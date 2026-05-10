@@ -1,0 +1,149 @@
+{
+  "schema_version": "3.0",
+  "entries": [
+    {
+      "file": "agents/code-Agent-Analyze.md",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:14Z",
+      "sha256": "313b847bb10bf9f773f7a2d1f8c1d6a214fa017ecd77475ae1c3d4a3d0c29874",
+      "scf_merge_strategy": "replace"
+    },
+    {
+      "file": "agents/code-Agent-Code.md",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:14Z",
+      "sha256": "90b7354b81a359a67fbef5c4c685591bab01a9dee09a0ff0313aa77efe6eb3d4",
+      "scf_merge_strategy": "replace"
+    },
+    {
+      "file": "agents/code-Agent-CodeRouter.md",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:14Z",
+      "sha256": "5df5df992214f935e021030e5ca898284abe3446dc6b47749280f0e88d1b7106",
+      "scf_merge_strategy": "replace"
+    },
+    {
+      "file": "agents/code-Agent-CodeUI.md",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:15Z",
+      "sha256": "ba6634b198ea98a2373e44262f66093f050126ca6a4862ba350fd910713ee393",
+      "scf_merge_strategy": "replace"
+    },
+    {
+      "file": "agents/code-Agent-Design.md",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:15Z",
+      "sha256": "1e2c462d59a3b8e6a295036b11d4e2c5b50924bacfe1971632d2ed5d35e47931",
+      "scf_merge_strategy": "replace"
+    },
+    {
+      "file": "agents/code-Agent-Docs.md",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:15Z",
+      "sha256": "7e1203f206fa739c2e126ce9fa19dfdd64d84541875d610d76ce2b06bfecfde6",
+      "scf_merge_strategy": "replace"
+    },
+    {
+      "file": "agents/code-Agent-FrameworkDocs.md",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:15Z",
+      "sha256": "23da4f361a0a223725336777a43f3fc3ccdd87f75583394fe18f4e80d5ec03e1",
+      "scf_merge_strategy": "replace"
+    },
+    {
+      "file": "agents/code-Agent-Git.md",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:16Z",
+      "sha256": "1f8695e9e190ae0597274d2da73ab453e4705d4801092ac35440a1f716ff5f10",
+      "scf_merge_strategy": "replace"
+    },
+    {
+      "file": "agents/code-Agent-Helper.md",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:16Z",
+      "sha256": "dbc06bac53f6ac0314b3d9bb86a6c39a3b452f80e20795771b45cf29b49a7ca5",
+      "scf_merge_strategy": "replace"
+    },
+    {
+      "file": "agents/code-Agent-Plan.md",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:16Z",
+      "sha256": "220c7747d43be5a470adfc16d7ad2492e996158fdb2d746bcf0ec5948e5cfc6a",
+      "scf_merge_strategy": "replace"
+    },
+    {
+      "file": "agents/code-Agent-Research.md",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:16Z",
+      "sha256": "3ea44846b8f323ff045bc49984c143c173a773967efaf2feea8d01e9f4d0678b",
+      "scf_merge_strategy": "replace"
+    },
+    {
+      "file": "AGENTS-master.md",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:17Z",
+      "sha256": "805636c0e67692005bfe24cbd2cf43edd2d97138bd71608473787e43656d98de",
+      "scf_merge_strategy": "replace"
+    },
+    {
+      "file": "instructions/mcp-context.instructions.md",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:17Z",
+      "sha256": "85f23f3e317c736762cc36e09ed9f24ecf3ce93c69fb2f5ab2a068f0814905d2",
+      "scf_merge_strategy": "replace"
+    },
+    {
+      "file": "__plugins__/scf-master-codecrafter",
+      "package": "scf-master-codecrafter",
+      "package_version": "2.6.1",
+      "installed_at": "2026-05-10T14:55:17Z",
+      "installation_mode": "plugin_manager",
+      "source_repo": "Nemex81/scf-master-codecrafter",
+      "files": [
+        ".github/agents/code-Agent-Analyze.md",
+        ".github/agents/code-Agent-Code.md",
+        ".github/agents/code-Agent-CodeRouter.md",
+        ".github/agents/code-Agent-CodeUI.md",
+        ".github/agents/code-Agent-Design.md",
+        ".github/agents/code-Agent-Docs.md",
+        ".github/agents/code-Agent-FrameworkDocs.md",
+        ".github/agents/code-Agent-Git.md",
+        ".github/agents/code-Agent-Helper.md",
+        ".github/agents/code-Agent-Plan.md",
+        ".github/agents/code-Agent-Research.md",
+        ".github/AGENTS-master.md",
+        ".github/instructions/mcp-context.instructions.md"
+      ],
+      "file_hashes": {
+        ".github/agents/code-Agent-Analyze.md": "313b847bb10bf9f773f7a2d1f8c1d6a214fa017ecd77475ae1c3d4a3d0c29874",
+        ".github/agents/code-Agent-Code.md": "90b7354b81a359a67fbef5c4c685591bab01a9dee09a0ff0313aa77efe6eb3d4",
+        ".github/agents/code-Agent-CodeRouter.md": "5df5df992214f935e021030e5ca898284abe3446dc6b47749280f0e88d1b7106",
+        ".github/agents/code-Agent-CodeUI.md": "ba6634b198ea98a2373e44262f66093f050126ca6a4862ba350fd910713ee393",
+        ".github/agents/code-Agent-Design.md": "1e2c462d59a3b8e6a295036b11d4e2c5b50924bacfe1971632d2ed5d35e47931",
+        ".github/agents/code-Agent-Docs.md": "7e1203f206fa739c2e126ce9fa19dfdd64d84541875d610d76ce2b06bfecfde6",
+        ".github/agents/code-Agent-FrameworkDocs.md": "23da4f361a0a223725336777a43f3fc3ccdd87f75583394fe18f4e80d5ec03e1",
+        ".github/agents/code-Agent-Git.md": "1f8695e9e190ae0597274d2da73ab453e4705d4801092ac35440a1f716ff5f10",
+        ".github/agents/code-Agent-Helper.md": "dbc06bac53f6ac0314b3d9bb86a6c39a3b452f80e20795771b45cf29b49a7ca5",
+        ".github/agents/code-Agent-Plan.md": "220c7747d43be5a470adfc16d7ad2492e996158fdb2d746bcf0ec5948e5cfc6a",
+        ".github/agents/code-Agent-Research.md": "3ea44846b8f323ff045bc49984c143c173a773967efaf2feea8d01e9f4d0678b",
+        ".github/AGENTS-master.md": "805636c0e67692005bfe24cbd2cf43edd2d97138bd71608473787e43656d98de",
+        ".github/instructions/mcp-context.instructions.md": "85f23f3e317c736762cc36e09ed9f24ecf3ce93c69fb2f5ab2a068f0814905d2"
+      },
+      "migrated": false
+    }
+  ],
+  "overrides": []
+}
