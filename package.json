@@ -12,8 +12,10 @@
     "test:windows": "jest --config jest.config.windows.js"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^3.0.2",
     "@react-native/new-app-screen": "0.82.1",
     "@supabase/supabase-js": "^2.105.4",
+    "bcryptjs": "^3.0.3",
     "react": "19.1.1",
     "react-native": "0.82.1",
     "react-native-dotenv": "^3.4.11",
@@ -32,6 +34,7 @@
     "@react-native/metro-config": "0.82.1",
     "@react-native/typescript-config": "0.82.1",
     "@rnx-kit/jest-preset": "^0.1.17",
+    "@types/bcryptjs": "^2.4.6",
     "@types/jest": "^29.5.13",
     "@types/node": "^25.6.2",
     "@types/react": "^19.1.1",
