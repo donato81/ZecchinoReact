@@ -73,3 +73,10 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Variabili d'ambiente e credenziali
+.env
+.env.local
+.env.development
+.env.production
+.env*.local
