@@ -1,0 +1,247 @@
+# Architettura — ZecchinoReact
+
+> Aggiornato al: 2026-05-13  
+> Stato: Migrazione Web → React Native in corso — app non avviabile fino alla risoluzione dei 6 blocchi (vedi [REPORT_diagnosi-compatibilita-RN_v0.1.0.md](1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md))
+
+---
+
+## 1. Stack tecnologico
+
+| Livello | Tecnologia | Versione | Stato RN |
+|---------|-----------|---------|----------|
+| Runtime JS | Hermes | bundled con RN 0.82 | ✅ |
+| UI Framework | React Native (bare) | 0.82.1 | ✅ |
+| React | React | 19.1.1 | ✅ |
+| Multi-platform | react-native-windows | ^0.82.5 | ✅ |
+| Backend | Supabase JS | ^2.105.4 | ✅ |
+| Auth | Supabase Auth | — | ✅ |
+| Storage locale | AsyncStorage | ^2.x (dipendenza corrente errata: ^3.x) | ⚠️ da correggere |
+| Hashing PIN | bcryptjs | ^3.0.3 | ✅ |
+| Cifratura dati | crypto.subtle (Web Crypto) | — | ❌ non supportato in Hermes |
+| Env vars | react-native-dotenv | — | ⚠️ non configurato in babel.config.js |
+| Alias path | babel-plugin-module-resolver | — | ⚠️ non configurato |
+
+---
+
+## 2. Layer architetturale
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                        screens/                                │  ← UI (vuoto nel branch corrente)
+├────────────────────────────────────────────────────────────────┤
+│                        context/                                │  ← Provider globali
+│  AuthContext  AppDataContext  UserSettingsContext  VisibleDataContext  │
+├────────────────────────────────────────────────────────────────┤
+│                         hooks/                                 │  ← Hook React
+│  use-user-settings  use-visible-data  use-display-preferences  │
+│  use-haptic  use-screen-reader  use-inactivity-timer           │
+│  use-online-status  use-talkback                               │
+├────────────────────────────────────────────────────────────────┤
+│                      lib/ (dominio)                            │  ← Logica pura + utility
+│  types  constants  helpers  budget-alerts  budget-forecasting  │
+│  budget-history  budget-templates  crypto                      │
+│  haptic-system  sound-system  screen-reader                    │
+├────────────────────────────────────────────────────────────────┤
+│                   lib/supabase/                                │  ← Data access layer
+│  client  cache  types                                          │
+│  repositories: conti  transazioni  categorie  budget          │
+│               obiettivi-risparmio  impostazioni-utente         │
+└────────────────────────────────────────────────────────────────┘
+```
+
+### Regole di dipendenza tra layer
+
+- `screens/` → può importare da qualsiasi livello inferiore  
+- `context/` → può importare da `hooks/`, `lib/`, `lib/supabase/`  
+- `hooks/` → può importare da `lib/`, `lib/supabase/`, altri hook  
+- `lib/` → dipendenze solo interne (`types`, `helpers`, ecc.) o npm  
+- `lib/supabase/` → dipendenza esterna: `@supabase/supabase-js`, `AsyncStorage`  
+- **I tipi `Db*` in `lib/supabase/types.ts` sono interni** — non importare fuori da `lib/supabase/`
+
+---
+
+## 3. Flusso dati principale
+
+```
+App.tsx
+  └── AuthProvider (AuthContext.tsx)
+        ├── legge sessione da Supabase Auth
+        ├── carica UserSettings da repository
+        └── UserSettingsProvider
+              └── VisibleDataContext
+                    └── AppDataProvider
+                          ├── legge conti/transazioni/categorie/budget/obiettivi
+                          │    └── controlla cache AsyncStorage (24h TTL)
+                          │    └── fallback Supabase se cache stale
+                          └── (screens e componenti)
+```
+
+### Scrittura preferenze
+
+```
+componente → setDisplayPreference(chiave, valore)
+           → use-user-settings → updatePreference(chiave, valore)
+           → repository → RPC Supabase update_impostazioni_preference
+           → stato locale aggiornato solo dopo conferma DB
+```
+
+---
+
+## 4. Database (Supabase / PostgreSQL)
+
+Tutti i file SQL sono in `docs/6-sql/`.
+
+| Tabella | File SQL | Note |
+|---------|---------|------|
+| `conti` | schema P25 | RLS: `user_id = auth.uid()` |
+| `transazioni` | schema P25 | RLS; trigger: cifratura automatica |
+| `categorie` | schema P25 | seed in P35 |
+| `budget` | schema P25 | |
+| `obiettivi_risparmio` | schema P25 | |
+| `impostazioni_utente` | P25 | JSONB `preferences` (32 chiavi), hash PIN |
+
+### RPC Supabase
+
+| Funzione | Firma | Uso |
+|----------|-------|-----|
+| `update_impostazioni_preference` | `(p_chiave text, p_valore jsonb) → impostazioni_utente` | Merge atomico JSONB singola chiave |
+
+---
+
+## 5. Compatibilità React Native — tabella per file
+
+| File | Layer | Stato | Blocco build? | Note |
+|------|-------|-------|--------------|------|
+| `lib/types.ts` | lib | ✅ Compatibile | No | — |
+| `lib/constants.ts` | lib | ✅ Compatibile | No | `color` oklch / `badgeVariant` da adattare per RN |
+| `lib/helpers.ts` | lib | ✅ Compatibile | No | `downloadFile()` usa DOM (solo export CSV, non critico al boot) |
+| `lib/budget-alerts.ts` | lib | ✅ Compatibile | No | — |
+| `lib/budget-forecasting.ts` | lib | ✅ Compatibile | No | — |
+| `lib/budget-history.ts` | lib | ✅ Compatibile | No | — |
+| `lib/budget-templates.ts` | lib | ⚠️ Valuta | No | `@phosphor-icons/react` da sostituire con stringhe o componenti RN |
+| `lib/crypto.ts` | lib | ⚠️ Parziale | No | `hashPin`/`verifyPin` OK; `encryptData`/`decryptData` (crypto.subtle) da rimpiazzare |
+| `lib/haptic-system.ts` | lib | ❌ Incompatibile | No | `localStorage` + `navigator.vibrate` — da riscrivere |
+| `lib/sound-system.ts` | lib | ❌ Incompatibile | No | Web Audio API — da riscrivere |
+| `lib/screen-reader.ts` | lib | ❌ Incompatibile | No | DOM `aria-live` — da riscrivere con `AccessibilityInfo` |
+| `lib/supabase/client.ts` | supabase | ⚠️ Richiede config | **Sì (B2/B6)** | OK struttura; bloccato senza `react-native-dotenv` in Babel |
+| `lib/supabase/cache.ts` | supabase | ✅ Compatibile | No | Già su AsyncStorage |
+| `lib/supabase/types.ts` | supabase | ✅ Compatibile | No | — |
+| `lib/supabase/repositories/conti.ts` | supabase | ✅ Compatibile | No | — |
+| `lib/supabase/repositories/transazioni.ts` | supabase | ✅ Compatibile | No | — |
+| `lib/supabase/repositories/categorie.ts` | supabase | ✅ Compatibile | No | — |
+| `lib/supabase/repositories/budget.ts` | supabase | ✅ Compatibile | No | — |
+| `lib/supabase/repositories/obiettivi-risparmio.ts` | supabase | ✅ Compatibile | No | — |
+| `lib/supabase/repositories/impostazioni-utente.ts` | supabase | ✅ Compatibile | No | — |
+| `context/AuthContext.tsx` | context | ❌ Rottura | **Sì (B3, B4)** | `sonner` + `@/components/ui/button` mancanti; `document.*` |
+| `context/AppDataContext.tsx` | context | ⚠️ Bug + rottura | **Sì (B3)** | `sonner` mancante; async/await su cache mancante |
+| `context/UserSettingsContext.tsx` | context | ✅ Compatibile | No | — |
+| `context/VisibleDataContext.tsx` | context | ✅ Compatibile | No | — |
+| `hooks/use-user-settings.ts` | hooks | ✅ Compatibile | No | — |
+| `hooks/use-visible-data.ts` | hooks | ✅ Compatibile | No | — |
+| `hooks/use-display-preferences.ts` | hooks | ✅ Compatibile | No | — |
+| `hooks/use-haptic.ts` | hooks | ⚠️ Struttura OK | No | Inutile finché `haptic-system.ts` non è riscritto |
+| `hooks/use-screen-reader.ts` | hooks | ⚠️ Struttura OK | No | Inutile finché `screen-reader.ts` non è riscritto |
+| `hooks/use-inactivity-timer.ts` | hooks | ❌ Incompatibile | No (causa crash al mount) | `document.addEventListener` — da riscrivere con `AppState` |
+| `hooks/use-online-status.ts` | hooks | ❌ Incompatibile | No | `navigator.onLine` — da riscrivere con `NetInfo` |
+| `hooks/use-talkback.ts` | hooks | ❌ Incompatibile | No | `matchMedia`, `sessionStorage`, `speechSynthesis` |
+
+---
+
+## 6. Blocchi di build correnti
+
+Per la lista completa con descrizione e priorità, vedi:  
+→ [docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md](1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md)
+
+### Riepilogo blocchi critici (impediscono qualsiasi avvio)
+
+| ID | Causa | File | Fix |
+|----|-------|------|-----|
+| B1 | `@/*` alias non risolto da Metro | `babel.config.js` | Aggiungere `babel-plugin-module-resolver` |
+| B2 | `process.env.SUPABASE_*` undefined → throw in client.ts | `babel.config.js` | Aggiungere plugin `react-native-dotenv` |
+| B3 | `sonner` non installato (DOM-only) | `AuthContext`, `AppDataContext` | Rimuovere; sostituire con toast nativo RN |
+| B4 | `@/components/ui/button` non esiste | `AuthContext.tsx` | Creare componente o rimuovere import |
+| B5 | `@react-native-async-storage ^3.0.2` non esiste su npm | `package.json` | Cambio versione a `^2.x` |
+| B6 | correlato a B2 | `babel.config.js` | Risolto con B2 |
+
+---
+
+## 7. Piano di migrazione consigliato (bottom-up)
+
+```
+Fase 0 — Config (pre-requisito globale)
+  ├── B5: fix package.json (async-storage ^2.x)
+  ├── B1: aggiungere babel-plugin-module-resolver
+  └── B2/B6: aggiungere react-native-dotenv plugin
+
+Fase 1 — Rimpiazza dipendenze DOM in lib/
+  ├── haptic-system.ts → react-native Vibration / expo-haptics
+  ├── sound-system.ts → expo-av
+  └── screen-reader.ts → AccessibilityInfo.announceForAccessibility
+
+Fase 2 — Rimpiazza hook web-only
+  ├── use-inactivity-timer.ts → AppState + setTimeout RN
+  ├── use-online-status.ts → @react-native-community/netinfo
+  └── use-talkback.ts → AccessibilityInfo.isScreenReaderEnabled
+
+Fase 3 — Pulisci context
+  ├── AppDataContext → fix async cache (await readCache)
+  └── AuthContext → rimuovi document.*, sonner, Button
+
+Fase 4 — Crea componenti UI base (src/components/)
+  └── Button, Toast/notification, etc.
+
+Fase 5 — Screens
+  └── Implementazione schermate con componenti RN nativi
+```
+
+---
+
+## 8. Configurazione build (file correnti)
+
+### `babel.config.js`
+
+Stato attuale: solo preset `@react-native/babel-preset`.  
+**Mancano** (blocco build):
+
+```js
+plugins: [
+  ['module:react-native-dotenv', { moduleName: '@env', path: '.env' }],
+  ['module-resolver', { root: ['./src'], alias: { '@': './src' } }]
+]
+```
+
+### `tsconfig.json`
+
+Estende `@react-native/typescript-config`. Path alias `@/*` → `src/*` configurato.  
+**Problema minore**: `"types": ["node"]` — maschera errori portabilità TS.
+
+### `metro.config.js`
+
+Blocklist attiva per `windows/` e build output `react-native-windows`.  
+Nessuna modifica richiesta.
+
+### `package.json`
+
+Dipendenza errata: `@react-native-async-storage/async-storage: ^3.0.2` (la major 3 non esiste).  
+Correggere a `^2.x`.
+
+---
+
+## 9. Piattaforme target
+
+| Piattaforma | Entry | Note |
+|-------------|-------|------|
+| Android | `android/` | Compilazione Gradle |
+| iOS | `ios/` | Richiede `bundle exec pod install` |
+| Windows | `windows/` | react-native-windows; blocklist Metro attiva |
+
+---
+
+## 10. Convenzioni codice
+
+- Nomi variabili, tipi, label UI: **italiano**  
+- Tipi client-side: **camelCase** (`nomeVisualizzato`, `importoTarget`)  
+- Tipi DB row: **snake_case** (`nome_visualizzato`, `importo_target`) — interni a `lib/supabase/`  
+- Errori DB: sempre wrappati in `RepositoryError`  
+- Scritture settings: **non ottimistiche** — stato locale aggiornato solo dopo conferma Supabase  
+- Cache: invalidare sempre con `invalidateCache(userId)` al sign-out

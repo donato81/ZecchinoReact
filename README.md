@@ -1,97 +1,153 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+﻿# ZecchinoReact
 
-# Getting Started
+App di finanza personale per **Android**, **iOS** e **Windows** (react-native-windows).  
+Il dominio â€” nomi variabili, tipi, label UI â€” Ã¨ interamente in italiano.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+> **Stato attuale**: migrazione da web (React + shadcn) a React Native in corso.  
+> L'app **non Ã¨ avviabile** fino alla risoluzione dei 6 blocchi di build documentati in  
+> [`docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md`](docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md).
 
-## Step 1: Start Metro
+---
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Stack tecnologico
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+| Tecnologia | Versione | Ruolo |
+|-----------|---------|-------|
+| React Native (bare) | 0.82.1 | UI framework â€” Android, iOS |
+| React | 19.1.1 | |
+| react-native-windows | ^0.82.5 | Target Windows (UWP) |
+| Supabase JS | ^2.105.4 | Backend: auth, DB PostgreSQL, RLS |
+| AsyncStorage | ^2.x | Cache locale (24h TTL) |
+| bcryptjs | ^3.0.3 | Hashing PIN privato |
+| TypeScript | â€” | Tipizzazione completa |
 
-```sh
-# Using npm
-npm start
+---
 
-# OR using Yarn
-yarn start
+## Requisiti
+
+- **Node.js** >= 20
+- Android: Android Studio + SDK (seguire [guida ufficiale](https://reactnative.dev/docs/set-up-your-environment))
+- iOS: Xcode + CocoaPods; dopo `npm install` eseguire `bundle exec pod install`
+- Windows: Visual Studio 2022 con workload C++ e Windows SDK
+
+---
+
+## Configurazione ambiente
+
+Creare un file `.env` (o `.env.local`) nella root del progetto:
+
+```
+SUPABASE_URL=https://<progetto>.supabase.co
+SUPABASE_ANON_KEY=<chiave-anonima>
 ```
 
-## Step 2: Build and run your app
+Le variabili vengono iniettate da `react-native-dotenv` e lette in `src/lib/supabase/client.ts`.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+> âš ï¸ Il plugin `react-native-dotenv` **non Ã¨ ancora configurato** in `babel.config.js` â€” Ã¨ uno dei blocchi build correnti.
 
-### Android
+---
 
-```sh
-# Using npm
-npm run android
+## Installazione
 
-# OR using Yarn
-yarn android
+```bash
+npm install
 ```
 
-### iOS
+> âš ï¸ `package.json` contiene una versione errata di AsyncStorage (`^3.0.2`, non esiste su npm).  
+> Correggere manualmente a `^2.x` prima di eseguire `npm install`.
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+---
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+## Comandi
 
-```sh
-bundle install
+```bash
+npm start              # Avvia Metro bundler
+npm run android        # Build ed esegui su emulatore/dispositivo Android
+npm run ios            # Build ed esegui su simulatore iOS
+npm run windows        # Build ed esegui su Windows (react-native-windows)
+npm run lint           # ESLint
+npm test               # Jest (tutte le piattaforme)
+npm run test:windows   # Jest con config Windows
 ```
 
-Then, and every time you update your native dependencies, run:
+---
 
-```sh
-bundle exec pod install
+## Struttura del progetto
+
+```
+src/
+  lib/
+    types.ts                  # Tipi dominio client (camelCase)
+    constants.ts              # Label, icone, mappe tipoâ†’categoria
+    helpers.ts                # Calcoli puri (saldo, formattazione, CSV)
+    budget-alerts.ts          # Alert budget
+    budget-forecasting.ts     # Previsione spesa con livello confidence
+    budget-history.ts         # Storico periodi budget
+    budget-templates.ts       # Template predefiniti (âš ï¸ phosphor-icons da rimuovere)
+    crypto.ts                 # Hash PIN (bcrypt âœ…) + cifratura (crypto.subtle âŒ)
+    haptic-system.ts          # Feedback aptico (âŒ navigator.vibrate)
+    sound-system.ts           # Audio (âŒ Web Audio API)
+    screen-reader.ts          # Annunci ARIA (âŒ DOM)
+    supabase/
+      client.ts               # Singleton Supabase
+      types.ts                # Tipi DB row (interni) + UserSettings + RepositoryError
+      cache.ts                # Cache AsyncStorage 24h
+      repositories/           # CRUD per conti, transazioni, categorie, budget,
+                              # obiettivi-risparmio, impostazioni-utente
+  context/
+    AuthContext.tsx           # Auth, PIN privato, timeout inattivitÃ  (âš ï¸ blocchi B3/B4)
+    AppDataContext.tsx        # Tutti i dati di dominio (âš ï¸ blocco B3)
+    UserSettingsContext.tsx   # Preferenze utente
+    VisibleDataContext.tsx    # Dati filtrati per lock privato
+  hooks/
+    use-user-settings.ts      # Preferenze da Supabase
+    use-visible-data.ts       # Filtro conti/transazioni per stato privato
+    use-display-preferences.ts
+    use-haptic.ts             # (âŒ dipende da haptic-system)
+    use-screen-reader.ts      # (âŒ dipende da screen-reader)
+    use-inactivity-timer.ts   # (âŒ document.addEventListener)
+    use-online-status.ts      # (âŒ navigator.onLine)
+    use-talkback.ts           # (âŒ matchMedia/sessionStorage)
+  screens/                    # (vuoto â€” da implementare)
+  components/                 # (vuoto â€” da implementare)
+docs/
+  api.md                      # Riferimento API completo
+  architettura.md             # Architettura layer e piano migrazione
+  1-reports/                  # Report diagnostici
+  3-coding-plans/             # Piani di implementazione
+  6-sql/                      # Script SQL Supabase
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+---
 
-```sh
-# Using npm
-npm run ios
+## Database
 
-# OR using Yarn
-yarn ios
-```
+Tutti i file SQL si trovano in `docs/6-sql/`.
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+- Row Level Security attiva: `auth.uid() = user_id` su tutte le tabelle
+- Preferenze utente in colonna JSONB `preferences` su `impostazioni_utente`
+- RPC `update_impostazioni_preference(p_chiave, p_valore)` per merge atomico
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+---
 
-## Step 3: Modify your app
+## Documentazione tecnica
 
-Now that you have successfully run the app, let's make changes!
+| Documento | Contenuto |
+|-----------|-----------|
+| [`docs/api.md`](docs/api.md) | Riferimento completo di tutti i moduli pubblici in `src/` |
+| [`docs/architettura.md`](docs/architettura.md) | Layer diagram, compatibilitÃ  RN per file, piano migrazione |
+| [`docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md`](docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md) | Diagnosi completa: 6 BLOCCANTI, 11 NON BLOCCANTI |
+| [`docs/1-reports/1-report-analisi-migrazione-react-native.md`](docs/1-reports/1-report-analisi-migrazione-react-native.md) | Classificazione TIENI/VALUTA/ELIMINA per ogni file `src/` |
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+---
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## Problemi noti
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Vedere [`docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md`](docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md) per la lista completa.
 
-## Congratulations! :tada:
+Riepilogo blocchi che impediscono l'avvio:
 
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+1. `babel.config.js` mancano `babel-plugin-module-resolver` e `react-native-dotenv`
+2. `sonner` non Ã¨ installato ed Ã¨ una libreria DOM-only
+3. `src/components/ui/button` non esiste
+4. `@react-native-async-storage` pinned a versione `^3.x` non pubblicata
