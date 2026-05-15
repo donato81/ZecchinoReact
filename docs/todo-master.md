@@ -1,19 +1,506 @@
-# TODO Master — ZecchinoReact
+## 1. Metadata e Context Header
 
-Indice centralizzato di tutti i task attivi e completati.
-Per ogni task il link rimanda al TODO specifico e al coding plan associato.
+- **Project Name:** ZecchinoReact
+- **Version:** 0.1.0
+- **Owner:** donny-81
+- **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
+- **Environment Sync:** Local
+- **Ultimo Agente Attivo:** [da compilare alla prima sessione di codifica]
+- **Blocco in Carico:** P0.B1
+- **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
+
+### Stato Globale Corrente
+
+- **Active Phase:** P0 — Fix Blocchi di Avvio
+- **Active Block:** P0.B1 — Fix babel.config.js
+- **Last Updated:** 2026-05-13
+
+### Mappa Documentale
+
+- **Design Docs:** docs/2-projects/
+- **Coding Plans:** docs/3-coding-plans/
+- **Todo per Piano:** docs/4-todo-lists/
+- **Test Suites:** __tests__/
+- **Architecture Decisions:** docs/architettura.md
 
 ---
 
-## TODO attivi
+## 2. Snapshot di Ripresa (Session Snapshot)
 
-| Feature / Sprint | File specifico | Stato | Priorità |
-|---|---|---|---|
-| Fix blocchi di avvio B1–B6 — Gruppo 1 | `docs/4-todo-lists/001-TODO_fix-blocchi-avvio_v0.1.0.md` | ACTIVE | CRITICA |
+> Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
+> Permette la ripresa immediata senza esplorazione manuale dello stato.
+
+- **Last Completed Task:** Nessuno — primo avvio del TODO-MASTER
+- **Last Validated Block:** Nessuno — nessun blocco ancora completato
+- **Files Modified But Not Validated:** Nessuno
+- **Open Threads:** tsconfig.json contiene "types": ["node"] che maschera errori di portabilità TypeScript — valutare se correggere in P0 o rimandare a P1
+- **Next Action:** Aprire babel.config.js e aggiungere i plugin module-resolver e react-native-dotenv seguendo docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md sezione 2
 
 ---
 
-## TODO completati
+## 2b. Protocollo di Apertura Sessione (Session Open)
 
-| Feature / Sprint | File specifico | Completato il |
-|---|---|---|
+> Procedura obbligatoria che l'agente deve eseguire come prima cosa all'avvio di ogni nuova sessione di lavoro umana, prima di toccare qualsiasi file. Non si applica al Context Refresh tecnico definito nella sezione 1.
+
+1. Leggere integralmente questo TODO-MASTER dall'inizio.
+2. Individuare il blocco attivo dal campo **Blocco in Carico** nella sezione 1.
+3. Leggere lo **Snapshot di Ripresa** e identificare il **Next Action**.
+4. Leggere il documento di design e il coding plan associati al blocco attivo.
+5. Inviare all'architetto il seguente messaggio di conferma prima di eseguire qualsiasi operazione:
+
+```
+SESSIONE APERTA — [Nome Agente] — [YYYY-MM-DD HH:MM]
+Blocco in carico: [Block ID — Titolo]
+Ultimo task validato: [Task ID — descrizione]
+Prossima azione pianificata: [Next Action dallo Snapshot]
+Confermato: in attesa di "VAI" dall'architetto per procedere.
+```
+
+6. Attendere conferma esplicita dell'architetto ("VAI") prima di eseguire qualsiasi task.
+
+---
+
+## 3. Definizione delle Fasi
+
+Per ogni fase del progetto compilare un blocco separato con questa struttura.
+
+---
+
+### Phase ID: P0
+
+- **Phase Title:** Fase 0 — Config (pre-requisito globale)
+- **Phase Objective:** Applicare fix di configurazione necessari (babel, package.json) per permettere il bundling e l'installazione coerente delle dipendenze.
+- **Entry Conditions:** Dipendenze iniziali presenti nel repository
+- **Exit Conditions — Global Gate:** `npm install` completa senza errori; Metro non produce errori di risoluzione alias `@/*`.
+- **Estimated Blocks:** 3
+- **Phase Status:** [ ] TODO
+
+---
+
+### Phase ID: P1
+
+- **Phase Title:** Fase 1 — Rimpiazza dipendenze DOM in `lib/`
+- **Phase Objective:** Sostituire o adattare le implementazioni web-only (`haptic-system`, `sound-system`, `screen-reader`) con equivalenti RN.
+- **Entry Conditions:** Fase 0 completata
+- **Exit Conditions — Global Gate:** Nessuna API DOM chiamata direttamente nei moduli critici; interfacce pubbliche mantenute.
+- **Estimated Blocks:** 3
+- **Phase Status:** [ ] TODO
+
+---
+
+### Phase ID: P2
+
+- **Phase Title:** Fase 2 — Rimpiazza hook web-only
+- **Phase Objective:** Adattare i hook a API RN (`use-inactivity-timer`, `use-online-status`, `use-talkback`).
+- **Entry Conditions:** Fase 1 completata
+- **Exit Conditions — Global Gate:** I hook non usano `document`/`window` e passano `npx tsc --noEmit` senza errori relativi a API DOM.
+- **Estimated Blocks:** 3
+- **Phase Status:** [ ] TODO
+
+---
+
+### Phase ID: P3
+
+- **Phase Title:** Fase 3 — Pulisci context
+- **Phase Objective:** Rimuovere import DOM-only da `AuthContext` e `AppDataContext`, introdurre shim temporanei dove necessario.
+- **Entry Conditions:** Fase 2 completata
+- **Exit Conditions — Global Gate:** `AuthProvider` e `AppDataProvider` montabili senza crash.
+- **Estimated Blocks:** 2
+- **Phase Status:** [ ] TODO
+
+---
+
+### Phase ID: P4
+
+- **Phase Title:** Fase 4 — Crea componenti UI base (src/components/)
+- **Phase Objective:** Implementare placeholder RN per componenti base (Button, Toast) necessari per il bootstrap.
+- **Entry Conditions:** Fase 3 completata
+- **Exit Conditions — Global Gate:** Componenti placeholder esistenti e importabili da `src/context` senza errori.
+- **Estimated Blocks:** 2
+- **Phase Status:** [ ] TODO
+
+---
+
+### Phase ID: P5
+
+- **Phase Title:** Fase 5 — Screens
+- **Phase Objective:** Implementare schermate RN utilizzando i componenti nativi e le API migrate.
+- **Entry Conditions:** Fase 4 completata
+- **Exit Conditions — Global Gate:** Schermate principali implementate e navigabili; app eseguibile su target platform.
+- **Estimated Blocks:** 5
+- **Phase Status:** [ ] TODO
+
+---
+
+## 4. Struttura dei Blocchi Operativi
+
+Per ogni blocco all'interno di una fase compilare un blocco separato con questa struttura.
+
+---
+
+### Block ID: P0.B1
+
+- **Block Title:** Fix babel.config.js — alias e variabili ambiente
+- **Parent Phase:** P0
+- **Reference Documents:** docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md, docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md
+- **Technical Scope:** Solo babel.config.js. Nessuna modifica ad altri file.
+- **Block Status:** [ ] TODO
+
+#### Mappa delle Dipendenze
+- **Depends On:** Nessuno — primo blocco
+- **Unlocks:** P0.B3, P0.B4
+
+#### Dry Run Check
+Prima di eseguire il Task 1, verificare che babel.config.js esista nella root del progetto e sia accessibile in scrittura. Se mancante attivare immediatamente HC-2.
+
+#### Atomic Task List
+
+##### Task ID: T0.1.1
+- **Action:** Aggiungere il plugin module-resolver al campo plugins di babel.config.js con root ['./src'] e alias { '@': './src' } seguendo docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md sezione 2.
+- **Target Files:** babel.config.js
+- **Depends On:** Nessuno
+- **Success Metric:** npm start non produce errori "Unable to resolve module @/..." nel log Metro.
+- **Task Status:** [ ] TODO
+
+##### Task ID: T0.1.2
+- **Action:** Aggiungere il plugin react-native-dotenv al campo plugins di babel.config.js con moduleName '@env' e path '.env' seguendo docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md sezione 2.
+- **Target Files:** babel.config.js
+- **Depends On:** T0.1.1
+- **Success Metric:** Le variabili SUPABASE_URL e SUPABASE_ANON_KEY sono accessibili a runtime tramite import da @env. Nessun throw in src/lib/supabase/client.ts all'avvio.
+- **Task Status:** [ ] TODO
+
+#### Block Gate
+- **Validation Steps:**
+  1. Eseguire npm install
+  2. Eseguire npx tsc --noEmit
+  3. Eseguire npm start e osservare il log Metro per 30 secondi
+- **Expected Outputs:**
+  1. Exit code 0, nessun errore in node_modules
+  2. Nessun errore TS2307 su moduli @/ o @env
+  3. Metro avvia senza errori di risoluzione moduli per alias @/ e variabili @env
+- **Gate Status:** [ ] OPEN
+
+---
+
+### Block ID: P0.B2
+
+- **Block Title:** Fix package.json — versione AsyncStorage
+- **Parent Phase:** P0
+- **Reference Documents:** docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md, docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md
+- **Technical Scope:** Solo package.json. Nessuna modifica ad altri file.
+- **Block Status:** [ ] TODO
+
+#### Mappa delle Dipendenze
+- **Depends On:** Nessuno — parallelo a P0.B1
+- **Unlocks:** P0.B3
+
+#### Dry Run Check
+Verificare che package.json esista nella root e che la dipendenza @react-native-async-storage/async-storage sia presente con versione ^3.0.2.
+
+#### Atomic Task List
+
+##### Task ID: T0.2.1
+- **Action:** In package.json modificare la versione di @react-native-async-storage/async-storage da ^3.0.2 a ^2.1.0 seguendo docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md.
+- **Target Files:** package.json
+- **Depends On:** Nessuno
+- **Success Metric:** npm install completa senza errori ETARGET o 404 per async-storage.
+- **Task Status:** [ ] TODO
+
+#### Block Gate
+- **Validation Steps:**
+  1. Eseguire npm install
+  2. Verificare che node_modules/@react-native-async-storage/async-storage esista con versione 2.x
+- **Expected Outputs:**
+  1. Exit code 0, nessun errore ETARGET o 404
+  2. Directory presente con versione 2.x
+- **Gate Status:** [ ] OPEN
+
+---
+
+### Block ID: P0.B3
+
+- **Block Title:** Fix AuthContext — rimozione sonner e dipendenze DOM
+- **Parent Phase:** P0
+- **Reference Documents:** docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md, docs/3-coding-plans/002-PLAN_fix-provider-bootstrap_v0.2.0.md
+- **Technical Scope:** Solo src/context/AuthContext.tsx. Nessuna modifica ad altri file.
+- **Block Status:** [ ] TODO
+
+#### Mappa delle Dipendenze
+- **Depends On:** P0.B1, P0.B2
+- **Unlocks:** P0.B4
+
+#### Dry Run Check
+Verificare che src/context/AuthContext.tsx esista e sia accessibile in scrittura. Verificare che P0.B1 e P0.B2 siano entrambi PASSED.
+
+#### Atomic Task List
+
+##### Task ID: T0.3.1
+- **Action:** Rimuovere l'import di sonner da AuthContext.tsx e sostituire ogni chiamata toast(...) con console.warn(...) come placeholder temporaneo, seguendo docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md.
+- **Target Files:** src/context/AuthContext.tsx
+- **Depends On:** Nessuno
+- **Success Metric:** Nessun import di sonner in AuthContext.tsx. npx tsc --noEmit non riporta errori su sonner.
+- **Task Status:** [ ] TODO
+
+##### Task ID: T0.3.2
+- **Action:** Rimuovere l'import di @/components/ui/button da AuthContext.tsx e sostituire ogni utilizzo del componente Button con TouchableOpacity di React Native, seguendo docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md.
+- **Target Files:** src/context/AuthContext.tsx
+- **Depends On:** T0.3.1
+- **Success Metric:** Nessun import di @/components/ui/button in AuthContext.tsx. npx tsc --noEmit non riporta errori sull'import mancante.
+- **Task Status:** [ ] TODO
+
+##### Task ID: T0.3.3
+- **Action:** Rimuovere tutte le occorrenze di document.addEventListener, document.removeEventListener e qualsiasi riferimento all'oggetto document in AuthContext.tsx. Sostituire con commenti TODO che indicano la sostituzione futura con AppState in P2, seguendo docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md.
+- **Target Files:** src/context/AuthContext.tsx
+- **Depends On:** T0.3.2
+- **Success Metric:** Nessun riferimento a document. in AuthContext.tsx. npx tsc --noEmit non riporta ReferenceError su document.
+- **Task Status:** [ ] TODO
+
+#### Block Gate
+- **Validation Steps:**
+  1. Eseguire npx tsc --noEmit
+  2. Eseguire npm start e verificare che AuthContext non produca errori al mount
+- **Expected Outputs:**
+  1. Nessun errore su sonner, @/components/ui/button, document in AuthContext.tsx
+  2. Metro avvia e AuthContext si monta senza ReferenceError
+- **Gate Status:** [ ] OPEN
+
+---
+
+### Block ID: P0.B4
+
+- **Block Title:** Fix AppDataContext — rimozione sonner e fix async cache
+- **Parent Phase:** P0
+- **Reference Documents:** docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md, docs/3-coding-plans/002-PLAN_fix-provider-bootstrap_v0.2.0.md
+- **Technical Scope:** Solo src/context/AppDataContext.tsx. Nessuna modifica ad altri file.
+- **Block Status:** [ ] TODO
+
+#### Mappa delle Dipendenze
+- **Depends On:** P0.B3
+- **Unlocks:** P1.B1, P1.B2, P1.B3
+
+#### Dry Run Check
+Verificare che src/context/AppDataContext.tsx esista e sia accessibile in scrittura. Verificare che P0.B3 sia PASSED.
+
+#### Atomic Task List
+
+##### Task ID: T0.4.1
+- **Action:** Rimuovere l'import di sonner da AppDataContext.tsx e sostituire ogni chiamata toast(...) con console.warn(...) come placeholder temporaneo, seguendo docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md.
+- **Target Files:** src/context/AppDataContext.tsx
+- **Depends On:** Nessuno
+- **Success Metric:** Nessun import di sonner in AppDataContext.tsx. npx tsc --noEmit non riporta errori su sonner.
+- **Task Status:** [ ] TODO
+
+##### Task ID: T0.4.2
+- **Action:** Aggiungere await davanti a tutte le chiamate a readCache e isCacheStale in AppDataContext.tsx che attualmente le invocano come sincrone, seguendo docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md.
+- **Target Files:** src/context/AppDataContext.tsx
+- **Depends On:** T0.4.1
+- **Success Metric:** Tutte le chiamate a readCache e isCacheStale in AppDataContext.tsx sono precedute da await. npx tsc --noEmit non riporta errori di tipo su queste chiamate.
+- **Task Status:** [ ] TODO
+
+#### Block Gate
+- **Validation Steps:**
+  1. Eseguire npx tsc --noEmit
+  2. Eseguire npm start e verificare che AppDataContext si monti e carichi i dati senza errori
+- **Expected Outputs:**
+  1. Nessun errore su sonner o chiamate async in AppDataContext.tsx
+  2. Metro avvia, AuthContext e AppDataContext si montano in sequenza senza crash
+- **Gate Status:** [ ] OPEN
+
+---
+
+## 5. Protocollo di Gestione Errori
+
+### Conflict Resolution
+
+- **Priority Rule:** Il codice esistente validato ha precedenza assoluta. Non sovrascrivere file validati senza escalation verso l'architetto.
+- **Safe Actions:** Azioni che l'agente può eseguire autonomamente per risolvere conflitti minori — es. rinominare file duplicati aggiungendo suffisso `_bak`, aggiungere commenti TODO nel codice per segnalare aree da rivedere.
+- **Forbidden Actions:** Azioni che l'agente non può mai eseguire in autonomia:
+  - Eliminare file o dati
+  - Modificare file fuori dal Technical Scope del blocco attivo
+  - Procedere al blocco successivo se il gate corrente è FAILED
+  - Interpretare un requisito ambiguo senza chiedere chiarimento
+
+### Security & Privacy Constraints
+
+- **Data Privacy:** Mai inserire valori numerici reali, nomi utente o dati sensibili nei log di debug o nei commenti del codice.
+- **Validation Logic:** Ogni funzione di calcolo finanziario deve includere test obbligatori per la gestione dei decimali e l'arrotondamento.
+- **Credential Handling:** Mai scrivere API Key o segreti direttamente nei file sorgente. Usare esclusivamente variabili d'ambiente o il modulo `@env`.
+- **Database Transactionality:** Tutti i task che comportano la modifica di schemi o dati su Supabase devono essere eseguiti tramite transazioni isolate o script di migrazione controllati. È fatto divieto di eseguire mutazioni dirette sul database che non possano essere annullate in sicurezza dalle procedure di Rollback.
+
+### Halt Conditions
+
+1. Un task produce un output diverso dal Success Metric dopo due tentativi consecutivi.
+2. Un file target non esiste e la sua creazione non è prevista nel piano.
+3. Un gate fallisce per ragioni non coperte dal Conflict Resolution.
+4. Emergono dipendenze non dichiarate che coinvolgono moduli fuori scope.
+5. Il rollback di livello 2 non ripristina uno stato pulito dopo due tentativi.
+6. Viene rilevata una contraddizione tra due documenti di riferimento.
+
+### Escalation Format
+
+```
+HALT — [Task ID o Block ID]
+Motivo: [descrizione in una riga del problema]
+Halt Condition attivata: [numero della condizione — es. HC-1]
+Stato al momento dell'halt: [cosa era stato completato, cosa era in corso]
+File coinvolti: [lista dei file toccati prima dell'halt]
+Opzioni identificate: [1-3 opzioni concrete con pro e contro]
+Decisione richiesta: [domanda specifica a cui l'architetto deve rispondere per sbloccare]
+```
+
+---
+
+## 6. Registro di Stato (State Ledger)
+
+Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni task completato.
+
+| ID | Titolo | Status | Gate |
+|----|--------|--------|------|
+| P0.B1 | Fix babel.config.js — alias e variabili ambiente | [ ] TODO | [ ] OPEN |
+| P0.B2 | Fix package.json — versione AsyncStorage | [ ] TODO | [ ] OPEN |
+| P0.B3 | Fix AuthContext — rimozione sonner e dipendenze DOM | [ ] TODO | [ ] OPEN |
+| P0.B4 | Fix AppDataContext — rimozione sonner e fix async cache | [ ] TODO | [ ] OPEN |
+| P1.B1 | Riscrittura haptic-system.ts per RN | [ ] TODO | [ ] OPEN |
+| P1.B2 | Riscrittura sound-system.ts per RN | [ ] TODO | [ ] OPEN |
+| P1.B3 | Riscrittura screen-reader.ts per RN | [ ] TODO | [ ] OPEN |
+| P2.B1 | Riscrittura use-inactivity-timer.ts per RN | [ ] TODO | [ ] OPEN |
+| P2.B2 | Riscrittura use-online-status.ts per RN | [ ] TODO | [ ] OPEN |
+| P2.B3 | Riscrittura use-talkback.ts per RN | [ ] TODO | [ ] OPEN |
+| P3.B1 | Pulizia AuthContext — rimozione residui DOM | [ ] TODO | [ ] OPEN |
+| P3.B2 | Pulizia AppDataContext — fix completo async | [ ] TODO | [ ] OPEN |
+| P4.B1 | Creazione componente Button nativo | [ ] TODO | [ ] OPEN |
+| P4.B2 | Creazione sistema Toast/notifica nativo | [ ] TODO | [ ] OPEN |
+| P5.B1 | Implementazione screens | [ ] TODO | [ ] OPEN |
+
+### Log di Validazione
+
+| Data | Block ID | Validato Da | Risultato | Note |
+|------|----------|-------------|-----------|------|
+| — | — | — | — | Nessun blocco ancora validato |
+
+---
+
+## 7. Archivio Decisioni (Decision Log)
+
+---
+
+### Decision ID: ADR-001
+- **Date:** 2026-05-13
+- **Context:** L'app era un monolite web React con oltre 1800 righe in un singolo file e storage locale Spark.
+- **Decision:** Estrazione della logica in file con responsabilità separate. Migrazione storage da Spark a Supabase.
+- **Alternatives Discarded:** Mantenere il monolite e aggiungere React Native sopra — insostenibile a lungo termine.
+- **Consequences:** Codebase modulare. Dipendenza da Supabase come backend unico.
+- **Triggered By:** Decisione architettuale iniziale — donny-81
+
+---
+
+### Decision ID: ADR-002
+- **Date:** 2026-05-13
+- **Context:** L'app web usava shadcn/ui e componenti DOM non portabili in React Native.
+- **Decision:** Rimozione di tutti i componenti UI web. Mantenuta solo logica e layer dati in preparazione alla riscrittura nativa.
+- **Alternatives Discarded:** Wrapper per shadcn/ui — scartato perché shadcn è DOM-only.
+- **Consequences:** src/screens/ e src/components/ attualmente vuoti. UI da costruire da zero in P4 e P5.
+- **Triggered By:** Decisione architettuale iniziale — donny-81
+
+---
+
+### Decision ID: ADR-003
+- **Date:** 2026-05-13
+- **Context:** crypto.subtle non è disponibile nel runtime Hermes di React Native.
+- **Decision:** hashPin e verifyPin con bcryptjs rimangono invariate. encryptData e decryptData da riscrivere con expo-crypto in fase successiva.
+- **Alternatives Discarded:** Sostituire bcryptjs — scartato perché già compatibile RN.
+- **Consequences:** Cifratura dati temporaneamente non funzionante. Da affrontare in P1.
+- **Triggered By:** REPORT_diagnosi-compatibilita-RN_v0.1.0.md
+
+---
+
+## 8. Protocollo di Rollback
+
+> Esistono tre livelli di rollback. L'agente deve sempre partire dal livello più basso possibile.
+
+### Livello 1 — Rollback di Task
+
+Si usa quando un singolo task produce un risultato sbagliato e il problema è circoscritto al file target di quel task.
+
+**Procedura:**
+1. Annullare le modifiche al file target.
+2. Segnare il task come FAILED nel registro di stato.
+3. Rimanere nel blocco corrente — non retrocedere al blocco precedente.
+4. Rieseguire il task da zero seguendo le istruzioni del coding plan.
+5. Se il task fallisce una seconda volta, attivare HC-1 e inviare il messaggio di escalation.
+
+**Limite di autonomia:** massimo 2 tentativi in autonomia.
+
+---
+
+### Livello 2 — Rollback di Blocco
+
+Si usa quando il gate di un blocco fallisce e il danno coinvolge più file modificati durante quel blocco.
+
+**Procedura:**
+1. Documentare nello Snapshot di Ripresa tutti i file toccati durante il blocco.
+2. Annullare le modifiche a tutti i file del blocco.
+3. Segnare il blocco come FAILED e il gate come FAILED nel registro di stato.
+4. Rileggere integralmente il documento di design e il coding plan associati.
+5. Rieseguire il blocco dall'inizio, task per task.
+6. Se il gate fallisce una seconda volta, attivare HC-3 e inviare il messaggio di escalation.
+
+**Limite di autonomia:** massimo 1 tentativo in autonomia.
+
+---
+
+### Livello 3 — Rollback Inter-Blocco
+
+Si usa quando il fallimento ha radici in un blocco precedente già validato.
+
+**Procedura:**
+1. Fermarsi immediatamente. Zero azioni sui file.
+2. Documentare nello Snapshot: quale blocco precedente è probabilmente la causa, quale evidenza lo suggerisce, quali file sono coinvolti.
+3. Segnare il blocco corrente come FAILED — BLOCKED nel registro di stato.
+4. Inviare il messaggio di escalation con HC-3.
+5. Attendere istruzione esplicita dell'architetto.
+
+**Limite di autonomia:** zero. Richiede sempre intervento umano.
+
+---
+
+### Punto di Non Ritorno
+
+Alcune operazioni non possono essere disfatte con sicurezza. Prima di eseguirle l'agente deve ottenere conferma esplicita dell'architetto.
+
+La conferma è richiesta per qualsiasi operazione **non esplicitamente prevista nel coding plan attivo**, e sempre per:
+- Eliminazione di file o directory
+- Qualsiasi operazione su database reale (non placeholder)
+- Rinomina di file importati da più moduli
+
+La conferma **non è richiesta** per modifiche a file di configurazione (babel.config.js, package.json, tsconfig.json e simili) quando la modifica è descritta in modo esplicito nel coding plan attivo del blocco corrente.
+
+**Formato di richiesta conferma:**
+
+```
+CONFERMA RICHIESTA — [Task ID]
+Operazione: [descrizione dell'operazione irreversibile]
+File o risorse coinvolte: [lista]
+Motivo per cui è irreversibile: [spiegazione in una riga]
+Istruzione del piano che la richiede: [riferimento al documento e sezione]
+Confermare con: "PROCEDI [Task ID]"
+```
+
+---
+
+## 9. Glossario Operativo
+
+| Termine | Definizione |
+|---------|-------------|
+| **Task atomico** | Un'azione che modifica uno e un solo file e produce un risultato verificabile in modo diretto. |
+| **Gate** | Procedura di verifica obbligatoria al termine di un blocco. Un blocco non è concluso finché il gate non è PASSED. |
+| **Blocco validato** | Un blocco il cui gate è stato superato e che è stato marcato DONE. Non può essere modificato senza rollback di livello 3. |
+| **Scope** | L'insieme esplicito di file e operazioni consentite in un blocco. Qualsiasi modifica fuori scope è una Forbidden Action. |
+| **Escalation** | Comunicazione formale verso l'architetto che sospende l'autonomia dell'agente. |
+| **Punto di non ritorno** | Operazione irreversibile che richiede conferma esplicita prima dell'esecuzione. |
+| **Snapshot di Ripresa** | Registro dello stato aggiornato a fine sessione che permette la ripresa senza esplorazione manuale. |
+| **Session Open** | Procedura obbligatoria di avvio sessione definita nella sezione 2b. Si applica solo alle sessioni di lavoro umane, non ai Context Refresh tecnici. Nessun task può essere eseguito prima che sia completata. |
+| **Context Refresh** | Reset tecnico della memoria dell'agente definito nella sezione 1. Non equivale a una nuova sessione di lavoro umana e non attiva il protocollo Session Open. |
+
+---
+
