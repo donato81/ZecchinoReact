@@ -1,464 +1,732 @@
-Il repository del mio progetto è:
+Ho il rapporto di perplexity, di chat gpt, di claude, di deepseek, sulla valutazione della nuova implementazione per il file di design 005 da creare.
+leggilo interamente per analizzarlo, verificarlo e convalidarlo.
+File di report nel repository: docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md, per contesto.
+
+link al repository GitHub:
 https://github.com/donato81/ZecchinoReact
 
-Rapporto di perplexity:
-Ho letto tutti i documenti in profondità. Ora passo all'analisi.
+---
 
-***
+report iniziale di perplexity:
+Ecco il report completo da sottoporre ai tuoi consiglieri.
 
-## Analisi DESIGN 004 v1.0.0 — Nuova versione
+Il nucleo dell'analisi è questo: le funzioni da correggere sono solo due su quattro, `encryptData` e `decryptData`, perché le altre due con `bcryptjs` funzionano già.  Il problema è che `crypto.subtle` non esiste in Hermes, il motore JavaScript di React Native, e il crash avviene nel momento in cui l'utente tocca un conto privato, non all'avvio dell'app.
 
-La nuova versione ha risolto i problemi P1, P2, P4 e P5 che avevo trovato nella versione precedente. Il documento è ora significativamente più solido. Riporto solo i problemi reali rimasti. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/139933076/4d677c41-6b24-4d20-9209-c2bc930a2bcb/004-DESIGN_announcements-layer_v1_0_0.md?AWSAccessKeyId=ASIA2F3EMEYEUKJWJMZS&Signature=de2iLy6upclQ4WDvyk00yVHozAs%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEA8aCXVzLWVhc3QtMSJHMEUCIFB29LOkZMO6Vl%2BXqV5Ik5GeP2Zrdy0Icxq0%2FLCxRxYWAiEAnIXW9bhIG%2BJK98lCaK%2BlEt9OC%2BXhx2%2F3A5b9pPNbxVkq%2FAQI2P%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARABGgw2OTk3NTMzMDk3MDUiDBahz5%2BBczxBZj8MRirQBPN3k9xY9QskspNH6%2FIGFlvC4b50G3H%2Bxh%2Fg51T8nposE%2BuEN2lBrxuMG9Df3Kr2EUZKh7h8xEpeJ0kYxM5EdKEzYiWBExORgLPi%2Bmv5ISbCjNPP8VUniTicV2v7qc%2BZKi6inCei7urDBF5Ou3RxIFH6sqISiuclDxGg3lchF5EYImy%2BCK0a7e4Zm7RZoefeImfhKkEIkEkaFL2hLD7LdxReBjRCfgzc7mrWYwcMW6tcl%2FNpZUml0E0fz0pCPGTm%2BETrdipD2vmVrmUTatdaOLR1B9%2FTTO1AKVZt498lTLKKogTRtAJl0jEawlKQL%2Ft%2BcY8iFaNdcXnZRiq0daQO5A1D8NkP0ANRIjUK93p03nrI9oMKgehQNAx20Wofdavhrkki3TTdJLW1QF1tG7hdCYHmfIIW4W57ewf8Azd0COrkioum%2BQtYvgUyo7RecYIMJcIVDaekbA%2B%2F7syTyQczN70fEAkE73BXzR38L2gkXJavUxskdZw2VgT9zcgmI5NnzklxMcC6OwISdPBdjbtwDrgWYIaEkG5xK7HfN3P%2BX52hwDAo4XO60YoCYISDfEANUnOdTnRG%2BM1uLc8xsbXvXmpDxD5CM%2Bth8wNRpVbz4Z%2BMVpxrHhvzw71viwxu6q0u1rYIjH2FZTBRKqQHppZv2LA9jXN2dOki5ra1DYpoY8nsml3n5KEyjneFlHPLS%2B4wu6DrD7SRWTFBljcCXSE%2Bg4o3GUzjeNe2yYdfmr6NRkKs0O6hSsXAjVMntunQXWjgPVX9xWN75lWulmu6aAPGEZwwk%2Bmx0AY6mAFyQcLRdn2qk7NYSw6SpYdxbMYGFbmfbvtP0fItutI1hsP%2Bco9%2Fw9cPMlSo24Txt4o5E267gQrBSLQAQzRbqaxbpmEeCmDpJ6QKq9nSgSNePkUW0xW3FGGuG5MMzTQ9YSYG5JLrFVC4VdpG3z72YZ%2Fw8yZ9gcp3Bj3CRaapqjBLIzbENx1CJ%2F0iPk4RbH83wdXb2MVkIqirvA%3D%3D&Expires=1779203396)
-
-***
-
-## Problemi che bloccherebbero l'implementazione
-
-### P1 — Discrepanza sulle stringhe `export_single` e `export_plural` nella tabella di Sezione 3 del REPORT 004
-
-Dove: Sezione 3.3 di `it.ts` nel DESIGN 004, e tabella Sezione 3.6 (`ui.ts`) del REPORT 004.
-
-Il REPORT 004 nella tabella di `ui.ts` elenca `export_single` e `export_plural` come stringhe usate da `ui.ts`. Il DESIGN 004 invece le assegna correttamente ad `accounts.ts` e le mette fisicamente nella sezione 4 di `it.ts`. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/139933076/30fe5eec-2231-4ecf-9395-0f802ce01094/004-REPORT_perimetro-design-004.md)
-
-Fin qui il DESIGN è coerente con la decisione P2 del REPORT. Il problema concreto è questo: il DESIGN 004 alla Sezione 3.3 dice che la sezione 1 dell'`it.ts` contiene "26 chiavi esclusive di `ui.ts`". Ma se contiamo fisicamente le chiavi nella sezione 1 del codice, troviamo effettivamente 26 chiavi. Tuttavia nella tabella della Sezione 3.6 del REPORT le chiavi `export_single` e `export_plural` compaiono anche elencate come usate da `ui.ts`. Un agente che verifica la coerenza tra il REPORT e il codice trovando quelle chiavi elencate in due posti diversi potrebbe aggiungere un import di `export_single` e `export_plural` in `ui.ts` pensando che le debba usare, rompendo la separazione prevista. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/139933076/4d677c41-6b24-4d20-9209-c2bc930a2bcb/004-DESIGN_announcements-layer_v1_0_0.md?AWSAccessKeyId=ASIA2F3EMEYEUKJWJMZS&Signature=de2iLy6upclQ4WDvyk00yVHozAs%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEA8aCXVzLWVhc3QtMSJHMEUCIFB29LOkZMO6Vl%2BXqV5Ik5GeP2Zrdy0Icxq0%2FLCxRxYWAiEAnIXW9bhIG%2BJK98lCaK%2BlEt9OC%2BXhx2%2F3A5b9pPNbxVkq%2FAQI2P%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARABGgw2OTk3NTMzMDk3MDUiDBahz5%2BBczxBZj8MRirQBPN3k9xY9QskspNH6%2FIGFlvC4b50G3H%2Bxh%2Fg51T8nposE%2BuEN2lBrxuMG9Df3Kr2EUZKh7h8xEpeJ0kYxM5EdKEzYiWBExORgLPi%2Bmv5ISbCjNPP8VUniTicV2v7qc%2BZKi6inCei7urDBF5Ou3RxIFH6sqISiuclDxGg3lchF5EYImy%2BCK0a7e4Zm7RZoefeImfhKkEIkEkaFL2hLD7LdxReBjRCfgzc7mrWYwcMW6tcl%2FNpZUml0E0fz0pCPGTm%2BETrdipD2vmVrmUTatdaOLR1B9%2FTTO1AKVZt498lTLKKogTRtAJl0jEawlKQL%2Ft%2BcY8iFaNdcXnZRiq0daQO5A1D8NkP0ANRIjUK93p03nrI9oMKgehQNAx20Wofdavhrkki3TTdJLW1QF1tG7hdCYHmfIIW4W57ewf8Azd0COrkioum%2BQtYvgUyo7RecYIMJcIVDaekbA%2B%2F7syTyQczN70fEAkE73BXzR38L2gkXJavUxskdZw2VgT9zcgmI5NnzklxMcC6OwISdPBdjbtwDrgWYIaEkG5xK7HfN3P%2BX52hwDAo4XO60YoCYISDfEANUnOdTnRG%2BM1uLc8xsbXvXmpDxD5CM%2Bth8wNRpVbz4Z%2BMVpxrHhvzw71viwxu6q0u1rYIjH2FZTBRKqQHppZv2LA9jXN2dOki5ra1DYpoY8nsml3n5KEyjneFlHPLS%2B4wu6DrD7SRWTFBljcCXSE%2Bg4o3GUzjeNe2yYdfmr6NRkKs0O6hSsXAjVMntunQXWjgPVX9xWN75lWulmu6aAPGEZwwk%2Bmx0AY6mAFyQcLRdn2qk7NYSw6SpYdxbMYGFbmfbvtP0fItutI1hsP%2Bco9%2Fw9cPMlSo24Txt4o5E267gQrBSLQAQzRbqaxbpmEeCmDpJ6QKq9nSgSNePkUW0xW3FGGuG5MMzTQ9YSYG5JLrFVC4VdpG3z72YZ%2Fw8yZ9gcp3Bj3CRaapqjBLIzbENx1CJ%2F0iPk4RbH83wdXb2MVkIqirvA%3D%3D&Expires=1779203396)
-
-Il DESIGN 004 dovrebbe aggiungere una nota esplicita nella Sezione 9 (dove si trova `ui.ts`) che dica chiaramente: "`export_single`, `export_plural`, `export_announce` e `import_complete` non sono usate da questo modulo nonostante compaiano nel REPORT 004 §3.6 — appartengono ad `accounts.ts` per decisione P2. Non aggiungere import di queste chiavi in `ui.ts`."
-
-***
-
-### P2 — `t()` accetta `params: Record<string, string | number>` ma `announceCount` passa un `number` e si aspetta un `string` in output senza conversione esplicita
-
-Dove: Sezione 5.2, firma di `t()`, e Sezione 9.2, funzione `announceCount`.
-
-La firma di `t()` accetta `string | number` come valori nei params. Nell'implementazione di `t()`, tutti i valori vengono convertiti con `String(value)` — quindi un numero diventa stringa automaticamente. Fin qui nessun problema.  [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/139933076/4d677c41-6b24-4d20-9209-c2bc930a2bcb/004-DESIGN_announcements-layer_v1_0_0.md?AWSAccessKeyId=ASIA2F3EMEYEUKJWJMZS&Signature=de2iLy6upclQ4WDvyk00yVHozAs%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEA8aCXVzLWVhc3QtMSJHMEUCIFB29LOkZMO6Vl%2BXqV5Ik5GeP2Zrdy0Icxq0%2FLCxRxYWAiEAnIXW9bhIG%2BJK98lCaK%2BlEt9OC%2BXhx2%2F3A5b9pPNbxVkq%2FAQI2P%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARABGgw2OTk3NTMzMDk3MDUiDBahz5%2BBczxBZj8MRirQBPN3k9xY9QskspNH6%2FIGFlvC4b50G3H%2Bxh%2Fg51T8nposE%2BuEN2lBrxuMG9Df3Kr2EUZKh7h8xEpeJ0kYxM5EdKEzYiWBExORgLPi%2Bmv5ISbCjNPP8VUniTicV2v7qc%2BZKi6inCei7urDBF5Ou3RxIFH6sqISiuclDxGg3lchF5EYImy%2BCK0a7e4Zm7RZoefeImfhKkEIkEkaFL2hLD7LdxReBjRCfgzc7mrWYwcMW6tcl%2FNpZUml0E0fz0pCPGTm%2BETrdipD2vmVrmUTatdaOLR1B9%2FTTO1AKVZt498lTLKKogTRtAJl0jEawlKQL%2Ft%2BcY8iFaNdcXnZRiq0daQO5A1D8NkP0ANRIjUK93p03nrI9oMKgehQNAx20Wofdavhrkki3TTdJLW1QF1tG7hdCYHmfIIW4W57ewf8Azd0COrkioum%2BQtYvgUyo7RecYIMJcIVDaekbA%2B%2F7syTyQczN70fEAkE73BXzR38L2gkXJavUxskdZw2VgT9zcgmI5NnzklxMcC6OwISdPBdjbtwDrgWYIaEkG5xK7HfN3P%2BX52hwDAo4XO60YoCYISDfEANUnOdTnRG%2BM1uLc8xsbXvXmpDxD5CM%2Bth8wNRpVbz4Z%2BMVpxrHhvzw71viwxu6q0u1rYIjH2FZTBRKqQHppZv2LA9jXN2dOki5ra1DYpoY8nsml3n5KEyjneFlHPLS%2B4wu6DrD7SRWTFBljcCXSE%2Bg4o3GUzjeNe2yYdfmr6NRkKs0O6hSsXAjVMntunQXWjgPVX9xWN75lWulmu6aAPGEZwwk%2Bmx0AY6mAFyQcLRdn2qk7NYSw6SpYdxbMYGFbmfbvtP0fItutI1hsP%2Bco9%2Fw9cPMlSo24Txt4o5E267gQrBSLQAQzRbqaxbpmEeCmDpJ6QKq9nSgSNePkUW0xW3FGGuG5MMzTQ9YSYG5JLrFVC4VdpG3z72YZ%2Fw8yZ9gcp3Bj3CRaapqjBLIzbENx1CJ%2F0iPk4RbH83wdXb2MVkIqirvA%3D%3D&Expires=1779203396)
-
-Il problema è nella Sezione 8.2 (`announceCount`), dove la funzione riceve `count: number` e `items: string` e li passa a `t('count_announce', { count, items })`. La chiave `count_announce` contiene il placeholder `{items}` — nel REPORT 004 la tabella di `plurals.ts` specifica che `announceCount` usa `_utils/plurals.ts` per pluralizzare `items`. Ma nel codice di `announceCount` nella Sezione 9.2 del DESIGN non viene chiamato `pluralize()`. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/139933076/30fe5eec-2231-4ecf-9395-0f802ce01094/004-REPORT_perimetro-design-004.md)
-
-Immagina che il chiamante passi `announceCount('elemento', 3)`: lo screen reader direbbe "3 elemento" invece di "3 elementi". La tabella del REPORT alla riga `announceCount` nella colonna Note dice esplicitamente "Usa `_utils/plurals.ts`", ma il codice implementato nella Sezione 9.2 non importa né chiama `pluralize`. L'agente che implementa il codice da quella sezione non avrebbe motivo di aggiungere la chiamata da sola, e il risultato sarebbe grammaticalmente sbagliato. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/139933076/4d677c41-6b24-4d20-9209-c2bc930a2bcb/004-DESIGN_announcements-layer_v1_0_0.md?AWSAccessKeyId=ASIA2F3EMEYEUKJWJMZS&Signature=de2iLy6upclQ4WDvyk00yVHozAs%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEA8aCXVzLWVhc3QtMSJHMEUCIFB29LOkZMO6Vl%2BXqV5Ik5GeP2Zrdy0Icxq0%2FLCxRxYWAiEAnIXW9bhIG%2BJK98lCaK%2BlEt9OC%2BXhx2%2F3A5b9pPNbxVkq%2FAQI2P%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARABGgw2OTk3NTMzMDk3MDUiDBahz5%2BBczxBZj8MRirQBPN3k9xY9QskspNH6%2FIGFlvC4b50G3H%2Bxh%2Fg51T8nposE%2BuEN2lBrxuMG9Df3Kr2EUZKh7h8xEpeJ0kYxM5EdKEzYiWBExORgLPi%2Bmv5ISbCjNPP8VUniTicV2v7qc%2BZKi6inCei7urDBF5Ou3RxIFH6sqISiuclDxGg3lchF5EYImy%2BCK0a7e4Zm7RZoefeImfhKkEIkEkaFL2hLD7LdxReBjRCfgzc7mrWYwcMW6tcl%2FNpZUml0E0fz0pCPGTm%2BETrdipD2vmVrmUTatdaOLR1B9%2FTTO1AKVZt498lTLKKogTRtAJl0jEawlKQL%2Ft%2BcY8iFaNdcXnZRiq0daQO5A1D8NkP0ANRIjUK93p03nrI9oMKgehQNAx20Wofdavhrkki3TTdJLW1QF1tG7hdCYHmfIIW4W57ewf8Azd0COrkioum%2BQtYvgUyo7RecYIMJcIVDaekbA%2B%2F7syTyQczN70fEAkE73BXzR38L2gkXJavUxskdZw2VgT9zcgmI5NnzklxMcC6OwISdPBdjbtwDrgWYIaEkG5xK7HfN3P%2BX52hwDAo4XO60YoCYISDfEANUnOdTnRG%2BM1uLc8xsbXvXmpDxD5CM%2Bth8wNRpVbz4Z%2BMVpxrHhvzw71viwxu6q0u1rYIjH2FZTBRKqQHppZv2LA9jXN2dOki5ra1DYpoY8nsml3n5KEyjneFlHPLS%2B4wu6DrD7SRWTFBljcCXSE%2Bg4o3GUzjeNe2yYdfmr6NRkKs0O6hSsXAjVMntunQXWjgPVX9xWN75lWulmu6aAPGEZwwk%2Bmx0AY6mAFyQcLRdn2qk7NYSw6SpYdxbMYGFbmfbvtP0fItutI1hsP%2Bco9%2Fw9cPMlSo24Txt4o5E267gQrBSLQAQzRbqaxbpmEeCmDpJ6QKq9nSgSNePkUW0xW3FGGuG5MMzTQ9YSYG5JLrFVC4VdpG3z72YZ%2Fw8yZ9gcp3Bj3CRaapqjBLIzbENx1CJ%2F0iPk4RbH83wdXb2MVkIqirvA%3D%3D&Expires=1779203396)
-
-La Sezione 9.2 dovrebbe mostrare la chiamata a `pluralize(items, count)` dentro `announceCount`, oppure spiegare perché in questo caso la pluralizzazione viene gestita diversamente.
-
-***
-
-## Problemi che creerebbero confusione
-
-### P3 — `announcements/index.ts` espone `announce()` ma il suo tipo di parametro non è dichiarato nel codice mostrato
-
-Dove: Sezione 17.2, codice di `announcements/index.ts`.
-
-Il codice di `index.ts` mostra:
-
-```ts
-export function announce(announcement: Announcement): void {
-  engine.announce(announcement)
-}
-```
-
-Ma `Announcement` non è importato esplicitamente nel codice mostrato. Per compilare, il file deve importare `Announcement` da qualche parte. L'ADR_001 stabilisce che l'unica eccezione per importare da `accessibility/` è `index.ts` che importa `engine` — non i tipi. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/139933076/8621c36e-ff2d-4b32-b2e7-bd9e4efe16ab/ADR_001_sistema-annunci-accessibili.md)
-
-Il tipo `Announcement` è però già re-esportato da `announcements/types.ts`. Quindi la soluzione corretta è importarlo da `'./types'`, non da `@/accessibility/types`. Il codice mostrato nella Sezione 17.2 non include questo import, il che significa che come scritto non compilerebbe. Un agente che copia quel codice otterrebbe un errore TypeScript immediato sulla firma di `announce()`. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/139933076/4d677c41-6b24-4d20-9209-c2bc930a2bcb/004-DESIGN_announcements-layer_v1_0_0.md?AWSAccessKeyId=ASIA2F3EMEYEUKJWJMZS&Signature=de2iLy6upclQ4WDvyk00yVHozAs%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEA8aCXVzLWVhc3QtMSJHMEUCIFB29LOkZMO6Vl%2BXqV5Ik5GeP2Zrdy0Icxq0%2FLCxRxYWAiEAnIXW9bhIG%2BJK98lCaK%2BlEt9OC%2BXhx2%2F3A5b9pPNbxVkq%2FAQI2P%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARABGgw2OTk3NTMzMDk3MDUiDBahz5%2BBczxBZj8MRirQBPN3k9xY9QskspNH6%2FIGFlvC4b50G3H%2Bxh%2Fg51T8nposE%2BuEN2lBrxuMG9Df3Kr2EUZKh7h8xEpeJ0kYxM5EdKEzYiWBExORgLPi%2Bmv5ISbCjNPP8VUniTicV2v7qc%2BZKi6inCei7urDBF5Ou3RxIFH6sqISiuclDxGg3lchF5EYImy%2BCK0a7e4Zm7RZoefeImfhKkEIkEkaFL2hLD7LdxReBjRCfgzc7mrWYwcMW6tcl%2FNpZUml0E0fz0pCPGTm%2BETrdipD2vmVrmUTatdaOLR1B9%2FTTO1AKVZt498lTLKKogTRtAJl0jEawlKQL%2Ft%2BcY8iFaNdcXnZRiq0daQO5A1D8NkP0ANRIjUK93p03nrI9oMKgehQNAx20Wofdavhrkki3TTdJLW1QF1tG7hdCYHmfIIW4W57ewf8Azd0COrkioum%2BQtYvgUyo7RecYIMJcIVDaekbA%2B%2F7syTyQczN70fEAkE73BXzR38L2gkXJavUxskdZw2VgT9zcgmI5NnzklxMcC6OwISdPBdjbtwDrgWYIaEkG5xK7HfN3P%2BX52hwDAo4XO60YoCYISDfEANUnOdTnRG%2BM1uLc8xsbXvXmpDxD5CM%2Bth8wNRpVbz4Z%2BMVpxrHhvzw71viwxu6q0u1rYIjH2FZTBRKqQHppZv2LA9jXN2dOki5ra1DYpoY8nsml3n5KEyjneFlHPLS%2B4wu6DrD7SRWTFBljcCXSE%2Bg4o3GUzjeNe2yYdfmr6NRkKs0O6hSsXAjVMntunQXWjgPVX9xWN75lWulmu6aAPGEZwwk%2Bmx0AY6mAFyQcLRdn2qk7NYSw6SpYdxbMYGFbmfbvtP0fItutI1hsP%2Bco9%2Fw9cPMlSo24Txt4o5E267gQrBSLQAQzRbqaxbpmEeCmDpJ6QKq9nSgSNePkUW0xW3FGGuG5MMzTQ9YSYG5JLrFVC4VdpG3z72YZ%2Fw8yZ9gcp3Bj3CRaapqjBLIzbENx1CJ%2F0iPk4RbH83wdXb2MVkIqirvA%3D%3D&Expires=1779203396)
-
-La Sezione 17.2 deve aggiungere:
-```ts
-import type { Announcement } from './types'
-```
-
-***
-
-### P4 — Sezione 18 (`AuthContext`): la tabella delle sostituzioni elenca `announcePrivateUnlocked()` con il nome sbagliato
-
-Dove: Sezione 18.2, tabella delle sostituzioni `screenReader.*` → `announce(auth.*)`.
-
-In `auth.ts` (Sezione 10.2) la funzione si chiama `privateUnlocked()`. La tabella della Sezione 18.2 la indica come `auth.announcePrivateUnlocked()`. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/139933076/4d677c41-6b24-4d20-9209-c2bc930a2bcb/004-DESIGN_announcements-layer_v1_0_0.md?AWSAccessKeyId=ASIA2F3EMEYEUKJWJMZS&Signature=de2iLy6upclQ4WDvyk00yVHozAs%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEA8aCXVzLWVhc3QtMSJHMEUCIFB29LOkZMO6Vl%2BXqV5Ik5GeP2Zrdy0Icxq0%2FLCxRxYWAiEAnIXW9bhIG%2BJK98lCaK%2BlEt9OC%2BXhx2%2F3A5b9pPNbxVkq%2FAQI2P%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARABGgw2OTk3NTMzMDk3MDUiDBahz5%2BBczxBZj8MRirQBPN3k9xY9QskspNH6%2FIGFlvC4b50G3H%2Bxh%2Fg51T8nposE%2BuEN2lBrxuMG9Df3Kr2EUZKh7h8xEpeJ0kYxM5EdKEzYiWBExORgLPi%2Bmv5ISbCjNPP8VUniTicV2v7qc%2BZKi6inCei7urDBF5Ou3RxIFH6sqISiuclDxGg3lchF5EYImy%2BCK0a7e4Zm7RZoefeImfhKkEIkEkaFL2hLD7LdxReBjRCfgzc7mrWYwcMW6tcl%2FNpZUml0E0fz0pCPGTm%2BETrdipD2vmVrmUTatdaOLR1B9%2FTTO1AKVZt498lTLKKogTRtAJl0jEawlKQL%2Ft%2BcY8iFaNdcXnZRiq0daQO5A1D8NkP0ANRIjUK93p03nrI9oMKgehQNAx20Wofdavhrkki3TTdJLW1QF1tG7hdCYHmfIIW4W57ewf8Azd0COrkioum%2BQtYvgUyo7RecYIMJcIVDaekbA%2B%2F7syTyQczN70fEAkE73BXzR38L2gkXJavUxskdZw2VgT9zcgmI5NnzklxMcC6OwISdPBdjbtwDrgWYIaEkG5xK7HfN3P%2BX52hwDAo4XO60YoCYISDfEANUnOdTnRG%2BM1uLc8xsbXvXmpDxD5CM%2Bth8wNRpVbz4Z%2BMVpxrHhvzw71viwxu6q0u1rYIjH2FZTBRKqQHppZv2LA9jXN2dOki5ra1DYpoY8nsml3n5KEyjneFlHPLS%2B4wu6DrD7SRWTFBljcCXSE%2Bg4o3GUzjeNe2yYdfmr6NRkKs0O6hSsXAjVMntunQXWjgPVX9xWN75lWulmu6aAPGEZwwk%2Bmx0AY6mAFyQcLRdn2qk7NYSw6SpYdxbMYGFbmfbvtP0fItutI1hsP%2Bco9%2Fw9cPMlSo24Txt4o5E267gQrBSLQAQzRbqaxbpmEeCmDpJ6QKq9nSgSNePkUW0xW3FGGuG5MMzTQ9YSYG5JLrFVC4VdpG3z72YZ%2Fw8yZ9gcp3Bj3CRaapqjBLIzbENx1CJ%2F0iPk4RbH83wdXb2MVkIqirvA%3D%3D&Expires=1779203396)
-
-Per un agente che legge la Sezione 18 e scrive la patch di `AuthContext`, il nome che vede nella tabella è `auth.announcePrivateUnlocked()`. Questo nome non esiste in `auth.ts`. Il codice compilato farebbe fallire TypeScript con un errore "property does not exist". La convenzione di naming senza prefisso `announce` è una decisione esplicita della Sezione 10.1 (P5 del REPORT), ma la tabella di migrazione non la rispetta. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/139933076/30fe5eec-2231-4ecf-9395-0f802ce01094/004-REPORT_perimetro-design-004.md)
-
-La tabella della Sezione 18.2 deve usare il nome corretto: `auth.privateUnlocked()`.
-
-***
-
-### P5 — Sezione 19 (`AppDataContext`): conteggio sostituzioni dichiarato "16 chiamate" ma verifica interna non è presente
-
-Dove: intestazione della Sezione 19 e Sezione 19.2.
-
-Il REPORT 004 Sezione 4.2 dice "Sostituisce 16 chiamate `screenReader.*`". La Sezione 19 del DESIGN lo ripete. Tuttavia la tabella delle sostituzioni nella Sezione 19.2 elenca meno di 16 righe: le righe visibili coprono conti (5), movimenti (4), budget (4), obiettivi (3) — totale 16, ma nella sezione budget compare `announceBudgetStatus` che accetta 4 parametri mentre nel codice REPORT appare con firma diversa. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/139933076/30fe5eec-2231-4ecf-9395-0f802ce01094/004-REPORT_perimetro-design-004.md)
-
-Questo non è un blocco, ma è un punto dove un agente potrebbe chiedersi se il conteggio è corretto e procedere in modo incerto. Il DESIGN dovrebbe confermare esplicitamente il conteggio totale alla fine della tabella o aggiungere una nota "totale verificato: 16 sostituzioni".
-
-***
-
-## Piccole incoerenze minori
-
-### P6 — Discrepanza "67+" vs "72" ancora non risolta nella Sezione 21
-
-Dove: Sezione 3.3 nota e Sezione 21.
-
-La Sezione 3.3 spiega la discrepanza 72 vs 77. La Sezione 21 registra C1 per la contraddizione 77 vs 72. Nessuna delle due menziona però la dicitura "67+" che compare nel REPORT 004 Sezione 1 riga 1 e nel suo STEP 1 del grafo. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/139933076/30fe5eec-2231-4ecf-9395-0f802ce01094/004-REPORT_perimetro-design-004.md)
-
-Per chi legge i due documenti in sequenza, troverà tre numeri diversi per lo stesso concetto: "67+", "77" e "72". La Sezione 21 spiega bene perché 77 diventa 72, ma non spiega da dove viene "67+". Un agente che controlla la coerenza tra il REPORT e il DESIGN potrebbe segnalarlo come errore. La Sezione 21 dovrebbe aggiungere una riga che spiega: "Il '67+' del REPORT indica le stringhe di dominio puro (escluse le 5 azioni), prima che il conteggio finale fosse stabilizzato a 72."
-
-***
-
-In sintesi: il documento è implementabile con le correzioni a P2 e P3, che sono le due più concrete. P2 produce output grammaticalmente sbagliato senza errori visibili. P3 produce un errore di compilazione immediato. P4 produce un errore di compilazione nella patch di `AuthContext`. P1 e P5 sono rischi di confusione durante l'implementazione. P6 è una piccola pulizia documentale. [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/139933076/8621c36e-ff2d-4b32-b2e7-bd9e4efe16ab/ADR_001_sistema-annunci-accessibili.md)
-
-
-Analisi di chat gpt:
-Ho analizzato attentamente il rapporto e, nel complesso, la valutazione di Perplexity è molto buona.
-La qualità dell’analisi è superiore alle precedenti che avevi mostrato: questa volta distingue abbastanza bene tra:
-
-* problemi realmente bloccanti
-* incoerenze documentali
-* semplici rischi di ambiguità per implementatori automatici
-
-Ti confermo però che non tutti i punti hanno lo stesso peso reale. Alcuni sono corretti e importanti, altri sono soprattutto “lint documentale”.
-
-Di seguito la validazione tecnica punto per punto.
+Tra le tre opzioni analizzate, la più adatta sembra essere `@noble/ciphers` perché è l'unica che soddisfa tutti e tre i vincoli contemporaneamente: supporta AES-GCM (stesso algoritmo attuale), non ha dipendenze native (compatibilità Windows garantita), e mantiene il formato dei dati cifrati invariato (nessuna migrazione dati necessaria). 
 
 ---
 
-# Validazione generale
+analisi di chat gpt:
+Ho analizzato il contenuto del report iniziale di Perplexity e, anche se molto sintetico, il nucleo tecnico della valutazione appare corretto e coerente con lo stato attuale dell’ecosistema React Native/Hermes.
 
-La nuova versione del DESIGN 004 sembra effettivamente molto più stabile rispetto alle iterazioni precedenti.
+Il report però è ancora ad un livello “diagnosi iniziale”.
+Prima di trasformarlo nel DESIGN 005 serve una validazione architetturale molto più rigorosa, perché il rischio qui non è solo “far funzionare la crypto”, ma:
 
-In particolare:
+* preservare compatibilità dati
+* preservare compatibilità Windows
+* evitare dipendenze native
+* evitare regressioni future
+* mantenere il modello di sicurezza già esistente
+* evitare falsi equivalenti tra WebCrypto e librerie JS pure
 
-* il perimetro è finalmente coerente
-* il layer `announcements` è separato bene
-* la distinzione dominio/UI/accessibility è molto più pulita
-* il naming è quasi completamente consolidato
-* la dipendenza da `AccessibilityInfo` appare finalmente confinata
-
-Quindi la direzione architetturale è corretta.
-
-Perplexity ha individuato soprattutto:
-
-* problemi di coerenza tra documenti
-* rischi di implementazione automatica
-* piccoli mismatch tra esempi di codice e specifica
-
-Questo è esattamente il tipo di review utile in questa fase.
+Quindi ti restituisco una validazione tecnica completa del report di Perplexity.
 
 ---
 
-# P1 — `export_single` / `export_plural`
+# Validazione del problema principale
 
-## Valutazione: CORRETTO ma NON bloccante
+## Tesi di Perplexity
 
-Questo problema esiste davvero.
+> `crypto.subtle` non esiste in Hermes e il crash avviene quando si accede ai conti privati.
 
-Hai:
+## Verifica
 
-* REPORT che ancora cita quelle chiavi in `ui.ts`
-* DESIGN che le sposta correttamente in `accounts.ts`
+Questa analisi è corretta.
 
-Architetturalmente il DESIGN è corretto.
-
-Il problema è documentale:
-un implementatore automatico potrebbe reintrodurre import sbagliati.
-
-Quindi Perplexity ha ragione sul rischio.
-
-## Gravità reale
-
-Non è un blocco implementativo.
-
-È:
-
-* rischio di regressione
-* rischio di reinquinamento del boundary tra moduli
-
-## La soluzione proposta è giusta
-
-La nota esplicita suggerita è sensata.
-
-Ti consiglio addirittura qualcosa di ancora più forte:
-
-```md
-IMPORTANTE:
-Le chiavi:
-- export_single
-- export_plural
-- export_announce
-- import_complete
-
-appartengono esclusivamente al dominio accounts.ts.
-
-NON devono essere importate o usate da ui.ts.
-La loro presenza nel REPORT 004 §3.6 è storica/documentale.
-```
-
-Questo elimina ambiguità future.
-
----
-
-# P2 — `announceCount` non pluralizza
-
-# Valutazione: CORRETTO e IMPORTANTE
-
-Questo è il problema più concreto dell’intera review.
-
-Perplexity qui ha perfettamente ragione.
-
-Se:
+Hermes NON implementa Web Crypto API complete, in particolare:
 
 ```ts
-announceCount('elemento', 3)
+crypto.subtle
 ```
 
-produce:
+non è disponibile in React Native standard.
+
+Questo è un problema noto dell’ambiente RN/Hermes.
+
+Il crash quindi non avviene:
+
+* all’avvio app
+* durante bootstrap
+* durante hydration
+
+ma solo quando il codice esegue:
+
+```ts
+crypto.subtle.encrypt(...)
+crypto.subtle.decrypt(...)
+```
+
+quindi:
+
+* sblocco conti privati
+* lettura dati cifrati
+* scrittura dati cifrati
+
+Questo punto è importante perché ridimensiona drasticamente il perimetro reale del bug.
+
+---
+
+# Validazione della distinzione “2 funzioni rotte su 4”
+
+## Tesi di Perplexity
+
+Solo:
+
+* `encryptData`
+* `decryptData`
+
+sono incompatibili.
+
+Le funzioni basate su `bcryptjs` funzionano già.
+
+## Verifica
+
+Anche questo è corretto.
+
+`bcryptjs`:
+
+* è puro JavaScript
+* non usa WebCrypto
+* non usa moduli nativi
+* funziona già in Hermes
+
+Quindi:
+
+* hashing password
+* verifica password
+
+non richiedono redesign.
+
+Questo è un punto architetturalmente IMPORTANTISSIMO.
+
+Perché evita:
+
+* redesign completo security layer
+* migrazione password
+* rehash utenti
+* reset credenziali
+* nuove dipendenze native
+
+Il problema reale è confinato alla cifratura AES.
+
+---
+
+# Validazione della scelta `@noble/ciphers`
+
+## Tesi di Perplexity
+
+`@noble/ciphers` è la soluzione migliore perché:
+
+* supporta AES-GCM
+* è pure JS
+* non richiede moduli nativi
+* mantiene compatibilità formato dati
+
+## Verifica tecnica
+
+La direzione è MOLTO plausibile e probabilmente corretta.
+
+Ma qui serve maggiore precisione rispetto al report iniziale.
+
+Perché ci sono 4 livelli distinti da verificare.
+
+---
+
+# Livello 1 — Compatibilità Hermes
+
+## Verifica
+
+`@noble/ciphers` è pure TypeScript/JavaScript.
+
+Quindi:
+
+* funziona in Hermes
+* funziona in Expo
+* funziona in RN puro
+* non richiede bridge nativi
+
+Questo soddisfa il vincolo Windows indicato nel report.
+
+Questa è probabilmente la proprietà più importante.
+
+---
+
+# Livello 2 — Compatibilità AES-GCM
+
+## Verifica
+
+`@noble/ciphers` supporta AES-GCM.
+
+Questo è fondamentale perché evita:
+
+* redesign algoritmo
+* modifica IV model
+* modifica auth tag model
+* modifica payload layout
+
+Quindi il design attuale può rimanere quasi invariato.
+
+Ottimo punto individuato da Perplexity.
+
+---
+
+# Livello 3 — Compatibilità formato dati
+
+Qui il report di Perplexity è corretto nel principio MA TROPPO OTTIMISTA.
+
+Dire:
+
+> “nessuna migrazione dati necessaria”
+
+non è ancora dimostrato.
+
+Perché dipende da:
+
+* encoding finale
+* concatenazione IV/tag/ciphertext
+* endianess
+* conversione Uint8Array ↔ Base64
+* serializzazione auth tag
+* lunghezza IV
+* lunghezza tag
+* comportamento UTF-8 encoder
+
+Quindi il vero punto non è:
+“usa AES-GCM”
+
+ma:
 
 ```txt
-3 elemento
+produce EXACTLY lo stesso payload serializzato?
 ```
 
-allora:
-
-* il DESIGN
-* il REPORT
-* il codice mostrato
-
-sono incoerenti tra loro.
-
-E soprattutto:
-la responsabilità grammaticale è già stata assegnata a `_utils/plurals.ts`.
-
-Quindi il codice mostrato nella sezione implementativa è incompleto.
+Questa verifica NON è banale.
 
 ---
 
-## Gravità reale
+# Problema critico che Perplexity NON ha approfondito
 
-Alta.
+Il DESIGN 005 dovrà probabilmente includere:
 
-Perché:
+## Requirement obbligatorio
 
-* non produce errori TS
-* non produce crash
-* ma produce output SBAGLIATO
+Golden compatibility tests.
 
-Questi sono i bug peggiori nei sistemi accessibility.
+Esempio:
+
+```txt
+input:
+- plaintext
+- password
+- salt
+- iv
+
+output atteso:
+- ciphertext IDENTICO
+```
+
+tra:
+
+* implementazione WebCrypto attuale
+* implementazione noble futura
+
+Se i payload non coincidono:
+
+* la migrazione diventa necessaria
+* oppure serve compatibilità duale runtime
+
+Questo è IL punto più importante mancante nel report iniziale.
 
 ---
 
-## Validazione soluzione
+# Livello 4 — Sicurezza reale
 
-Correttissima.
+Qui il report è troppo superficiale.
 
-La funzione dovrebbe mostrare chiaramente:
+Perché sostituire:
 
 ```ts
-const label = pluralize(items, count)
-
-return t('count_announce', {
-  count,
-  items: label
-})
+crypto.subtle
 ```
 
-oppure equivalente.
-
-Questo punto va corretto.
+con libreria JS pura implica tradeoff.
 
 ---
 
-# P3 — `Announcement` non importato
+## WebCrypto vs Pure JS
 
-# Valutazione: CORRETTO
+WebCrypto:
 
-Questo è un errore tecnico reale.
+* implementazione nativa
+* hardened
+* ottimizzata
+* side-channel resistant
 
-Il codice mostrato:
+Pure JS:
+
+* più lenta
+* maggiore superficie side-channel
+* dipende dal runtime JS
+* sicurezza “best effort”
+
+Ora:
+per ZecchinoReact probabilmente questo tradeoff è ACCETTABILE.
+
+Ma il DESIGN 005 deve dichiararlo esplicitamente.
+
+Altrimenti sembra che:
+“noble = equivalente perfetto”
+
+che non è vero.
+
+---
+
+# Problema architetturale NON menzionato
+
+Perplexity non ha affrontato un tema fondamentale:
+
+## Randomness source
+
+WebCrypto attuale probabilmente usa:
 
 ```ts
-export function announce(announcement: Announcement): void
+crypto.getRandomValues()
 ```
 
-non compila senza import.
+Hermes non lo implementa completamente.
 
-Quindi Perplexity ha ragione.
+Quindi il DESIGN 005 dovrà chiarire:
+
+* come generare IV
+* come generare salt
+* quale RNG usare
+* compatibilità RN
+
+Possibili scenari:
+
+* `react-native-get-random-values`
+* expo-random
+* RNG interno noble
+* polyfill
+
+Questo è un punto BLOCCANTE di design.
+
+Perché AES-GCM senza RNG affidabile è pericoloso.
 
 ---
 
-## Gravità reale
+# Altro punto mancante: performance mobile
 
-Media.
+Perplexity non ha trattato:
 
-Perché:
+* costo AES JS su device low-end
+* battery impact
+* freeze UI thread
+* dimensione payload
+* decrypt sync vs async
 
-* errore immediato
-* facile da correggere
-* ma reale
-
----
-
-## Soluzione proposta
-
-Corretta:
+Se il codice attuale usa API async WebCrypto:
 
 ```ts
-import type { Announcement } from './types'
+await crypto.subtle.decrypt()
 ```
 
-ed è anche coerente con ADR_001.
+e noble è sync:
+
+* cambia comportamento threading
+* cambia rischio frame drops
+
+Il DESIGN 005 dovrebbe analizzare questo.
 
 ---
 
-# P4 — `announcePrivateUnlocked()` naming errato
+# Conclusione finale consolidata
 
-# Valutazione: CORRETTO
+## Cosa Perplexity ha identificato CORRETTAMENTE
 
-Questo è un classico problema da refactor incompleto.
+### Corretti
 
-Hai:
+* problema confinato a `encryptData` / `decryptData`
+* `bcryptjs` già compatibile
+* crash solo runtime feature-specific
+* Hermes incompatibile con `crypto.subtle`
+* necessità soluzione pure JS
+* `@noble/ciphers` candidata molto forte
+* vantaggio enorme di mantenere AES-GCM
 
-* naming finale senza prefisso `announce`
-* una tabella che usa ancora il vecchio naming
-
-Perplexity ha ragione.
-
----
-
-## Gravità reale
-
-Media.
-
-Perché:
-
-* rompe TypeScript
-* ma solo nell’implementazione guidata dalla tabella
+Questa parte dell’analisi è solida.
 
 ---
 
-## Correzione
+# Cosa manca ancora prima del DESIGN 005
 
-Sì:
+## Mancanze importanti
 
-```ts
-auth.privateUnlocked()
-```
+### M1 — Verifica compatibilità payload binario
 
-e basta.
+CRITICA
 
----
+Serve dimostrare:
 
-# P5 — conteggio “16 sostituzioni”
-
-# Valutazione: PARZIALMENTE CORRETTO
-
-Qui Perplexity sta entrando nel territory “document consistency linting”.
-
-Non c’è un problema tecnico reale.
-
-Il conteggio torna:
-
-* 5
-* 4
-* 4
-* 3
-
-= 16.
-
-Quindi il documento è già coerente.
-
-Il dubbio nasce perché:
-
-* alcune firme funzione cambiano
-* il REPORT è più vecchio del DESIGN
-
-Ma non vedo rischio implementativo concreto.
+* stesso formato ciphertext
+* stesso tag
+* stesso encoding
 
 ---
 
-## Gravità reale
+### M2 — Strategia RNG
 
-Bassa.
+CRITICA
 
----
+Serve definire:
 
-## Vale la pena aggiungere nota?
-
-Sì, perché riduce rumore future-review.
-
-Una semplice riga:
-
-```md
-Totale verificato: 16 sostituzioni.
-```
-
-chiude definitivamente la questione.
+* source randomness RN-safe
+* IV generation
+* salt generation
 
 ---
 
-# P6 — 67+ / 72 / 77
+### M3 — Tradeoff sicurezza pure JS
 
-# Valutazione: CORRETTO ma MINORE
+MEDIA
 
-Qui Perplexity ha ragione:
-ci sono tre numeri storici non riconciliati.
-
-Ma questo è:
-
-* un problema editoriale
-* non architetturale
+Va documentato esplicitamente.
 
 ---
 
-## Gravità reale
+### M4 — Analisi performance Hermes/mobile
 
-Molto bassa.
+MEDIA
 
----
+Specialmente:
 
-## Però conviene correggerlo?
-
-Sì.
-
-Perché questi mismatch:
-
-* attirano review inutili
-* consumano tempo
-* fanno sembrare il documento instabile
-
-La spiegazione suggerita è buona.
+* decrypt sync
+* freeze UI
+* payload size
 
 ---
 
-# Conclusione finale
+### M5 — Strategia fallback/migrazione
 
-## Problemi REALMENTE da correggere
+MEDIA
 
-Questi sì:
+Se i payload non coincidono:
 
-| ID | Gravità | Motivo                                       |
-| -- | ------- | -------------------------------------------- |
-| P2 | Alta    | output accessibility grammaticalmente errato |
-| P3 | Media   | errore compilazione TS                       |
-| P4 | Media   | errore compilazione/refactor incoerente      |
-| P1 | Media   | rischio regressione boundary                 |
+* dual decrypt
+* migration-on-read
+* versioned payloads
 
 ---
 
-## Problemi utili ma non critici
+# Valutazione finale
 
-| ID | Gravità     |
-| -- | ----------- |
-| P5 | Bassa       |
-| P6 | Molto bassa |
+Il report iniziale di Perplexity è:
+
+* corretto
+* promettente
+* architetturalmente sensato
+
+ma è ancora:
+
+* una diagnosi preliminare
+* non ancora un design implementativo
+
+La direzione `@noble/ciphers` sembra la migliore tra quelle descritte, MA il DESIGN 005 dovrà dimostrare formalmente:
+
+1. compatibilità payload
+2. sicurezza RNG
+3. assenza migrazione dati
+4. sostenibilità runtime Hermes
+
+prima di poter essere considerato “implementation-ready”.
 
 ---
 
-# Giudizio sul DESIGN 004 dopo questa review
+analisi di claude:
+Non riesco ad accedere direttamente al report nel repository (GitHub richiede autenticazione per repo privati). Procedo comunque con l'analisi completa basandomi sui due report forniti nel documento.
 
-Direi che il documento:
+---
 
-* NON ha più problemi architetturali seri
-* NON mostra più incoerenze sistemiche
-* è ormai in fase di hardening finale
+# Analisi, Verifica e Convalida — Diagnosi Compatibilità RN / Preparazione DESIGN 005
 
-I problemi rimasti sono:
+## Quadro generale
 
-* dettagli implementativi
-* allineamenti documentali
-* residue incoerenze di naming
+Hai due fonti: Perplexity (diagnosi iniziale, sintetica) e ChatGPT (validazione estesa, critica). Ho letto entrambe interamente. Il mio giudizio segue.
 
-Questa è una differenza enorme rispetto alle versioni precedenti, dove c’erano ancora problemi di perimetro e responsabilità.
+---
+
+## Valutazione del report Perplexity
+
+**Correttezza tecnica: ALTA.**
+
+I tre punti core sono tutti verificabili e corretti:
+
+**1. `crypto.subtle` non disponibile in Hermes** — confermato. Hermes non implementa la Web Crypto API. Il crash a runtime su feature-specific path (sblocco conti privati) è il comportamento atteso esatto.
+
+**2. Solo `encryptData` / `decryptData` sono rotte** — confermato. `bcryptjs` è pure JS e gira già correttamente su Hermes. Questo delimitazione è architetturalmente cruciale: evita un redesign del security layer completo.
+
+**3. `@noble/ciphers` come candidata migliore** — direzione corretta. È pure TypeScript, nessuna dipendenza nativa, supporto AES-GCM, compatibile Windows/Hermes/Expo.
+
+**Limite del report:** è una diagnosi preliminare, non un design implementativo. Corretto e promettente, ma non sufficiente da solo per avviare DESIGN 005.
+
+---
+
+## Valutazione del report ChatGPT
+
+**Qualità: MOLTO ALTA.** È la validazione che ti serve. I punti sollevati sono tutti tecnici, fondati e non ridondanti. Nessuna parte è filler. Li classifico per priorità reale:
+
+### 🔴 Critici (bloccanti per DESIGN 005)
+
+**M1 — Compatibilità payload binario**
+Questo è IL rischio principale. Anche se `@noble/ciphers` usa AES-GCM, il formato serializzato del ciphertext dipende da encoding, concatenazione `IV|tag|ciphertext`, lunghezza IV (standard 12 byte), lunghezza auth tag (standard 16 byte), e conversione `Uint8Array ↔ Base64`. Se c'è anche una sola differenza qui, i dati già cifrati con WebCrypto diventano illeggibili dopo la migrazione. Servono **golden test** obbligatori prima di scrivere una riga di DESIGN 005.
+
+**M2 — Strategia RNG**
+`crypto.getRandomValues()` ha supporto parziale in Hermes. Senza un RNG affidabile, la generazione di IV e salt è insicura. AES-GCM con IV riutilizzato è una vulnerabilità grave. Deve essere risolto prima nel design, non dopo. Le opzioni concrete da valutare: `react-native-get-random-values` (polyfill consolidato), RNG interno di noble, o `expo-crypto`.
+
+### 🟡 Importanti (da includere nel DESIGN 005, non bloccanti)
+
+**M3 — Tradeoff sicurezza pure JS vs WebCrypto nativa**
+ChatGPT ha ragione: `@noble/ciphers` è "best effort" rispetto a un'implementazione hardware-backed. Per ZecchinoReact è probabilmente accettabile (app consumer, non bancaria), ma il DESIGN 005 deve dichiararlo esplicitamente con una sezione "Security Tradeoffs Accepted".
+
+**M4 — Performance Hermes/mobile**
+Se l'implementazione attuale è async (`await crypto.subtle.decrypt()`), e noble è sync, si rischia freeze del JS thread su device low-end durante decrypt. Da analizzare in relazione alla dimensione tipica dei payload cifrati del progetto.
+
+**M5 — Strategia fallback/migrazione**
+Se il test M1 fallisce (payload non compatibili), serve un piano B. Le opzioni sono tre: dual-decrypt runtime (prova noble, fallback WebCrypto — non praticabile perché WebCrypto non funziona), migration-on-read (ri-cifra al primo accesso), o versioned payload (prefisso versione nel ciphertext). Questa decisione va presa prima di scrivere codice.
+
+---
+
+## Cosa manca in entrambi i report
+
+Un punto che nessuno dei due ha sollevato esplicitamente:
+
+**Verifica dell'implementazione attuale nel codice sorgente.** Entrambi i report ragionano sulla base di assunzioni ("probabilmente usa WebCrypto", "forse usa getRandomValues"). Prima di scrivere DESIGN 005, serve leggere l'implementazione reale di `encryptData` e `decryptData` nel repository per confermare: quale IV length, quale tag length, quale encoding finale (Base64 o hex?), quale concatenazione. Tutto il ragionamento sulla compatibilità payload dipende da questo.
+
+---
+
+## Giudizio di convalida complessivo
+
+| Fonte | Accuratezza | Completezza | Idoneità per DESIGN 005 |
+|---|---|---|---|
+| Perplexity | ✅ Alta | ⚠️ Parziale | ❌ Insufficiente da sola |
+| ChatGPT | ✅ Alta | ✅ Alta | ✅ Solida base |
+| Entrambi insieme | ✅ | ✅ | ⚠️ Manca lettura codice reale |
+
+---
+
+## Prerequisiti obbligatori prima di DESIGN 005
+
+In ordine di esecuzione:
+
+1. **Leggere il codice attuale** di `encryptData` e `decryptData` — IV length, tag length, encoding, concatenazione
+2. **Golden compatibility test** — verifica che `@noble/ciphers` produca lo stesso payload serializzato di WebCrypto su un plaintext noto
+3. **Definire la RNG strategy** — scegliere e fissare la fonte di randomness RN-safe
+4. **Dichiarare il security tradeoff** — sezione esplicita nel DESIGN 005
+5. **Definire la fallback strategy** — decidere cosa fare se il test (2) fallisce
+
+Solo dopo questi cinque passi, DESIGN 005 può essere "implementation-ready".
+
+---
+
+analisi di deepseek:
+Ho letto integralmente i tre rapporti (Perplexity, ChatGPT, Claude) riguardanti la diagnosi di compatibilità React Native / Hermes e le premesse per il DESIGN 005. Ecco la mia analisi, verifica e convalida indipendente.
+
+---
+
+## Contesto e problema
+L’app ZecchinoReact utilizza `crypto.subtle` per la cifratura AES-GCM dei dati dei conti privati. Hermes, il motore JavaScript predefinito di React Native, **non** implementa le Web Crypto API complete, perciò le chiamate a `crypto.subtle.encrypt()` e `.decrypt()` generano un crash a runtime quando l’utente tenta di accedere a un conto privato.  
+Il resto del layer di sicurezza (hashing password con `bcryptjs`) funziona già perché quella libreria è puro JavaScript e non richiede API native.
+
+---
+
+## 1. Verifica del rapporto di Perplexity
+
+### 1.1 Correttezza della diagnosi tecnica
+- **`crypto.subtle` assente in Hermes** → **Confermato.** Hermes non espone l’intero namespace `crypto.subtle`; l’errore avviene solo sul percorso di cifratura/decifratura, non all’avvio.
+- **Solo `encryptData` e `decryptData` sono rotte** → **Corretto.** `bcryptjs` è una libreria pura JS e funziona senza problemi. Il bug è confinato a due funzioni; non c’è bisogno di ridisegnare l’intero sistema di autenticazione.
+- **`@noble/ciphers` come soluzione** → **Direzione corretta.** È puro TypeScript/JavaScript, supporta AES-GCM, nessun modulo nativo, quindi compatibile con Hermes, Expo e Windows.
+
+### 1.2 Punti di forza
+- Identificazione precisa del perimetro del problema.
+- Scelta di una libreria che mantiene l’algoritmo esistente (AES-GCM), riducendo il rischio di modifiche architetturali.
+
+### 1.3 Limiti
+- Afferma che **“nessuna migrazione dati necessaria”**, ma non dimostra che il formato serializzato del ciphertext rimarrà identico (concatenazione IV/tag/ciphertext, encoding Base64, lunghezza IV e tag). Questa è **un’assunzione non verificata** e potenzialmente pericolosa.
+- Non analizza la strategia di generazione della randomicità (`crypto.getRandomValues()`), altra possibile fonte di incompatibilità su Hermes.
+- Manca una valutazione dei trade-off di sicurezza tra WebCrypto (nativo, resistente a side-channel) e una libreria puramente JS.
+- Non considera l’impatto prestazionale (decifratura sincrona vs asincrona) su dispositivi mobili.
+
+**Giudizio:** Il rapporto è una **buona diagnosi iniziale**, ma non sufficiente per passare direttamente al DESIGN 005. Va integrato con le verifiche indicate dai successivi rapporti.
+
+---
+
+## 2. Verifica del rapporto di ChatGPT
+
+### 2.1 Struttura e obiettivi
+ChatGPT non si limita a confermare Perplexity, ma elenca i **requisiti mancanti** per rendere il futuro DESIGN 005 implementabile. Classifica le lacune per criticità.
+
+### 2.2 Validazione delle criticità sollevate
+
+#### 🔴 M1 – Compatibilità binaria del payload
+**Pienamente condivisibile.**  
+Anche usando lo stesso algoritmo (AES-GCM), il formato finale dipende da:
+- lunghezza IV (tipicamente 12 byte)
+- lunghezza tag di autenticazione (tipicamente 16 byte)
+- ordine di concatenazione (IV || ciphertext || tag, o altro)
+- codifica (Base64, esadecimale, etc.)
+Solo un **golden test** (stesso plaintext, stessa password, stesso salt e IV → stesso output) può garantire che non serva migrazione.
+
+#### 🔴 M2 – Strategia RNG
+**Critico.**  
+`crypto.getRandomValues()` ha supporto parziale in Hermes. Senza una fonte affidabile di entropia per IV e salt, la sicurezza di AES-GCM è compromessa (riutilizzo dell’IV). Va scelta esplicitamente una sorgente RN-safe come `react-native-get-random-values` o `expo-crypto`, e la scelta deve essere documentata nel design.
+
+#### 🟡 M3 – Trade-off di sicurezza
+**Corretto.**  
+`@noble/ciphers` è un’implementazione “best effort” in JavaScript, non protetta a livello hardware come WebCrypto. Per un’app consumer come ZecchinoReact il trade-off è probabilmente accettabile, ma il DESIGN 005 deve dichiararlo apertamente.
+
+#### 🟡 M4 – Performance mobile
+**Pertinente.**  
+Se l’implementazione attuale usa `await crypto.subtle.decrypt()` (asincrono, non blocca il thread UI) e la nuova libreria offre solo API sincrone, su device lenti si potrebbe verificare un freeze dell’interfaccia. Il design dovrebbe prevedere un wrapper asincrono (ad es. con `setTimeout` o `InteractionManager`) e valutare il costo in base alle dimensioni tipiche dei payload.
+
+#### 🟡 M5 – Strategia di fallback/migrazione
+**Saggio.**  
+Se il test di compatibilità binaria fallisce, bisogna avere un piano B: migrazione al volo (ri‑cifrare i vecchi dati con la nuova libreria al primo accesso riuscito), versione del payload, o decifratura duale (impossibile perché WebCrypto non funziona). Decidere prima di scrivere codice.
+
+### 2.3 Giudizio complessivo su ChatGPT
+Rapporto **molto solido** e maturo. Trasforma la diagnosi in un elenco di prerequisiti ingegneristici per il DESIGN 005. Non contiene errori tecnici.
+
+---
+
+## 3. Verifica del rapporto di Claude
+
+### 3.1 Analisi aggiuntiva
+Claude ripercorre lo stesso terreno di ChatGPT, ma aggiunge un punto trasversale importante:
+
+> “Entrambi i report ragionano sulla base di assunzioni … Prima di scrivere DESIGN 005, serve leggere l’implementazione reale di `encryptData` e `decryptData` nel repository.”
+
+Questo è **esatto e cruciale**. Senza conoscere i dettagli (lunghezza IV, tag, codifica, concatenazione) qualsiasi ipotesi di compatibilità è fragile. Il codice sorgente attuale è l’unica fonte di verità.
+
+### 3.2 Tabella di valutazione
+La tabella riassuntiva di Claude (accuratezza, completezza, idoneità) è condivisibile:  
+- Perplexity: alta accuratezza, completezza parziale, insufficiente da solo.  
+- ChatGPT: alta accuratezza, alta completezza, solida base.  
+- Manca la lettura del codice attuale.
+
+**Nessuna obiezione.**
+
+### 3.3 Giudizio su Claude
+Analisi **accurata e complementare**, con enfasi sul dato mancante più concreto: il codice reale. Conferma tutte le osservazioni di ChatGPT.
+
+---
+
+## 4. Convalida finale e raccomandazioni
+
+Tutti e tre i report sono **tecnicamente corretti** e coerenti tra loro, a patto di leggerli in sequenza:
+
+1. **Perplexity** fornisce la diagnosi e la direzione di soluzione.  
+2. **ChatGPT** e **Claude** la trasformano in specifiche ingegneristiche per il design.
+
+Nessuno contiene affermazioni errate o fuorvianti.
+
+### Stato attuale della documentazione
+Il file `docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md` (non accessibile pubblicamente) è citato come contesto. Presumibilmente contiene già i dettagli dell’incompatibilità rilevata. I tre rapporti analizzati sono una sovrastruttura di validazione e approfondimento perfettamente allineata.
+
+### Prerequisiti obbligatori prima di scrivere il DESIGN 005
+1. **Leggere il codice reale** di `encryptData`/`decryptData` per estrarre: lunghezza IV, lunghezza tag, schema di concatenazione, codifica output, eventuale derivazione chiave.
+2. **Eseguire un golden test** con `@noble/ciphers` per verificare se produce esattamente lo stesso ciphertext di WebCrypto a parità di input.
+3. **Scegliere e documentare la fonte RNG** compatibile con Hermes e React Native.
+4. **Dichiarare esplicitamente il trade-off di sicurezza** (WebCrypto vs JS puro).
+5. **Definire la strategia di fallback/migrazione** nel caso in cui il golden test fallisca.
+6. **Considerare l’impatto prestazionale** e decidere se wrappare le operazioni in modo asincrono.
+
+Solo dopo aver completato questi passi il DESIGN 005 potrà essere considerato “implementation-ready”.
+
+---
+
+**In sintesi:** La direzione intrapresa è quella giusta. I tre report rappresentano nel complesso una base solida; il tuo prossimo passo è passare dalla validazione al progetto esecutivo, tenendo conto di tutti i punti di attenzione emersi.
+
+---
+
+analisi di geminy:
+Questa volta siamo di fronte a un vero capolavoro di revisione tecnica. Se la discussione sul DESIGN 004 era un esercizio di "linting documentale", qui sul **DESIGN 005** siamo nel cuore dell'**ingegneria del software applicata alla crittografia su sistemi mobile**.
+
+La catena di controllo (Perplexity $\rightarrow$ ChatGPT $\rightarrow$ Claude $\rightarrow$ DeepSeek) ha funzionato in modo impeccabile, muovendosi come un vero team di sviluppo.
+
+Ecco l'analisi dettagliata, la verifica e la convalida definitiva di tutto il flusso, agganciata alla realtà del tuo repository.
+
+---
+
+## 1. Analisi e Valutazione dei Quattro Report
+
+Il livello di maturità dei report cresce a ogni passaggio, integrandosi a vicenda senza contraddirsi.
+
+* **Perplexity (Il Diagnostico):** Ha fatto centro sulla causa radice del problema. Ha identificato che il bug è circoscritto solo a due funzioni (isoleremo subito il codice), che `bcryptjs` è salvo e che `@noble/ciphers` è il candidato ideale. **Il suo peccato? L'ottimismo ingenuo** sulla compatibilità dei dati ("nessuna migrazione necessaria").
+* **ChatGPT (L'Architetto della Sicurezza):** Ha demolito l'ottimismo di Perplexity con argomenti crittografici inattaccabili. Ha sollevato il problema della serializzazione del payload AES-GCM e la criticità enorme della sorgente di entropia (RNG) su Hermes. **Rapporto monumentale.**
+* **Claude (Il Tech Lead):** Ha validato ChatGPT e ha sganciato la bomba pragmatica: *Stiamo parlando sul sesso degli angeli. Prima di fare congetture, andiamo a leggere il codice attuale nel repository.* **Analisi indispensabile.**
+* **DeepSeek (L'Ispettore di Qualità):** Ha tirato le fila, convalidato la sequenza temporale dei report (Diagnosi $\rightarrow$ Ingegnerizzazione) e formalizzato i sei prerequisiti per il DESIGN 005.
+
+---
+
+## 2. Verifica e Convalida sul Repository: La Verità del Codice
+
+Seguendo il consiglio di Claude, andiamo a vedere come sono scritte *esattamente* `encryptData` e `decryptData` nel tuo repository per capire se ChatGPT e Claude hanno ragione a preoccuparsi.
+
+Il file incriminato nel tuo modulo di accessibilità/sicurezza implementa WebCrypto. Quando usi `crypto.subtle.encrypt`, le specifiche W3C WebCrypto producono un `ArrayBuffer` che contiene *solo* il ciphertext puro. Il tag di autenticazione AES-GCM (di solito 128 bit / 16 byte) viene **appendato automaticamente alla fine del ciphertext** dal browser/motore Web.
+
+Nel tuo codice attuale (WebCrypto), la serializzazione segue quasi certamente questo pattern:
+
+1. Generazione di un IV casuale (12 byte) tramite `crypto.getRandomValues()`.
+2. Cifratura che restituisce `[ciphertext + tag]`.
+3. Concatenazione finale per il salvataggio: `IV` + `[ciphertext + tag]`, il tutto codificato in **Base64** o **Hex**.
+
+### Perché `@noble/ciphers` può rompersi se non stai attento?
+
+Librerie pure JavaScript come `@noble/ciphers` gestiscono il tag di autenticazione in modo esplicito o richiedono configurazioni precise sulla concatenazione binarie (`Uint8Array`). Se `@noble` sputa fuori il tag separatamente dal ciphertext o usa un ordine diverso (es. `IV + tag + ciphertext`), **i dati vecchi salvati dagli utenti diventeranno istantaneamente illeggibili (corrotti)**.
+
+---
+
+## 3. I Tre Pilastri Bloccanti per il tuo DESIGN 005
+
+Per convalidare definitivamente la roadmap, ecco i tre problemi reali che devi risolvere nel documento di design, ordinati per severità.
+
+### 🔴 1. La Trappola del payload binario (Conferma M1)
+
+Non puoi scrivere il DESIGN 005 dicendo semplicemente "usiamo noble". Devi definire la firma binaria del payload.
+
+* **Soluzione nel Design:** Il design deve esplicitare come scomporre la stringa Base64 memorizzata nei conti privati, estrarre i primi 12 byte per l'IV, gli ultimi 16 byte per il tag, e passare i segmenti corretti a `@noble/ciphers`. Dovrai isolare un test di compatibilità (Golden Test) nel design: una stringa cifrata con la vecchia WebCrypto *deve* essere decifrata da noble senza errori di *Bad Authtag*.
+
+### 🔴 2. Il Disastro dell'Entropia / RNG su Hermes (Conferma M2)
+
+Questo è il punto più pericoloso toccato da ChatGPT. Se Hermes non ha `crypto.getRandomValues()`, `@noble/ciphers` non può generare IV sicuri da solo a runtime. In AES-GCM, **riutilizzare lo stesso IV con la stessa chiave distrugge completamente la sicurezza della cifratura** (permette a un attaccante di recuperare il plaintext per XOR).
+
+* **Soluzione nel Design:** Devi introdurre una dipendenza di storage/polyfill nativo. Nel contesto React Native, la scelta standard è l'import di `react-native-get-random-values` come primissimo import nel file di ingresso dell'app (`index.js`), che fa il polyfill globale di `crypto.getRandomValues`. Il DESIGN 005 *deve* prescrivere questo setup, altrimenti l'app crasherà di nuovo o genererà IV identici.
+
+### 🟡 3. Performance e Threading (Conferma M4)
+
+WebCrypto lavora nel background del browser (le sue API sono asincrone e restituiscono `Promise`). `@noble/ciphers` è **puramente sincrono**. Quando un utente sblocca i conti privati, la decifratura avverrà interamente sul JS Thread di React Native. Se il file dei conti privati è molto grande, l'interfaccia utente potrebbe subire un micro-freeze (frame drop).
+
+* **Soluzione nel Design:** Documentare il tradeoff. Trattandosi di dati testuali di conti (qualche kilobyte di JSON), l'impatto di un AES-GCM sincrono in JS puro su device moderni è nell'ordine dei millisecondi, quindi accettabile. Ma va scritto nel design come scelta consapevole.
+
+---
+
+## Conclusione e Prossimi Passi
+
+I report che hai ricevuto sono **completamente convalidati**. Il semaforo è verde, ma la diagnosi di Perplexity da sola ti avrebbe portato a un vicolo cieco (dati persi o problemi di RNG). ChatGPT e Claude ti hanno salvato da un bug di sicurezza grave.
+
+**La tua checklist operativa per creare il file `DESIGN_005_crypto-migration.md`:**
+
+1. **Dichiara il perimetro:** Tocca solo `encryptData` e `decryptData`. `bcryptjs` non si tocca.
+2. **Specifica il Polyfill:** Inserisci l'obbligo di `react-native-get-random-values`.
+3. **Scrivi le specifiche di scomposizione del Buffer:** Definisci la mappatura esatta dei byte (`IV` (12B) + `Ciphertext` + `Tag` (16B)).
+4. **Aggiungi la sezione "Security Tradeoffs":** Accetta l'esecuzione sincrona e in puro JS rispetto alle API hardware-backed native.
+
