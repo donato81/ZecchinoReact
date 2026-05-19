@@ -36,6 +36,11 @@
 - **Open Threads:** tsconfig.json contiene "types": ["node"] che maschera errori di portabilità TypeScript — valutare se correggere in P0 o rimandare a P1
 - **Next Action:** Aprire babel.config.js e aggiungere i plugin module-resolver e react-native-dotenv seguendo docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md sezione 2
 
+> **Nota sessione docs 2026-05-19:** Completata estrazione coding plan da documenti di design. Documenti pronti per l'implementazione:
+> - `docs/3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md` — T1-T8 (P1 accessibility engine)
+> - `docs/3-coding-plans/004-PLAN_announcements-layer_v1_0_0.md` — T1-T14 (P2/P3 announcements layer)
+> - DESIGN 003 e 004 ripuliti da sezioni implementative.
+
 ---
 
 ## 2b. Protocollo di Apertura Sessione (Session Open)
@@ -85,6 +90,7 @@ Per ogni fase del progetto compilare un blocco separato con questa struttura.
 - **Exit Conditions — Global Gate:** Nessuna API DOM chiamata direttamente nei moduli critici; interfacce pubbliche mantenute.
 - **Estimated Blocks:** 3
 - **Phase Status:** [ ] TODO
+- **Reference Documents:** docs/2-projects/003-DESIGN_fix-accessibility-engine_v1.0.0.md, docs/3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md
 
 ---
 
@@ -96,6 +102,7 @@ Per ogni fase del progetto compilare un blocco separato con questa struttura.
 - **Exit Conditions — Global Gate:** I hook non usano `document`/`window` e passano `npx tsc --noEmit` senza errori relativi a API DOM.
 - **Estimated Blocks:** 3
 - **Phase Status:** [ ] TODO
+- **Reference Documents:** docs/2-projects/004-DESIGN_announcements-layer_v1_0_0.md, docs/3-coding-plans/004-PLAN_announcements-layer_v1_0_0.md
 
 ---
 

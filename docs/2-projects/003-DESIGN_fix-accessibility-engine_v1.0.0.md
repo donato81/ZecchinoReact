@@ -1,4 +1,4 @@
----
+﻿---
 tipo: design
 titolo: "Fix accessibility engine — layer src/accessibility/ e locales minimale"
 versione: 1.0.0
@@ -128,98 +128,7 @@ usano i re-export di `engine.ts` o `detection.ts`.
 
 ### 3.2 Codice TypeScript completo
 
-```ts
-// src/accessibility/types.ts
-// Tipi condivisi tra engine.ts e detection.ts.
-// Regola generale: NON importare direttamente da questo file fuori da
-// src/accessibility/. Unica eccezione ammessa: src/announcements/types.ts
-// può importare Announcement e AnnouncementPriority come `import type`
-// — mai codice eseguibile. Vedi Sezione 3.1 per la motivazione completa.
-
-// ── Tipi del motore di annuncio ────────────────────────────────────────────
-
-/**
-* Priorità di un annuncio.
-* - 'polite': l'annuncio aspetta che lo screen reader finisca quello che
-*   sta leggendo.
-* - 'assertive': l'annuncio ha precedenza sul contenuto corrente.
-*
-* React Native 0.82 non espone nativamente questa distinzione tramite
-* AccessibilityInfo.announceForAccessibility. Il campo è mantenuto nella
-* struttura Announcement per:
-* a) Documentare l'intenzione semantica del chiamante.
-* b) Forward compatibility: quando React Native aggiungerà supporto nativo
-*    la distinzione è già codificata nell'oggetto.
-* c) Permettere agli screen reader che la supportano (Narrator su Windows)
-*    di ricevere context aggiuntivo in una futura versione dell'engine.
-*/
-export type AnnouncementPriority = 'polite' | 'assertive'
-
-/**
-* Struttura di un annuncio pronto da pronunciare.
-* Prodotta dai moduli src/announcements/, consumata da engine.ts.
-* Il testo deve essere già composto e localizzato — engine.ts non esegue
-* nessuna trasformazione sul testo.
-*/
-export interface Announcement {
-  text: string
-  priority: AnnouncementPriority
-}
-
-// ── Tipi del rilevamento piattaforma ──────────────────────────────────────
-
-/**
-* Stato corrente del rilevamento screen reader.
-*
-* CAMBIAMENTO RISPETTO ALLA VERSIONE PRECEDENTE:
-* Il valore 'medium' di confidenceLevel è eliminato.
-* L'API nativa AccessibilityInfo.isScreenReaderEnabled() fornisce una
-* risposta binaria certa — non graduata — quindi:
-* - 'high': isScreenReaderEnabled() ha restituito true.
-* - 'low': stato iniziale prima che la Promise sia risolta, o nessuno
-*   screen reader attivo.
-* I consumatori che verificavano confidenceLevel === 'medium' devono
-* essere aggiornati.
-*/
-export interface TalkBackState {
-  /** true se lo screen reader è attivo (nativo o override manuale) */
-  isEnabled: boolean
-  /** true se AccessibilityInfo.isScreenReaderEnabled() ha restituito true */
-  isDetected: boolean
-  /**
-  * 'high' = risposta certa dal sistema operativo (isEnabled è affidabile)
-  * 'low' = stato iniziale prima che la Promise sia risolta, oppure
-  *         nessuno screen reader attivo
-  */
-  confidenceLevel: 'high' | 'low'
-  /** true se le adattazioni (touch target, timeout, descrizioni) sono attive */
-  adaptationsActive: boolean
-}
-
-/**
-* Adattamenti attivi quando uno screen reader è rilevato.
-* Questo tipo è la forma client-side. Una forma compatibile esiste anche
-* in src/lib/supabase/types.ts per la persistenza su DB.
-* Fonte di verità: questo file. Vedi Sezione 11 — "Nota critica: migrazione `TalkBackAdaptations`".
-*/
-export interface TalkBackAdaptations {
-  enhancedTouchTargets: boolean
-  simplifiedNavigation: boolean
-  extendedTimeouts: boolean
-  verboseDescriptions: boolean
-  highContrastMode: boolean
-  reducedMotion: boolean
-  autoFocusManagement: boolean
-  // Campo mantenuto per compatibilità con la shape persistita in
-  // src/lib/supabase/types.ts e nel database. Non esiste un audio
-  // engine che consumi questo flag in questa fase del progetto.
-  // Il default in DEFAULT_ADAPTATIONS è `true` per preservare la
-  // coerenza con la shape originale persistita — non perché il flag
-  // sia attivo funzionalmente. Va rivalutato quando il layer audio
-  // verrà implementato.
-  spatialAudio: boolean
-}
-```
+> **Implementazione estratta nel coding plan:** [003-PLAN_fix-accessibility-engine_v1.0.0.md](../3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md) — Task **003.T1**
 
 ### 3.3 Scope esplicito
 
@@ -253,66 +162,7 @@ Questo non è un bug: gli annunci sono best-effort per natura.
 
 ### 4.2 Codice TypeScript completo
 
-```ts
-// src/accessibility/engine.ts
-import { AccessibilityInfo } from 'react-native'
-import type { Announcement } from './types'
-
-class ScreenReaderEngine {
-  /**
-  * Pronuncia un annuncio già costruito.
-  *
-  * Natura fire-and-forget:
-  * - Il metodo non attende la pronuncia né gestisce callback.
-  * - Il fallimento è sempre silenzioso: se lo screen reader non è attivo,
-  *   se la piattaforma non supporta la chiamata, o se la coda è piena,
-  *   non viene generata nessuna eccezione né attivato nessun fallback.
-  * - L'unico gate: se announcement.text.trim() è vuoto, la chiamata
-  *   a AccessibilityInfo viene saltata.
-  *
-  * Sul campo `priority`:
-  * React Native 0.82 non espone un parametro priority in
-  * announceForAccessibility. Il campo è presente nell'oggetto Announcement
-  * per documentazione semantica e forward compatibility — quando RN
-  * aggiungerà il supporto nativo la distinzione sarà in questo unico punto.
-  *
-  * Comportamento per piattaforma (RN 0.82):
-  * - Android / TalkBack: pronuncia il testo; TalkBack gestisce la coda
-  *   interna. La distinzione polite/assertive non è esposta.
-  * - iOS / VoiceOver: pronuncia il testo; VoiceOver gestisce interruzioni
-  *   in base alle sue policy interne.
-  * - Windows / Narrator: vedere Sezione 10 — Rischio R1.
-  *
-  * @param announcement Oggetto Announcement prodotto da src/announcements/
-  */
-  announce(announcement: Announcement): void {
-    if (!announcement.text.trim()) {
-      return
-    }
-    if (typeof AccessibilityInfo.announceForAccessibility !== 'function') {
-      // Fallback silenzioso in ambienti che non supportano l'API
-      // (es. Jest/Node, versioni RN Windows senza supporto completo).
-      // Coerente con il principio fire-and-forget: il fallimento è sempre
-      // silenzioso e non genera eccezioni.
-      if (__DEV__) {
-        console.log('[engine] announceForAccessibility non disponibile:', announcement.text)
-      }
-      return
-    }
-    AccessibilityInfo.announceForAccessibility(announcement.text)
-  }
-}
-
-/**
-* Singleton esportato.
-* Unico punto dell'app che chiama AccessibilityInfo.announceForAccessibility.
-* I moduli src/announcements/ importano questo singleton per pronunciare —
-* ma questo avviene nel documento successivo, non in questo.
-* In questo documento nessun file chiama engine.announce() tranne il
-* componente di test temporaneo del Gate 2, che va rimosso prima del commit.
-*/
-export const engine = new ScreenReaderEngine()
-```
+> **Implementazione estratta nel coding plan:** [003-PLAN_fix-accessibility-engine_v1.0.0.md](../3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md) — Task **003.T2**
 
 ### 4.3 Scope esplicito
 
@@ -407,229 +257,7 @@ useAccessibilityDetection()
 
 ### 5.4 Codice TypeScript completo
 
-```ts
-// src/accessibility/detection.ts
-import { useState, useEffect, useCallback } from 'react'
-import { AccessibilityInfo } from 'react-native'
-import { useUserSettings } from '@/context/UserSettingsContext'
-import type { TalkBackState, TalkBackAdaptations } from './types'
-
-/**
-* Adattamenti di default applicati quando lo screen reader è rilevato.
-* Valori ottimizzati per massima accessibilità al primo mount.
-* L'utente può sovrascrivere i singoli valori tramite updateAdaptation()
-* e le modifiche vengono persistite in UserSettings (Supabase).
-*/
-export const DEFAULT_ADAPTATIONS: TalkBackAdaptations = {
-  enhancedTouchTargets: true,
-  simplifiedNavigation: true,
-  extendedTimeouts: true,
-  verboseDescriptions: true,
-  highContrastMode: false,
-  reducedMotion: true,
-  autoFocusManagement: true,
-  spatialAudio: true,
-}
-
-/**
-* Hook per il rilevamento dello screen reader e il calcolo delle adattazioni.
-*
-* Sostituisce src/hooks/use-talkback.ts.
-* Import da aggiornare: `from '@/hooks/use-talkback'` → `from '@/accessibility/detection'`
-* Funzione da rinominare: `useTalkBack()` → `useAccessibilityDetection()`
-*
-* NON usa: window, document, navigator, sessionStorage, matchMedia,
-* speechSynthesis, userAgent, maxTouchPoints, addEventListener DOM.
-* Usa SOLO: AccessibilityInfo.isScreenReaderEnabled() e
-*           AccessibilityInfo.addEventListener('screenReaderChanged', ...).
-*/
-export function useAccessibilityDetection() {
-  const {
-    talkBackAdaptations,
-    talkBackManualOverride,
-    setTalkBackAdaptations,
-    setTalkBackManualOverride,
-  } = useUserSettings()
-
-  const [talkBackState, setTalkBackState] = useState<TalkBackState>({
-    isEnabled: false,
-    isDetected: false,
-    confidenceLevel: 'low',
-    adaptationsActive: false,
-  })
-
-  const adaptations = talkBackAdaptations ?? DEFAULT_ADAPTATIONS
-  const manualOverride = talkBackManualOverride
-
-  useEffect(() => {
-    let isMounted = true
-
-    // Lettura asincrona dello stato iniziale dallo screen reader nativo.
-    // Finestra di incertezza accettata: al primo mount esiste un brevissimo
-    // istante (<100ms tipicamente) in cui isEnabled è false anche se lo
-    // screen reader è attivo. Il listener screenReaderChanged corregge lo
-    // stato quando la risposta arriva. Non va compensata con meccanismi
-    // di pre-idratazione o valori iniziali ottimistici.
-    void AccessibilityInfo.isScreenReaderEnabled().then((nativeEnabled) => {
-      if (!isMounted) return
-      const isEnabled = manualOverride !== null ? Boolean(manualOverride) : nativeEnabled
-      setTalkBackState({
-        isEnabled,
-        isDetected: nativeEnabled,
-        // L'API nativa fornisce una risposta binaria certa:
-        // 'high' se lo screen reader è attivo, 'low' altrimenti.
-        confidenceLevel: nativeEnabled ? 'high' : 'low',
-        adaptationsActive: isEnabled,
-      })
-    })
-
-    // Listener reattivo: risponde ai cambiamenti durante la sessione
-    // senza riavvio dell'app.
-    const subscription = AccessibilityInfo.addEventListener(
-      'screenReaderChanged',
-      (nativeEnabled: boolean) => {
-        if (!isMounted) return
-        const isEnabled = manualOverride !== null ? Boolean(manualOverride) : nativeEnabled
-        setTalkBackState({
-          isEnabled,
-          isDetected: nativeEnabled,
-          confidenceLevel: nativeEnabled ? 'high' : 'low',
-          adaptationsActive: isEnabled,
-        })
-      }
-    )
-
-    return () => {
-      isMounted = false
-      // Verifica difensiva: subscription.remove potrebbe non essere una
-      // funzione su versioni di react-native-windows precedenti a RN 0.65.
-      // Coerente con il Rischio R2 della Sezione 10.
-      if (typeof subscription.remove === 'function') {
-        subscription.remove()
-      }
-    }
-  }, [manualOverride])
-
-  // ── Controllo manuale ───────────────────────────────────────────────────
-
-  // ATTENZIONE al naming: enableTalkBack e disableTalkBack NON abilitano
-  // né disabilitano lo screen reader del sistema operativo.
-  // Modificano esclusivamente l'override locale React e lo stato delle
-  // adattazioni. Il nome è mantenuto perché semanticamente descrittivo
-  // per i futuri consumatori che arriveranno nel documento successivo —
-  // cambiarlo richiederebbe aggiornare l'API pubblica del hook.
-  // Il suo significato reale è "forza override locale attivo"
-  // e "forza override locale disattivo".
-  const enableTalkBack = useCallback((manual: boolean = false) => {
-    if (manual) {
-      setTalkBackManualOverride(true).catch(console.error)
-    }
-    setTalkBackState(prev => ({ ...prev, isEnabled: true, adaptationsActive: true }))
-  }, [setTalkBackManualOverride])
-
-  const disableTalkBack = useCallback((manual: boolean = false) => {
-    if (manual) {
-      setTalkBackManualOverride(false).catch(console.error)
-    }
-    setTalkBackState(prev => ({ ...prev, isEnabled: false, adaptationsActive: false }))
-  }, [setTalkBackManualOverride])
-
-  /**
-  * Nuovo comportamento di resetDetection (DIVERSO dall'originale):
-  * 1. Cancella l'override manuale chiamando setTalkBackManualOverride(null).
-  * 2. Rilegge lo stato reale dallo screen reader nativo tramite
-  *    AccessibilityInfo.isScreenReaderEnabled().
-  * 3. Aggiorna lo stato con la risposta nativa.
-  *
-  * NON chiama detectTalkBack() — quella funzione non esiste più.
-  * NON resetta semplicemente le adattazioni come nel file originale.
-  */
-  const resetDetection = useCallback(async () => {
-    await setTalkBackManualOverride(null)
-    const nativeEnabled = await AccessibilityInfo.isScreenReaderEnabled()
-    setTalkBackState({
-      isEnabled: nativeEnabled,
-      isDetected: nativeEnabled,
-      confidenceLevel: nativeEnabled ? 'high' : 'low',
-      adaptationsActive: nativeEnabled,
-    })
-  }, [setTalkBackManualOverride])
-
-  // ── Gestione adattamenti ────────────────────────────────────────────────
-
-  const updateAdaptation = useCallback(
-    (key: keyof TalkBackAdaptations, value: boolean) => {
-      setTalkBackAdaptations({ ...adaptations, [key]: value }).catch(console.error)
-    },
-    [adaptations, setTalkBackAdaptations]
-  )
-
-  const resetAdaptations = useCallback(() => {
-    setTalkBackAdaptations(DEFAULT_ADAPTATIONS).catch(console.error)
-  }, [setTalkBackAdaptations])
-
-  // ── Funzioni utilitarie (logica invariata, sorgente dati aggiornata) ───
-
-  const getTouchTargetSize = useCallback(() => {
-    if (!talkBackState.adaptationsActive || !adaptations.enhancedTouchTargets) return 44
-    return 56
-  }, [talkBackState.adaptationsActive, adaptations])
-
-  const getAnimationDuration = useCallback(
-    (baseMs: number) => {
-      if (!talkBackState.adaptationsActive || !adaptations.reducedMotion) return baseMs
-      return Math.min(baseMs * 0.5, 100)
-    },
-    [talkBackState.adaptationsActive, adaptations]
-  )
-
-  const getTimeout = useCallback(
-    (baseMs: number) => {
-      if (!talkBackState.adaptationsActive || !adaptations.extendedTimeouts) return baseMs
-      return baseMs * 2
-    },
-    [talkBackState.adaptationsActive, adaptations]
-  )
-
-  const shouldUseVerboseDescriptions = useCallback(() => {
-    return talkBackState.adaptationsActive && (adaptations.verboseDescriptions ?? true)
-  }, [talkBackState.adaptationsActive, adaptations])
-
-  const shouldSimplifyNavigation = useCallback(() => {
-    return talkBackState.adaptationsActive && (adaptations.simplifiedNavigation ?? true)
-  }, [talkBackState.adaptationsActive, adaptations])
-
-  const shouldAutoManageFocus = useCallback(() => {
-    return talkBackState.adaptationsActive && (adaptations.autoFocusManagement ?? true)
-  }, [talkBackState.adaptationsActive, adaptations])
-
-  const getAriaDescription = useCallback(
-    (brief: string, verbose: string) => {
-      return shouldUseVerboseDescriptions() ? verbose : brief
-    },
-    [shouldUseVerboseDescriptions]
-  )
-
-  // ── Return ───────────────────────────────────────────────────────────────
-
-  return {
-    talkBackState,
-    adaptations,
-    enableTalkBack,
-    disableTalkBack,
-    resetDetection,
-    updateAdaptation,
-    resetAdaptations,
-    getTouchTargetSize,
-    getAnimationDuration,
-    getTimeout,
-    shouldUseVerboseDescriptions,
-    shouldSimplifyNavigation,
-    shouldAutoManageFocus,
-    getAriaDescription,
-  }
-}
-```
+> **Implementazione estratta nel coding plan:** [003-PLAN_fix-accessibility-engine_v1.0.0.md](../3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md) — Task **003.T3**
 
 ### 5.5 Note sul comportamento
 
@@ -708,59 +336,11 @@ successivo.
 
 ### 6.2 `src/locales/it.ts`
 
-```ts
-// src/locales/it.ts
-//
-// Infrastruttura del sistema di localizzazione — passo 3 (accessibility engine).
-//
-// In questo passo il file definisce i tipi Strings e StringKey e l'oggetto it,
-// inizialmente vuoto. Le stringhe di dominio (auth, conti, movimenti, budget,
-// obiettivi, export, template, form, toggle, card, audio, periodo, help)
-// vengono aggiunte nel documento di design successivo dedicato a
-// src/announcements/ quando ogni modulo dichiarerà le proprie chiavi.
-//
-// Regola di import invariante:
-// NON importare questo file direttamente.
-// Tutti i file dell'app importano SOLO da src/locales/index.ts.
-
-export const it = {
-  // Stringhe verranno aggiunte dal documento successivo (announcements/).
-  // Formato entry: chiave_area_evento: 'Testo in italiano con {placeholder}',
-  //
-  // Esempio (non aggiungere qui — documento successivo):
-  //   navigazione_schermata: 'Navigazione a {schermata}',
-  //   errore_generico: 'Si è verificato un errore.',
-} as const
-
-export type Strings = typeof it
-export type StringKey = keyof Strings
-```
+> **Implementazione estratta nel coding plan:** [003-PLAN_fix-accessibility-engine_v1.0.0.md](../3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md) — Task **003.T4**
 
 ### 6.3 `src/locales/index.ts`
 
-```ts
-// src/locales/index.ts
-//
-// Punto di accesso unico per le stringhe localizzate.
-// TUTTI i file dell'app importano SOLO da questo modulo, mai da it.ts.
-//
-// Passo 3: lingua fissa italiano.
-// Passo 4: la costante `strings` verrà sostituita con una funzione che
-//          legge la lingua attiva da UserSettingsContext e seleziona
-//          il dizionario corrispondente.
-//
-// Pattern di import corretto in tutti i file consumatori:
-//   import { strings } from '@/locales/index'
-//   import type { StringKey } from '@/locales/index'
-
-import { it } from './it'
-import type { Strings, StringKey } from './it'
-
-const strings: Strings = it
-
-export { strings }
-export type { Strings, StringKey }
-```
+> **Implementazione estratta nel coding plan:** [003-PLAN_fix-accessibility-engine_v1.0.0.md](../3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md) — Task **003.T5**
 
 ### 6.4 Scope esplicito
 
@@ -795,21 +375,7 @@ rinominato in `useAccessibilityDetection()` ed esposto da `detection.ts`.
 | `src/context/AuthContext.tsx` | `import { useTalkBack } from '@/hooks/use-talkback'` | `import { useAccessibilityDetection } from '@/accessibility/detection'` |
 | Altri file se presenti | `from '@/hooks/use-talkback'` | `from '@/accessibility/detection'` |
 
-Eseguire prima della deletion:
-```bash
-grep -r "from.*use-talkback\|useTalkBack" src/ --include="*.ts" --include="*.tsx"
-```
-I file trovati devono aggiornare import e chiamata prima che `use-talkback.ts`
-venga eliminato. La regola di aggiornamento è universale per tutti i file
-trovati dal grep, indipendentemente dal file:
-- `from '@/hooks/use-talkback'` → `from '@/accessibility/detection'`
-- `useTalkBack(` → `useAccessibilityDetection(`
-
-**Gate di verifica post-deletion**:
-```bash
-grep -r "from.*use-talkback\|useTalkBack" src/
-# deve restituire 0 risultati
-```
+> **Comandi e gate estratti nel coding plan:** [003-PLAN_fix-accessibility-engine_v1.0.0.md](../3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md) — Tasks **003.T6**, **003.T7**
 
 ### 7.2 `src/hooks/use-screen-reader.ts`
 
@@ -822,12 +388,7 @@ nel documento successivo.
 di `useScreenReader()` in questa fase del progetto. Il file può essere
 eliminato in questo documento dopo aver verificato con il comando seguente
 che nessun file lo importa:
-```bash
-grep -r "from.*use-screen-reader\|useScreenReader\|useAnnouncePage" src/ --include="*.ts" --include="*.tsx"
-```
-Se il comando restituisce zero risultati, procedere direttamente con
-la deletion. Se restituisce risultati, aggiornare gli import nei file
-trovati prima di procedere con la deletion.
+> **Comando e procedura estratti nel coding plan:** [003-PLAN_fix-accessibility-engine_v1.0.0.md](../3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md) — Task **003.T8**
 
 ### 7.3 `src/lib/screen-reader.ts` — DIFFERITO
 
@@ -853,164 +414,19 @@ conseguenza.
 
 ## 8. Criteri di validazione per file
 
-### Gate 1 — `accessibility/types.ts` creato
+> **Comandi di validazione completi estratti nel coding plan:** [003-PLAN_fix-accessibility-engine_v1.0.0.md](../3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md) — Sezione **§4 Gate di completamento**
 
-```bash
-npx tsc --noEmit
-```
-Nessun errore. I tipi `AnnouncementPriority`, `Announcement`, `TalkBackState`,
-`TalkBackAdaptations` sono esportati.
+I gate verificano nell'ordine:
 
-```bash
-grep -E "^export type|^export interface" src/accessibility/types.ts
-```
-Deve mostrare 4 voci: `AnnouncementPriority`, `Announcement`, `TalkBackState`,
-`TalkBackAdaptations`.
-
-Verifica forward compatibility:
-```bash
-# Il tipo non deve contenere 'medium'
-grep "medium" src/accessibility/types.ts
-# Deve restituire 0 risultati
-```
-
-### Gate 2 — `accessibility/engine.ts` creato
-
-```bash
-npx tsc --noEmit
-```
-Nessun errore.
-
-```bash
-grep -E "document\.|window\.|HTMLDivElement|aria-live|aria-atomic|from 'react'" src/accessibility/engine.ts
-# Deve restituire 0 risultati
-```
-
-**Verifica funzionale manuale (con screen reader attivo)**:
-Aggiungere temporaneamente in `App.tsx`:
-```ts
-import { engine } from '@/accessibility/engine'
-engine.announce({ text: 'Test engine ZecchinoReact', priority: 'polite' })
-```
-Eseguire l'app. Criterio di successo: Narrator deve pronunciare per intero
-la stringa "Test engine ZecchinoReact" entro 3 secondi dal mount del
-componente. Una pronuncia parziale o assente indica che il Rischio R1
-si è materializzato.
-
-Verifica prioritaria su **Windows con Narrator attivo** (piattaforma
-primaria di sviluppo). Se Narrator non pronuncia il testo, il Rischio R1
-della Sezione 10 si è materializzato — aggiungere guard `Platform.OS`
-prima di procedere al documento successivo.
-
-Verificare anche su Android con TalkBack attivo.
-
-Rimuovere il codice temporaneo di test dopo la verifica.
-
-### Gate 3 — `accessibility/detection.ts` creato
-
-```bash
-npx tsc --noEmit
-```
-Nessun errore.
-
-```bash
-grep -E "window\.matchMedia|sessionStorage|speechSynthesis|navigator\.maxTouchPoints|navigator\.userAgent|document\.body|recheckInterval|detectTalkBack|'medium'" src/accessibility/detection.ts
-# Deve restituire 0 risultati
-```
-
-```bash
-grep "useTalkBack" src/accessibility/detection.ts
-# Deve restituire 0 risultati — il hook è rinominato useAccessibilityDetection
-```
-
-```bash
-# Verifica invariante ADR_001: detection.ts non importa da engine.ts
-grep "from.*engine" src/accessibility/detection.ts
-# Deve restituire 0 risultati
-# Se restituisce risultati, la regola di separazione dell'ADR_001 è violata
-```
-
-**Verifica funzionale manuale**: con screen reader attivo (TalkBack su Android,
-VoiceOver su iOS, Narrator su Windows), montare un componente che usa
-`useAccessibilityDetection()` e verificare che:
-- `talkBackState.isEnabled === true`
-- `talkBackState.isDetected === true`
-- `talkBackState.confidenceLevel === 'high'`
-- `talkBackState.adaptationsActive === true`
-- `getTouchTargetSize()` restituisce `56`
-
-### Gate 4 — `locales/it.ts` e `locales/index.ts` creati
-
-```bash
-npx tsc --noEmit
-# Nessun errore di tipo sui due file
-```
-
-```bash
-grep -r "from.*locales/it" src/ --include="*.ts" --include="*.tsx"
-# Deve restituire 0 risultati
-# Nessun file importa it.ts direttamente — tutti passano da index.ts
-```
-
-```bash
-grep -E "^export" src/locales/index.ts
-# Deve mostrare: export { strings }, export type { Strings, StringKey }
-```
-
-Verifica che il tipo `StringKey` sia `never` in questa fase (oggetto it vuoto):
-
-Crea un file temporaneo `src/locales/locales-verify.ts` con il contenuto
-seguente. Dopo aver verificato che TypeScript non segnala errori, elimina
-il file prima di procedere al commit. Non includere mai questo file in un
-commit.
-
-```ts
-// Test TypeScript da aggiungere temporaneamente e rimuovere dopo:
-import type { StringKey } from '@/locales/index'
-type Verifica = StringKey extends never ? true : false
-// Verifica deve essere true — oggetto it è vuoto, StringKey è never
-```
-
-Questo è il comportamento atteso in questo passo: `StringKey` diventa un tipo
-concreto non vuoto solo dopo che le stringhe vengono aggiunte nel documento
-successivo.
-
-### Gate 5 — `use-talkback.ts` eliminato
-
-```bash
-test ! -f src/hooks/use-talkback.ts && echo "OK" || echo "ERRORE: file ancora presente"
-```
-
-```bash
-grep -r "from.*use-talkback\|useTalkBack" src/ --include="*.ts" --include="*.tsx"
-# Deve restituire 0 risultati
-```
-
-### Gate 6 — `use-screen-reader.ts` eliminato
-
-```bash
-test ! -f src/hooks/use-screen-reader.ts && echo "OK" || echo "ERRORE: file ancora presente"
-```
-
-```bash
-grep -r "from.*use-screen-reader\|useScreenReader\|useAnnouncePage" src/ --include="*.ts" --include="*.tsx"
-# Deve restituire 0 risultati
-```
-
-### Gate finale — build pulito
-
-```bash
-npx tsc --noEmit
-# Zero errori TypeScript su tutto il progetto
-```
-
-```bash
-npm run lint
-# Zero warning sui file creati o modificati
-```
+1. **Gate 1** — `accessibility/types.ts` creato: compilazione TypeScript, grep 4 tipi esportati, forward-compatibility `'medium'` assente.
+2. **Gate 2** — `accessibility/engine.ts` creato: compilazione TypeScript, grep dipendenze DOM/React assenti, verifica funzionale manuale Narrator (Windows) e TalkBack (Android).
+3. **Gate 3** — `accessibility/detection.ts` creato: compilazione TypeScript, grep dipendenze browser rimosse, verifica invariante ADR_001, verifica funzionale manuale.
+4. **Gate 4** — `locales/it.ts` e `locales/index.ts` creati: compilazione TypeScript, grep import diretti (0 risultati).
+5. **Gate 5** — `use-talkback.ts` eliminato: file assente, grep import (0 risultati).
+6. **Gate 6** — `use-screen-reader.ts` verificato con grep — consumatori documentati (deletion differita a DESIGN 004).
+7. **Gate finale** — build pulito: `npx tsc --noEmit`, `npm run lint`.
 
 ---
-
 ## 9. Cosa NON viene affrontato in questo documento
 
 | Ambito | Motivazione | Documento previsto |
@@ -1046,44 +462,7 @@ npm run lint
 
 ### Sequenza commit raccomandata
 
-```
-commit 1: feat(accessibility): aggiungi accessibility/types.ts
-  - src/accessibility/types.ts (CREATE)
-
-commit 2: feat(accessibility): aggiungi accessibility/engine.ts
-  - src/accessibility/engine.ts (CREATE)
-  - GATE 2: eseguire DOPO la creazione del file e PRIMA di fare il commit.
-    Sequenza obbligatoria: 1) crea il file, 2) esegui la verifica manuale
-    Narrator su Windows descritta nel Gate 2 della Sezione 8,
-    3) solo se la verifica passa, esegui il commit.
-
-commit 3: feat(accessibility): aggiungi accessibility/detection.ts
-  - src/accessibility/detection.ts (CREATE)
-
-commit 4: feat(locales): aggiungi infrastruttura locales
-  - src/locales/it.ts (CREATE)
-  - src/locales/index.ts (CREATE)
-
-commit 5: refactor(accessibility): aggiorna import useTalkBack → useAccessibilityDetection
-  - src/context/AuthContext.tsx (PATCH — solo import e chiamata)
-  - [altri file trovati dal grep di Sezione 7.1]
-
-commit 6: chore(accessibility): elimina use-talkback.ts
-  - src/hooks/use-talkback.ts (DELETE)
-  - GATE 5: verificare che grep restituisca 0 risultati
-
-commit 7: chore(accessibility): verifica consumatori use-screen-reader.ts
-  - Eseguire grep di verifica (§7.2)
-  - ATTESO: grep restituisce risultati in AuthContext.tsx e
-    AppDataContext.tsx — questi file importano useScreenReader
-  - NON eliminare use-screen-reader.ts in questo commit
-  - Documentare i risultati del grep
-  - La deletion è differita al gate finale del DESIGN 004
-    dopo la migrazione dei context al layer announcements/
-  - GATE 6: verificare con grep e documentare i consumatori trovati
-
-commit 8: DIFFERITO al documento successivo: elimina screen-reader.ts
-```
+> **Sequenza commit estratta nel coding plan:** [003-PLAN_fix-accessibility-engine_v1.0.0.md](../3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md) — Sezione **Sezione 5 (Sequenza commit)**
 
 ### Nota critica: migrazione `TalkBackAdaptations`
 
@@ -1135,10 +514,7 @@ Verificare che `talkBackManualOverride` e le sue setter siano presenti in
 `UserSettings` e esposte da `useUserSettings()`. Se non fossero presenti:
 aggiungerle prima di creare `detection.ts` (blocco di questo commit).
 
-Eseguire prima:
-```bash
-grep -E "talkBackManualOverride|talkBackAdaptations|setTalkBackAdaptations|setTalkBackManualOverride" src/context/UserSettingsContext.tsx src/hooks/use-user-settings.ts
-```
+Eseguire prima (grep estratto nel coding plan — vedere [003-PLAN_fix-accessibility-engine_v1.0.0.md](../3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md), Task **003.T3**):
 
 ### Nota critica: engine.ts non deve essere chiamato direttamente
 
