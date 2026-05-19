@@ -1,16 +1,16 @@
 {
   "schema_version": "2.0",
-  "updated_at": "2026-05-11T19:30:00Z",
+  "updated_at": "2026-05-19T00:00:00Z",
   "packages": [
     {
       "id": "spark-base",
       "display_name": "SPARK Base Layer",
       "description": "Layer fondazionale SCF con agenti base, skill condivise, instruction comuni e prompt framework general-purpose.",
-      "latest_version": "2.1.0",
+      "latest_version": "2.3.0",
       "version_source": "package-manifest",
       "status": "stable",
       "repo_url": "https://github.com/Nemex81/spark-base",
-      "min_engine_version": "3.4.0",
+      "min_engine_version": "3.6.0",
       "engine_managed_resources": false,
       "tags": [
         "base",
@@ -29,7 +29,7 @@
       "version_source": "package-manifest",
       "status": "stable",
       "repo_url": "https://github.com/Nemex81/scf-master-codecrafter",
-      "min_engine_version": "3.4.0",
+      "min_engine_version": "3.6.0",
       "engine_managed_resources": false,
       "tags": [
         "master",
@@ -47,7 +47,7 @@
       "version_source": "package-manifest",
       "status": "stable",
       "repo_url": "https://github.com/Nemex81/scf-pycode-crafter",
-      "min_engine_version": "3.4.0",
+      "min_engine_version": "3.6.0",
       "engine_managed_resources": false,
       "tags": [
         "python",
@@ -60,10 +60,10 @@
       "id": "spark-ops",
       "display_name": "SPARK Ops Layer",
       "description": "Layer operativo E2E/framework-docs/release. Req spark-base>=2.0.0",
-      "latest_version": "1.1.0",
+      "latest_version": "1.4.0",
       "version_source": "package-manifest",
       "status": "stable",
-      "repo_url": "https://github.com/Nemex81/spark-ops",
+      "repo_url": "https://github.com/Nemex81/spark-framework-engine",
       "min_engine_version": "3.4.0",
       "engine_managed_resources": true,
       "tags": [
