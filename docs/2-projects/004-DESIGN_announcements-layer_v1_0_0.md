@@ -3,7 +3,7 @@ tipo: design
 titolo: "Layer announcements/ e migrazione context — sistema annunci accessibili"
 versione: 1.0.0
 data: 2026-05-19
-stato: DRAFT
+stato: REVIEWED.
 riferimento-architetturale: docs/0-architecture/ADR_001_sistema-annunci-accessibili.md
 sorgente-report: docs/1-reports/004-REPORT_perimetro-design-004.md
 precondizione: >
