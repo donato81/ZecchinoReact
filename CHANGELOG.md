@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Docs — 2026-05-20 (analisi coerenza)
+
+#### Aggiunto
+- `docs/1-reports/REPORT_analisi-coerenza_DESIGN-001-002_v1.0.0.md`
+  (CREATO) — Report analisi coerenza e validazione DESIGN 001 e DESIGN 002.
+  Sei incoerenze documentali identificate (nessuna bloccante per la
+  correttezza tecnica), due punti di attenzione critici (App.test.tsx e
+  Risk R5 screen-reader.ts), cinque gap di copertura test documentati.
+  Generato da Copilot Agent (Analyzer).
+
 ### Docs — 2026-05-20 (aggiornamento)
 
 #### Modificato
