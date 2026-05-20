@@ -3,7 +3,7 @@ tipo: design
 titolo: Async cache hydration — bootstrap lifecycle AppDataContext
 versione: 0.1.0
 data: 2026-05-20
-stato: DRAFT
+stato: REVIEWED
 sorgente: docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md
 perimetro: src/context/AppDataContext.tsx
 ---

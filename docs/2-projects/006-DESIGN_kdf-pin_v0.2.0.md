@@ -3,7 +3,7 @@ tipo: design
 titolo: Key Derivation Function per PIN privato
 versione: 0.2.0
 data: 2026-05-20
-stato: REVIEWED.
+stato: REVIEWED
 sorgente: docs/2-projects/005-DESIGN_sostituzione-crypto-N4_v0.4.0.md
 perimetro: src/lib/crypto.ts, src/lib/supabase/types.ts, src/lib/supabase/repositories/impostazioni-utente.ts, docs/6-sql/
 ---
