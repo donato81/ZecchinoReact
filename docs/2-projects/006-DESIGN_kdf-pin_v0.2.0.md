@@ -139,10 +139,18 @@ nativi, ed è compatibile con il runtime Hermes su Android, iOS e Windows.
   direttamente come chiave AES-256.
 - **Parametri PBKDF2**:
   - Funzione pseudo-casuale: HMAC-SHA256.
-  - Numero di iterazioni: non fissato in questo design. Andrà
-    calibrato durante l'implementazione in modo da rientrare nel
-    budget prestazionale dichiarato nella sezione 7. Il valore finale
-    sarà documentato nel Coding Plan 006.
+  - Numero di iterazioni: non fissato in questo design.
+    Andrà calibrato sperimentalmente durante
+    l'implementazione in modo da rientrare nel budget
+    prestazionale dichiarato nella sezione 7.
+    Il valore finale sarà documentato nel Coding Plan 006.
+    Vincolo invalicabile: il numero di iterazioni
+    non può essere inferiore a 100.000 (centomila),
+    coerentemente con le raccomandazioni OWASP
+    contemporanee per PBKDF2-SHA256 contro attacchi
+    offline con hardware GPU. Un valore inferiore
+    a questo floor, anche se rientrasse nel budget
+    temporale, non è accettabile sul piano della sicurezza.
   - Lunghezza output (dkLen): 32 byte.
   - Salt: passato come parametro, non derivato internamente.
 
@@ -296,6 +304,14 @@ secondari per la calibrazione; se un numero di iterazioni calibrato su
 Windows risultasse fuori budget su Android, la scelta sarà documentata
 come tradeoff accettato nel Coding Plan 006.
 
+Il numero di iterazioni calibrato dovrà in ogni caso
+rispettare il floor minimo dichiarato nella sezione 4
+(100.000 iterazioni). Se durante la calibrazione
+il floor minimo non fosse raggiungibile entro il budget
+100–300 ms sul device di riferimento, il tradeoff
+dovrà essere documentato nel Coding Plan 006
+come criticità aperta, non silenziata.
+
 ---
 
 ## 8. Golden vectors — famiglia K
@@ -438,9 +454,16 @@ Coding Plan 006.
    PBKDF2-SHA256.
 3. **Estrarre salt dal payload**: i byte 1–16 del buffer (0-indexed)
    contengono il salt incluso nel payload al momento della cifratura.
-   Questo salt deve coincidere con quello persistito su Supabase;
-   se differiscono, il payload è corrotto o appartiene a una sessione
-   precedente.
+   Questo salt è la fonte di verità per la decifratura del payload
+   corrente: viene usato direttamente per la derivazione PBKDF2
+   al passo successivo, indipendentemente dal salt
+   correntemente persistito su Supabase.
+   Il salt su Supabase non costituisce un criterio
+   di validazione bloccante per i payload esistenti:
+   la sua unica funzione diagnostica è rilevare
+   se il PIN è impostato (passo 1). L'integrità
+   crittografica del payload è garantita esclusivamente
+   dall'AuthTag AES-GCM al passo 5.
 4. **Derivare chiave PBKDF2**: invocare PBKDF2-SHA256 con il PIN
    inserito dall'utente e il salt recuperato.
 5. **Decifrare con AES-GCM**: estrarre IV (byte 17–28 del buffer) e
