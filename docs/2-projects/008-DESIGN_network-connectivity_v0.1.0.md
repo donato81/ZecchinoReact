@@ -3,7 +3,7 @@ tipo: design
 titolo: Network connectivity — sostituzione browser detection con NetInfo
 versione: 0.1.0
 data: 2026-05-20
-stato: DRAFT
+stato: REVIEWED
 sorgente: docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md
 perimetro: src/hooks/use-online-status.ts, src/context/AppDataContext.tsx
 ---
