@@ -5,6 +5,10 @@
 ### Docs — 2026-05-20 (aggiornamento)
 
 #### Modificato
+- `docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md` (REVIEWED) —
+  chiuse precondizioni P2 e P3 con esito di verifica documentato.
+  Marcatura stato da DRAFT a REVIEWED. Precondizione P1 residua:
+  identificazione TurboModule WinRT Save Picker prima del Coding Plan 009.
 - `docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md` — aggiornata
   strategia Windows nelle Sezioni 6, 9 e 10 a seguito della verifica
   delle precondizioni P1/P2/P3 da parte del consiglio AI.

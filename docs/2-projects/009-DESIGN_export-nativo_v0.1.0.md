@@ -3,7 +3,7 @@ tipo: design
 titolo: Export File Nativo — delivery layer multi-formato e multi-piattaforma
 versione: 0.1.0
 data: 2026-05-20
-stato: DRAFT
+stato: REVIEWED
 sorgente: docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md (punto N10)
 perimetro: src/lib/export-service.ts (nuovo), src/context/AppDataContext.tsx
 ---
@@ -366,15 +366,26 @@ prima che il **Coding Plan 009** possa essere scritto.
    `Windows.Storage.Pickers.FileSavePicker` via C++/WinRT bridge.
    La scelta va documentata con motivazione prima che il Coding
    Plan possa essere scritto.
-2. **P2 — Versione `react-native-share`.** Identificazione della
-   **versione minima stabile** di `react-native-share` compatibile con
-   `react-native ^0.82.1`, verificata su iOS e Android.
-3. **P3 — Censimento consumer.** Verifica esaustiva che **tutti i
-   consumer** di `handleExportCSV` (componenti UI, hook, dialog overlay,
-   ecc.) siano stati individuati e mappati **prima** dell'aggiornamento
-   della firma da `void` a `Promise<void>`. Il censimento va prodotto
-   tramite ricerca testuale completa nel repository e allegato al
-   Coding Plan.
+2. **P2 — Versione `react-native-share`.**
+   Precondizione soddisfatta (verificata 2026-05-20).
+   `react-native-share` è compatibile con `react-native ^0.82.1`
+   e con la New Architecture obbligatoria di RN 0.82.x (TurboModules,
+   Fabric). Compatibilità architetturale confermata per iOS e Android.
+   Versione esatta da installare: da fissare alla stesura del Coding
+   Plan 009 verificando l'ultima major stabile disponibile su npm al
+   momento dell'implementazione.
+3. **P3 — Censimento consumer.**
+   Precondizione soddisfatta (verificata 2026-05-20).
+   Censimento eseguito tramite ricerca testuale completa nel
+   repository. Risultato: 9 occorrenze del termine `handleExportCSV`
+   distribuite in 8 file. Tutte le occorrenze appartengono a
+   documentazione, changelog, design, report o test placeholder.
+   Nessun consumer runtime esterno oltre a `src/context/AppDataContext.tsx`,
+   che è la dichiarazione e implementazione sorgente della funzione.
+   Il breaking change da `() => void` a `() => Promise<void>` non
+   genera propagation impact su consumer esterni al momento.
+   Aggiornamenti da eseguire al Coding Plan: `src/context/AppDataContext.tsx`
+   (firma e corpo) e `docs/api.md` (documentazione firma).
 
 ---
 

@@ -34,7 +34,7 @@
 - **Last Validated Block:** Nessuno — nessun blocco ancora completato
 - **Files Modified But Not Validated:** Nessuno
 - **Open Threads:** tsconfig.json contiene "types": ["node"] che maschera errori di portabilità TypeScript — valutare se correggere in P0 o rimandare a P1
-- **Next Action:** Precondizioni DESIGN 009 — P2 e P3 verificate e chiuse. P1 ridefinita: identificare o progettare TurboModule WinRT Save Picker per Windows prima della stesura del Coding Plan 009. `react-native-share` compatibile con RN 0.82.1 (versione esatta al Coding Plan). Nessun consumer runtime esterno di `handleExportCSV`.
+- **Next Action:** DESIGN 009 marcato REVIEWED. Precondizione residua P1: identificare o progettare TurboModule WinRT Save Picker per Windows. Prossimo passo: identificazione componente WinRT picker, poi stesura Coding Plan 009.
 
 > **Nota sessione docs 2026-05-19:** Completata estrazione coding plan da documenti di design. Documenti pronti per l'implementazione:
 > - `docs/3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md` — T1-T8 (P1 accessibility engine)
