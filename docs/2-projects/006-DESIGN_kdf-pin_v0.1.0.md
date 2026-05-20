@@ -1,7 +1,7 @@
 ---
 tipo: design
 titolo: Key Derivation Function per PIN privato
-versione: 0.5.0
+versione: 0.2.0
 data: 2026-05-20
 stato: DRAFT
 sorgente: docs/2-projects/005-DESIGN_sostituzione-crypto-N4_v0.4.0.md
@@ -421,6 +421,14 @@ considerare l'operazione conclusa. Se uno dei due fallisce, il sistema
 deve trovarsi in uno stato coerente: nessuna delle due colonne deve
 essere parzialmente aggiornata.
 
+Le colonne `pin_privato_hash` e `pin_kdf_salt` costituiscono un'unità
+logica indivisibile. Uno stato in cui solo una delle due colonne è
+aggiornata è uno stato invalido del sistema e non deve mai essere
+raggiunto. Il vincolo di atomicità è dichiarato qui a livello
+architetturale. Il meccanismo tecnico per garantirlo (transazione,
+rollback, RPC, compensazione o retry) è competenza esclusiva del
+Coding Plan 006.
+
 ### Verifica e decifrazione con PIN
 
 1. **Recuperare salt da Supabase**: leggere `pinKdfSalt` da
@@ -438,6 +446,13 @@ essere parzialmente aggiornata.
 5. **Decifrare con AES-GCM**: estrarre IV (byte 17–28 del buffer) e
    `ciphertext + authTag` (byte 29 in poi); invocare AES-GCM decrypt
    con la chiave derivata.
+
+Il salt necessario alla derivazione PBKDF2 è incorporato nel payload
+cifrato stesso, nella posizione definita nella sezione 6. Questo
+garantisce che i dati precedentemente cifrati restino autonomamente
+decifrabili anche dopo che l'utente ha modificato il PIN. Ogni payload
+porta con sé le informazioni necessarie per la propria decifrazione,
+indipendentemente dal salt correntemente persistito su Supabase.
 
 ---
 
@@ -468,6 +483,13 @@ sempre decifrabile anche dopo che l'applicazione ha adottato `0x02` o
 `0x03` per i nuovi payload. Non è necessaria alcuna migrazione di massa
 dei dati persistiti: ogni payload porta con sé le informazioni necessarie
 per la sua decifrazione.
+
+Non esistono payload persistiti in formato PIN antecedenti a questa
+implementazione. Prima di DESIGN 006, nessuna funzionalità del sistema
+produceva payload cifrati derivati da PIN e persistiti su Supabase.
+Il byte `KDF_VERSION` è pertanto obbligatorio per tutti i payload di
+questo tipo senza eccezioni. Non è previsto né necessario alcun decoder
+di compatibilità per payload privi di version byte.
 
 **Limite di versione**: `KDF_VERSION` è un singolo byte unsigned, quindi
 supporta al massimo 255 versioni distinte dell'algoritmo di derivazione.
