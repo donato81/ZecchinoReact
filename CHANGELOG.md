@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+### Docs — 2026-05-20 (aggiornamento)
+
+#### Modificato
+- `docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md` — aggiornata
+  strategia Windows nelle Sezioni 6, 9 e 10 a seguito della verifica
+  delle precondizioni P1/P2/P3 da parte del consiglio AI.
+  Distinzione esplicita tra scrittura file (@react-native-windows/fs)
+  e selezione destinazione utente (WinRT Save Picker via TurboModule).
+  P2 soddisfatta (react-native-share compatibile con RN 0.82.1).
+  P3 verificata (nessun consumer runtime esterno di handleExportCSV).
+  P1 ridefinita: precondizione residua identificata nel TurboModule
+  WinRT picker.
+- `__tests__/ExportService.test.ts` — aggiunti casi placeholder per
+  la strategia Windows a due componenti (Layer A e Layer B).
+
 ### Docs — 2026-05-20
 
 #### Aggiunto

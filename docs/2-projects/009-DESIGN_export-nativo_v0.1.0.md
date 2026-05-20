@@ -196,9 +196,45 @@ React Native e applica la strategia di delivery appropriata.
 
 ### Windows (React Native Windows 0.82.x)
 
-- **Modalità:** save file dialog nativa (file picker di sistema).
-- **Libreria candidata:** `react-native-fs` oppure alternativa equivalente — **[DA VERIFICARE]** alla precondizione P1 della Sezione 10.
-- **PRECONDIZIONE OBBLIGATORIA prima della stesura del Coding Plan 009:** verificare la compatibilità di `react-native-fs` con `react-native-windows ^0.82.5`. Se incompatibile, identificare un'alternativa (es. modulo nativo custom, libreria community equivalente, API WinRT esposta via turbomodule) **prima** di procedere alla stesura del piano di codifica.
+La strategia Windows adotta una separazione esplicita tra due
+responsabilità distinte che su desktop non possono essere gestite
+da un unico componente:
+
+**Layer A — Scrittura del file**
+
+- **Responsabilità:** scrivere il contenuto del file in una
+  directory temporanea dell'app.
+- **Tecnologia:** `@react-native-windows/fs`.
+- **Motivazione:** pacchetto ufficiale mantenuto dal team
+  React Native Windows, progettato per ambienti RNW con API
+  Promise-based e piena compatibilità con RNW 0.82.x. Gestisce
+  correttamente le condizioni transitorie del filesystem tipiche
+  di Windows (es. lock antivirus).
+
+**Layer B — Selezione destinazione da parte dell'utente**
+
+- **Responsabilità:** esporre la finestra nativa di selezione
+  del percorso di salvataggio (Windows Save File Dialog), ricevere
+  il path scelto dall'utente e restituirlo a ExportService.
+- **Tecnologia:** WinRT Save File Picker esposto tramite
+  TurboModule o modulo nativo RNW.
+- **Precondizione residua (da risolvere prima del Coding Plan 009):**
+  identificare o progettare il TurboModule WinRT picker da utilizzare.
+  Opzioni candidate: libreria community esistente, modulo nativo
+  custom leggero, API WinRT `Windows.Storage.Pickers.FileSavePicker`
+  esposta via C++/WinRT bridge.
+
+**Flusso integrato su Windows**
+
+1. `ExportService` riceve contenuto, nome file e MIME type.
+2. Invoca il WinRT Save Picker per richiedere all'utente il path
+   di destinazione.
+3. Se l'utente annulla, restituisce
+   `{ success: false, reason: 'CANCELLED' }` immediatamente.
+4. Se l'utente conferma il path, scrive il file via
+   `@react-native-windows/fs` nel path indicato.
+5. Restituisce `{ success: true }` oppure il reason di errore
+   appropriato in caso di I/O failure.
 
 ### Comportamento condizionale
 
@@ -288,13 +324,28 @@ implementa l'integrazione del formato CSV come prima istanza.
 - **Versione minima:** **[DA VERIFICARE]** alla stesura del Coding Plan 009 — identificare l'ultima major stabile compatibile con React Native 0.82.1.
 - **Uso:** strategia di delivery su iOS e Android (Sezione 6).
 
-### `react-native-fs`
+### `@react-native-windows/fs`
 
 - **Stato:** non presente in `package.json` (verificato).
-- **Destinazione:** sezione `dependencies` di `package.json` — **solo se** confermata la compatibilità con `react-native-windows ^0.82.5`.
-- **Versione minima:** **[DA VERIFICARE]** alla precondizione P1 della Sezione 10.
-- **Uso:** strategia di delivery su Windows (Sezione 6).
-- **Note:** se la verifica di compatibilità su RNW 0.82.x fallisce, questa dipendenza viene sostituita con l'alternativa identificata in P1.
+- **Destinazione:** sezione `dependencies` di `package.json`.
+- **Versione minima:** ultima stabile compatibile con
+  `react-native-windows ^0.82.5` — da confermare al Coding Plan.
+- **Uso:** scrittura del file in directory temporanea nella
+  strategia di delivery Windows (Layer A, Sezione 6).
+- **Motivazione:** pacchetto ufficiale React Native Windows,
+  compatibilità RNW 0.82.x garantita dal team Microsoft.
+
+### TurboModule WinRT Save Picker (Windows)
+
+- **Stato:** non presente nel repository — da identificare o
+  progettare.
+- **Destinazione:** dipendenza nativa RNW oppure modulo interno
+  in `src/native/` se realizzato custom.
+- **Precondizione:** identificazione formale del componente
+  (libreria community o custom) come parte della precondizione
+  P1 aggiornata della Sezione 10.
+- **Uso:** esposizione della finestra nativa di selezione
+  percorso di salvataggio su Windows (Layer B, Sezione 6).
 
 ---
 
@@ -303,11 +354,18 @@ implementa l'integrazione del formato CSV come prima istanza.
 Le seguenti precondizioni devono essere **soddisfatte e documentate**
 prima che il **Coding Plan 009** possa essere scritto.
 
-1. **P1 — Compatibilità Windows.** Verifica documentata della
-   compatibilità di `react-native-fs` con `react-native-windows ^0.82.5`.
-   Se la verifica produce esito negativo, identificazione formale di una
-   **libreria alternativa** (community, custom turbomodule, API WinRT) in
-   grado di esporre un save file dialog nativo su Windows.
+1. **P1 — Strategia Windows: TurboModule WinRT picker.**
+   La strategia di delivery su Windows è stata definita
+   architetturalmente (vedere Sezione 6): scrittura file via
+   `@react-native-windows/fs` e selezione destinazione via
+   WinRT Save File Picker esposto tramite TurboModule o modulo
+   nativo RNW. La precondizione residua prima della stesura del
+   Coding Plan 009 è l'identificazione formale del componente
+   che espone il WinRT picker: libreria community esistente,
+   modulo nativo custom leggero o API WinRT
+   `Windows.Storage.Pickers.FileSavePicker` via C++/WinRT bridge.
+   La scelta va documentata con motivazione prima che il Coding
+   Plan possa essere scritto.
 2. **P2 — Versione `react-native-share`.** Identificazione della
    **versione minima stabile** di `react-native-share` compatibile con
    `react-native ^0.82.1`, verificata su iOS e Android.

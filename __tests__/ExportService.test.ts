@@ -23,6 +23,11 @@ describe('ExportService (placeholder DESIGN 009)', () => {
   it.todo('errore non classificabile -> { success: false, reason: UNKNOWN }')
   it.todo('ExportService non solleva mai eccezioni (catch + mapping interno)')
   it.todo('nessun side effect UX dentro ExportService (no toast/sound/haptic/screenReader)')
+  // Strategia Windows a due componenti (DESIGN 009, Sezione 6):
+  it.todo('Windows Layer A: scrittura file in directory temporanea via @react-native-windows/fs')
+  it.todo('Windows Layer B: selezione percorso destinazione via WinRT Save File Picker (TurboModule)')
+  it.todo('Windows: utente annulla il WinRT Save Picker -> { success: false, reason: CANCELLED } senza scrittura file')
+  it.todo('Windows: fallimento scrittura su path selezionato dall\'utente -> { success: false, reason: FILESYSTEM_ERROR }')
 })
 
 describe('handleExportCSV in AppDataContext (placeholder DESIGN 009)', () => {
