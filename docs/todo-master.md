@@ -371,7 +371,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P1.B2 | Riscrittura sound-system.ts per RN | [ ] TODO | [ ] OPEN |
 | P1.B3 | Riscrittura screen-reader.ts per RN | [ ] TODO | [ ] OPEN |
 | P2.B1 | Riscrittura use-inactivity-timer.ts per RN | [ ] TODO | [ ] OPEN |
-| P2.B2 | Riscrittura use-online-status.ts per RN | [ ] TODO | [ ] OPEN |
+| P2.B2 | Riscrittura use-online-status.ts per RN (rif. DESIGN 008) | [ ] TODO | [ ] OPEN |
 | P2.B3 | Riscrittura use-talkback.ts per RN | [ ] TODO | [ ] OPEN |
 | P3.B1 | Pulizia AuthContext — rimozione residui DOM | [ ] TODO | [ ] OPEN |
 | P3.B2 | Pulizia AppDataContext — fix completo async | [ ] TODO | [ ] OPEN |
