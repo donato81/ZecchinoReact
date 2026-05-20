@@ -1,15 +1,15 @@
 ---
 tipo: design
 titolo: Sostituzione crypto.subtle — N4 (encryptData / decryptData)
-versione: 0.3.0
-data: 2026-05-19
+versione: 0.4.0
+data: 2026-05-20
 stato: REVIEWED
 sorgente: docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md
 perimetro: src/lib/crypto.ts, index.js, package.json
 problema: N4
 ---
 
-# DESIGN — Sostituzione crypto.subtle (v0.3.0)
+# DESIGN — Sostituzione crypto.subtle (v0.4.0)
 
 > **Scope**: rendere le funzioni `encryptData` e `decryptData` di
 > `src/lib/crypto.ts` eseguibili in React Native sostituendo l'API
@@ -196,6 +196,13 @@ l'IV con `Math.random` o algoritmi pseudocasuali non crittografici,
 perché questo renderebbe gli IV prevedibili e comprometterebbe la
 sicurezza della cifratura. Il polyfill è l'unica soluzione corretta.
 
+Chiarimento sullo scope del polyfill: react-native-get-random-values
+fornisce esclusivamente un'implementazione di crypto.getRandomValues
+basata sull'entropia del sistema operativo. Non fornisce né polyfilla
+crypto.subtle, né alcuna altra API WebCrypto. La sostituzione di
+crypto.subtle con @noble/ciphers è un intervento separato e indipendente,
+descritto nelle sezioni 4.1 e 7 di questo documento.
+
 ### 4.3 Compatibilità dati esistenti
 
 I dati cifrati da `encryptData` già presenti su Supabase (salvati
@@ -267,6 +274,15 @@ chiamante nel codebase attuale richiede modifiche. Il comportamento
 osservabile dall'esterno — incluso il formato del payload Base64 — è
 identico all'implementazione attuale.
 
+Poiché l'implementazione attuale usa await su operazioni WebCrypto
+asincrone, tutti i chiamanti esistenti si aspettano una Promise. La nuova
+implementazione usa @noble/ciphers in modo sincrono internamente, ma le
+funzioni pubbliche devono restare dichiarate come async oppure restituire
+esplicitamente Promise.resolve con il risultato, per preservare la
+semantica asincrona verso tutti i chiamanti. Cambiare la firma da
+Promise a un valore diretto romperebbe silenziosamente ogni punto di
+chiamata senza errori di compilazione visibili.
+
 ---
 
 ## 5. Golden Compatibility Tests
@@ -314,6 +330,15 @@ Se uno qualunque dei due vettori non viene riprodotto esattamente dalla
 nuova implementazione, il Coding Plan deve interrompersi e aprire un
 report di diagnostica prima di proseguire. Nessun'altra modifica può
 essere effettuata fino a quando i golden test non passano.
+
+Nota critica sull'uso degli IV deterministici: gli IV fissi usati nei
+vettori G1 e G2 sono ammessi esclusivamente nei golden test perché
+servono a garantire la riproducibilità del valore Base64 atteso. In
+qualsiasi contesto produttivo, ogni IV deve essere generato casualmente
+tramite crypto.getRandomValues prima di ogni singola operazione di
+cifratura. Riutilizzare lo stesso IV con la stessa chiave su plaintext
+diversi compromette la sicurezza di AES-GCM in modo irreversibile. Il
+Coding Plan non deve mai usare IV fissi al di fuori del contesto dei test.
 
 ---
 
@@ -420,6 +445,12 @@ Di seguito l'elenco dei casi da coprire, descritti in linguaggio naturale.
 - **E3 (payload troncato)**: tentare di decifrare un Base64 che corrisponde
   a un buffer più corto di 28 byte (12 IV + almeno 1 byte ciphertext + 16
   authTag) deve causare un errore controllato, non un crash non gestito.
+- **A1 (contratto asincrono)**: il valore restituito da `encryptData` e da
+  `decryptData` deve essere un'istanza di Promise. Verificare che la
+  chiamata sia incatenabile tramite `.then()` e che il risultato non venga
+  restituito in modo sincrono. Questo garantisce che la firma pubblica
+  asincrona sia preservata e che nessun chiamante esistente si rompa
+  silenziosamente a seguito della migrazione interna a @noble/ciphers.
 
 ### Casi per hashPin e verifyPin
 
@@ -427,3 +458,13 @@ Poiché `hashPin` e `verifyPin` non vengono modificate, i loro test
 dovrebbero verificare unicamente che il comportamento sia invariato dopo
 il refactoring di `encryptData`/`decryptData`. Un singolo test di
 round-trip (hash di un PIN, verifica con lo stesso PIN) è sufficiente.
+
+### Casi di sicurezza RNG
+
+- **S1 (IV casuale in produzione)**: cifrare la stessa stringa due volte
+  consecutive con la stessa chiave deve produrre due valori Base64 distinti.
+  Questo verifica che ogni invocazione di `encryptData` genera un IV diverso
+  tramite `crypto.getRandomValues` e non riutilizza mai un IV fisso. Due
+  payload identici in ingresso non devono mai produrre payload identici in
+  uscita: l'uguaglianza dell'output indicherebbe un IV ripetuto, che
+  comprometterebbe la sicurezza di AES-GCM in modo irreversibile.
