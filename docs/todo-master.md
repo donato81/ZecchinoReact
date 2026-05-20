@@ -30,11 +30,11 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** Nessuno — primo avvio del TODO-MASTER
+- **Last Completed Task:** Stesura `docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md`
 - **Last Validated Block:** Nessuno — nessun blocco ancora completato
 - **Files Modified But Not Validated:** Nessuno
 - **Open Threads:** tsconfig.json contiene "types": ["node"] che maschera errori di portabilità TypeScript — valutare se correggere in P0 o rimandare a P1
-- **Next Action:** Aprire babel.config.js e aggiungere i plugin module-resolver e react-native-dotenv seguendo docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md sezione 2
+- **Next Action:** Verifica precondizioni formali DESIGN 009 (compatibilità `react-native-fs` su RNW 0.82.x, versione minima `react-native-share` su RN 0.82.1, censimento consumer di `handleExportCSV`) prima della stesura del Coding Plan 009
 
 > **Nota sessione docs 2026-05-19:** Completata estrazione coding plan da documenti di design. Documenti pronti per l'implementazione:
 > - `docs/3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md` — T1-T8 (P1 accessibility engine)
@@ -375,6 +375,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P2.B3 | Riscrittura use-talkback.ts per RN | [ ] TODO | [ ] OPEN |
 | P3.B1 | Pulizia AuthContext — rimozione residui DOM | [ ] TODO | [ ] OPEN |
 | P3.B2 | Pulizia AppDataContext — fix completo async | [ ] TODO | [ ] OPEN |
+| P3.B2-EXT | Stesura DESIGN 009 — Export File Nativo | [X] DONE | [X] PASSED |
 | P4.B1 | Creazione componente Button nativo | [ ] TODO | [ ] OPEN |
 | P4.B2 | Creazione sistema Toast/notifica nativo | [ ] TODO | [ ] OPEN |
 | P5.B1 | Implementazione screens | [ ] TODO | [ ] OPEN |
