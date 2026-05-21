@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Docs — 2026-05-21 (analisi coerenza DESIGN 003 + PLAN 003)
+
+#### Aggiunto
+- `docs/1-reports/REPORT_analisi-coerenza_DESIGN-003_v1.0.0.md`
+  (CREATO) — Report analisi coerenza e validazione DESIGN 003 e PLAN 003.
+  Quattro incoerenze documentali identificate: C1 CRITICA (contraddizione
+  §9/§11 DESIGN vs Task T6 PLAN su AuthContext.tsx), A1/A2/A3 ALTE
+  (eccezione ADR non formalizzata, rischio RA guard DOM non quantificato,
+  autore/revisore assenti), M1–M4 MEDIE. Verdetto: PRONTO CON RISERVE
+  su entrambi i documenti. Generato da Copilot Agent (Analyzer).
+
 ### Docs — 2026-05-21 (correzioni A1/A2/A3 + nota C2)
 
 #### Modificato
