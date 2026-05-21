@@ -404,6 +404,10 @@ interface UseAccessibilityDetectionReturn {
   getTouchTargetSize: () => number
   getAnimationDuration: (base: number) => number
   getTimeout: (base: number) => number
+  shouldSimplifyNavigation: () => boolean
+  shouldAutoManageFocus: () => boolean
+  getAriaDescription: (brief: string, verbose: string)
+    => string
   shouldUseVerboseDescriptions: () => boolean
 }
 ```
