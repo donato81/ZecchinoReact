@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+### Refactor
+
+- DESIGN 004 — Implementato il layer semantico `src/announcements/`
+  conforme ad ADR_001 v1.2.0. Tutti gli annunci accessibili passano ora
+  per `announce()` esposto da `@/announcements`, unico punto autorizzato
+  a importare `@/accessibility/engine`. Migrati `src/context/AuthContext.tsx`
+  (7 chiamate `screenReader.*` sostituite con `auth.*` builders) e
+  `src/context/AppDataContext.tsx` (16 chiamate sostituite con
+  `accounts.*` e `budgets.*` builders).
+- Aggiunte stringhe di dominio in `src/locales/it.ts` (72 chiavi in 6
+  sezioni). Tipi `Strings` e `StringKey` esportati per type-safety.
+- Aggiunti moduli di dominio: `ui.ts` (26 fn), `auth.ts` (8 fn),
+  `accounts.ts` (14 fn), `budgets.ts` (12 fn) con annunci composti per
+  soglie budget (>=100/90/75) e progressi obiettivi (>=100/75).
+- Eliminati i file legacy `src/hooks/use-screen-reader.ts` e
+  `src/lib/screen-reader.ts`. Baseline TypeScript ridotta da 89 a 47
+  errori (eliminati ~42 errori legati ai file rimossi).
+
 ### Documentation
 
 - docs/4-todo-lists/004-TODO_announcements-layer_v1.0.0.md: ciclo validazione Consiglio AI completato. Log Validazione popolato. Next Action aggiornato a T1.

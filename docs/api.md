@@ -242,42 +242,14 @@ Sistema audio. Nessuna dipendenza esterna, usa Web Audio API (`AudioContext`).
 
 ---
 
-## `src/lib/screen-reader.ts` ❌
+## `src/lib/screen-reader.ts` — RIMOSSO
 
-Annunci per screen reader. Nessuna dipendenza esterna, usa DOM live regions.
+File rimosso (DESIGN 004). Sostituito dal layer semantico
+`src/announcements/` che dispatcha verso `src/accessibility/engine.ts`
+tramite `AccessibilityInfo.announceForAccessibility()` di React Native.
 
-### Tipo esportato
-
-| Nome | Tipo |
-|------|------|
-| `AnnouncementPriority` | `type` — `'polite' \| 'assertive'` |
-
-### Classe `ScreenReaderAnnouncer` — metodi pubblici
-
-| Metodo | Parametri | Ritorna | RN |
-|--------|-----------|---------|-----|
-| `announce(message, priority?)` | `string`, `AnnouncementPriority?` | `void` | ❌ (DOM `aria-live`) |
-| `announceNavigation(destination)` | `string` | `void` | ❌ |
-| `announceAction(action)` | `string` | `void` | ❌ |
-| `announceError(error)` | `string` | `void` | ❌ |
-| `announceSuccess(message)` | `string` | `void` | ❌ |
-| `announceCount(items, count)` | `string`, `number` | `void` | ❌ |
-| `announceBalance(accountName, balance, currency?)` | `string`, `number`, `string?` | `void` | ❌ |
-| `announceTransaction(type, amount, account, category?)` | … | `void` | ❌ |
-| `announceDialogOpen(title)` | `string` | `void` | ❌ |
-| `announceDialogClose()` | — | `void` | ❌ |
-| `announceProgress(current, total, label)` | `number`, `number`, `string` | `void` | ❌ |
-| `announceBudgetStatus(name, spent, target, percentage)` | … | `void` | ❌ |
-| `announceFocus(elementDescription)` | `string` | `void` | ❌ |
-| `announceListNavigation(position, total, itemDescription)` | … | `void` | ❌ |
-| `announceFilter(filterName, active)` | `string`, `boolean` | `void` | ❌ |
-| `announceSort(columnName, direction)` | `string`, `'ascending'\|'descending'` | `void` | ❌ |
-| `announceAccountCreated/Deleted(…)` | … | `void` | ❌ |
-| `announceBudgetCreated/Deleted(…)` | … | `void` | ❌ |
-
-**Singleton esportato**: `screenReader: ScreenReaderAnnouncer`
-
-> Da riscrivere interamente usando `AccessibilityInfo.announceForAccessibility()`.
+Vedi `src/announcements/index.ts` per la nuova API: `announce()`,
+`ui.*`, `auth.*`, `accounts.*`, `budgets.*`.
 
 ---
 
@@ -588,9 +560,11 @@ Wrapper hook su `hapticSystem`. Compatibile in sé (solo useState/useEffect), ma
 
 ---
 
-## `src/hooks/use-screen-reader.ts` ⚠️
+## `src/hooks/use-screen-reader.ts` — RIMOSSO
 
-Wrapper hook su `screenReader`. Compatibile in sé, ma inutile finché `screen-reader.ts` non è riscritto per RN.
+File rimosso (DESIGN 004). Sostituito dalle funzioni builder esposte da
+`src/announcements/{ui,auth,accounts,budgets}.ts` e dal dispatcher
+`announce()` di `src/announcements/index.ts`.
 
 ---
 
@@ -704,6 +678,57 @@ strings: Strings      // oggetto stringhe italiano
 type Strings          // shape dell'oggetto stringhe
 type StringKey        // keyof Strings
 ```
+
+---
+
+## `src/announcements/` ✅ (DESIGN 004)
+
+Layer semantico per annunci accessibili. Unico path autorizzato a
+importare `@/accessibility/engine` (invariante architetturale ADR_001).
+
+### `src/announcements/index.ts`
+
+```ts
+import { engine } from '@/accessibility/engine'
+import type { Announcement } from './types'
+
+export type { Announcement, AnnouncementPriority, ActionType } from './types'
+export { actionKeyMap } from './types'
+
+export function announce(announcement: Announcement): void
+
+export * as ui from './ui'
+export * as auth from './auth'
+export * as accounts from './accounts'
+export * as budgets from './budgets'
+```
+
+`announce()` delega a `engine.announce()` (fire-and-forget,
+`AccessibilityInfo.announceForAccessibility`).
+
+### `src/announcements/types.ts`
+
+Re-esporta `Announcement` e `AnnouncementPriority` da
+`@/accessibility/types` via `import type`. Definisce `ActionType`
+(`'modifica' | 'elimina' | 'crea' | 'aggiunge' | 'salva'`) e
+`actionKeyMap: Record<ActionType, StringKey>`.
+
+### Builder per dominio
+
+Ogni modulo espone funzioni pure che ritornano `Announcement`
+`{ text, priority }`. Nessuno importa l'engine.
+
+| Modulo | Funzioni | Note |
+|--------|----------|------|
+| `ui.ts` | 26 | builder generici (focus, navigazione, dialog, filtri, ordinamenti, conteggi) |
+| `auth.ts` | 8 | `pinNotConfigured`, `pinInvalid`, `privateUnlocked`, `privateAccountLocked`, `pinSet`, `pinChanged`, `pinRemoved`, `sessionKept` — priority `assertive` per errori PIN |
+| `accounts.ts` | 14 | `announceAccountCreated/Modified/Deleted`, `announceTransaction*`, `announceExportCSV`, ecc. |
+| `budgets.ts` | 12 | `announceBudgetCreated/Modified/Deleted/Status`, `announceSavingsGoal*` — soglie `assertive` a >=100/90 |
+
+### Utility private (`_utils/`)
+
+`t.ts`, `currency.ts`, `dates.ts`, `plurals.ts` — pure, nessuna
+dipendenza da engine.
 
 ---
 

@@ -34,16 +34,20 @@
 ├────────────────────────────────────────────────────────────────┤
 │                         hooks/                                 │  ← Hook React
 │  use-user-settings  use-visible-data  use-display-preferences  │
-│  use-haptic  use-screen-reader  use-inactivity-timer           │
-│  use-online-status  use-inactivity-timer                       │
-├────────────────────────────────────────────────────────────────┤
+│  use-haptic  use-inactivity-timer                              │
+│  use-online-status                                             │
+├─────────────────────────────────────────────────────────────┤
 │                      lib/ (dominio)                            │  ← Logica pura + utility
 │  types  constants  helpers  budget-alerts  budget-forecasting  │
 │  budget-history  budget-templates  crypto                      │
-│  haptic-system  sound-system  screen-reader                    │
-├────────────────────────────────────────────────────────────────┤
+│  haptic-system  sound-system                                   │
+├─────────────────────────────────────────────────────────────┤
 │                    accessibility/                              │  ← Accessibility engine (DESIGN 003)
 │  types  engine  detection                                      │
+├─────────────────────────────────────────────────────────────┤
+│                    announcements/                              │  ← Layer semantico annunci (DESIGN 004)
+│  index (announce)  types                                       │
+│  ui  auth  accounts  budgets  _utils/                          │
 ├────────────────────────────────────────────────────────────────┤
 │                      locales/                                  │  ← Localizzazione (DESIGN 003)
 │  it  index                                                     │
@@ -128,7 +132,7 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `lib/crypto.ts` | lib | ⚠️ Parziale | No | `hashPin`/`verifyPin` OK; `encryptData`/`decryptData` (crypto.subtle) da rimpiazzare |
 | `lib/haptic-system.ts` | lib | ❌ Incompatibile | No | `localStorage` + `navigator.vibrate` — da riscrivere |
 | `lib/sound-system.ts` | lib | ❌ Incompatibile | No | Web Audio API — da riscrivere |
-| `lib/screen-reader.ts` | lib | ❌ Incompatibile | No | DOM `aria-live` — da riscrivere con `AccessibilityInfo` |
+| `lib/screen-reader.ts` | lib | **ELIMINATO (DESIGN 004)** | — | Sostituito da `src/announcements/` |
 | `lib/supabase/client.ts` | supabase | ⚠️ Richiede config | **Sì (B2/B6)** | OK struttura; bloccato senza `react-native-dotenv` in Babel |
 | `lib/supabase/cache.ts` | supabase | ✅ Compatibile | No | Già su AsyncStorage |
 | `lib/supabase/types.ts` | supabase | ✅ Compatibile | No | — |
@@ -146,7 +150,7 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `hooks/use-visible-data.ts` | hooks | ✅ Compatibile | No | — |
 | `hooks/use-display-preferences.ts` | hooks | ✅ Compatibile | No | — |
 | `hooks/use-haptic.ts` | hooks | ⚠️ Struttura OK | No | Inutile finché `haptic-system.ts` non è riscritto |
-| `hooks/use-screen-reader.ts` | hooks | ⚠️ Struttura OK | No | Inutile finché `screen-reader.ts` non è riscritto |
+| `hooks/use-screen-reader.ts` | hooks | **ELIMINATO (DESIGN 004)** | — | Sostituito da `src/announcements/` builders |
 | `hooks/use-inactivity-timer.ts` | hooks | ✅ Compatibile | Sì | DESIGN 002 STEP 002 (N6): migrato a `setTimeout` RN; detection eventi delegata a `ActivityDetectorView` |
 | `components/ActivityDetectorView.tsx` | components | ✅ Compatibile | Sì | DESIGN 002 STEP 002 (N6): View RN che invoca `onActivity` su touch e (Windows) keydown senza catturare il responder |
 | `hooks/use-online-status.ts` | hooks | ❌ Incompatibile | No | `navigator.onLine` — da riscrivere con `NetInfo` |
@@ -157,10 +161,22 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | File | Layer | Stato RN | Blocco? | Note |
 |------|-------|----------|---------|------|
 | `accessibility/types.ts` | accessibility | ✅ Compatibile | No | Tipi condivisi tra engine e detection |
-| `accessibility/engine.ts` | accessibility | ✅ Compatibile | No | Singleton announce — da usare solo via announcements/ (DESIGN 004) |
+| `accessibility/engine.ts` | accessibility | ✅ Compatibile | No | Singleton announce — importabile **solo** da `src/announcements/index.ts` (invariante ADR_001) |
 | `accessibility/detection.ts` | accessibility | ✅ Compatibile | No | Sostituisce use-talkback.ts |
 | `locales/it.ts` | locales | ✅ Compatibile | No | Scaffolding stringhe IT (vuoto) |
 | `locales/index.ts` | locales | ✅ Compatibile | No | Entry point localizzazione |
+
+### Nuovi file aggiunti (DESIGN 004)
+
+| File | Layer | Stato RN | Blocco? | Note |
+|------|-------|----------|---------|------|
+| `announcements/index.ts` | announcements | ✅ Compatibile | No | Dispatcher `announce()` + re-export builder. Unico path che importa `@/accessibility/engine` |
+| `announcements/types.ts` | announcements | ✅ Compatibile | No | Re-export `Announcement`/`AnnouncementPriority` + `ActionType` + `actionKeyMap` |
+| `announcements/ui.ts` | announcements | ✅ Compatibile | No | 26 builder generici (focus, dialog, navigazione, filtri) |
+| `announcements/auth.ts` | announcements | ✅ Compatibile | No | 8 builder per stati PIN/sessione |
+| `announcements/accounts.ts` | announcements | ✅ Compatibile | No | 14 builder per conti, transazioni, export |
+| `announcements/budgets.ts` | announcements | ✅ Compatibile | No | 12 builder per budget/obiettivi con soglie semantiche |
+| `announcements/_utils/*.ts` | announcements | ✅ Compatibile | No | Utility pure: `t`, `currency`, `dates`, `plurals` |
 
 ---
 
@@ -193,7 +209,9 @@ Fase 0 — Config (pre-requisito globale)
 Fase 1 — Rimpiazza dipendenze DOM in lib/
   ├── haptic-system.ts → react-native Vibration / expo-haptics
   ├── sound-system.ts → expo-av
-  └── screen-reader.ts → AccessibilityInfo.announceForAccessibility
+  └── screen-reader.ts → ✅ COMPLETATO (DESIGN 004)
+      Sostituito da src/announcements/ → accessibility/engine →
+      AccessibilityInfo.announceForAccessibility
 
 Fase 2 — Rimpiazza hook web-only
   ├── use-inactivity-timer.ts → AppState + setTimeout RN

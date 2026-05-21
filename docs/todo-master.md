@@ -5,21 +5,17 @@
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
-- **Ultimo Agente Attivo:** Agent-Docs (documentazione DESIGN 004 completata — PLAN 004 verificato, TODO 004 creato)
-- **Blocco in Carico:** Nessuno — DESIGN 001, 002, 003 implementati e chiusi.
-  In attesa avvio implementazione DESIGN 004
-  (announcements layer) dopo validazione documentale
-  completata con il Consiglio AI.
+- **Ultimo Agente Attivo:** Agent-Code (implementazione DESIGN 004 completata — layer `src/announcements/` operativo)
+- **Blocco in Carico:** Nessuno — DESIGN 001, 002, 003, 004 implementati.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
 
-- **Active Phase:** P0/P1/P2 completate. Documentazione DESIGN 004
-  ultimata (PLAN 004 verificato e allineato; TODO 004
-  creato in `docs/4-todo-lists/`). Prossimo: validazione
-  Consiglio AI e avvio implementazione.
-- **Active Block:** Nessuno — documentazione DESIGN 004 pronta per
-  validazione.
+- **Active Phase:** P0/P1/P2 completate. DESIGN 004 implementato:
+  layer `src/announcements/` creato e collegato; legacy
+  `use-screen-reader.ts` e `screen-reader.ts` eliminati;
+  TSC baseline ridotta da 89 a 47 errori.
+- **Active Block:** Nessuno — implementazione DESIGN 004 completata.
 - **Last Updated:** 2026-05-21
 
 ### Mappa Documentale
@@ -431,7 +427,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P4.B1 | Creazione componente Button nativo | [ ] TODO | [ ] OPEN |
 | P4.B2 | Creazione sistema Toast/notifica nativo | [ ] TODO | [ ] OPEN |
 | P5.B1 | Implementazione screens | [ ] TODO | [ ] OPEN |
-| P1.B4 | Documentazione DESIGN 004 completata (PLAN + TODO creati) | [x] DONE | [~] PENDING-VALIDATION |
+| P1.B4 | Documentazione DESIGN 004 completata (PLAN + TODO creati) | [x] DONE | [x] DONE |
 
 ### Log di Validazione
 
@@ -445,6 +441,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-22 | P2.B3 | Agent-Orchestrator | DONE | DESIGN 003 — use-talkback.ts eliminato |
 | 2026-05-22 | P1.B3-PARZIALE | Agent-Orchestrator | DONE (parziale) | DESIGN 003 — accessibility engine |
 | 2026-05-21 | P1.B4-DOC | Agent-Docs | DONE | PLAN 004 verificato (no correzioni), TODO 004 creato |
+| 2026-05-22 | P1.B4-IMPL | Agent-Code | DONE | DESIGN 004 — `src/announcements/` operativo, AuthContext+AppDataContext migrati, legacy SR eliminati |
 
 ---
 

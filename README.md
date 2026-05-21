@@ -80,9 +80,8 @@ src/
     budget-history.ts         # Storico periodi budget
     budget-templates.ts       # Template predefiniti (âš ï¸ phosphor-icons da rimuovere)
     crypto.ts                 # Hash PIN (bcrypt âœ…) + cifratura (crypto.subtle âŒ)
-    haptic-system.ts          # Feedback aptico (âŒ navigator.vibrate)
-    sound-system.ts           # Audio (âŒ Web Audio API)
-    screen-reader.ts          # Annunci ARIA (âŒ DOM)
+    haptic-system.ts          # Feedback aptico (❌ navigator.vibrate)
+    sound-system.ts           # Audio (❌ Web Audio API)
     supabase/
       client.ts               # Singleton Supabase
       types.ts                # Tipi DB row (interni) + UserSettings + RepositoryError
@@ -98,13 +97,18 @@ src/
     use-user-settings.ts      # Preferenze da Supabase
     use-visible-data.ts       # Filtro conti/transazioni per stato privato
     use-display-preferences.ts
-    use-haptic.ts             # (âŒ dipende da haptic-system)
-    use-screen-reader.ts      # (âŒ dipende da screen-reader)
-    use-inactivity-timer.ts   # (âŒ document.addEventListener)
+    use-haptic.ts             # (❌ dipende da haptic-system)
+    use-inactivity-timer.ts   # (❌ document.addEventListener)
     use-online-status.ts      # (âŒ navigator.onLine)
     use-talkback.ts           # (âŒ matchMedia/sessionStorage)
-  screens/                    # (vuoto â€” da implementare)
-  components/                 # (vuoto â€” da implementare)
+  screens/                    # (vuoto — da implementare)
+  components/                 # (vuoto — da implementare)
+  accessibility/              # Engine + detection (DESIGN 003)
+    types.ts  engine.ts  detection.ts
+  announcements/              # Layer semantico annunci (DESIGN 004)
+    index.ts                  # Dispatcher announce() — unico import di engine
+    types.ts  ui.ts  auth.ts  accounts.ts  budgets.ts
+    _utils/                   # t, currency, dates, plurals
 docs/
   api.md                      # Riferimento API completo
   architettura.md             # Architettura layer e piano migrazione
