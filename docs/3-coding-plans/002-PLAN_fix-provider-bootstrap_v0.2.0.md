@@ -181,7 +181,7 @@ const [isScreenReaderActive, setIsScreenReaderActive] = useState(false)
 **Step 3** — Rimuovere le righe 63–65.
 
 ```ts
-// DA RIMUOVERE (righe 63–65):
+// DA RIMUOVERE (righe 64–66):
 const isScreenReaderActive = typeof document !== 'undefined'
   && document.querySelector('[aria-live]') !== null
   && document.documentElement.getAttribute('data-sr-active') === 'true'
