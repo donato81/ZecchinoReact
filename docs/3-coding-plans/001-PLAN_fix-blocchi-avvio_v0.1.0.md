@@ -368,7 +368,7 @@ Non deve segnalare errori relativi a `<div>`, `<p>`, `className`,
 
 ---
 
-## Gate di verifica globale (sezione 10 DESIGN)
+## Gate di verifica globale
 
 > **Se un gate fallisce:** tenta di correggerti autonomamente solo se l'errore riguarda un file già nel perimetro di questa fase (vedere i file elencati nell'intestazione della fase). Se l'errore riguarda un file fuori perimetro, fermati, riporta il testo esatto dell'errore e attendi istruzioni. Non modificare file non elencati nel perimetro della fase corrente.
 

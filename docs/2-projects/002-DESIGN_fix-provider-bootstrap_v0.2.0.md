@@ -1,6 +1,6 @@
 ---
 tipo: design
-titolo: Fix provider bootstrap — Gruppo 2 (N6, N8, N11)
+titolo: Fix provider bootstrap — Gruppo 2 (N11, N8, N6)
 versione: 0.2.0
 data: 2026-05-14
 stato: REVIEWED

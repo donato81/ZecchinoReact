@@ -46,7 +46,7 @@ design: docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md
 
 - [ ] **N8-1** — In `src/context/AuthContext.tsx`: aggiungere `AccessibilityInfo` agli import da `react-native` (aggiungere alla riga di import esistente o creare una nuova riga di import)
 - [ ] **N8-2** — In `src/context/AuthContext.tsx`: aggiungere `const [isScreenReaderActive, setIsScreenReaderActive] = useState(false)` insieme agli altri `useState` in `AuthProvider`
-- [ ] **N8-3** — In `src/context/AuthContext.tsx`: rimuovere le righe 63–65 (la costante `isScreenReaderActive` calcolata con `typeof document !== 'undefined' && document.querySelector('[aria-live]') !== null && document.documentElement.getAttribute('data-sr-active') === 'true'`)
+- [ ] **N8-3** — In `src/context/AuthContext.tsx`: rimuovere le righe 62–64 (la costante `isScreenReaderActive` calcolata con `typeof document !== 'undefined' && document.querySelector('[aria-live]') !== null && document.documentElement.getAttribute('data-sr-active') === 'true'`)
 - [ ] **N8-4** — In `src/context/AuthContext.tsx`: aggiungere `useEffect` dedicato
   **dopo** il `useEffect` per la sessione Supabase già presente nel file,
   con `AccessibilityInfo.isScreenReaderEnabled().then(setIsScreenReaderActive)`,

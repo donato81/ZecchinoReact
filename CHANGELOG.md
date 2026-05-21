@@ -2,6 +2,32 @@
 
 ## [Unreleased]
 
+### Docs — 2026-05-21 (correzioni A1/A2/A3 + nota C2)
+
+#### Modificato
+- `docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md`
+  (MODIFICATO) — A1: rimosso riferimento stale a "sezione 10 DESIGN"
+  nell'intestazione del Gate di verifica globale.
+- `docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md`
+  (MODIFICATO) — A3: corretto ordine N11/N8/N6 nel campo `titolo` del
+  frontmatter (allineato a ordine di implementazione in corpo e PLAN 002).
+  A2a saltata: `[NESSUN RIFERIMENTO TROVATO]` — il DESIGN 002 non cita
+  numeri di riga espliciti per `isScreenReaderActive`.
+- `docs/3-coding-plans/002-PLAN_fix-provider-bootstrap_v0.2.0.md`
+  (MODIFICATO) — C2-NOTA: aggiunta sezione "Nota operativa — Risk C2
+  (screen-reader.ts)" immediatamente prima di "Note per code-Agent-Code".
+  La nota avvisa l'implementatore di non testare i path PIN/sblocco
+  privato (unlockPrivate, setPin, changePin, removePin) fino al
+  completamento di DESIGN 003, per evitare `ReferenceError: document
+  is not defined` originato da `initializeLiveRegions()` privo di guard
+  in `src/lib/screen-reader.ts`.
+- `docs/4-todo-lists/002-TODO_fix-provider-bootstrap_v0.2.0.md`
+  (MODIFICATO) — A2b: aggiornato riferimento righe nel task N8-3 da
+  "righe 63–65" a "righe 62–64" (verificato direttamente in
+  `src/context/AuthContext.tsx`, offset di 1 riga). Altre menzioni
+  "63–65" presenti nei gate N8/GLOBAL restano fuori dal perimetro
+  esplicito dell'operazione A2b (solo testo del task N8-3).
+
 ### Docs — 2026-05-20 (analisi coerenza)
 
 #### Aggiunto

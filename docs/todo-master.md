@@ -36,6 +36,10 @@
 - **Open Threads:** tsconfig.json contiene "types": ["node"] che maschera errori di portabilità TypeScript — valutare se correggere in P0 o rimandare a P1
 - **Next Action:** DESIGN 009 marcato REVIEWED. Precondizione residua P1: identificare o progettare TurboModule WinRT Save Picker per Windows. Prossimo passo: identificazione componente WinRT picker, poi stesura Coding Plan 009.
 
+> **Nota sessione correzioni 2026-05-21:** Correzioni documentali A1/A2/A3 e nota operativa C2 applicate.
+> PLAN 001, DESIGN 002, PLAN 002, TODO 002 aggiornati. A2a su DESIGN 002 saltata (nessun riferimento riga presente).
+> Prossimo passo: analisi gruppo DESIGN 003 e DESIGN 004.
+
 > **Nota sessione analisi 2026-05-20:** Report analisi coerenza DESIGN 001 + DESIGN 002 generato (`docs/1-reports/REPORT_analisi-coerenza_DESIGN-001-002_v1.0.0.md`). In attesa di revisione da donny-81 e consiglio AI. Prossimo passo: revisione report e identificazione azioni correttive se necessarie. Punti critici da valutare: (C1) aggiornamento `App.test.tsx` con mock prima di procedere con DESIGN 002 PRE-3; (C2) rivalutazione Risk R5 in `screen-reader.ts` e aggiunta guard in `initializeLiveRegions`. Azioni documentali raccomandate: (A1) correzione riferimento stale "sezione 10 DESIGN" in PLAN 001; (A2) correzione offset righe 63-65→61-63 in DESIGN 002 e TODO 002; (A3) correzione ordine N6/N8/N11→N11/N8/N6 nel titolo frontmatter DESIGN 002.
 
 > **Nota sessione docs 2026-05-19:** Completata estrazione coding plan da documenti di design. Documenti pronti per l'implementazione:

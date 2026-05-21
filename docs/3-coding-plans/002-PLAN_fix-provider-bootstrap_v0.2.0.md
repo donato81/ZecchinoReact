@@ -453,6 +453,28 @@ su `document` o `window`, il gate N6 ha fallito. Non procedere.
 
 ---
 
+## Nota operativa — Risk C2 (screen-reader.ts)
+
+> **NOTA OPERATIVA — Risk C2 (screen-reader.ts)**
+>
+> Durante l'implementazione di questo piano, non testare i path
+> di codice che coinvolgono le azioni PIN o sblocco conto privato
+> (unlockPrivate, setPin, changePin, removePin) fino al completamento
+> di DESIGN 003.
+>
+> Motivo: `src/lib/screen-reader.ts` contiene il metodo
+> `initializeLiveRegions()` privo di guard DOM. Il metodo viene
+> chiamato da `announce()` se `!this.initialized`. In React Native,
+> dove il costruttore non chiama mai `initializeLiveRegions()`,
+> `initialized` rimane sempre `false`. La prima chiamata a qualsiasi
+> `announce*()` causa `ReferenceError: document is not defined`.
+>
+> Questo file verrà completamente rimosso e riscritto da DESIGN 003,
+> che implementerà il sistema screen reader nativo React Native.
+> La correzione della guard è responsabilità di DESIGN 003, Step 1.
+
+---
+
 ## Note per code-Agent-Code
 
 > **Se un gate fallisce:** tenta di correggerti autonomamente solo se
