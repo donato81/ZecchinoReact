@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { ActivityDetectorView } from '@/components/ActivityDetectorView'
 import { useInactivityTimer } from '@/hooks/use-inactivity-timer'
 import { useAccessibilityDetection } from '@/accessibility/detection'
+import { announce, auth } from '@/announcements'
 
 // Shim temporaneo — rimpiazzare con react-native-toast-message nella fase UI
 const sonnerNotify = {
@@ -194,7 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!isPrivateEnabled || !privatePinHashCache) {
       soundSystem.play('pin-error')
       hapticSystem.pinError()
-      screenReader.announceError('PIN privato non configurato.')
+      announce(auth.pinNotConfigured())
       if (!isScreenReaderActive) {
         sonnerNotify.error('PIN privato non configurato')
       }
@@ -205,7 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!isValid) {
       soundSystem.play('pin-error')
       hapticSystem.pinError()
-      screenReader.announceError('PIN privato non corretto. Riprova.')
+      announce(auth.pinInvalid())
       if (!isScreenReaderActive) {
         sonnerNotify.error('PIN privato non corretto')
       }
@@ -216,14 +217,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setShowPrivatePinDialog(false)
     soundSystem.play('private-unlock')
     hapticSystem.privateUnlock()
-    screenReader.announceSuccess('Conto privato sbloccato.')
+    announce(auth.privateUnlocked())
     if (!isScreenReaderActive) {
       sonnerNotify.success('Conto privato sbloccato')
     }
-  }, [isPrivateEnabled, isScreenReaderActive, privatePinHashCache, screenReader])
+  }, [isPrivateEnabled, isScreenReaderActive, privatePinHashCache])
 
   const lockPrivate = useCallback(() => {
     setIsPrivateUnlocked(false)
+    announce(auth.privateAccountLocked())
   }, [])
 
   const setPin = useCallback(async (pin: string) => {
@@ -238,11 +240,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsPrivateUnlocked(true)
     soundSystem.play('private-unlock')
     hapticSystem.privateUnlock()
-    screenReader.announceSuccess('PIN privato configurato.')
+    announce(auth.pinSet())
     if (!isScreenReaderActive) {
       sonnerNotify.success('PIN privato configurato con successo')
     }
-  }, [isPrivateEnabled, isScreenReaderActive, screenReader])
+  }, [isPrivateEnabled, isScreenReaderActive])
 
   const changePin = useCallback(async (oldPin: string, newPin: string) => {
     if (!isPrivateEnabled || !privatePinHashCache) {
@@ -262,11 +264,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUserSettings(prev => prev ? { ...prev, pinPrivatoHash: newHash } : prev)
     soundSystem.play('private-unlock')
     hapticSystem.privateUnlock()
-    screenReader.announceSuccess('PIN privato modificato.')
+    announce(auth.pinChanged())
     if (!isScreenReaderActive) {
       sonnerNotify.success('PIN privato modificato con successo')
     }
-  }, [isPrivateEnabled, isScreenReaderActive, privatePinHashCache, screenReader])
+  }, [isPrivateEnabled, isScreenReaderActive, privatePinHashCache])
 
   const removePin = useCallback(async (pin: string) => {
     if (!isPrivateEnabled || !privatePinHashCache) {
@@ -285,11 +287,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUserSettings(prev => prev ? { ...prev, pinPrivatoHash: null } : prev)
     setIsPrivateUnlocked(false)
     soundSystem.play('dialog-close')
-    screenReader.announceSuccess('PIN privato rimosso.')
+    announce(auth.pinRemoved())
     if (!isScreenReaderActive) {
       sonnerNotify.success('PIN privato rimosso')
     }
-  }, [isPrivateEnabled, isScreenReaderActive, privatePinHashCache, screenReader])
+  }, [isPrivateEnabled, isScreenReaderActive, privatePinHashCache])
 
   const completeOnboarding = useCallback(() => {
     setNeedsOnboarding(false)
@@ -360,8 +362,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               variant="outline"
               onPress={() => {
                 resetTimer()
-                // TODO: ripristinare l'annuncio screen reader quando screen-reader.ts sarà migrato a RN
-                // screenReader.announceSuccess('Sessione mantenuta attiva.')
+                announce(auth.sessionKept())
               }}
             >
               Rimani connesso
