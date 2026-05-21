@@ -80,3 +80,5 @@ yarn-error.log
 .env.development
 .env.production
 .env*.local
+# Cartella workspace personale AI
+Zecchino-React-Work-Spaces-AI/
