@@ -8,6 +8,20 @@
   DESIGN 001, 002, 003. Registro di Stato aggiornato.
   Snapshot di Ripresa aggiornato. Log di Validazione popolato.
   Sezione 1 metadati aggiornati.
+- docs/3-coding-plans/004-PLAN_announcements-layer_v1_0_0.md:
+  revisione documentale completata. Verifica precondizioni
+  (DESIGN 003 outputs su filesystem) ed allineamento frontmatter
+  alla convenzione PLAN 003 confermati: nessuna correzione
+  chirurgica necessaria. Documento confermato READY per validazione
+  Consiglio AI.
+- docs/4-todo-lists/004-TODO_announcements-layer_v1.0.0.md: CREATO.
+  Documento operativo derivato dai 14 task del PLAN 004 (T1–T14)
+  con id `T4.Bx.Ny`, gate 1–7, snapshot, note operative e log
+  validazione. Stato iniziale: PENDING.
+- docs/todo-master.md: stato avanzamento DESIGN 004. Blocco in
+  Carico aggiornato a "documentazione completata in attesa
+  validazione". Active Phase, Next Action, riga ledger P1.B4 e
+  log di validazione 2026-05-21 aggiunti.
 
 ### DESIGN 002 — STEP 002 (Fix Provider Bootstrap — useInactivityTimer & detection SR)
 
