@@ -10,7 +10,7 @@ import { soundSystem } from '@/lib/sound-system'
 import { hapticSystem } from '@/lib/haptic-system'
 import { Button } from '@/components/ui/button'
 import { useInactivityTimer } from '@/hooks/use-inactivity-timer'
-import { useScreenReader } from '@/hooks/use-screen-reader'
+import { useAccessibilityDetection } from '@/accessibility/detection'
 
 // Shim temporaneo — rimpiazzare con react-native-toast-message nella fase UI
 const sonnerNotify = {
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthReady, setIsAuthReady] = useState(false)
   const [privatePinHashCache, setPrivatePinHashCache] = useState<string | null | undefined>(undefined)
   const [userSettings, setUserSettings] = useState<UserSettings | null>(null)
-  const screenReader = useScreenReader()
+  const { talkBackState } = useAccessibilityDetection()
   const isScreenReaderActive = typeof document !== 'undefined'
     && document.querySelector('[aria-live]') !== null
     && document.documentElement.getAttribute('data-sr-active') === 'true'
