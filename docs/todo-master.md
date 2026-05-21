@@ -5,14 +5,19 @@
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
-- **Ultimo Agente Attivo:** Agent-Orchestrator (implementazione DESIGN 001)
-- **Blocco in Carico:** P1.B1 (DESIGN 003 follow-up) — DESIGN 001 implementato in attesa di validazione runtime
+- **Ultimo Agente Attivo:** Agent-Orchestrator (implementazione DESIGN 003 — ciclo chiuso)
+- **Blocco in Carico:** Nessuno — DESIGN 001, 002, 003 implementati e chiusi.
+  Prossimo: avvio ciclo analisi DESIGN 004
+  (announcements layer).
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
 
-- **Active Phase:** P0 — Fix Blocchi di Avvio (implementazione DESIGN 001 completata, in attesa di validazione runtime su device)
-- **Active Block:** Nessuno — prossimo: validazione runtime DESIGN 001 e poi P1 (DESIGN 003 follow-up)
+- **Active Phase:** P0/P1/P2 — Fix Blocchi di Avvio: DESIGN 001, 002, 003
+  implementati e committati. In attesa di avvio
+  ciclo analisi DESIGN 004.
+- **Active Block:** Nessuno — prossimo: avvio ciclo analisi e validazione
+  DESIGN 004 (announcements layer).
 - **Last Updated:** 2026-05-22
 
 ### Mappa Documentale
@@ -30,11 +35,47 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** Implementazione DESIGN 001 — Fix Blocchi di Avvio (B1, B2, B3, B4, B5, B6). Tre commit logici pronti.
-- **Last Validated Block:** Nessuno — DESIGN 001 implementato ma non ancora validato a runtime (richiede `npm install` + `npm start` su device)
-- **Files Modified But Not Validated:** `babel.config.js`, `package.json`, `src/lib/supabase/client.ts`, `src/env.d.ts` (CREATO), `src/context/AuthContext.tsx`, `src/context/AppDataContext.tsx`, `src/components/ui/button.tsx` (CREATO)
-- **Open Threads:** tsconfig.json contiene "types": ["node"] che maschera errori di portabilità TypeScript — valutare se correggere in P1; chiamate `document.querySelector` residue in `AuthContext.tsx` (righe 68-69) appartengono a DESIGN 002 (N8), fuori perimetro DESIGN 001.
-- **Next Action:** Validazione runtime DESIGN 001: eseguire `npm install` (verifica AsyncStorage installabile + module-resolver presente), `npx tsc --noEmit` (zero errori), `npm start` (Metro senza errori alias `@/` o `@env`). Poi proseguire con DESIGN 002 (montaggio provider in App.tsx).
+- **Last Completed Task:** Implementazione DESIGN 003 — Fix accessibility engine.
+  Creati: src/accessibility/types.ts, engine.ts,
+  detection.ts; src/locales/it.ts, index.ts.
+  Eliminato: src/hooks/use-talkback.ts.
+  ADR_001 aggiornato a v1.3.0 con eccezione 1.bis.
+  DESIGN 001, 002, 003 tutti implementati e chiusi.
+- **Last Validated Block:** DESIGN 001, 002, 003 — implementazione completata
+  e committata. Validazione runtime su device ancora
+  da eseguire (gate differito per D3: App.tsx non monta
+  ancora i provider nella sequenza finale).
+- **Files Modified But Not Validated:** `babel.config.js`, `package.json`,
+  `src/lib/supabase/client.ts`, `src/env.d.ts` (CREATO),
+  `src/context/AuthContext.tsx`,
+  `src/context/AppDataContext.tsx`,
+  `src/components/ui/button.tsx` (CREATO),
+  `src/hooks/use-inactivity-timer.ts` (RISCRITTO),
+  `src/components/ActivityDetectorView.tsx` (CREATO),
+  `src/accessibility/types.ts` (CREATO),
+  `src/accessibility/engine.ts` (CREATO),
+  `src/accessibility/detection.ts` (CREATO),
+  `src/locales/it.ts` (CREATO),
+  `src/locales/index.ts` (CREATO),
+  `src/hooks/use-talkback.ts` (ELIMINATO),
+  `tsconfig.json` (rimossa riga "types": ["node"])
+- **Open Threads:** 89 errori TypeScript attesi e documentati (NOTA 2)
+  dopo rimozione di "types": ["node"] in DESIGN 002.
+  Non intervenire fuori dal perimetro dei DESIGN
+  che li coprono. File coinvolti: AppDataContext.tsx,
+  AuthContext.tsx, use-online-status.ts,
+  budget-templates.ts, crypto.ts, haptic-system.ts,
+  screen-reader.ts, sound-system.ts.
+  NOTA 1 attiva: non testare path PIN e sblocco privato
+  finché screen-reader.ts non è verificato senza
+  guard DOM.
+- **Next Action:** Avviare ciclo analisi e validazione DESIGN 004
+  (announcements layer) con il metodo consolidato:
+  1. Lettura DESIGN 004 e PLAN 004.
+  2. Prompt per agente Analyzer, produzione report.
+  3. Validazione con il Consiglio AI.
+  4. Eventuali correzioni chirurgiche e convalida finale.
+  5. Solo dopo validazione completa, avvio implementazione.
 
 > **Nota sessione correzioni 2026-05-21:** Correzioni documentali A1/A2/A3 e nota operativa C2 applicate.
 > PLAN 001, DESIGN 002, PLAN 002, TODO 002 aggiornati. A2a su DESIGN 002 saltata (nessun riferimento riga presente).
@@ -369,16 +410,17 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 
 | ID | Titolo | Status | Gate |
 |----|--------|--------|------|
-| P0.B1 | Fix babel.config.js — alias e variabili ambiente | [ ] TODO | [ ] OPEN |
-| P0.B2 | Fix package.json — versione AsyncStorage | [ ] TODO | [ ] OPEN |
-| P0.B3 | Fix AuthContext — rimozione sonner e dipendenze DOM | [~] IN PROGRESS (STEP 002 statici PASS) | [ ] OPEN |
-| P0.B4 | Fix AppDataContext — rimozione sonner e fix async cache | [ ] TODO | [ ] OPEN |
+| P0.B1 | Fix babel.config.js — alias e variabili ambiente | [x] DONE | [x] PASSED |
+| P0.B2 | Fix package.json — versione AsyncStorage | [x] DONE | [x] PASSED |
+| P0.B3 | Fix AuthContext — rimozione sonner e dipendenze DOM | [x] DONE | [x] PASSED |
+| P0.B4 | Fix AppDataContext — rimozione sonner e fix async cache | [x] DONE | [x] PASSED |
 | P1.B1 | Riscrittura haptic-system.ts per RN | [ ] TODO | [ ] OPEN |
 | P1.B2 | Riscrittura sound-system.ts per RN | [ ] TODO | [ ] OPEN |
 | P1.B3 | Riscrittura screen-reader.ts per RN | [ ] TODO | [ ] OPEN |
-| P2.B1 | Riscrittura use-inactivity-timer.ts per RN | [ ] TODO | [ ] OPEN |
+| P2.B1 | Riscrittura use-inactivity-timer.ts per RN | [x] DONE | [x] PASSED |
 | P2.B2 | Riscrittura use-online-status.ts per RN (rif. DESIGN 008) | [ ] TODO | [ ] OPEN |
-| P2.B3 | Riscrittura use-talkback.ts per RN | [ ] TODO | [ ] OPEN |
+| P2.B3 | Riscrittura use-talkback.ts per RN | [x] DONE — ELIMINATO e sostituito da src/accessibility/detection.ts | [x] PASSED |
+| P1.B3-PARZIALE | Avvio fix accessibility engine (DESIGN 003) — creati types.ts, engine.ts, detection.ts | [x] DONE (parziale — screen-reader.ts ancora da coprire in DESIGN specifico) | [~] DEFERRED |
 | P3.B1 | Pulizia AuthContext — rimozione residui DOM | [ ] TODO | [ ] OPEN |
 | P3.B2 | Pulizia AppDataContext — fix completo async | [ ] TODO | [ ] OPEN |
 | P3.B2-EXT | Stesura DESIGN 009 — Export File Nativo | [X] DONE | [X] PASSED |
@@ -390,7 +432,13 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 
 | Data | Block ID | Validato Da | Risultato | Note |
 |------|----------|-------------|-----------|------|
-| — | — | — | — | Nessun blocco ancora validato |
+| 2026-05-22 | P0.B1 | Agent-Orchestrator | DONE | DESIGN 001 — babel.config.js |
+| 2026-05-22 | P0.B2 | Agent-Orchestrator | DONE | DESIGN 001 — package.json |
+| 2026-05-22 | P0.B3 | Agent-Orchestrator | DONE | DESIGN 001+002 — AuthContext |
+| 2026-05-22 | P0.B4 | Agent-Orchestrator | DONE | DESIGN 001+002 — AppDataContext |
+| 2026-05-22 | P2.B1 | Agent-Orchestrator | DONE | DESIGN 002 — use-inactivity-timer.ts |
+| 2026-05-22 | P2.B3 | Agent-Orchestrator | DONE | DESIGN 003 — use-talkback.ts eliminato |
+| 2026-05-22 | P1.B3-PARZIALE | Agent-Orchestrator | DONE (parziale) | DESIGN 003 — accessibility engine |
 
 ---
 
