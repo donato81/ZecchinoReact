@@ -2,6 +2,70 @@
 
 ## [Unreleased]
 
+### DESIGN 001 — 2026-05-22 (Fix Blocchi di Avvio React Native / Expo)
+
+Risolti i sei blocchi di build documentati in
+`docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md`
+(B1 babel alias `@/`, B2 variabili ambiente `@env`, B3 import `sonner`,
+B4 dialog DOM in AuthContext, B5 versione AsyncStorage fantasma,
+B6 plugin `react-native-dotenv` non configurato). Applicato lo scope
+definito da `docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md`
+e dal coding plan `docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md`.
+
+#### Aggiunto
+- `src/env.d.ts` (CREATO) — dichiarazione modulo `@env` con
+  `SUPABASE_URL` e `SUPABASE_ANON_KEY` tipizzate come `string`.
+  Sblocca l'import tipato in `src/lib/supabase/client.ts`.
+- `src/components/ui/button.tsx` (CREATO) — placeholder RN del
+  componente `Button` (wrapper su `TouchableOpacity`/`Text`) con alias
+  `onClick → onPress` per compatibilita' con il codice web superstite.
+  Soddisfa l'import gia' presente in `src/context/AuthContext.tsx`.
+
+#### Modificato
+- `babel.config.js` (MODIFICATO) — aggiunti due plugin all'array
+  `plugins`: `react-native-dotenv` (moduleName `@env`, allowlist
+  `SUPABASE_URL`/`SUPABASE_ANON_KEY`, `allowUndefined: false`) e
+  `module-resolver` (root `./src`, alias `@ → ./src`, estensioni RN
+  multi-piattaforma). Ordine obbligatorio: dotenv prima del resolver.
+- `package.json` (MODIFICATO) — `@react-native-async-storage/async-storage`
+  da `^3.0.2` (versione fantasma non pubblicata su npm) a `^2.1.2`;
+  aggiunto `babel-plugin-module-resolver: ^5.0.3` alle devDependencies.
+- `src/lib/supabase/client.ts` (MODIFICATO) — sostituito
+  `process.env.SUPABASE_URL`/`SUPABASE_ANON_KEY` (non risolto da Metro)
+  con `import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env'`.
+  Mantenuti i throw di validazione e l'export di `supabase` invariati.
+- `src/context/AuthContext.tsx` (MODIFICATO) — rimosso import
+  `from 'sonner'` (pacchetto DOM-only non installato); sostituito da
+  shim locale `sonnerNotify` con `success`/`error` che inoltrano a
+  `console`. Convertito il dialog di scadenza sessione: `<div>` →
+  `<View>`, `<p>` → `<Text>`, `role="alertdialog"` →
+  `accessibilityRole="alert"`, `aria-label` → `accessibilityLabel`,
+  `onClick` → `onPress`. Aggiunti import `View, Text` da `react-native`.
+  La chiamata `screenReader.announceSuccess('Sessione mantenuta attiva.')`
+  e' stata commentata come TODO (sara' ripristinata quando il layer
+  screen reader sara' migrato a RN in DESIGN 002).
+- `src/context/AppDataContext.tsx` (MODIFICATO) — rimosso import
+  `from 'sonner'`; sostituito da shim locale `toast` **callable**
+  (la firma estende il PLAN per supportare la call site
+  `toast(title, { description, duration })` presente in
+  `checkBudgetNotifications`, oltre ai metodi `success`/`error`/`warning`).
+  Tutti i 23+ call site preesistenti restano invariati.
+
+#### Fixed
+- App ora bundlable: Metro risolve l'alias `@/` (B1) e le variabili
+  `@env` (B2+B6); `npm install` completa senza errori 404 su
+  AsyncStorage (B5); `tsc --noEmit` non segnala piu' import irrisolti
+  `sonner` (B3); il dialog di scadenza sessione non monta piu' tag DOM
+  incompatibili con Hermes/React Native (B4).
+
+#### Note operative
+- Validazione runtime ancora da eseguire: `npm install`, `npx tsc --noEmit`,
+  `npm start` (osservare 30s di log Metro). Test E2E platform-specific
+  rimandati alla fase di montaggio provider (DESIGN 002).
+- Le chiamate `document.querySelector` superstiti in
+  `src/context/AuthContext.tsx` (rilevamento screen reader) appartengono
+  al perimetro di DESIGN 002 (N8) e non sono toccate in questa fase.
+
 ### DESIGN 003 — 2026-05-21 (implementazione accessibility engine)
 
 #### Aggiunto

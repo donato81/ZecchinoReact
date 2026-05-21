@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { View, Text } from 'react-native'
 import type { Session, User } from '@supabase/supabase-js'
 import { hashPin, verifyPin } from '@/lib/crypto'
 import { supabase } from '@/lib/supabase/client'
@@ -10,7 +11,12 @@ import { hapticSystem } from '@/lib/haptic-system'
 import { Button } from '@/components/ui/button'
 import { useInactivityTimer } from '@/hooks/use-inactivity-timer'
 import { useScreenReader } from '@/hooks/use-screen-reader'
-import { toast as sonnerNotify } from 'sonner'
+
+// Shim temporaneo — rimpiazzare con react-native-toast-message nella fase UI
+const sonnerNotify = {
+  success: (message: string) => console.log('[toast:success]', message),
+  error: (message: string) => console.error('[toast:error]', message),
+}
 
 interface AuthContextValue {
   user: User | null
@@ -320,19 +326,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={value}>
       {children}
       {showWarning && isAuthenticated ? (
-        <div className="fixed bottom-4 left-4 right-4 z-50 rounded-lg border bg-background/95 p-4 shadow-lg backdrop-blur" role="alertdialog" aria-live="assertive" aria-label="Avviso scadenza sessione">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-foreground">La tua sessione scadrà tra 1 minuto. Vuoi rimanere connesso?</p>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => { resetTimer(); screenReader.announceSuccess('Sessione mantenuta attiva.') }}>
-                Rimani connesso
-              </Button>
-              <Button variant="destructive" onClick={() => { void signOut() }}>
-                Esci ora
-              </Button>
-            </div>
-          </div>
-        </div>
+        <View accessibilityRole="alert" accessibilityLabel="Avviso scadenza sessione">
+          <Text>La tua sessione scadrà tra 1 minuto. Vuoi rimanere connesso?</Text>
+          <View>
+            <Button
+              variant="outline"
+              onPress={() => {
+                resetTimer()
+                // TODO: ripristinare l'annuncio screen reader quando screen-reader.ts sarà migrato a RN
+                // screenReader.announceSuccess('Sessione mantenuta attiva.')
+              }}
+            >
+              Rimani connesso
+            </Button>
+            <Button
+              variant="destructive"
+              onPress={() => { void signOut() }}
+            >
+              Esci ora
+            </Button>
+          </View>
+        </View>
       ) : null}
     </AuthContext.Provider>
   )

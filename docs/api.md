@@ -301,7 +301,7 @@ Tipi DB e di settings. Uso interno al layer `src/lib/supabase/`.
 
 Singleton Supabase. Dipendenza: `@supabase/supabase-js`.
 
-> ⚠️ **Blocco build attuale**: legge `process.env.SUPABASE_URL` e `SUPABASE_ANON_KEY` con `throw` immediato se assenti. Richiede il plugin Babel `react-native-dotenv` per iniettarle.
+> ✅ **DESIGN 001 risolto**: il client importa `SUPABASE_URL` e `SUPABASE_ANON_KEY` dal modulo `@env` (plugin Babel `react-native-dotenv` configurato in `babel.config.js`). Mantenuto il `throw` immediato come guardia.
 
 ### Esportazioni
 
@@ -428,7 +428,7 @@ Lettura/scrittura preferenze utente. Dipendenza: `@supabase/supabase-js`.
 ## `src/context/AuthContext.tsx` ⚠️
 
 Provider auth + gestione PIN privato.  
-**Import problematici**: `sonner` (non installato, DOM-only), `@/components/ui/button` (componente mancante), `document.querySelector` per screen reader detection.
+**Import problematici risolti (DESIGN 001)**: `sonner` sostituito da shim locale `sonnerNotify`; `@/components/ui/button` ora esiste come placeholder RN (`src/components/ui/button.tsx`); le chiamate residue `document.querySelector` per screen reader detection appartengono al perimetro DESIGN 002.
 
 ### Hook esportato
 
@@ -468,7 +468,7 @@ Provider auth + gestione PIN privato.
 ## `src/context/AppDataContext.tsx` ⚠️
 
 Provider CRUD dati di dominio + gestione dialog.  
-**Import problematici**: `sonner` (non installato, DOM-only).  
+**Import problematici risolti (DESIGN 001)**: `sonner` sostituito da shim locale `toast` callable con metodi `success`/`error`/`warning`.  
 **Bug noto**: `readCache`/`isCacheStale` invocate come sincrone invece di `await`.
 
 ### Hook esportato

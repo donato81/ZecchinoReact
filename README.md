@@ -41,9 +41,7 @@ SUPABASE_URL=https://<progetto>.supabase.co
 SUPABASE_ANON_KEY=<chiave-anonima>
 ```
 
-Le variabili vengono iniettate da `react-native-dotenv` e lette in `src/lib/supabase/client.ts`.
-
-> âš ï¸ Il plugin `react-native-dotenv` **non Ã¨ ancora configurato** in `babel.config.js` â€” Ã¨ uno dei blocchi build correnti.
+Le variabili vengono iniettate da `react-native-dotenv` (plugin configurato in `babel.config.js`) e lette tramite `import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env'` in `src/lib/supabase/client.ts`.
 
 ---
 
@@ -52,9 +50,6 @@ Le variabili vengono iniettate da `react-native-dotenv` e lette in `src/lib/supa
 ```bash
 npm install
 ```
-
-> âš ï¸ `package.json` contiene una versione errata di AsyncStorage (`^3.0.2`, non esiste su npm).  
-> Correggere manualmente a `^2.x` prima di eseguire `npm install`.
 
 ---
 

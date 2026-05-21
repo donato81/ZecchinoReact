@@ -5,7 +5,25 @@ import { shouldShowBudgetNotification, getBudgetNotificationTitle } from '@/lib/
 import { soundSystem } from '@/lib/sound-system'
 import { hapticSystem } from '@/lib/haptic-system'
 import { useScreenReader } from '@/hooks/use-screen-reader'
-import { toast } from 'sonner'
+
+// Shim temporaneo — rimpiazzare con react-native-toast-message nella fase UI.
+// Lo shim e' callable: i call site usano sia `toast(title, opts)` (in
+// checkBudgetNotifications) sia `toast.success / .error / .warning`.
+type ToastOpts = { description?: string; duration?: number }
+type ToastFn = ((message: string, opts?: ToastOpts) => void) & {
+  success: (message: string, opts?: ToastOpts) => void
+  error: (message: string, opts?: ToastOpts) => void
+  warning: (message: string, opts?: ToastOpts) => void
+}
+const toastBase: (message: string, opts?: ToastOpts) => void = (message, opts) =>
+  console.log('[toast]', message, opts?.description ?? '')
+const toast = toastBase as ToastFn
+toast.success = (message, opts) =>
+  console.log('[toast:success]', message, opts?.description ?? '')
+toast.error = (message, opts) =>
+  console.error('[toast:error]', message, opts?.description ?? '')
+toast.warning = (message, opts) =>
+  console.warn('[toast:warning]', message, opts?.description ?? '')
 import {
   getAll as getAllConti, create as createConto,
   update as updateConto, remove as removeConto,

@@ -5,15 +5,15 @@
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
-- **Ultimo Agente Attivo:** [da compilare alla prima sessione di codifica]
-- **Blocco in Carico:** P0.B1
+- **Ultimo Agente Attivo:** Agent-Orchestrator (implementazione DESIGN 001)
+- **Blocco in Carico:** P1.B1 (DESIGN 003 follow-up) — DESIGN 001 implementato in attesa di validazione runtime
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
 
-- **Active Phase:** P0 — Fix Blocchi di Avvio
-- **Active Block:** P0.B1 — Fix babel.config.js
-- **Last Updated:** 2026-05-13
+- **Active Phase:** P0 — Fix Blocchi di Avvio (implementazione DESIGN 001 completata, in attesa di validazione runtime su device)
+- **Active Block:** Nessuno — prossimo: validazione runtime DESIGN 001 e poi P1 (DESIGN 003 follow-up)
+- **Last Updated:** 2026-05-22
 
 ### Mappa Documentale
 
@@ -30,11 +30,11 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** Stesura `docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md`
-- **Last Validated Block:** Nessuno — nessun blocco ancora completato
-- **Files Modified But Not Validated:** Nessuno
-- **Open Threads:** tsconfig.json contiene "types": ["node"] che maschera errori di portabilità TypeScript — valutare se correggere in P0 o rimandare a P1
-- **Next Action:** DESIGN 009 marcato REVIEWED. Precondizione residua P1: identificare o progettare TurboModule WinRT Save Picker per Windows. Prossimo passo: identificazione componente WinRT picker, poi stesura Coding Plan 009.
+- **Last Completed Task:** Implementazione DESIGN 001 — Fix Blocchi di Avvio (B1, B2, B3, B4, B5, B6). Tre commit logici pronti.
+- **Last Validated Block:** Nessuno — DESIGN 001 implementato ma non ancora validato a runtime (richiede `npm install` + `npm start` su device)
+- **Files Modified But Not Validated:** `babel.config.js`, `package.json`, `src/lib/supabase/client.ts`, `src/env.d.ts` (CREATO), `src/context/AuthContext.tsx`, `src/context/AppDataContext.tsx`, `src/components/ui/button.tsx` (CREATO)
+- **Open Threads:** tsconfig.json contiene "types": ["node"] che maschera errori di portabilità TypeScript — valutare se correggere in P1; chiamate `document.querySelector` residue in `AuthContext.tsx` (righe 68-69) appartengono a DESIGN 002 (N8), fuori perimetro DESIGN 001.
+- **Next Action:** Validazione runtime DESIGN 001: eseguire `npm install` (verifica AsyncStorage installabile + module-resolver presente), `npx tsc --noEmit` (zero errori), `npm start` (Metro senza errori alias `@/` o `@env`). Poi proseguire con DESIGN 002 (montaggio provider in App.tsx).
 
 > **Nota sessione correzioni 2026-05-21:** Correzioni documentali A1/A2/A3 e nota operativa C2 applicate.
 > PLAN 001, DESIGN 002, PLAN 002, TODO 002 aggiornati. A2a su DESIGN 002 saltata (nessun riferimento riga presente).
@@ -157,7 +157,7 @@ Per ogni blocco all'interno di una fase compilare un blocco separato con questa 
 - **Parent Phase:** P0
 - **Reference Documents:** docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md, docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md
 - **Technical Scope:** Solo babel.config.js. Nessuna modifica ad altri file.
-- **Block Status:** [ ] TODO
+- **Block Status:** [x] DONE — implementato 2026-05-22 (Agent-Orchestrator). Gate di validazione runtime non ancora eseguito.
 
 #### Mappa delle Dipendenze
 - **Depends On:** Nessuno — primo blocco

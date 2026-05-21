@@ -15,11 +15,11 @@
 | Multi-platform | react-native-windows | ^0.82.5 | ✅ |
 | Backend | Supabase JS | ^2.105.4 | ✅ |
 | Auth | Supabase Auth | — | ✅ |
-| Storage locale | AsyncStorage | ^2.x (dipendenza corrente errata: ^3.x) | ⚠️ da correggere |
+| Storage locale | AsyncStorage | ^2.1.2 | ✅ allineato (DESIGN 001) |
 | Hashing PIN | bcryptjs | ^3.0.3 | ✅ |
 | Cifratura dati | crypto.subtle (Web Crypto) | — | ❌ non supportato in Hermes |
-| Env vars | react-native-dotenv | — | ⚠️ non configurato in babel.config.js |
-| Alias path | babel-plugin-module-resolver | — | ⚠️ non configurato |
+| Env vars | react-native-dotenv | ^3.4.11 | ✅ configurato in babel.config.js (DESIGN 001) |
+| Alias path | babel-plugin-module-resolver | ^5.0.3 | ✅ configurato in babel.config.js (DESIGN 001) |
 
 ---
 
