@@ -4,7 +4,7 @@ import { formatCurrency, exportToCSV, downloadFile, getActiveBudgets, getBudgetP
 import { shouldShowBudgetNotification, getBudgetNotificationTitle } from '@/lib/budget-alerts'
 import { soundSystem } from '@/lib/sound-system'
 import { hapticSystem } from '@/lib/haptic-system'
-import { useScreenReader } from '@/hooks/use-screen-reader'
+import { announce, accounts as accountsAnn, budgets as budgetsAnn } from '@/announcements'
 
 // Shim temporaneo — rimpiazzare con react-native-toast-message nella fase UI.
 // Lo shim e' callable: i call site usano sia `toast(title, opts)` (in
@@ -204,8 +204,6 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const safeCategories = useMemo(() => categories, [categories])
   const safeBudgets = useMemo(() => budgets, [budgets])
   const safeSavingsGoals = useMemo(() => savingsGoals, [savingsGoals])
-
-  const screenReader = useScreenReader()
 
   const applyDomainSnapshot = useCallback((snapshot: DomainSnapshot) => {
     setAccounts(snapshot.accounts)
@@ -490,14 +488,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         soundSystem.play('save')
         hapticSystem.save()
         toast.success('Conto modificato')
-        screenReader.announceSuccess(`Conto ${account.nome} modificato con successo.`)
+        announce(accountsAnn.announceAccountModified(account.nome))
       } else {
         const { id: _id, ...data } = account
         await addAccount(data)
         soundSystem.play('account-created')
         hapticSystem.accountCreated()
         toast.success(`Conto "${account.nome}" creato`)
-        screenReader.announceSuccess(`Nuovo conto ${account.nome} di tipo ${account.tipo} creato con saldo iniziale di ${formatCurrency(account.saldoIniziale)}.`)
+        announce(accountsAnn.announceAccountCreated(account.nome, account.tipo, account.saldoIniziale))
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Errore durante il salvataggio del conto'
@@ -517,7 +515,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         soundSystem.play('save')
         hapticSystem.save()
         toast.success('Movimento modificato')
-        screenReader.announceSuccess('Movimento modificato con successo.')
+        announce(accountsAnn.announceTransactionModified())
       } else {
         const { id: _id, ...createData } = transactionData
         await addTransaction(createData)
@@ -533,12 +531,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         }
         const account = accounts.find(a => a.id === transaction.contoId)
         const category = categories.find(c => c.id === transaction.categoriaId)
+        void category
         toast.success(`Movimento aggiunto: ${transaction.tipo} ${formatCurrency(transaction.importo)} - ${account?.nome || ''}`)
-        screenReader.announceTransaction(
-          transaction.tipo,
-          transaction.importo,
-          account?.nome || 'Conto sconosciuto',
-          category?.nome
+        announce(
+          accountsAnn.announceTransaction(
+            transaction.tipo,
+            transaction.importo,
+            account?.nome || 'Conto sconosciuto',
+          ),
         )
         if (transaction.tipo === 'uscita') {
           checkBudgetNotifications([...transactions, { ...transaction, cifrato: false, id: transaction.id ?? '' }])
@@ -559,14 +559,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         soundSystem.play('save')
         hapticSystem.save()
         toast.success('Budget modificato')
-        screenReader.announceSuccess(`Budget ${budget.nome} modificato.`)
+        announce(budgetsAnn.announceBudgetModified(budget.nome))
       } else {
         const { id: _id, ...data } = budget
         await addBudget(data)
         soundSystem.play('budget-created')
         hapticSystem.budgetCreated()
         toast.success(`Budget "${budget.nome}" creato`)
-        screenReader.announceSuccess(`Nuovo budget ${budget.nome} creato. Importo target: ${formatCurrency(budget.importoTarget)} per periodo ${budget.periodo}.`)
+        announce(budgetsAnn.announceBudgetCreated(budget.nome, budget.importoTarget, budget.periodo))
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Errore durante il salvataggio del budget'
@@ -583,14 +583,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         soundSystem.play('save')
         hapticSystem.save()
         toast.success('Obiettivo di risparmio modificato')
-        screenReader.announceSuccess(`Obiettivo ${goal.nome} modificato.`)
+        announce(budgetsAnn.announceSavingsGoalModified(goal.nome))
       } else {
         const { id: _id, ...data } = goal
         await addSavingsGoal(data)
         soundSystem.play('goal-created')
         hapticSystem.goalCreated()
         toast.success(`Obiettivo "${goal.nome}" creato`)
-        screenReader.announceSuccess(`Nuovo obiettivo di risparmio ${goal.nome} creato. Target: ${formatCurrency(goal.importoTarget)}.`)
+        announce(budgetsAnn.announceSavingsGoalCreated(goal.nome, goal.importoTarget))
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Errore durante il salvataggio'
@@ -610,14 +610,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         hapticSystem.accountDeleted()
         toast.success('Conto eliminato')
         if (account) {
-          screenReader.announceSuccess(`Conto ${account.nome} eliminato. Tutti i movimenti associati sono stati rimossi.`)
+          announce(accountsAnn.announceAccountDeleted(account.nome, true))
         } else {
-          screenReader.announceSuccess('Conto eliminato.')
+          announce(accountsAnn.announceAccountDeletedGeneric())
         }
       } else if (deletingItem.type === 'transaction') {
         await removeTransaction(deletingItem.id)
         toast.success('Movimento eliminato')
-        screenReader.announceSuccess('Movimento eliminato.')
+        announce(accountsAnn.announceTransactionDeleted())
       } else if (deletingItem.type === 'budget') {
         const budget = budgets.find(b => b.id === deletingItem.id)
         await removeBudget(deletingItem.id)
@@ -625,18 +625,18 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         hapticSystem.budgetDeleted()
         toast.success('Budget eliminato')
         if (budget) {
-          screenReader.announceSuccess(`Budget ${budget.nome} eliminato.`)
+          announce(budgetsAnn.announceBudgetDeleted(budget.nome))
         } else {
-          screenReader.announceSuccess('Budget eliminato.')
+          announce(budgetsAnn.announceBudgetDeletedGeneric())
         }
       } else if (deletingItem.type === 'savingsGoal') {
         const goal = savingsGoals.find(g => g.id === deletingItem.id)
         await removeSavingsGoal(deletingItem.id)
         toast.success('Obiettivo di risparmio eliminato')
         if (goal) {
-          screenReader.announceSuccess(`Obiettivo ${goal.nome} eliminato.`)
+          announce(budgetsAnn.announceSavingsGoalDeleted(goal.nome))
         } else {
-          screenReader.announceSuccess('Obiettivo eliminato.')
+          announce(budgetsAnn.announceSavingsGoalDeletedGeneric())
         }
       }
     } catch (err) {
@@ -651,7 +651,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     soundSystem.play('export')
     hapticSystem.export()
     toast.success('Dati esportati in CSV')
-    screenReader.announceSuccess(`Dati esportati. ${visibleTransactions.length} movimenti salvati in formato CSV.`)
+    announce(accountsAnn.announceExportCSV(visibleTransactions.length))
   }
 
   const handleViewBudget = (budgetId: string, onNavigate: (budget: Budget) => void) => {
