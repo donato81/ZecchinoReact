@@ -5,20 +5,22 @@
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
-- **Ultimo Agente Attivo:** Agent-Orchestrator (implementazione DESIGN 003 — ciclo chiuso)
+- **Ultimo Agente Attivo:** Agent-Docs (documentazione DESIGN 004 completata — PLAN 004 verificato, TODO 004 creato)
 - **Blocco in Carico:** Nessuno — DESIGN 001, 002, 003 implementati e chiusi.
-  Prossimo: avvio ciclo analisi DESIGN 004
-  (announcements layer).
+  In attesa avvio implementazione DESIGN 004
+  (announcements layer) dopo validazione documentale
+  completata con il Consiglio AI.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
 
-- **Active Phase:** P0/P1/P2 — Fix Blocchi di Avvio: DESIGN 001, 002, 003
-  implementati e committati. In attesa di avvio
-  ciclo analisi DESIGN 004.
-- **Active Block:** Nessuno — prossimo: avvio ciclo analisi e validazione
-  DESIGN 004 (announcements layer).
-- **Last Updated:** 2026-05-22
+- **Active Phase:** P0/P1/P2 completate. Documentazione DESIGN 004
+  ultimata (PLAN 004 verificato e allineato; TODO 004
+  creato in `docs/4-todo-lists/`). Prossimo: validazione
+  Consiglio AI e avvio implementazione.
+- **Active Block:** Nessuno — documentazione DESIGN 004 pronta per
+  validazione.
+- **Last Updated:** 2026-05-21
 
 ### Mappa Documentale
 
@@ -69,13 +71,15 @@
   NOTA 1 attiva: non testare path PIN e sblocco privato
   finché screen-reader.ts non è verificato senza
   guard DOM.
-- **Next Action:** Avviare ciclo analisi e validazione DESIGN 004
-  (announcements layer) con il metodo consolidato:
-  1. Lettura DESIGN 004 e PLAN 004.
-  2. Prompt per agente Analyzer, produzione report.
-  3. Validazione con il Consiglio AI.
-  4. Eventuali correzioni chirurgiche e convalida finale.
-  5. Solo dopo validazione completa, avvio implementazione.
+- **Next Action:** Avviare validazione DESIGN 004 con il Consiglio AI.
+  Documenti pronti per la review:
+  - `docs/2-projects/004-DESIGN_announcements-layer_v1_0_0.md`
+  - `docs/3-coding-plans/004-PLAN_announcements-layer_v1_0_0.md`
+  - `docs/4-todo-lists/004-TODO_announcements-layer_v1.0.0.md`
+  Procedura: identica ai cicli DESIGN 001/002/003
+  (review Consiglio AI → eventuali correzioni
+  chirurgiche → convalida finale → avvio
+  implementazione).
 
 > **Nota sessione correzioni 2026-05-21:** Correzioni documentali A1/A2/A3 e nota operativa C2 applicate.
 > PLAN 001, DESIGN 002, PLAN 002, TODO 002 aggiornati. A2a su DESIGN 002 saltata (nessun riferimento riga presente).
@@ -427,6 +431,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P4.B1 | Creazione componente Button nativo | [ ] TODO | [ ] OPEN |
 | P4.B2 | Creazione sistema Toast/notifica nativo | [ ] TODO | [ ] OPEN |
 | P5.B1 | Implementazione screens | [ ] TODO | [ ] OPEN |
+| P1.B4 | Documentazione DESIGN 004 completata (PLAN + TODO creati) | [x] DONE | [~] PENDING-VALIDATION |
 
 ### Log di Validazione
 
@@ -439,6 +444,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-22 | P2.B1 | Agent-Orchestrator | DONE | DESIGN 002 — use-inactivity-timer.ts |
 | 2026-05-22 | P2.B3 | Agent-Orchestrator | DONE | DESIGN 003 — use-talkback.ts eliminato |
 | 2026-05-22 | P1.B3-PARZIALE | Agent-Orchestrator | DONE (parziale) | DESIGN 003 — accessibility engine |
+| 2026-05-21 | P1.B4-DOC | Agent-Docs | DONE | PLAN 004 verificato (no correzioni), TODO 004 creato |
 
 ---
 
