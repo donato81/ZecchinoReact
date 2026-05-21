@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { View, Text } from 'react-native'
+import { AccessibilityInfo, View, Text } from 'react-native'
 import type { Session, User } from '@supabase/supabase-js'
 import { hashPin, verifyPin } from '@/lib/crypto'
 import { supabase } from '@/lib/supabase/client'
@@ -63,10 +63,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthReady, setIsAuthReady] = useState(false)
   const [privatePinHashCache, setPrivatePinHashCache] = useState<string | null | undefined>(undefined)
   const [userSettings, setUserSettings] = useState<UserSettings | null>(null)
+  const [isScreenReaderActive, setIsScreenReaderActive] = useState(false)
   const { talkBackState } = useAccessibilityDetection()
-  const isScreenReaderActive = typeof document !== 'undefined'
-    && document.querySelector('[aria-live]') !== null
-    && document.documentElement.getAttribute('data-sr-active') === 'true'
 
   const loadUserSettings = useCallback(async () => {
     try {
@@ -137,6 +135,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe()
     }
   }, [loadUserSettings])
+
+  useEffect(() => {
+    let active = true
+
+    void AccessibilityInfo.isScreenReaderEnabled().then((enabled) => {
+      if (active) {
+        setIsScreenReaderActive(enabled)
+      }
+    })
+
+    const subscription = AccessibilityInfo.addEventListener(
+      'screenReaderChanged',
+      (enabled) => {
+        setIsScreenReaderActive(enabled)
+      },
+    )
+
+    return () => {
+      active = false
+      subscription.remove()
+    }
+  }, [])
 
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
