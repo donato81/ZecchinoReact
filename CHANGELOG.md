@@ -2,6 +2,38 @@
 
 ## [Unreleased]
 
+### DESIGN 003 — 2026-05-21 (implementazione accessibility engine)
+
+#### Aggiunto
+- `src/accessibility/types.ts` (CREATO) — Tipi condivisi tra i layer
+  accessibility: `AnnouncementPriority`, `Announcement`, `TalkBackState`,
+  `TalkBackAdaptations`. Entry point dei contratti pubblici per engine.ts,
+  detection.ts e il futuro layer announcements/ (DESIGN 004).
+- `src/accessibility/engine.ts` (CREATO) — Singleton `engine` che incapsula
+  `AccessibilityInfo.announceForAccessibility`. Stateless, fire-and-forget,
+  zero dipendenze DOM. Unico punto di chiamata per tutti gli annunci screen
+  reader (sarà invocato da `announcements/index.ts` in DESIGN 004, mai
+  direttamente dall'app). Guard `__DEV__` per fallback logging su piattaforme
+  senza `announceForAccessibility`.
+- `src/accessibility/detection.ts` (CREATO) — Hook `useAccessibilityDetection()`
+  che sostituisce `src/hooks/use-talkback.ts`. Usa esclusivamente
+  `AccessibilityInfo.isScreenReaderEnabled()` e
+  `AccessibilityInfo.addEventListener('screenReaderChanged', ...)` — zero API
+  DOM/browser. Persiste adattazioni in Supabase tramite `useUserSettings()`.
+  Esporta `DEFAULT_ADAPTATIONS` e il contratto pubblico completo documentato
+  in DESIGN 003 §5.7.
+- `src/locales/it.ts` (CREATO) — Scaffolding localizzazione italiano.
+  Struttura `as const` vuota, predisposta per espansione in DESIGN 004+.
+  Esporta i tipi `Strings` e `StringKey`.
+- `src/locales/index.ts` (CREATO) — Entry point del sistema di localizzazione.
+  Esporta `{ strings }` e `type { Strings, StringKey }`.
+
+#### Rimosso
+- `src/hooks/use-talkback.ts` (ELIMINATO) — Rimosso dopo conferma assenza
+  consumatori (T6: 0 import nel codebase). Sostituito da
+  `src/accessibility/detection.ts`. Eliminava 5 errori tsc pre-esistenti
+  legati ad API DOM (`window`, `navigator.maxTouchPoints`, `sessionStorage`).
+
 ### Docs — 2026-05-21 (correzioni documentali DESIGN 003 e ADR_001 — sette fix validati)
 
 #### Modificato

@@ -35,12 +35,18 @@
 │                         hooks/                                 │  ← Hook React
 │  use-user-settings  use-visible-data  use-display-preferences  │
 │  use-haptic  use-screen-reader  use-inactivity-timer           │
-│  use-online-status  use-talkback                               │
+│  use-online-status  use-inactivity-timer                       │
 ├────────────────────────────────────────────────────────────────┤
 │                      lib/ (dominio)                            │  ← Logica pura + utility
 │  types  constants  helpers  budget-alerts  budget-forecasting  │
 │  budget-history  budget-templates  crypto                      │
 │  haptic-system  sound-system  screen-reader                    │
+├────────────────────────────────────────────────────────────────┤
+│                    accessibility/                              │  ← Accessibility engine (DESIGN 003)
+│  types  engine  detection                                      │
+├────────────────────────────────────────────────────────────────┤
+│                      locales/                                  │  ← Localizzazione (DESIGN 003)
+│  it  index                                                     │
 ├────────────────────────────────────────────────────────────────┤
 │                   lib/supabase/                                │  ← Data access layer
 │  client  cache  types                                          │
@@ -143,7 +149,17 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `hooks/use-screen-reader.ts` | hooks | ⚠️ Struttura OK | No | Inutile finché `screen-reader.ts` non è riscritto |
 | `hooks/use-inactivity-timer.ts` | hooks | ❌ Incompatibile | No (causa crash al mount) | `document.addEventListener` — da riscrivere con `AppState` |
 | `hooks/use-online-status.ts` | hooks | ❌ Incompatibile | No | `navigator.onLine` — da riscrivere con `NetInfo` |
-| `hooks/use-talkback.ts` | hooks | ❌ Incompatibile | No | `matchMedia`, `sessionStorage`, `speechSynthesis` |
+| ~~`hooks/use-talkback.ts`~~ | hooks | **ELIMINATO** | — | Rimosso in DESIGN 003. Sostituito da `accessibility/detection.ts` |
+
+### Nuovi file aggiunti (DESIGN 003)
+
+| File | Layer | Stato RN | Blocco? | Note |
+|------|-------|----------|---------|------|
+| `accessibility/types.ts` | accessibility | ✅ Compatibile | No | Tipi condivisi tra engine e detection |
+| `accessibility/engine.ts` | accessibility | ✅ Compatibile | No | Singleton announce — da usare solo via announcements/ (DESIGN 004) |
+| `accessibility/detection.ts` | accessibility | ✅ Compatibile | No | Sostituisce use-talkback.ts |
+| `locales/it.ts` | locales | ✅ Compatibile | No | Scaffolding stringhe IT (vuoto) |
+| `locales/index.ts` | locales | ✅ Compatibile | No | Entry point localizzazione |
 
 ---
 
@@ -181,7 +197,8 @@ Fase 1 — Rimpiazza dipendenze DOM in lib/
 Fase 2 — Rimpiazza hook web-only
   ├── use-inactivity-timer.ts → AppState + setTimeout RN
   ├── use-online-status.ts → @react-native-community/netinfo
-  └── use-talkback.ts → AccessibilityInfo.isScreenReaderEnabled
+  └── use-talkback.ts → ✅ COMPLETATO (DESIGN 003)
+      Sostituito da src/accessibility/detection.ts + engine.ts
 
 Fase 3 — Pulisci context
   ├── AppDataContext → fix async cache (await readCache)

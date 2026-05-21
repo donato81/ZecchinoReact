@@ -618,12 +618,74 @@ useInactivityTimer({ timeoutMinutes, onTimeout }): { resetTimer(), showWarning: 
 
 ---
 
-## `src/hooks/use-talkback.ts` ❌
+## `src/accessibility/types.ts` ✅
 
-Rilevamento TalkBack/VoiceOver. Usa `window.matchMedia`, `sessionStorage`, `speechSynthesis`, `navigator.userAgent`.
+Tipi condivisi tra engine.ts, detection.ts e il futuro layer announcements/ (DESIGN 004).
+Nessuna dipendenza esterna.
+
+| Nome | Tipo | Descrizione |
+|------|------|-------------|
+| `AnnouncementPriority` | `type` | `'polite' \| 'assertive'` |
+| `Announcement` | `interface` | `{ text: string; priority: AnnouncementPriority }` |
+| `TalkBackState` | `interface` | `{ isEnabled, isDetected, confidenceLevel: 'high'\|'low', adaptationsActive: boolean }` |
+| `TalkBackAdaptations` | `interface` | 8 booleani: `enhancedTouchTargets`, `simplifiedNavigation`, `extendedTimeouts`, `verboseDescriptions`, `highContrastMode`, `reducedMotion`, `autoFocusManagement`, `spatialAudio` |
+
+---
+
+## `src/accessibility/engine.ts` ✅
+
+Singleton per l'invio di annunci allo screen reader. Stateless, zero dipendenze DOM.
+**Non chiamare direttamente dall'app** — sarà invocato solo da `announcements/index.ts` (DESIGN 004).
 
 ```ts
-useTalkBack(): TalkBackState & { adaptations, setAdaptations, ... }
+engine.announce(announcement: Announcement): void
 ```
 
-> Da riscrivere completamente con `AccessibilityInfo.isScreenReaderEnabled()`.
+---
+
+## `src/accessibility/detection.ts` ✅
+
+Hook che sostituisce `src/hooks/use-talkback.ts` (eliminato). Usa esclusivamente API React Native.
+
+```ts
+useAccessibilityDetection(): {
+  talkBackState: TalkBackState
+  adaptations: TalkBackAdaptations
+  enableTalkBack(manual?: boolean): void
+  disableTalkBack(manual?: boolean): void
+  resetDetection(): Promise<void>
+  updateAdaptation(key: keyof TalkBackAdaptations, value: boolean): void
+  resetAdaptations(): void
+  getTouchTargetSize(): number            // 44px base, 56px enhanced
+  getAnimationDuration(baseMs: number): number
+  getTimeout(baseMs: number): number
+  shouldUseVerboseDescriptions(): boolean
+  shouldSimplifyNavigation(): boolean
+  shouldAutoManageFocus(): boolean
+  getAriaDescription(brief: string, verbose: string): string
+}
+```
+
+Esporta anche `DEFAULT_ADAPTATIONS: TalkBackAdaptations` (costante, tutte le adattazioni a true eccetto highContrastMode).
+
+> Sostituisce `useTalkBack()` da `src/hooks/use-talkback.ts` (eliminato in DESIGN 003).
+
+---
+
+## `src/locales/index.ts` ✅
+
+Entry point localizzazione. Importare sempre da qui, mai da `src/locales/it.ts` direttamente.
+
+```ts
+strings: Strings      // oggetto stringhe italiano
+type Strings          // shape dell'oggetto stringhe
+type StringKey        // keyof Strings
+```
+
+---
+
+## ~~`src/hooks/use-talkback.ts`~~ ❌ (ELIMINATO — DESIGN 003)
+
+File rimosso. Sostituito da `src/accessibility/detection.ts`.
+Usava API browser incompatibili con React Native (`window.matchMedia`, `sessionStorage`, `speechSynthesis`, `navigator.userAgent`).
+
