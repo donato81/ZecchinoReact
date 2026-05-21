@@ -9,6 +9,7 @@ import type { UserSettings } from '@/lib/supabase/types'
 import { soundSystem } from '@/lib/sound-system'
 import { hapticSystem } from '@/lib/haptic-system'
 import { Button } from '@/components/ui/button'
+import { ActivityDetectorView } from '@/components/ActivityDetectorView'
 import { useInactivityTimer } from '@/hooks/use-inactivity-timer'
 import { useAccessibilityDetection } from '@/accessibility/detection'
 
@@ -344,7 +345,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {isAuthenticated ? (
+        <ActivityDetectorView onActivity={resetTimer}>
+          {children}
+        </ActivityDetectorView>
+      ) : (
+        children
+      )}
       {showWarning && isAuthenticated ? (
         <View accessibilityRole="alert" accessibilityLabel="Avviso scadenza sessione">
           <Text>La tua sessione scadrà tra 1 minuto. Vuoi rimanere connesso?</Text>

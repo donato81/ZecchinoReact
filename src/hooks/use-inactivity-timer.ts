@@ -10,8 +10,6 @@ interface UseInactivityTimerResult {
   showWarning: boolean
 }
 
-const ACTIVITY_EVENTS = ['click', 'keydown', 'scroll', 'touchstart'] as const
-
 export function useInactivityTimer({ timeoutMinutes, onTimeout }: UseInactivityTimerOptions): UseInactivityTimerResult {
   const warningTimerRef = useRef<number | null>(null)
   const timeoutTimerRef = useRef<number | null>(null)
@@ -19,12 +17,12 @@ export function useInactivityTimer({ timeoutMinutes, onTimeout }: UseInactivityT
 
   const clearTimers = useCallback(() => {
     if (warningTimerRef.current !== null) {
-      window.clearTimeout(warningTimerRef.current)
+      clearTimeout(warningTimerRef.current)
       warningTimerRef.current = null
     }
 
     if (timeoutTimerRef.current !== null) {
-      window.clearTimeout(timeoutTimerRef.current)
+      clearTimeout(timeoutTimerRef.current)
       timeoutTimerRef.current = null
     }
   }, [])
@@ -40,11 +38,11 @@ export function useInactivityTimer({ timeoutMinutes, onTimeout }: UseInactivityT
     const timeoutMs = timeoutMinutes * 60_000
     const warningMs = Math.max((timeoutMinutes - 1) * 60_000, 0)
 
-    warningTimerRef.current = window.setTimeout(() => {
+    warningTimerRef.current = setTimeout(() => {
       setShowWarning(true)
     }, warningMs)
 
-    timeoutTimerRef.current = window.setTimeout(() => {
+    timeoutTimerRef.current = setTimeout(() => {
       setShowWarning(false)
       onTimeout()
     }, timeoutMs)
@@ -69,19 +67,8 @@ export function useInactivityTimer({ timeoutMinutes, onTimeout }: UseInactivityT
 
     scheduleTimers()
 
-    const handleActivity = () => {
-      scheduleTimers()
-    }
-
-    ACTIVITY_EVENTS.forEach((eventName) => {
-      document.addEventListener(eventName, handleActivity, { passive: true })
-    })
-
     return () => {
       clearTimers()
-      ACTIVITY_EVENTS.forEach((eventName) => {
-        document.removeEventListener(eventName, handleActivity)
-      })
     }
   }, [clearTimers, scheduleTimers, timeoutMinutes])
 
