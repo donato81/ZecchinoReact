@@ -57,13 +57,13 @@
   `src/locales/index.ts` (CREATO),
   `src/hooks/use-talkback.ts` (ELIMINATO),
   `tsconfig.json` (rimossa riga "types": ["node"])
-- **Open Threads:** 89 errori TypeScript attesi e documentati (NOTA 2)
+- **Open Threads:** ~47 errori TypeScript attesi e documentati (NOTA 2)
   dopo rimozione di "types": ["node"] in DESIGN 002.
   Non intervenire fuori dal perimetro dei DESIGN
   che li coprono. File coinvolti: AppDataContext.tsx,
   AuthContext.tsx, use-online-status.ts,
   budget-templates.ts, crypto.ts, haptic-system.ts,
-  screen-reader.ts, sound-system.ts.
+  sound-system.ts.
   NOTA 1 attiva: non testare path PIN e sblocco privato
   finché screen-reader.ts non è verificato senza
   guard DOM.

@@ -5,7 +5,7 @@
 ### Refactor
 
 - DESIGN 004 — Implementato il layer semantico `src/announcements/`
-  conforme ad ADR_001 v1.2.0. Tutti gli annunci accessibili passano ora
+  conforme ad ADR_001 v1.3.0. Tutti gli annunci accessibili passano ora
   per `announce()` esposto da `@/announcements`, unico punto autorizzato
   a importare `@/accessibility/engine`. Migrati `src/context/AuthContext.tsx`
   (7 chiamate `screenReader.*` sostituite con `auth.*` builders) e
