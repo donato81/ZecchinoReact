@@ -1070,6 +1070,9 @@ export * as budgets from './budgets'
 
 **Passo 1 — Import da rimuovere:**
 ```ts
+Prima verificare se la riga esiste nel file con il comando:
+grep -n "useScreenReader" src/context/AuthContext.tsx
+Procedere con la rimozione solo se il grep restituisce almeno un risultato.
 // RIMUOVERE la riga:
 import { useScreenReader } from '@/hooks/use-screen-reader'
 ```
@@ -1222,6 +1225,10 @@ const screenReader = useScreenReader()
 ---
 
 ## 4. Gate di validazione
+
+> NOTA OPERATIVA — Baseline TypeScript: nei gate che indicano
+> "npx tsc --noEmit senza errori" si intende sempre "senza
+> errori NUOVI rispetto al baseline legacy di circa 89 errori".
 
 ### Gate 1 — `locales/it.ts` (STEP 1, post-004.T1)
 
