@@ -1,736 +1,466 @@
+Perfetto. Ho letto il CHANGELOG reale. Ora riscrivo il report correttamente.
+
+
+
+\*\*\*
+
+
+
 ```
 
-\# IMPLEMENTAZIONE DESIGN 001
+Ciao. Inizia questa sessione di lavoro leggendo e analizzando
 
-\# Fix Blocchi di Avvio — React Native / Expo
+nell'ordine esatto tutti i file elencati qui sotto.
 
+Non fare nulla, non rispondere con analisi, non fare domande
 
+finché non hai letto tutti i file dell'elenco.
 
-════════════════════════════════════════════════
+Dopo la lettura, produci un breve rapporto di allineamento
 
-IDENTITÀ OPERATIVA
+che confermi ogni file letto, riporti la versione corrente
 
-════════════════════════════════════════════════
+del progetto dal CHANGELOG, e segnali eventuali file
 
-
-
-Sei un agente Orchestratore specializzato
-
-in implementazione di codice production-ready
-
-per React Native con Expo.
+non trovati o illeggibili.
 
 
 
-Il tuo principio fondante:
+════════════════════════════════════════
+
+FILE DA LEGGERE — ORDINE OBBLIGATORIO
+
+════════════════════════════════════════
 
 
 
-&#x20; NON scrivere mai una riga di codice
-
-&#x20; senza prima aver letto, analizzato
-
-&#x20; e verificato i file coinvolti.
+BLOCCO 1 — Radice del progetto
 
 
 
-&#x20; NON modificare mai un file
+&#x20; README.md
 
-&#x20; senza prima aver dichiarato
+&#x20; CHANGELOG.md
 
-&#x20; cosa modificherai e perché.
-
-
-
-&#x20; Ogni affermazione deve essere tracciabile
-
-&#x20; a un file e a una sezione specifica.
+&#x20; SPARK-START.md
 
 
 
-════════════════════════════════════════════════
-
-FASE 0 — LETTURA OBBLIGATORIA
-
-════════════════════════════════════════════════
+BLOCCO 2 — Documentazione principale
 
 
 
-Leggi TUTTI i file elencati nell'ordine esatto.
+&#x20; docs/architettura.md
 
-Non eseguire nessuna azione finché non hai
+&#x20; docs/api.md
 
-letto tutti i file di questa fase.
+&#x20; docs/todo-master.md
 
 
 
-FILE DI CONTESTO ARCHITETTURALE:
+BLOCCO 3 — Architettura e decisioni tecniche
 
 
 
 &#x20; docs/0-architecture/ADR\_001\_sistema-annunci-accessibili.md
 
-&#x20; docs/0-architecture/architecture.md
 
 
+BLOCCO 4 — Report di analisi
 
-FILE DI PROGETTO E PIANO:
 
 
+&#x20; (leggi tutti i file presenti nella cartella)
 
-&#x20; docs/2-projects/001-DESIGN\_fix-blocchi-avvio\_v0.1.0.md
+&#x20; docs/1-reports/
 
-&#x20; docs/3-coding-plans/001-PLAN\_fix-blocchi-avvio\_v0.1.0.md
 
 
+BLOCCO 5 — Documenti di design (DESIGN)
 
-FILE DI STATO ATTUALE:
 
 
+&#x20; (leggi tutti i file presenti nella cartella)
 
-&#x20; docs/1-reports/REPORT\_diagnosi-compatibilita-RN\_v0.1.0.md
+&#x20; docs/2-projects/
 
 
 
-FILE TARGET DA MODIFICARE (leggi prima di toccare):
+BLOCCO 6 — Coding plans
 
 
 
-&#x20; babel.config.js
+&#x20; (leggi tutti i file presenti nella cartella)
 
-&#x20; package.json
+&#x20; docs/3-coding-plans/
 
-&#x20; src/context/AuthContext.tsx
 
-&#x20; src/context/AppDataContext.tsx
 
-&#x20; src/lib/supabase/client.ts
+BLOCCO 7 — Todo lists di progetto
 
-&#x20; src/env.d.ts
 
 
+&#x20; (leggi tutti i file presenti nella cartella)
 
-FILE DI DOCUMENTAZIONE DA AGGIORNARE (leggi prima di toccare):
+&#x20; docs/4-todo-lists/
 
 
 
-&#x20; docs/0-architecture/architecture.md
+BLOCCO 8 — SQL e schema database
 
-&#x20; docs/0-architecture/api.md
 
-&#x20; docs/todo-master.md
 
-&#x20; CHANGELOG.md
+&#x20; (leggi tutti i file presenti nella cartella)
 
-&#x20; README.md
+&#x20; docs/6-sql/
 
 
 
-Dopo aver letto tutti i file, dichiara:
+════════════════════════════════════════
 
-&#x20; LETTURA COMPLETATA
+NOTE IMPORTANTI SUL CONTESTO
 
-&#x20; con la lista dei file letti e una riga
+════════════════════════════════════════
 
-&#x20; di sintesi per ognuno.
 
 
+Il progetto si chiama ZecchinoReact.
 
-════════════════════════════════════════════════
+È un'app React Native crossplatform con focus principale
 
-FASE 1 — ANALISI PRE-IMPLEMENTAZIONE
+su Windows come prima piattaforma di sviluppo e test.
 
-════════════════════════════════════════════════
+Il target finale sono tre piattaforme: Android, iOS e Windows
 
+tramite react-native-windows. La cartella src contiene
 
+codice già parzialmente modificato dai DESIGN 001, 002 e 003:
 
-Prima di scrivere qualsiasi codice,
+non analizzarla autonomamente, non trarre conclusioni da essa
 
-analizza e dichiara:
+al di fuori di quanto documentato nei DESIGN e PLAN.
 
 
 
-1\. PERIMETRO CONFERMATO
+Il codice è in fase di refactoring documentato.
 
-&#x20;  Elenca i file che modificherai
+Tutta la pianificazione avviene prima tramite documenti
 
-&#x20;  e per ognuno dichiara:
+di design (DESIGN), coding plan e todo list.
 
-&#x20;  - cosa cambierà
+Gli agenti coder vengono attivati in sequenza solo dopo
 
-&#x20;  - cosa NON cambierà
+che la documentazione è convalidata.
 
-&#x20;  - perché questa modifica è necessaria
 
 
+La piattaforma di sviluppo è Windows. Il developer
 
-2\. LISTA FILE VIETATI
+è non vedente e usa NVDA come screen reader.
 
-&#x20;  Elenca tutti i file che NON toccherai.
+L'accessibilità è una priorità architetturale,
 
-&#x20;  In particolare:
+non un'aggiunta futura.
 
-&#x20;  - src/accessibility/
 
-&#x20;  - src/locales/
 
-&#x20;  - qualsiasi file non presente
+════════════════════════════════════════
 
-&#x20;    nella lista dei FILE TARGET
+STATO CORRENTE DEL PROGETTO
 
+════════════════════════════════════════
 
 
-3\. DIPENDENZE CRITICHE
 
-&#x20;  Verifica che le versioni npm
+Versione attiva: 0.1.0
 
-&#x20;  che introdurrai siano compatibili
+Fase attiva: P0 — Fix Blocchi di Avvio
 
-&#x20;  con quelle già presenti in package.json.
 
-&#x20;  Dichiara ogni versione introdotta
 
-&#x20;  con la motivazione.
+════════════════════════════════════════
 
+DESIGN E CODING PLAN — STATO REALE
 
+════════════════════════════════════════
 
-4\. GATE DI VERIFICA PRE-CODIFICA
 
-&#x20;  Prima di procedere alla Fase 2,
 
-&#x20;  rispondi esplicitamente a queste domande:
+DESIGN 001 — Fix babel.config.js e package.json (B1–B6)
 
-&#x20;  - Il PLAN 001 contiene comandi git espliciti?
+&#x20; Stato: IMPLEMENTATO E CHIUSO.
 
-&#x20;    Se sì, elencali in ordine.
+&#x20; Codice modificato e committato. Il CHANGELOG documenta:
 
-&#x20;  - Ci sono dipendenze circolari
+&#x20;   - babel.config.js: aggiunti plugin module-resolver
 
-&#x20;    tra i file target?
+&#x20;     e react-native-dotenv.
 
-&#x20;  - C'è un ordine preciso di modifica
+&#x20;   - package.json: AsyncStorage corretto da ^3.0.2 a ^2.1.2;
 
-&#x20;    dichiarato nel PLAN?
+&#x20;     aggiunto babel-plugin-module-resolver.
 
-&#x20;    Se sì, qual è?
+&#x20;   - src/lib/supabase/client.ts: import da @env.
 
+&#x20;   - src/context/AuthContext.tsx: rimosso import sonner,
 
+&#x20;     dialog DOM convertito in View/Text RN.
 
-Non procedere alla Fase 2 finché
+&#x20;   - src/context/AppDataContext.tsx: rimosso import sonner,
 
-l'analisi pre-implementazione non è completa.
+&#x20;     sostituito con shim locale callable.
 
+&#x20;   - src/env.d.ts: creato (dichiarazione modulo @env).
 
+&#x20;   - src/components/ui/button.tsx: creato (placeholder RN).
 
-════════════════════════════════════════════════
+&#x20; Correzioni documentali applicate e chiuse:
 
-FASE 2 — IMPLEMENTAZIONE
+&#x20;   A1 — PLAN 001: riferimento stale a "sezione 10 DESIGN" rimosso.
 
-════════════════════════════════════════════════
 
 
+DESIGN 002 — Fix provider bootstrap, useInactivityTimer e
 
-Esegui le modifiche nell'ordine esatto
+&#x20;            detection screen reader (N11, N8, N6)
 
-dichiarato nel PLAN 001.
+&#x20; Stato: IMPLEMENTATO E CHIUSO.
 
+&#x20; Codice modificato e committato. Il CHANGELOG documenta:
 
+&#x20;   - tsconfig.json: rimossa riga "types": \["node"] (N11).
 
-Per ogni singolo file:
+&#x20;   - src/context/AuthContext.tsx: detection screen reader
 
+&#x20;     migrata da DOM a AccessibilityInfo RN (N8);
 
+&#x20;     wrap ActivityDetectorView aggiunto (N6 parte).
 
-&#x20; PASSO A — Riletto il file target
+&#x20;   - src/hooks/use-inactivity-timer.ts: riscritto su API RN,
 
-&#x20; Rileggi il file prima di modificarlo.
+&#x20;     rimosso document.addEventListener (N6).
 
-&#x20; Conferma il contenuto attuale.
+&#x20;   - src/components/ActivityDetectorView.tsx: creato (N6).
 
+&#x20; Correzioni documentali applicate e chiuse:
 
+&#x20;   A2 — TODO 002: offset righe N8-3 corretto a 62–64.
 
-&#x20; PASSO B — Dichiara la modifica
+&#x20;   A3 — DESIGN 002: ordine frontmatter corretto a N11, N8, N6.
 
-&#x20; Prima di scrivere, dichiara:
+&#x20;   C2-NOTA — PLAN 002: nota operativa rischio screen-reader.ts
 
-&#x20; - Riga o sezione da cambiare
+&#x20;              inserita prima dell'avvio di DESIGN 003.
 
-&#x20; - Cosa verrà rimosso
+&#x20; Nota tecnica: la rimozione di "types": \["node"] da tsconfig.json
 
-&#x20; - Cosa verrà aggiunto
+&#x20; è intenzionale e corretta. Causa la comparsa di 89 errori
 
-&#x20; - Perché questa è la soluzione corretta
+&#x20; TypeScript visibili con npx tsc --noEmit. Questi errori erano
 
+&#x20; già presenti nel codice e sono ora visibili perché il compilatore
 
+&#x20; non usa più il dizionario del browser come copertura. Non vanno
 
-&#x20; PASSO C — Applica la modifica
+&#x20; corretti fuori dal perimetro dei DESIGN che li coprono.
 
-&#x20; Scrivi il codice modificato.
 
 
+DESIGN 003 — Fix accessibility engine
 
-&#x20; PASSO D — Verifica immediata
+&#x20; Stato: IMPLEMENTATO E CHIUSO.
 
-&#x20; Dopo ogni modifica verifica:
+&#x20; Ciclo di analisi documentale completato con report Analyzer.
 
-&#x20; - Il file è sintatticamente corretto?
+&#x20; Sette correzioni documentali applicate e validate dal
 
-&#x20; - Le importazioni sono coerenti
+&#x20; Consiglio AI (Perplexity, Claude, ChatGPT, DeepSeek, Gemini).
 
-&#x20;   con React Native (niente DOM, niente window,
+&#x20; Codice creato e committato. Il CHANGELOG documenta:
 
-&#x20;   niente document, niente browser API)?
+&#x20;   - src/accessibility/types.ts: creato.
 
-&#x20; - Le versioni npm dichiarate
+&#x20;   - src/accessibility/engine.ts: creato (singleton announce).
 
-&#x20;   sono coerenti con package.json?
+&#x20;   - src/accessibility/detection.ts: creato (sostituisce
 
-&#x20; - Il file rispetta le invarianti
+&#x20;     use-talkback.ts).
 
-&#x20;   dichiarate in ADR\_001?
+&#x20;   - src/locales/it.ts: creato (scaffolding IT).
 
+&#x20;   - src/locales/index.ts: creato (entry point localizzazione).
 
+&#x20;   - src/hooks/use-talkback.ts: ELIMINATO.
 
-&#x20; Se la verifica fallisce:
+&#x20; Report di analisi prodotto e salvato in:
 
-&#x20; correggi e ripeti il Passo D.
+&#x20;   docs/1-reports/REPORT\_analisi-coerenza\_DESIGN-003\_v1.0.0.md
 
-&#x20; Massimo 10 tentativi per file.
+&#x20; ADR\_001 aggiornato a versione 1.3.0 con eccezione 1.bis
 
-&#x20; Se raggiungi il limite, non procedere:
+&#x20; (announcements/types.ts può importare da accessibility/types.ts
 
-&#x20; accodare un report diagnostico
+&#x20; solo come import type).
 
-&#x20; con file, problema rilevato, tentativi fatti,
 
-&#x20; e saltare il file. Continuare con il successivo.
 
+DESIGN 004 — Announcements layer
 
+&#x20; Stato: CODING PLAN CREATO (004-PLAN\_announcements-layer\_v1\_0\_0.md),
 
-════════════════════════════════════════════════
+&#x20;        DESIGN documento presente (004-DESIGN\_announcements-layer).
 
-FASE 3 — CICLO DI REVISIONE GLOBALE
+&#x20;        Da analizzare e validare con il metodo dei cicli precedenti
 
-════════════════════════════════════════════════
+&#x20;        prima di avviare l'implementazione.
 
 
 
-Dopo aver completato tutti i file della Fase 2,
+════════════════════════════════════════
 
-esegui questo ciclo:
+ALTRI DESIGN PRESENTI NEL REPOSITORY
 
+════════════════════════════════════════
 
 
-PASSO A — REVISIONE
 
-Rileggi tutti i file modificati nella Fase 2.
+DESIGN 005 — Sostituzione crypto.subtle con @noble/ciphers (N4)
 
-Per ognuno verifica:
+&#x20; Stato: DRAFT → v0.4.0 dopo correzioni documentali.
 
-&#x20; - Coerenza interna del file
+&#x20; Da analizzare e validare prima dell'implementazione.
 
-&#x20; - Coerenza con gli altri file modificati
 
-&#x20; - Nessuna importazione DOM o browser API rimasta
 
-&#x20; - Nessun file fuori perimetro toccato
+DESIGN 006 — KDF PIN con PBKDF2-SHA256 (@noble/hashes)
 
-&#x20; - Nessuna dipendenza npm con versione
+&#x20; Stato: v0.2.0 dopo correzioni pre-REVIEWED.
 
-&#x20;   non dichiarata nella Fase 1
+&#x20; Da analizzare e validare prima dell'implementazione.
 
 
 
-PASSO B — CONVALIDA DELLA REVISIONE
+DESIGN 007 — Async cache hydration (AppDataContext)
 
-La revisione supera la convalida se:
+&#x20; Stato: DRAFT.
 
-&#x20; - Tutti i file passano la verifica
 
-&#x20; - Nessuna violazione delle invarianti ADR\_001
 
-&#x20; - Nessun file non autorizzato modificato
+DESIGN 008 — Network connectivity (sostituzione navigator.onLine)
 
-&#x20; - Tutti i comandi git del PLAN 001
+&#x20; Stato: DRAFT.
 
-&#x20;   sono pronti per essere eseguiti
 
 
+DESIGN 009 — Export nativo multi-piattaforma
 
-Se la convalida NON passa:
+&#x20; Stato: REVIEWED, precondizione P1 residua (TurboModule WinRT picker).
 
-correggi e torna al Passo A.
 
-Massimo 10 tentativi.
 
-Se raggiungi il limite: accodare un report
+════════════════════════════════════════
 
-diagnostico dettagliato e procedere alla Fase 4
+PROSSIMA AZIONE PIANIFICATA
 
-con i file convalidati fino a quel momento.
+════════════════════════════════════════
 
 
 
-════════════════════════════════════════════════
+Avviare il ciclo di analisi e validazione per DESIGN 004,
 
-FASE 4 — CICLO TEST E AGGIORNAMENTO
+con lo stesso metodo usato per DESIGN 001, 002 e 003:
 
-════════════════════════════════════════════════
+&#x20; 1. Lettura file DESIGN 004 e PLAN 004.
 
+&#x20; 2. Prompt per agente Analyzer, produzione report.
 
+&#x20; 3. Validazione con il Consiglio AI.
 
-Dopo la convalida della Fase 3, esegui:
+&#x20; 4. Eventuali correzioni chirurgiche e convalida finale.
 
+&#x20; 5. Solo dopo validazione completa, avvio implementazione.
 
 
-PASSO A — REVISIONE DEI TEST ESISTENTI
 
-Verifica se esistono test nei file:
+════════════════════════════════════════
 
-&#x20; - src/\_\_tests\_\_/
+NOTE OPERATIVE ATTIVE
 
-&#x20; - src/\*\*/\*.test.ts
+════════════════════════════════════════
 
-&#x20; - src/\*\*/\*.spec.ts
 
 
+NOTA 1 — PIN e conto privato
 
-Per ogni test esistente che copre
+&#x20; Non testare i path PIN e sblocco conto privato
 
-i file modificati nella Fase 2:
+&#x20; (unlockPrivate, setPin, changePin, removePin)
 
-&#x20; - Il test è ancora valido dopo la modifica?
+&#x20; fino alla verifica che screen-reader.ts sia stato
 
-&#x20; - Il test deve essere aggiornato?
+&#x20; completamente rimosso o riscritto senza guard DOM.
 
+&#x20; Motivo originale: initializeLiveRegions() senza guard DOM.
 
+&#x20; Verificare stato attuale del file prima di rimuovere
 
-PASSO B — ESTENSIONE DEI TEST
+&#x20; questa nota.
 
-Per i contratti introdotti o modificati
 
-che non hanno copertura di test,
 
-identifica quali sono più critici:
+NOTA 2 — 89 errori TypeScript attesi
 
-&#x20; - Configurazione Babel con module-resolver
+&#x20; L'output di npx tsc --noEmit mostra 89 errori in 8 file.
 
-&#x20; - Importazioni alias @/ nei file core
+&#x20; Sono tutti pre-esistenti e attesi dopo la rimozione
 
-&#x20; - Assenza di dipendenze DOM in AuthContext
+&#x20; di "types": \["node"] in DESIGN 002.
 
-&#x20; - Assenza di dipendenze DOM in AppDataContext
+&#x20; Non intervenire su di essi fuori dal perimetro
 
+&#x20; dei DESIGN che li coprono esplicitamente.
 
+&#x20; File coinvolti:
 
-Dichiara esplicitamente:
+&#x20;   src/context/AppDataContext.tsx
 
-quali test sono stati aggiornati,
+&#x20;   src/context/AuthContext.tsx
 
-quali sono stati aggiunti,
+&#x20;   src/hooks/use-online-status.ts
 
-quali sono stati identificati ma rimandati
+&#x20;   src/lib/budget-templates.ts
 
-(con motivazione).
+&#x20;   src/lib/crypto.ts
 
+&#x20;   src/lib/haptic-system.ts
 
+&#x20;   src/lib/screen-reader.ts
 
-PASSO C — CONVALIDA TEST
+&#x20;   src/lib/sound-system.ts
 
-I test superano la convalida se:
 
-&#x20; - Nessun test esistente è regredito
 
-&#x20; - I test nuovi coprono almeno i contratti
+NOTA 3 — File workspace interno
 
-&#x20;   critici identificati nel Passo B
+&#x20; Il file Zecchino-React-work-spaces-ai/1-prima-analisi-consiglieri.md
 
+&#x20; è stato modificato fuori scope in un commit precedente.
 
+&#x20; Esplicitare sempre nei prompt agli agenti se i file
 
-Se la convalida NON passa:
+&#x20; workspace devono preservare lo storico o possono
 
-correggi e torna al Passo A.
+&#x20; essere sovrascritti.
 
-Massimo 10 tentativi.
 
-Se raggiungi il limite: accodare report
 
-diagnostico e procedere alla Fase 5.
+════════════════════════════════════════
 
 
 
-════════════════════════════════════════════════
+Solo dopo aver letto tutto e prodotto il rapporto
 
-FASE 5 — COMANDI GIT
-
-════════════════════════════════════════════════
-
-
-
-Esegui esattamente i comandi git
-
-dichiarati nel PLAN 001, nell'ordine preciso.
-
-
-
-Prima di eseguire ogni comando:
-
-&#x20; - Dichiara il comando
-
-&#x20; - Dichiara cosa fa
-
-&#x20; - Dichiara su quale branch sei
-
-
-
-Dopo ogni comando:
-
-&#x20; - Conferma l'esito
-
-&#x20; - Se fallisce: dichiara l'errore
-
-&#x20;   e non proseguire fino a risoluzione
-
-
-
-════════════════════════════════════════════════
-
-FASE 6 — AGGIORNAMENTO DOCUMENTAZIONE
-
-════════════════════════════════════════════════
-
-
-
-Aggiorna nell'ordine:
-
-
-
-1\. docs/todo-master.md
-
-&#x20;  Segna come completati i task
-
-&#x20;  del DESIGN 001 e PLAN 001.
-
-&#x20;  Non rimuovere task di altri design.
-
-
-
-2\. docs/architettura.md
-
-&#x20;  Aggiorna solo le sezioni
-
-&#x20;  impattate dalle modifiche del DESIGN 001.
-
-&#x20;  Dichiara ogni sezione aggiornata.
-
-
-
-3\. docs/api.md
-
-&#x20;  Aggiorna solo se le modifiche
-
-&#x20;  hanno cambiato contratti di API
-
-&#x20;  o interfacce pubbliche.
-
-&#x20;  Se nessuna modifica è necessaria:
-
-&#x20;  dichiaralo esplicitamente.
-
-
-
-4\. README.md
-
-&#x20;  Aggiorna solo se le modifiche
-
-&#x20;  impattano la procedura di avvio
-
-&#x20;  o le dipendenze dichiarate nel README.
-
-&#x20;  Se nessuna modifica è necessaria:
-
-&#x20;  dichiaralo esplicitamente.
-
-
-
-5\. CHANGELOG.md
-
-&#x20;  Aggiungi una voce nella sezione
-
-&#x20;  corrispondente alla versione attuale.
-
-&#x20;  Formato voce:
-
-&#x20;    ### DESIGN 001 — Fix Blocchi di Avvio
-
-&#x20;    - \[tipo modifica] descrizione
-
-&#x20;      (file: nome-file.ts)
-
-&#x20;  Tipi ammessi: Added, Changed, Fixed, Removed.
-
-
-
-════════════════════════════════════════════════
-
-FASE 7 — AGGIORNAMENTO RELEASE
-
-════════════════════════════════════════════════
-
-
-
-Valuta se aggiornare la versione del progetto.
-
-
-
-Aggiorna la release SOLO se si verifica
-
-almeno una di queste condizioni:
-
-
-
-&#x20; - Sono state rimosse dipendenze
-
-&#x20;   incompatibili con React Native
-
-&#x20; - La configurazione Babel è stata
-
-&#x20;   modificata in modo da sbloccare
-
-&#x20;   il bootstrap dell'app
-
-&#x20; - Il file package.json ha ricevuto
-
-&#x20;   modifiche a dipendenze dirette
-
-
-
-Se aggiorni la release:
-
-&#x20; - Dichiara la motivazione esplicita
-
-&#x20; - Segui il versionamento semantico
-
-&#x20;   già in uso nel progetto
-
-&#x20; - Aggiorna package.json versione
-
-&#x20; - Aggiorna CHANGELOG.md con
-
-&#x20;   il numero di versione corretto
-
-
-
-Se NON aggiorni la release:
-
-&#x20; - Dichiaralo esplicitamente
-
-&#x20;   con motivazione
-
-
-
-════════════════════════════════════════════════
-
-FASE 8 — REPORT FINALE DI SESSIONE
-
-════════════════════════════════════════════════
-
-
-
-Produci un report finale con questa struttura:
-
-
-
-&#x20; RIEPILOGO SESSIONE IMPLEMENTAZIONE DESIGN 001
-
-
-
-&#x20; STATO COMPLESSIVO: \[COMPLETATO / PARZIALE / BLOCCATO]
-
-
-
-&#x20; FILE MODIFICATI:
-
-&#x20;   - \[nome file] — \[tipo modifica] — \[esito: OK / WARN / FAIL]
-
-
-
-&#x20; FILE NON MODIFICATI (confermati fuori perimetro):
-
-&#x20;   - \[nome file] — \[motivazione]
-
-
-
-&#x20; COMANDI GIT ESEGUITI:
-
-&#x20;   - \[comando] — \[esito]
-
-
-
-&#x20; DOCUMENTAZIONE AGGIORNATA:
-
-&#x20;   - \[file] — \[sezione] — \[tipo aggiornamento]
-
-
-
-&#x20; RELEASE AGGIORNATA: \[sì / no] — \[motivazione]
-
-
-
-&#x20; PUNTI APERTI E DIAGNOSTICA:
-
-&#x20;   - \[problema] — \[file] — \[tentativo raggiunto] — \[azione raccomandata]
-
-
-
-&#x20; PROSSIMO PASSO RACCOMANDATO:
-
-&#x20;   Dopo la convalida del corretto avvio
-
-&#x20;   da terminale (npx expo start senza crash),
-
-&#x20;   procedere con l'implementazione di DESIGN 002.
-
-
-
-════════════════════════════════════════════════
-
-NOTE OPERATIVE OBBLIGATORIE
-
-════════════════════════════════════════════════
-
-
-
-&#x20; NON toccare mai i file fuori perimetro.
-
-&#x20; NON toccare src/accessibility/.
-
-&#x20; NON toccare src/locales/.
-
-&#x20; NON toccare i file di DESIGN 003
-
-&#x20; già implementati: sono corretti
-
-&#x20; e devono rimanere intatti.
-
-
-
-&#x20; Prima di ogni scrittura: leggi.
-
-&#x20; Prima di ogni modifica: analizza.
-
-&#x20; Prima di ogni commit: convalida.
-
-
-
-&#x20; Se qualcosa non è chiaro
-
-&#x20; o un file non esiste:
-
-&#x20; segnalarlo nel report diagnostico
-
-&#x20; e attendere istruzioni.
-
-&#x20; Non inventare percorsi o contenuti.
+di allineamento, sei pronto a ricevere istruzioni.
 
 ```
 
