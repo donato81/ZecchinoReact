@@ -4,6 +4,9 @@
 
 ### Documentation
 
+- docs/4-todo-lists/004-TODO_announcements-layer_v1.0.0.md: ciclo validazione Consiglio AI completato. Log Validazione popolato. Next Action aggiornato a T1.
+- docs/3-coding-plans/004-PLAN_announcements-layer_v1_0_0.md: nota operativa baseline TypeScript aggiunta. Task T12 reso condizionale su verifica grep.
+
 - docs/todo-master.md: allineamento stato post-implementazione
   DESIGN 001, 002, 003. Registro di Stato aggiornato.
   Snapshot di Ripresa aggiornato. Log di Validazione popolato.

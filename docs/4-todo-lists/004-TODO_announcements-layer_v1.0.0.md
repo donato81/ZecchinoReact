@@ -22,7 +22,7 @@ note-stato: >-
 | Ultimo Agente Attivo | — |
 | Blocco in Carico | — |
 | Last Completed Task | — |
-| Next Action | Validazione Consiglio AI su DESIGN 004, PLAN 004 e questo TODO |
+| Next Action | Esecuzione Task T1 (Patch locales/it.ts) |
 | Open Threads | — |
 
 ---
@@ -279,3 +279,5 @@ referenzia come precondizione, non come azione.
 
 | Data | Blocco | Agente | Esito | Note |
 |------|--------|--------|-------|------|
+
+| 2026-05-21 | DESIGN 004 + PLAN 004 + TODO 004 | Consiglio AI | APPROVATO | Libera avvio con integrazioni su T12, T13, T14 |
