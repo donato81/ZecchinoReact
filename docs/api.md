@@ -606,15 +606,38 @@ useOnlineStatus(): { isOffline: boolean }
 
 ---
 
-## `src/hooks/use-inactivity-timer.ts` ❌
+## `src/hooks/use-inactivity-timer.ts` ✅
 
-Timer inattività. Usa `document.addEventListener` e `window.setTimeout`.
+Timer inattività su API RN native. Le sottoscrizioni agli eventi di
+attività utente non sono più qui: vivono in `ActivityDetectorView`
+(montato da `AuthProvider` quando l'utente è autenticato) che invoca
+`resetTimer()` al touch/keydown.
 
 ```ts
 useInactivityTimer({ timeoutMinutes, onTimeout }): { resetTimer(), showWarning: boolean }
 ```
 
-> `document.addEventListener` causa `ReferenceError` al mount in RN. Da riscrivere con `AppState` di React Native.
+> DESIGN 002 (STEP 002, commit N6): rimossi `window.setTimeout`/`window.clearTimeout`
+> e il blocco `document.addEventListener` nell'`useEffect` (delegato a `ActivityDetectorView`).
+> I ref restano `useRef<number | null>` perché `setTimeout` RN restituisce `number`.
+
+---
+
+## `src/components/ActivityDetectorView.tsx` ✅
+
+View RN che intercetta gli eventi di attività utente per resettare il timer
+di inattività, senza catturare il responder (gli eventi proseguono ai figli).
+
+```ts
+ActivityDetectorView({ onActivity: () => void, children: ReactNode }): JSX.Element
+```
+
+- `onStartShouldSetResponder` → chiama `onActivity` e restituisce `false`
+- `onMoveShouldSetResponder` → `false`
+- `onKeyDown` aggiunto solo su `Platform.OS === 'windows'` (navigazione Narrator da tastiera)
+
+> Creato in DESIGN 002 (STEP 002, commit N6) per disaccoppiare la detection
+> dell'attività dal hook `useInactivityTimer`.
 
 ---
 

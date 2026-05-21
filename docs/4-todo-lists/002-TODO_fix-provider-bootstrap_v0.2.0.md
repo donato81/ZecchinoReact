@@ -3,7 +3,7 @@ tipo: todo
 titolo: Fix provider bootstrap — Gruppo 2 (N11, N8, N6)
 versione: 0.2.0
 data: 2026-05-14
-stato: ACTIVE
+stato: STATIC_GATES_PASSED
 coding-plan: docs/3-coding-plans/002-PLAN_fix-provider-bootstrap_v0.2.0.md
 design: docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md
 ---
@@ -28,13 +28,13 @@ design: docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md
 *Commit: `fix(config): rimuovi types node da tsconfig (N11)`*
 *File: `tsconfig.json`*
 
-- [ ] **N11-1** — In `tsconfig.json`: rimuovere la riga `"types": ["node"]` da `compilerOptions`; verificare che il file risultante abbia `compilerOptions` con solo
+- [x] **N11-1** — In `tsconfig.json`: rimuovere la riga `"types": ["node"]` da `compilerOptions`; verificare che il file risultante abbia `compilerOptions` con solo
   `baseUrl` e `paths`; alla radice del file solo `extends`, `include`
   ed `exclude` — nessun altro campo a nessun livello
 
 *Gate N11 (eseguire dopo il commit):*
 
-- [ ] **N11-GATE** — `npx tsc --noEmit` → deve produrre errori su `document.addEventListener`, `window.clearTimeout`, `window.setTimeout` e `document.querySelector` (errori **attesi** che confermano l'effetto del fix); non devono comparire errori nuovi sui tipi `number` dei timer
+- [x] **N11-GATE** — `npx tsc --noEmit` → deve produrre errori su `document.addEventListener`, `window.clearTimeout`, `window.setTimeout` e `document.querySelector` (errori **attesi** che confermano l'effetto del fix); non devono comparire errori nuovi sui tipi `number` dei timer
 
 ---
 
@@ -44,10 +44,10 @@ design: docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md
 *File: `src/context/AuthContext.tsx`*
 *Dipendenza: N11-GATE superato*
 
-- [ ] **N8-1** — In `src/context/AuthContext.tsx`: aggiungere `AccessibilityInfo` agli import da `react-native` (aggiungere alla riga di import esistente o creare una nuova riga di import)
-- [ ] **N8-2** — In `src/context/AuthContext.tsx`: aggiungere `const [isScreenReaderActive, setIsScreenReaderActive] = useState(false)` insieme agli altri `useState` in `AuthProvider`
-- [ ] **N8-3** — In `src/context/AuthContext.tsx`: rimuovere le righe 62–64 (la costante `isScreenReaderActive` calcolata con `typeof document !== 'undefined' && document.querySelector('[aria-live]') !== null && document.documentElement.getAttribute('data-sr-active') === 'true'`)
-- [ ] **N8-4** — In `src/context/AuthContext.tsx`: aggiungere `useEffect` dedicato
+- [x] **N8-1** — In `src/context/AuthContext.tsx`: aggiungere `AccessibilityInfo` agli import da `react-native` (aggiungere alla riga di import esistente o creare una nuova riga di import)
+- [x] **N8-2** — In `src/context/AuthContext.tsx`: aggiungere `const [isScreenReaderActive, setIsScreenReaderActive] = useState(false)` insieme agli altri `useState` in `AuthProvider`
+- [x] **N8-3** — In `src/context/AuthContext.tsx`: rimuovere le righe 62–64 (la costante `isScreenReaderActive` calcolata con `typeof document !== 'undefined' && document.querySelector('[aria-live]') !== null && document.documentElement.getAttribute('data-sr-active') === 'true'`)
+- [x] **N8-4** — In `src/context/AuthContext.tsx`: aggiungere `useEffect` dedicato
   **dopo** il `useEffect` per la sessione Supabase già presente nel file,
   con `AccessibilityInfo.isScreenReaderEnabled().then(setIsScreenReaderActive)`,
   `AccessibilityInfo.addEventListener('screenReaderChanged', ...)` e
@@ -56,8 +56,8 @@ design: docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md
 
 *Gate N8 (eseguire dopo il commit — `App.tsx` deve montare `AuthProvider`):*
 
-- [ ] **N8-GATE-TSC** — `npx tsc --noEmit` → nessun errore su `document.querySelector`, `document.documentElement`, `document is not defined` nelle righe 63–65 di `AuthContext.tsx`; `isScreenReaderActive` inferito come `boolean`
-- [ ] **N8-GATE-METRO** — `npm start` → `AuthProvider` montato in `App.tsx` non produce `ReferenceError` su `document.querySelector`; log Metro privo di errori relativi alle righe 63–65 di `AuthContext.tsx`
+- [x] **N8-GATE-TSC** — `npx tsc --noEmit` → nessun errore su `document.querySelector`, `document.documentElement`, `document is not defined` nelle righe 63–65 di `AuthContext.tsx`; `isScreenReaderActive` inferito come `boolean`
+- [ ] **N8-GATE-METRO** — `npm start` → `AuthProvider` montato in `App.tsx` non produce `ReferenceError` su `document.querySelector`; log Metro privo di errori relativi alle righe 63–65 di `AuthContext.tsx` *(DIFFERITO — D3: AuthProvider non montato in App.tsx)*
 
 ---
 
@@ -67,11 +67,11 @@ design: docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md
 *File: `src/hooks/use-inactivity-timer.ts` (MODIFY), `src/components/ActivityDetectorView.tsx` (CREATE), `src/context/AuthContext.tsx` (MODIFY — integrazione wrapper)*
 *Dipendenza: N8-GATE-METRO superato*
 
-- [ ] **N6-1** — In `src/hooks/use-inactivity-timer.ts`: rimuovere la costante `ACTIVITY_EVENTS` (riga 13: `const ACTIVITY_EVENTS = ['click', 'keydown', 'scroll', 'touchstart'] as const`)
-- [ ] **N6-2** — In `src/hooks/use-inactivity-timer.ts`: sostituire tutte le occorrenze di `window.clearTimeout(...)` con `clearTimeout(...)` (righe 22–29); i ref `warningTimerRef` e `timeoutTimerRef` restano `useRef<number | null>` — il tipo non cambia
-- [ ] **N6-3** — In `src/hooks/use-inactivity-timer.ts`: sostituire tutte le occorrenze di `window.setTimeout(...)` con `setTimeout(...)` (righe 42–51)
-- [ ] **N6-4** — In `src/hooks/use-inactivity-timer.ts`: rimuovere dall'`useEffect` il blocco `handleActivity`, `ACTIVITY_EVENTS.forEach(document.addEventListener)` e il corrispettivo `document.removeEventListener` nel return del cleanup (righe 72–86)
-- [ ] **N6-5** — Creare `src/components/ActivityDetectorView.tsx` con:
+- [x] **N6-1** — In `src/hooks/use-inactivity-timer.ts`: rimuovere la costante `ACTIVITY_EVENTS` (riga 13: `const ACTIVITY_EVENTS = ['click', 'keydown', 'scroll', 'touchstart'] as const`)
+- [x] **N6-2** — In `src/hooks/use-inactivity-timer.ts`: sostituire tutte le occorrenze di `window.clearTimeout(...)` con `clearTimeout(...)` (righe 22–29); i ref `warningTimerRef` e `timeoutTimerRef` restano `useRef<number | null>` — il tipo non cambia
+- [x] **N6-3** — In `src/hooks/use-inactivity-timer.ts`: sostituire tutte le occorrenze di `window.setTimeout(...)` con `setTimeout(...)` (righe 42–51)
+- [x] **N6-4** — In `src/hooks/use-inactivity-timer.ts`: rimuovere dall'`useEffect` il blocco `handleActivity`, `ACTIVITY_EVENTS.forEach(document.addEventListener)` e il corrispettivo `document.removeEventListener` nel return del cleanup (righe 72–86)
+- [x] **N6-5** — Creare `src/components/ActivityDetectorView.tsx` con:
   interfaccia `ActivityDetectorViewProps { onActivity: () => void; children: React.ReactNode }`,
   `View` con `onStartShouldSetResponder` che chiama `onActivity` e restituisce `false`,
   `onMoveShouldSetResponder` che restituisce `false`,
@@ -80,14 +80,14 @@ design: docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md
   mai invocato — la detection del tocco è già completa in `onStartShouldSetResponder`),
   `onKeyDown` che chiama `onActivity` con guard `Platform.OS === 'windows'`,
   style `flex: 1`
-- [ ] **N6-6** — In `src/context/AuthContext.tsx`: aggiungere import `ActivityDetectorView` da `'@/components/ActivityDetectorView'`
-- [ ] **N6-7** — In `src/context/AuthContext.tsx`: nel render del provider, avvolgere `{children}` con `<ActivityDetectorView onActivity={resetTimer}>` condizionalmente su `isAuthenticated` (Opzione B del design §4); il ramo non-autenticato lascia passare `{children}` direttamente
+- [x] **N6-6** — In `src/context/AuthContext.tsx`: aggiungere import `ActivityDetectorView` da `'@/components/ActivityDetectorView'`
+- [x] **N6-7** — In `src/context/AuthContext.tsx`: nel render del provider, avvolgere `{children}` con `<ActivityDetectorView onActivity={resetTimer}>` condizionalmente su `isAuthenticated` (Opzione B del design §4); il ramo non-autenticato lascia passare `{children}` direttamente
 
 *Gate N6 (eseguire dopo il commit — `App.tsx` deve montare `AuthProvider`):*
 
-- [ ] **N6-GATE-TSC** — `npx tsc --noEmit` → nessun errore su `document.addEventListener`, `window.clearTimeout`, `window.setTimeout` in `src/hooks/use-inactivity-timer.ts`; nessun errore di tipo su `src/context/AuthContext.tsx` relativo all'import di `ActivityDetectorView` o all'uso di `isAuthenticated` come condizione del wrapper
-- [ ] **N6-GATE-METRO** — `npm start` → `AuthProvider` montato in `App.tsx` non produce `ReferenceError` su `document` o `window`; log Metro privo di errori relativi a `use-inactivity-timer.ts`
-- [ ] **N6-GATE-FUNZIONALE** — Verifica manuale: dopo `timeoutMinutes` minuti di inattività `showWarning` diventa `true`; su Windows con Narrator attivo la navigazione da tastiera resetta il timer (verificabile con `console.log` temporaneo nel callback `scheduleTimers`)
+- [x] **N6-GATE-TSC** — `npx tsc --noEmit` → nessun errore su `document.addEventListener`, `window.clearTimeout`, `window.setTimeout` in `src/hooks/use-inactivity-timer.ts`; nessun errore di tipo su `src/context/AuthContext.tsx` relativo all'import di `ActivityDetectorView` o all'uso di `isAuthenticated` come condizione del wrapper
+- [ ] **N6-GATE-METRO** — `npm start` → `AuthProvider` montato in `App.tsx` non produce `ReferenceError` su `document` o `window`; log Metro privo di errori relativi a `use-inactivity-timer.ts` *(DIFFERITO — D3)*
+- [ ] **N6-GATE-FUNZIONALE** — Verifica manuale: dopo `timeoutMinutes` minuti di inattività `showWarning` diventa `true`; su Windows con Narrator attivo la navigazione da tastiera resetta il timer (verificabile con `console.log` temporaneo nel callback `scheduleTimers`) *(DIFFERITO — D3)*
 
 ---
 
@@ -95,12 +95,12 @@ design: docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md
 
 *Eseguire in sequenza dopo il completamento dei tre commit:*
 
-- [ ] **GLOBAL-1** — `npx tsc --noEmit` → zero errori su `document` e `window` in
+- [x] **GLOBAL-1** — `npx tsc --noEmit` → zero errori su `document` e `window` in
   `src/hooks/use-inactivity-timer.ts` e `src/context/AuthContext.tsx`;
   nessun errore su `document.querySelector` nelle righe 63–65 di `AuthContext.tsx`
-- [ ] **GLOBAL-2** — `npm start` → Metro avvia senza errori; `AuthProvider` montato in `App.tsx` non produce crash
-- [ ] **GLOBAL-3** — `npm run android` (o `npm run ios`) → bundle generato, app avviabile sul simulatore con `AuthProvider` attivo
-- [ ] **GLOBAL-4** — Verifica manuale inattività: timer scatta dopo `timeoutMinutes`; su Windows con Narrator la navigazione da tastiera resetta il timer
+- [ ] **GLOBAL-2** — `npm start` → Metro avvia senza errori; `AuthProvider` montato in `App.tsx` non produce crash *(DIFFERITO — D3)*
+- [ ] **GLOBAL-3** — `npm run android` (o `npm run ios`) → bundle generato, app avviabile sul simulatore con `AuthProvider` attivo *(DIFFERITO — D3)*
+- [ ] **GLOBAL-4** — Verifica manuale inattività: timer scatta dopo `timeoutMinutes`; su Windows con Narrator la navigazione da tastiera resetta il timer *(DIFFERITO — D3)*
 
 ---
 

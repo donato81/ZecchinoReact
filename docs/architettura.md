@@ -147,7 +147,8 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `hooks/use-display-preferences.ts` | hooks | ✅ Compatibile | No | — |
 | `hooks/use-haptic.ts` | hooks | ⚠️ Struttura OK | No | Inutile finché `haptic-system.ts` non è riscritto |
 | `hooks/use-screen-reader.ts` | hooks | ⚠️ Struttura OK | No | Inutile finché `screen-reader.ts` non è riscritto |
-| `hooks/use-inactivity-timer.ts` | hooks | ❌ Incompatibile | No (causa crash al mount) | `document.addEventListener` — da riscrivere con `AppState` |
+| `hooks/use-inactivity-timer.ts` | hooks | ✅ Compatibile | Sì | DESIGN 002 STEP 002 (N6): migrato a `setTimeout` RN; detection eventi delegata a `ActivityDetectorView` |
+| `components/ActivityDetectorView.tsx` | components | ✅ Compatibile | Sì | DESIGN 002 STEP 002 (N6): View RN che invoca `onActivity` su touch e (Windows) keydown senza catturare il responder |
 | `hooks/use-online-status.ts` | hooks | ❌ Incompatibile | No | `navigator.onLine` — da riscrivere con `NetInfo` |
 | ~~`hooks/use-talkback.ts`~~ | hooks | **ELIMINATO** | — | Rimosso in DESIGN 003. Sostituito da `accessibility/detection.ts` |
 

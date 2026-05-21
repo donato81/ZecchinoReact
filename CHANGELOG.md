@@ -2,6 +2,50 @@
 
 ## [Unreleased]
 
+### DESIGN 002 — STEP 002 (Fix Provider Bootstrap — useInactivityTimer & detection SR)
+
+Implementati i 3 fix di compatibilita' RN su provider e hook documentati in
+`docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md` e pianificati
+in `docs/3-coding-plans/002-PLAN_fix-provider-bootstrap_v0.2.0.md`. Eliminate
+le ultime dipendenze DOM nei file del bootstrap auth (N6, N8) e rimosso
+l'override dei tipi `node` che mascherava gli errori (N11). Gate runtime
+(`npm start`) **differiti**: AuthProvider non e' ancora montato in `App.tsx`
+(D3 — fuori perimetro STEP 002).
+
+#### Modificato
+- `tsconfig.json` (MODIFICATO) — N11. Rimossa la riga
+  `"types": ["node"]` da `compilerOptions`. Permette a `tsc --noEmit`
+  di segnalare gli usi residui di `window`/`document`/`navigator` nel
+  codice RN, evitando falsi positivi di compatibilita'.
+- `src/context/AuthContext.tsx` (MODIFICATO) — N8. Sostituita la
+  detection screen reader DOM-based (`document.querySelector('[aria-live]')`
+  + `document.documentElement.getAttribute('data-sr-active')`) con
+  `AccessibilityInfo.isScreenReaderEnabled()` di React Native e
+  sottoscrizione `addEventListener('screenReaderChanged', ...)` con
+  cleanup tramite `subscription.remove()`. Aggiunto import
+  `AccessibilityInfo` da `react-native`, aggiunto state
+  `isScreenReaderActive` (boolean) gestito da nuovo `useEffect`
+  dedicato. N6 (parte): aggiunto import
+  `ActivityDetectorView` e wrap condizionale dei `children` quando
+  `isAuthenticated === true` (Opzione B del PLAN) per propagare gli
+  eventi di attivita' utente al timer di inattivita'.
+- `src/hooks/use-inactivity-timer.ts` (MODIFICATO) — N6. Riscritto
+  su API RN native: rimossa la costante `ACTIVITY_EVENTS` e il blocco
+  `document.addEventListener`/`removeEventListener` nell'`useEffect`
+  (responsabilita' ora delegata a `ActivityDetectorView`); sostituiti
+  `window.setTimeout`/`window.clearTimeout` con i globali RN
+  `setTimeout`/`clearTimeout`. Public API `{ resetTimer, showWarning }`
+  invariata.
+
+#### Aggiunto
+- `src/components/ActivityDetectorView.tsx` (CREATO) — N6. Componente
+  View RN che cattura gli eventi di attivita' utente tramite
+  `onStartShouldSetResponder` (touch/click) senza acquisire il
+  responder (`return false`), permettendo agli eventi di proseguire
+  ai componenti figli. Su Windows aggiunge `onKeyDown` per coprire
+  la navigazione da tastiera Narrator. Espone interfaccia
+  `{ onActivity: () => void; children: ReactNode }`.
+
 ### DESIGN 001 — 2026-05-22 (Fix Blocchi di Avvio React Native / Expo)
 
 Risolti i sei blocchi di build documentati in

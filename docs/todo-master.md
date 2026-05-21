@@ -234,9 +234,9 @@ Verificare che package.json esista nella root e che la dipendenza @react-native-
 
 - **Block Title:** Fix AuthContext — rimozione sonner e dipendenze DOM
 - **Parent Phase:** P0
-- **Reference Documents:** docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md, docs/3-coding-plans/002-PLAN_fix-provider-bootstrap_v0.2.0.md
+- **Reference Documents:** docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md, docs/3-coding-plans/002-PLAN_fix-provider-bootstrap_v0.2.0.md, docs/1-reports/REPORT_implementazione_STEP-002_v1.0.0.md
 - **Technical Scope:** Solo src/context/AuthContext.tsx. Nessuna modifica ad altri file.
-- **Block Status:** [ ] TODO
+- **Block Status:** [~] IN PROGRESS (STEP 002 commit N11/N8/N6 eseguiti; gate runtime DIFFERITI per D3 — `App.tsx` non monta `AuthProvider`)
 
 #### Mappa delle Dipendenze
 - **Depends On:** P0.B1, P0.B2
@@ -371,7 +371,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 |----|--------|--------|------|
 | P0.B1 | Fix babel.config.js — alias e variabili ambiente | [ ] TODO | [ ] OPEN |
 | P0.B2 | Fix package.json — versione AsyncStorage | [ ] TODO | [ ] OPEN |
-| P0.B3 | Fix AuthContext — rimozione sonner e dipendenze DOM | [ ] TODO | [ ] OPEN |
+| P0.B3 | Fix AuthContext — rimozione sonner e dipendenze DOM | [~] IN PROGRESS (STEP 002 statici PASS) | [ ] OPEN |
 | P0.B4 | Fix AppDataContext — rimozione sonner e fix async cache | [ ] TODO | [ ] OPEN |
 | P1.B1 | Riscrittura haptic-system.ts per RN | [ ] TODO | [ ] OPEN |
 | P1.B2 | Riscrittura sound-system.ts per RN | [ ] TODO | [ ] OPEN |
