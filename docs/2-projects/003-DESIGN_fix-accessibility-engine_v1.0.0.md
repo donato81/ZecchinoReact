@@ -3,7 +3,12 @@ tipo: design
 titolo: "Fix accessibility engine — layer src/accessibility/ e locales minimale"
 versione: 1.0.0
 data: 2026-05-18
-stato: REVIEWED
+data-ultima-revisione: 2026-05-21
+stato: CORRETTO — IN ATTESA DI IMPLEMENTAZIONE
+stato-revisione: VALIDATO
+governance-version: 1.0.0
+autore: donny-81
+revisore: Consiglio AI (Perplexity, Claude, ChatGPT, DeepSeek, Gemini)
 sorgente: docs/0-architecture/ADR_001_sistema-annunci-accessibili.md
 perimetro: >
   src/accessibility/types.ts (CREATE),
@@ -11,6 +16,9 @@ perimetro: >
   src/accessibility/detection.ts (CREATE),
   src/locales/it.ts (CREATE — stringhe motore only),
   src/locales/index.ts (CREATE),
+  src/context/AuthContext.tsx (PATCH — solo riga di import: sostituzione
+    useTalkBack → useAccessibilityDetection, in coordinazione con la
+    deletion di use-talkback.ts. T6 è precondizione funzionale di T7),
   src/lib/screen-reader.ts (DELETE DIFFERITO — vedi Sezione 7.3),
   src/hooks/use-screen-reader.ts (DELETE DIFFERITO — vedi Sezione 7.2 e DESIGN 004),
   src/hooks/use-talkback.ts (DELETE — vedi Sezione 7)
@@ -19,6 +27,16 @@ nota-ordine: >
   L'ordine operativo obbligatorio è definito dal grafo in Sezione 2.
 precondizione: >
   002-DESIGN_fix-provider-bootstrap_v0.2.0.md completamente implementato
+dipendenze-a-monte: >
+  Questo design dipende da: DESIGN 002 (fix provider bootstrap) e,
+  transitivamente, DESIGN 001 (fix blocchi di avvio). L'implementazione
+  di DESIGN 003 può iniziare solo dopo la chiusura formale dei cicli
+  DESIGN 001 e DESIGN 002.
+dipendenze-a-valle: >
+  DESIGN 004 (announcements layer) dipende dal contratto pubblico
+  definito in DESIGN 003. In particolare il tipo TalkBackState e l'hook
+  useAccessibilityDetection() devono esistere e superare i test prima
+  che DESIGN 004 possa essere implementato.
 ---
 
 # DESIGN 003 — Fix accessibility engine
@@ -84,13 +102,33 @@ STEP 3 (indipendente da accessibility/, parallelizzabile con step 2):
   src/locales/it.ts                  CREATE — nessuna dipendenza interna
   src/locales/index.ts               CREATE — importa da ./it
 
-STEP 4 (dopo step 2, dopo aggiornamento import in AuthContext):
+STEP 4a (dopo step 2 — precondizione funzionale di STEP 4b):
+  src/context/AuthContext.tsx        PATCH — solo riga di import
+                                     (sostituzione useTalkBack →
+                                     useAccessibilityDetection)
+                                     Task PLAN: 003.T6
+                                     Dipende da: 003.T3 (il contratto
+                                     sostitutivo deve esistere prima
+                                     di aggiornare l'import)
+
+STEP 4b (dopo STEP 4a — la deletion non può precedere il PATCH):
   src/hooks/use-talkback.ts          DELETE — vedi Sezione 7.1
-  src/hooks/use-screen-reader.ts     DELETE — vedi Sezione 7.2
+                                     Task PLAN: 003.T7
+                                     Dipende da: 003.T6
+  src/hooks/use-screen-reader.ts     VERIFICA con grep — DELETE DIFFERITA
+                                     a DESIGN 004 (vedi §7.2)
 
 STEP 5 (DIFFERITO — non in questo documento):
   src/lib/screen-reader.ts           DELETE DIFFERITO — vedi Sezione 7.3
 ```
+
+**Dipendenza esplicita T6 → T3 (formalizzata in questo grafo):**
+T6 (patch import in `AuthContext.tsx`) non può essere eseguito se T3
+(definizione di `detection.ts` con il nuovo contratto
+`useAccessibilityDetection`) non è ancora stato completato. La sequenza
+obbligatoria è T3 → T6 → T7. Violare quest'ordine produce un errore di
+modulo non risolto (`Cannot find module '@/accessibility/detection'`).
+La precedenza commit-per-commit è verificata nella Sezione 5 del PLAN 003.
 
 **Invariante ADR_001 sul flusso di dipendenze:**
 
@@ -312,6 +350,102 @@ e `adaptations`, appartiene a un layer diverso.
 
 ---
 
+### 5.7 Contratto pubblico dell'hook `useAccessibilityDetection()`
+
+Questa sottosezione è la **fonte di verità architetturale** dell'API
+pubblica esposta da `detection.ts`. Il codice TypeScript completo vive
+nel PLAN (Task 003.T3); qui si formalizza il contratto che i layer a
+valle — in particolare DESIGN 004 (`announcements/` e provider
+applicativi) — devono assumere come stabile.
+
+#### Firma
+
+```ts
+function useAccessibilityDetection(): UseAccessibilityDetectionReturn
+```
+
+Hook React puro. Non accetta argomenti. Va invocato all'interno di un
+componente React montato sotto `UserSettingsProvider` (dipendenza
+verticale documentata in §5.1).
+
+#### Valore di ritorno
+
+```ts
+interface UseAccessibilityDetectionReturn {
+  // Stato di rilevamento aggregato (nativo + override manuale).
+  talkBackState: TalkBackState
+
+  // Adattazioni correnti (touch target, timeout, animazioni,
+  // descrizioni verbose). Derivate da TalkBackAdaptations utente.
+  adaptations: TalkBackAdaptations
+
+  // Override manuale (solo per sviluppo/testing).
+  // Imposta isEnabled e adaptationsActive a true, ignorando il valore nativo.
+  enableTalkBack: () => void
+
+  // Override manuale opposto: forza isEnabled e adaptationsActive a false.
+  disableTalkBack: () => void
+
+  // Cancella l'override manuale e rilegge il valore nativo da
+  // AccessibilityInfo.isScreenReaderEnabled().
+  resetDetection: () => void
+
+  // Aggiorna una singola chiave di adattazione (es. touchTargetSize).
+  updateAdaptation: <K extends keyof TalkBackAdaptations>(
+    key: K,
+    value: TalkBackAdaptations[K]
+  ) => void
+
+  // Ripristina tutte le adattazioni ai valori di default.
+  resetAdaptations: () => void
+
+  // Funzioni utilitarie pure derivate da talkBackState + adaptations.
+  // La logica è invariata rispetto a use-talkback.ts.
+  getTouchTargetSize: () => number
+  getAnimationDuration: (base: number) => number
+  getTimeout: (base: number) => number
+  shouldUseVerboseDescriptions: () => boolean
+}
+```
+
+#### Comportamento atteso
+
+- **Stato iniziale al mount**: `talkBackState.confidenceLevel === 'low'`
+  finché la prima `AccessibilityInfo.isScreenReaderEnabled()` non risolve
+  (tipicamente <100ms, vedi R4 in §10). Subito dopo il primo aggiornamento
+  asincrono il valore passa a `'high'`.
+- **Reattività in sessione**: il listener `screenReaderChanged` aggiorna
+  `talkBackState.isEnabled` al volo (vedi §5.5). Comportamento simmetrico
+  in attivazione e disattivazione, su tutte e tre le piattaforme.
+- **Precedenza override**: se l'utente ha impostato `talkBackManualOverride`
+  in `UserSettings`, questo sovrascrive `isEnabled` e `adaptationsActive`
+  ma non `isDetected` né `confidenceLevel`.
+- **Pure functions**: tutte le funzioni utilitarie sono pure e derivate
+  solo da `talkBackState` e `adaptations`. Nessuna chiamata a I/O, nessun
+  side effect.
+- **Cleanup**: alla smontatura il listener viene rimosso con
+  `subscription.remove()` e nessun aggiornamento di stato avviene
+  dopo l'unmount.
+
+#### Stabilità del contratto e dipendenza di DESIGN 004
+
+**Questo contratto è la dipendenza primaria di DESIGN 004.** Tutti i
+moduli `announcements/` e i provider applicativi (`AuthContext.tsx`
+e altri) consumeranno `useAccessibilityDetection()` con la firma
+documentata sopra. Modifiche breaking a questa API obbligano DESIGN 004
+a riallineare ogni consumer.
+
+Variazioni ammesse senza breaking change:
+- aggiunta di nuove chiavi opzionali al ritorno
+- aggiunta di nuove funzioni utilitarie
+
+Variazioni che richiedono coordinamento esplicito con DESIGN 004:
+- modifica della firma di funzioni esistenti
+- rimozione di chiavi dal ritorno
+- modifica della shape di `TalkBackState` o `TalkBackAdaptations`
+
+---
+
 ## 6. `src/locales/it.ts` e `src/locales/index.ts`
 
 ### 6.1 Ruolo dell'infrastruttura locales
@@ -433,7 +567,7 @@ I gate verificano nell'ordine:
 |---|---|---|
 | `src/announcements/` (tutti i moduli) | Layer futuro che usa engine.ts | Documento successivo |
 | Stringhe di dominio in `locales/it.ts` | Aggiunte da ogni modulo announcements/ | Documento successivo |
-| Patch `AuthContext.tsx` (import detection) | Fuori perimetro engine | Documento successivo |
+| Integrazione architetturale di `detection.ts` nei provider applicativi (mount completo, consumo di `talkBackState`/`adaptations` lato UI) | Fuori perimetro engine | Documento successivo (DESIGN 004) |
 | Patch `AppDataContext.tsx` | Fuori perimetro engine | Documento successivo |
 | Eliminazione `screen-reader.ts` | Dipende da migration announcements/ | Documento successivo |
 | Funzionalità haptic (`use-haptic.ts`) | Layer separato | Documento futuro |
@@ -455,6 +589,7 @@ I gate verificano nell'ordine:
 | R4 | Finestra di incertezza al primo mount (detection.ts) | Certa | Bassa | Documentata e accettata in §5.5. Durata tipica <100ms. Il listener corregge lo stato senza intervento manuale. |
 | R5 | `screen-reader.ts` non può essere eliminato finché `announcements/` non è completo | Certa | Nulla (se la sequenza è rispettata) | La deletion è esplicitamente differita al documento successivo (Sezione 7.3). Agent-Plan deve sequenziare correttamente. |
 | R6 | Consumatori di `use-screen-reader.ts` presenti al momento della deletion | Molto bassa | Media | `screens/` e `components/` sono vuoti in questa fase — il grep di Sezione 7.2 è una misura precauzionale, non la gestione di un rischio concreto. Se inaspettatamente il grep restituisce risultati, aggiornare quegli import prima di procedere. |
+| R7 | `src/lib/screen-reader.ts` contiene `initializeLiveRegions()` senza guard DOM (`document.createElement`, `aria-live`, `document.body`). Il file è browser-bound e incompatibile con React Native. Per tutta la durata di DESIGN 003 il file rimane fisicamente presente (deletion differita, vedi §7.3) e qualsiasi path runtime che invoca `useScreenReader().announce*()` produce `ReferenceError: document is not defined` con crash dell'albero React. | Alta | Alto | Il file viene rimosso e riscritto come parte del flusso DESIGN 003 + DESIGN 004; nessun nuovo consumer di `screen-reader.ts` viene introdotto in questo documento. **Nota operativa attiva, obbligatoria per tutta la durata di DESIGN 003**: non testare i path PIN e sblocco conto privato (`unlockPrivate`, `setPin`, `changePin`, `removePin`) finché DESIGN 003 non è completato. La nota rimane attiva fino al gate finale di DESIGN 004. Dipendenza: ciclo DESIGN 003 + DESIGN 004. |
 
 ---
 
@@ -486,22 +621,27 @@ Opzioni per la migration (scegliere una):
 In entrambi i casi `detection.ts` deve importare da `@/accessibility/types`,
 non da `@/lib/supabase/types`.
 
-### Nota critica: detection.ts è codice orfano in questo documento
+### Nota critica: detection.ts è codice quasi-orfano in questo documento
 
-`src/accessibility/detection.ts` viene creato in questo documento ma non
-viene montato da nessun Context o componente dell'app. Nessun file importa
-`useAccessibilityDetection()` al termine di questo documento.
+`src/accessibility/detection.ts` viene creato in questo documento e viene
+esposto come modulo importabile. L'unico consumer applicativo in questo
+documento è la singola riga di import in `src/context/AuthContext.tsx`
+(Task 003.T6), strettamente necessaria per consentire la deletion di
+`use-talkback.ts` (Task 003.T7) senza rompere la build. Nessun altro
+file importa `useAccessibilityDetection()` al termine di questo documento.
 
 Questo è intenzionale e corretto.
 
-L'integrazione di `detection.ts` nei React Provider dell'app
-(in particolare `AuthContext.tsx`) avviene nel documento successivo
-destinato a `src/announcements/`. In quel documento `AuthContext` sostituirà
-l'import di `useTalkBack` con `useAccessibilityDetection`.
+L'integrazione architetturale completa di `detection.ts` nei React Provider
+(consumo runtime di `talkBackState`/`adaptations`, propagazione alle UI,
+attivazione delle adattazioni) avviene nel documento successivo destinato
+a `src/announcements/`. Qui ci limitiamo alla sostituzione minimale
+dell'import — non viene introdotto alcun nuovo comportamento applicativo.
 
-Agent-Plan non deve tentare di integrare `detection.ts` nei context
-per "vederlo funzionare" in questo documento — farlo violerebbe il
-perimetro e potrebbe rompere la build.
+Agent-Plan non deve tentare di montare consumer aggiuntivi di
+`detection.ts` nei context per "vederlo funzionare" oltre la singola
+sostituzione di import — farlo violerebbe il perimetro e anticiperebbe
+lavoro che appartiene al documento successivo.
 
 Il modulo è verificabile autonomamente tramite un componente di test
 temporaneo montato in `App.tsx` (come descritto nel Gate 3 della Sezione 8),

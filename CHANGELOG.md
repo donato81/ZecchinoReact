@@ -2,6 +2,40 @@
 
 ## [Unreleased]
 
+### Docs — 2026-05-21 (correzioni documentali DESIGN 003 e ADR_001 — sette fix validati)
+
+#### Modificato
+- `docs/2-projects/003-DESIGN_fix-accessibility-engine_v1.0.0.md`
+  (MODIFICATO) — applicate sette correzioni validate dal Consiglio AI
+  (Perplexity, Claude, ChatGPT, DeepSeek, Gemini):
+  - C1: frontmatter integrato con `autore: donny-81`, `revisore: Consiglio AI`,
+    `governance-version: 1.0.0`, `stato-revisione: VALIDATO`. Stato bump:
+    `REVIEWED` → `CORRETTO — IN ATTESA DI IMPLEMENTAZIONE`,
+    `data-ultima-revisione: 2026-05-21`.
+  - C2: `src/context/AuthContext.tsx` inserito esplicitamente nel perimetro
+    frontmatter (PATCH minimale: solo riga di import). §9 e §11 riformulate:
+    rimossa classificazione "fuori perimetro engine" per il singolo import;
+    confermata fuori perimetro solo l'integrazione architetturale completa.
+  - C3: §10 risk matrix integrata con R7 — `screen-reader.ts` senza guard DOM
+    (probabilità Alta, impatto Alto, nota operativa attiva PIN/sblocco privato).
+  - C4: §2 grafo dipendenze formalizza esplicitamente T6 → T3 (e T7 → T6),
+    STEP 4 spezzato in 4a (PATCH AuthContext) e 4b (DELETE use-talkback).
+  - C5: nuova sottosezione §5.7 con il contratto pubblico di
+    `useAccessibilityDetection()` (firma, tipo del ritorno, comportamento
+    atteso, regole di stabilità per DESIGN 004).
+  - C6: frontmatter integrato con `dipendenze-a-monte` (DESIGN 002 + DESIGN 001
+    transitiva) e `dipendenze-a-valle` (DESIGN 004).
+- `docs/0-architecture/ADR_001_sistema-annunci-accessibili.md`
+  (MODIFICATO) — C7: bump versione `1.2.0` → `1.3.0`,
+  `data: 2026-05-21`. Aggiunta eccezione 1.bis alla Regola 1 di dipendenza
+  (`announcements/types.ts` può importare da `accessibility/types.ts`
+  esclusivamente come `import type`). Aggiornata riga 003-DESIGN nella
+  tabella "Impatto sui documenti esistenti". Aggiunta sezione "Storia del
+  documento" con changelog di versione.
+
+Report di convalida di riferimento:
+`docs/1-reports/REPORT_analisi-coerenza_DESIGN-003_v1.0.0.md`.
+
 ### Docs — 2026-05-21 (analisi coerenza DESIGN 003 + PLAN 003)
 
 #### Aggiunto

@@ -3,8 +3,8 @@
 tipo: architecture-decision-record
 titolo: Sistema di annunci accessibili — separazione delle responsabilità
 id: ADR_001
-versione: 1.2.0
-data: 2026-05-18
+versione: 1.3.0
+data: 2026-05-21
 stato: APPROVATO
 sostituisce: —
 superseded-by: —
@@ -185,8 +185,19 @@ prima di procedere con la codifica.
 
 1. `announcements/` non importa mai da `accessibility/`
    Il layer che costruisce dati non conosce il layer che esegue effetti.
-   La sola eccezione è `announcements/index.ts` che importa `engine`
-   per esporre la funzione `announce()`.
+   La sola eccezione strutturale è `announcements/index.ts` che importa
+   `engine` per esporre la funzione `announce()`.
+
+   **Eccezione 1.bis (introdotta con DESIGN 003, formalizzata in ADR_001 v1.3.0):**
+   `announcements/types.ts` può importare da `accessibility/types.ts`
+   **esclusivamente** con la sintassi `import type` — mai import di valore.
+   Questo import è consentito perché `announcements/types.ts` deve
+   condividere la definizione di `Announcement` e `AnnouncementPriority`
+   con il motore senza creare una dipendenza runtime sul layer
+   `accessibility/`. L'eccezione è limitata al singolo file
+   `announcements/types.ts`: ogni altro file di `announcements/`
+   non può importare da `accessibility/` in nessuna forma, né come
+   tipo né come valore.
 
 2. Il dominio non chiama `engine.ts` direttamente
    Il dominio passa sempre da `announcements/index.ts`.
@@ -227,7 +238,7 @@ announcements prendono queste decisioni.
 |-----------|---------|
 | 001-DESIGN | Nessun impatto — fix blocchi di avvio, invariato |
 | 002-DESIGN | Impatto minore — i placeholder `console.warn` aperti in `AuthContext` e `AppDataContext` verranno chiusi nel documento di design per `announcements/`, non nel 003 |
-| 003-DESIGN | Riscritto con scope ridotto: costruisce solo `accessibility/` e l'infrastruttura minima di `locales/` |
+| 003-DESIGN | Riscritto con scope ridotto: costruisce solo `accessibility/` e l'infrastruttura minima di `locales/`. Introduce inoltre l'eccezione architetturale 1.bis (import type da `accessibility/types` in `announcements/types`), formalizzata in ADR_001 v1.3.0. |
 
 ---
 
@@ -265,3 +276,13 @@ Scartato. Senza un criterio univoco ogni modulo avrebbe interpretato
 la distinzione polite/assertive in modo arbitrario, producendo
 comportamenti incoerenti tra le diverse aree dell'app.
 ```
+
+---
+
+## Storia del documento
+
+| Versione | Data | Modifica |
+|----------|------|----------|
+| 1.0.0 | 2026-05-15 | Prima formalizzazione dell'ADR. |
+| 1.2.0 | 2026-05-18 | Allineamento con DESIGN 003 v1.0.0 (scope ridotto). |
+| 1.3.0 | 2026-05-21 | Aggiunta eccezione 1.bis: `announcements/types.ts` può importare `Announcement` e `AnnouncementPriority` da `accessibility/types.ts` esclusivamente come `import type`. Aggiornata Regola 1 e tabella "Impatto sui documenti esistenti" riga 003-DESIGN. Approvata con DESIGN 003 v1.0.0. |
