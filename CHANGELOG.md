@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Documentation
+
+- docs/todo-master.md: allineamento stato post-implementazione
+  DESIGN 001, 002, 003. Registro di Stato aggiornato.
+  Snapshot di Ripresa aggiornato. Log di Validazione popolato.
+  Sezione 1 metadati aggiornati.
+
 ### DESIGN 002 — STEP 002 (Fix Provider Bootstrap — useInactivityTimer & detection SR)
 
 Implementati i 3 fix di compatibilita' RN su provider e hook documentati in
