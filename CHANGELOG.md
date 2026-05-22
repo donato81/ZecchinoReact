@@ -54,6 +54,14 @@
   Hermes aggiunta, tabella file coinvolti inserita,
   gate precondizione DESIGN 005 formalizzato, divieto
   Math.random() esplicitato. Versione aggiornata a v0.3.0.
+- docs/3-coding-plans/005-PLAN_sostituzione-crypto-N4_v1.0.0.md:
+  Coding Plan 005 creato. Copre: golden test G1–G3,
+  sostituzione encryptData/decryptData con @noble/ciphers,
+  polyfill react-native-get-random-values, test suite.
+- docs/3-coding-plans/006-PLAN_kdf-pin_v1.0.0.md:
+  Coding Plan 006 creato. Copre: benchmark Hermes Fase 0,
+  PBKDF2-SHA256 via @noble/hashes, migration SQL
+  pin_kdf_salt, golden vectors K1–K3, atomicità PIN.
 
 ### DESIGN 002 — STEP 002 (Fix Provider Bootstrap — useInactivityTimer & detection SR)
 
