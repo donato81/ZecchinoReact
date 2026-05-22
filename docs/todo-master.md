@@ -429,6 +429,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P5.B1 | Implementazione screens | [ ] TODO | [ ] OPEN |
 | P1.B4 | Documentazione DESIGN 004 completata (PLAN + TODO creati) | [x] DONE | [x] DONE |
 | P1.B5 | Documentazione DESIGN 005 — TODO 005 creato (PLAN 005 pronto per implementazione) | [x] DONE | [x] DONE |
+| P1.B6 | Documentazione DESIGN 006 — TODO 006 creato (PLAN 006 v1.1.0 pronto per implementazione a valle di PLAN 005) | [x] DONE | [x] DONE |
 
 ### Log di Validazione
 
@@ -444,6 +445,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-21 | P1.B4-DOC | Agent-Docs | DONE | PLAN 004 verificato (no correzioni), TODO 004 creato |
 | 2026-05-22 | P1.B4-IMPL | Agent-Code | DONE | DESIGN 004 — `src/announcements/` operativo, AuthContext+AppDataContext migrati, legacy SR eliminati |
 | 2026-05-22 | P1.B5-DOC | Agent-Orchestrator | DONE | PLAN 005 — TODO 005 creato. TODO operativo 8 task T1–T8 con gate bash. PLAN pronto per implementazione. |
+| 2026-05-22 | P1.B6-DOC | Agent-Orchestrator | DONE | PLAN 006 v1.1.0 — TODO 006 creato. TODO operativo 9 task T1–T9 con gate bash. Note critiche: divieto commit Fase 0 con placeholder, sequenza calcolo offline vettori K1/K2/K3 (6 passi), contratto errore updateFields (no swallow), serializzazione KDF_VERSION UInt8, posizioni buffer 0/1-16/17-28/29+. Gate bloccante: dipendenza da PLAN 005 implementato e mergiato. Checklist chiusura 12 punti da PLAN §10. |
 
 ---
 

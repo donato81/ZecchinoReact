@@ -81,6 +81,13 @@
   iniziale golden test atteso e metodologicamente corretto. NOTA V8:
   check anti-Math.random. NOTA DIAGNOSTICA: report delta byte-per-byte
   su fallimento post-migrazione. Checklist chiusura 11 punti da PLAN §9.
+- docs/4-todo-lists/006-TODO_kdf-pin_v1.1.0.md: creato.
+  TODO operativo per PLAN 006 v1.1.0 (KDF PIN). 9 task atomici
+  con gate bash verificabili. Nota critica Fase 0: divieto commit
+  con placeholder. Nota caso critico: floor 100.000 non negoziabile.
+  Nota sequenza calcolo vettori K1/K2/K3 in 6 passi. Nota contratto
+  errore updateFields (no swallow). Gate bloccante: dipendenza da
+  PLAN 005 implementato. Checklist chiusura 12 punti da PLAN §10.
 
 ### DESIGN 002 — STEP 002 (Fix Provider Bootstrap — useInactivityTimer & detection SR)
 
