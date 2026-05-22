@@ -2,6 +2,27 @@
 
 ## [Unreleased]
 
+### Changed
+
+- DESIGN/PLAN/TODO 005 — Sostituito `crypto.subtle` in `src/lib/crypto.ts`
+  con AES-256-GCM via `@noble/ciphers` (pure-JS, Hermes-compatible).
+  IV 96-bit generato con `crypto.getRandomValues` (polyfill
+  `react-native-get-random-values` caricato come prima riga di `index.js`).
+  Formato payload `Base64(IV[12] ‖ ciphertext ‖ authTag[16])` INVARIATO:
+  retrocompatibile con i dati cifrati esistenti su Supabase.
+  Firma API `encryptData(data, key): Promise<string>` e
+  `decryptData(encryptedData, key): Promise<string>` INVARIATE.
+  `hashPin`/`verifyPin` (bcryptjs) NON toccati.
+  Errori di decifratura normalizzati a `'Decryption failed: authentication
+  tag mismatch'` (chiave errata, payload manomesso o troncato).
+
+### Added
+
+- `__tests__/crypto/golden.test.ts` — 3 vettori bit-perfect (G1, G2, G3).
+- `__tests__/crypto/encrypt-decrypt.test.ts` — 6 test (R1, E1, E2, E3, A1, S1).
+- `__tests__/crypto/pin.test.ts` — 2 test bcryptjs round-trip.
+- Dipendenze: `@noble/ciphers@^1.0.0`, `react-native-get-random-values@^1.11.0`.
+
 ### Refactor
 
 - DESIGN 004 — Implementato il layer semantico `src/announcements/`

@@ -5,12 +5,13 @@ riferimento-design: docs/2-projects/005-DESIGN_sostituzione-crypto-N4_v0.5.0.md
 riferimento-plan: docs/3-coding-plans/005-PLAN_sostituzione-crypto-N4_v1.0.0.md
 versione: 1.0.0
 data-creazione: 2026-05-22
-stato: PENDING
-agente: —
-data-completamento: —
+stato: IMPLEMENTED
+agente: Agent-Orchestrator
+data-completamento: 2026-05-22
 note-stato: >-
-  Documento operativo derivato dal PLAN 005. Tutti i task
-  PENDING in attesa di avvio implementazione.
+  Migrazione completata. T1–T8 eseguiti in ordine canonico.
+  Suite __tests__/crypto/: 11/11 PASS (golden 3, encrypt-decrypt 6, pin 2).
+  Gate chiusura §9 (11 punti) superato. Vincoli V1–V11 rispettati.
 ---
 
 # TODO 005 — Sostituzione crypto.subtle N4
@@ -19,10 +20,10 @@ note-stato: >-
 
 | Campo | Valore |
 |-------|--------|
-| Ultimo Agente Attivo | — |
-| Blocco in Carico | — |
-| Last Completed Task | — |
-| Next Action | Esecuzione Task T1 — creazione `__tests__/crypto/golden.test.ts` |
+| Ultimo Agente Attivo | Agent-Orchestrator |
+| Blocco in Carico | — (chiuso) |
+| Last Completed Task | T8 — suite completa + tsc (11/11 PASS) |
+| Next Action | Migrazione conclusa. Riferimento futuro: PLAN 006 (KDF reale). |
 | Open Threads | — |
 
 ---

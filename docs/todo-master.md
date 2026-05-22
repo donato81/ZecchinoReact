@@ -429,6 +429,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P5.B1 | Implementazione screens | [ ] TODO | [ ] OPEN |
 | P1.B4 | Documentazione DESIGN 004 completata (PLAN + TODO creati) | [x] DONE | [x] DONE |
 | P1.B5 | Documentazione DESIGN 005 — TODO 005 creato (PLAN 005 pronto per implementazione) | [x] DONE | [x] DONE |
+| P1.B5-IMPL | Implementazione PLAN 005 — `@noble/ciphers` (T1–T8, 11/11 PASS, Gate §9 superato) | [x] DONE | [x] PASSED |
 | P1.B6 | Documentazione DESIGN 006 — TODO 006 creato (PLAN 006 v1.1.0 pronto per implementazione a valle di PLAN 005) | [x] DONE | [x] DONE |
 
 ### Log di Validazione

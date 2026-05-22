@@ -17,7 +17,8 @@
 | Auth | Supabase Auth | — | ✅ |
 | Storage locale | AsyncStorage | ^2.1.2 | ✅ allineato (DESIGN 001) |
 | Hashing PIN | bcryptjs | ^3.0.3 | ✅ |
-| Cifratura dati | crypto.subtle (Web Crypto) | — | ❌ non supportato in Hermes |
+| Cifratura dati | @noble/ciphers (AES-256-GCM, pure-JS) | ^1.0.0 | ✅ Hermes-compatible (PLAN 005) |
+| CSPRNG | react-native-get-random-values (polyfill `crypto.getRandomValues`) | ^1.11.0 | ✅ |
 | Env vars | react-native-dotenv | ^3.4.11 | ✅ configurato in babel.config.js (DESIGN 001) |
 | Alias path | babel-plugin-module-resolver | ^5.0.3 | ✅ configurato in babel.config.js (DESIGN 001) |
 
@@ -129,7 +130,7 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `lib/budget-forecasting.ts` | lib | ✅ Compatibile | No | — |
 | `lib/budget-history.ts` | lib | ✅ Compatibile | No | — |
 | `lib/budget-templates.ts` | lib | ⚠️ Valuta | No | `@phosphor-icons/react` da sostituire con stringhe o componenti RN |
-| `lib/crypto.ts` | lib | ⚠️ Parziale | No | `hashPin`/`verifyPin` OK; `encryptData`/`decryptData` (crypto.subtle) da rimpiazzare |
+| `lib/crypto.ts` | lib | ✅ OK | Sì | `hashPin`/`verifyPin` (bcryptjs) + `encryptData`/`decryptData` (@noble/ciphers AES-GCM) — PLAN 005 implementato |
 | `lib/haptic-system.ts` | lib | ❌ Incompatibile | No | `localStorage` + `navigator.vibrate` — da riscrivere |
 | `lib/sound-system.ts` | lib | ❌ Incompatibile | No | Web Audio API — da riscrivere |
 | `lib/screen-reader.ts` | lib | **ELIMINATO (DESIGN 004)** | — | Sostituito da `src/announcements/` |
