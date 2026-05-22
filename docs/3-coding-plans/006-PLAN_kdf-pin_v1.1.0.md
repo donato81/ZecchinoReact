@@ -436,7 +436,7 @@ deve essere serializzata come un singolo byte `UInt8`
 buffer, il byte deve essere scritto con:
 
 ```ts
-buffer = KDF_VERSION; // UInt8, 1 byte esatto
+buffer[0] = KDF_VERSION; // UInt8, 1 byte esatto
 ```
 
 oppure tramite `DataView.setUint8(0, KDF_VERSION)`.
