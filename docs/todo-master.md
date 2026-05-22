@@ -428,6 +428,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P4.B2 | Creazione sistema Toast/notifica nativo | [ ] TODO | [ ] OPEN |
 | P5.B1 | Implementazione screens | [ ] TODO | [ ] OPEN |
 | P1.B4 | Documentazione DESIGN 004 completata (PLAN + TODO creati) | [x] DONE | [x] DONE |
+| P1.B5 | Documentazione DESIGN 005 — TODO 005 creato (PLAN 005 pronto per implementazione) | [x] DONE | [x] DONE |
 
 ### Log di Validazione
 
@@ -442,6 +443,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-22 | P1.B3-PARZIALE | Agent-Orchestrator | DONE (parziale) | DESIGN 003 — accessibility engine |
 | 2026-05-21 | P1.B4-DOC | Agent-Docs | DONE | PLAN 004 verificato (no correzioni), TODO 004 creato |
 | 2026-05-22 | P1.B4-IMPL | Agent-Code | DONE | DESIGN 004 — `src/announcements/` operativo, AuthContext+AppDataContext migrati, legacy SR eliminati |
+| 2026-05-22 | P1.B5-DOC | Agent-Orchestrator | DONE | PLAN 005 — TODO 005 creato. TODO operativo 8 task T1–T8 con gate bash. PLAN pronto per implementazione. |
 
 ---
 

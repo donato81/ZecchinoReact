@@ -75,6 +75,12 @@
   indipendente da src/lib/crypto.ts (no falsi positivi
   crittografici), confronto K2 via bytesToHex, check lunghezze
   post-conversione hex→bytes, output solo in console.
+- docs/4-todo-lists/005-TODO_sostituzione-crypto-N4_v1.0.0.md: creato.
+  TODO operativo per PLAN 005 (sostituzione crypto.subtle). 8 task
+  atomici T1–T8 con gate bash verificabili. NOTA FASE 0: fallimento
+  iniziale golden test atteso e metodologicamente corretto. NOTA V8:
+  check anti-Math.random. NOTA DIAGNOSTICA: report delta byte-per-byte
+  su fallimento post-migrazione. Checklist chiusura 11 punti da PLAN §9.
 
 ### DESIGN 002 — STEP 002 (Fix Provider Bootstrap — useInactivityTimer & detection SR)
 
