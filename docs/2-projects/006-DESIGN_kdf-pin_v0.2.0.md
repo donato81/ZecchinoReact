@@ -1,8 +1,8 @@
 ---
 tipo: design
 titolo: Key Derivation Function per PIN privato
-versione: 0.2.0
-data: 2026-05-20
+versione: 0.3.0
+data: 2026-05-22
 stato: REVIEWED
 sorgente: docs/2-projects/005-DESIGN_sostituzione-crypto-N4_v0.4.0.md
 perimetro: src/lib/crypto.ts, src/lib/supabase/types.ts, src/lib/supabase/repositories/impostazioni-utente.ts, docs/6-sql/
@@ -64,7 +64,7 @@ controllato e richiede un salt per ogni derivazione.
 
 **DESIGN 005 deve essere completamente implementato e mergiato nel
 codebase prima dell'implementazione di qualsiasi elemento di questo
-documento.**
+documento.** (Gate: verificare prima dell'avvio che DESIGN 005 sia stato implementato e il modulo @noble/ciphers sia disponibile nel progetto.)
 
 La dipendenza tecnica è la seguente:
 
@@ -196,6 +196,12 @@ modifica il PIN privato, viene generato un nuovo salt indipendente.
 **Dimensione minima**: 16 byte (128 bit). Questa dimensione garantisce
 che la probabilità di collisione tra due salt generati indipendentemente
 sia trascurabile (ordine di $2^{-64}$ per il paradosso del compleanno).
+
+> DIVIETO ASSOLUTO: non usare Math.random() né
+> Date.now() come fonte di entropia per la generazione
+> del salt o di qualsiasi parametro crittografico.
+> Usare esclusivamente crypto.getRandomValues()
+> tramite @noble/ciphers o equivalente CSPRNG.
 
 ### Persistenza
 
@@ -518,3 +524,53 @@ di compatibilità per payload privi di version byte.
 supporta al massimo 255 versioni distinte dell'algoritmo di derivazione.
 Questo limite è ritenuto sufficiente per il ciclo di vita previsto
 dell'applicazione.
+
+---
+
+## 12. Vincoli tecnici
+
+Raccolta dei vincoli tecnici documentati nel presente design.
+I vincoli sono mantenuti nelle sezioni originali per la lettura
+contestuale; questa sezione offre una visione consolidata.
+
+| Vincolo | Valore / Regola | Sezione di riferimento |
+|---------|-----------------|------------------------|
+| Dipendenza da DESIGN 005 | DESIGN 005 deve essere implementato e mergiato prima di qualsiasi implementazione di DESIGN 006 | §2 |
+| Algoritmo KDF | PBKDF2-SHA256 (RFC 8018) via `@noble/hashes` | §4 |
+| Floor iterazioni PBKDF2 | ≥ 100.000 iterazioni (raccomandazione OWASP per attacchi GPU offline) | §4 |
+| Dipendenze pure-JavaScript | Solo librerie senza binding nativi; vietato WebAssembly e JNI | §4 |
+| Dimensione minima salt | 16 byte (128 bit) generati tramite `crypto.getRandomValues` | §5 |
+| Fonte entropia | Esclusivamente `crypto.getRandomValues` (CSPRNG); vietato `Math.random()` e `Date.now()` | §5 |
+| Budget prestazionale derivazione | 100–300 ms sul device minimo supportato | §7 |
+| Floor iterazioni (budget) | Se il floor 100.000 non è raggiungibile entro 100–300 ms, documentare come criticità aperta nel Coding Plan 006 | §7 |
+
+---
+
+## 13. Fasi di implementazione
+
+### Fase 0 — Benchmark preliminare su Hermes
+
+Prima di procedere con qualsiasi implementazione del codice KDF, eseguire
+la seguente attività preparatoria:
+
+- Benchmark PBKDF2-SHA256 su Hermes (React Native):
+  misurare il tempo di esecuzione con il numero di
+  iterazioni configurato prima di procedere all'
+  implementazione. Il risultato deve essere inferiore
+  al limite accettabile per UX (≤ 2s su device
+  di riferimento low-end).
+
+I risultati del benchmark e il numero di iterazioni scelto saranno
+documentati nel Coding Plan 006.
+
+---
+
+## 14. File coinvolti
+
+| File | Operazione | Note |
+|------|------------|------|
+| `src/lib/crypto.ts` | Modifica | Sostituzione KDF PIN: PBKDF2-SHA256 sostituisce padding/troncatura |
+| `src/lib/supabase/types.ts` | Modifica | Aggiunta `pin_kdf_salt` in `DbUserSettings` e `pinKdfSalt` in `UserSettings` |
+| `src/lib/supabase/repositories/impostazioni-utente.ts` | Modifica | Aggiunta funzione `updatePinSalt`, estensione `fieldMap` |
+| `docs/6-sql/` | Creazione | Migration SQL per colonna `pin_kdf_salt` su `impostazioni_utente` |
+| `__tests__/crypto/` o `src/__tests__/crypto/` | Creazione | Test KDF con golden vectors K1, K2, K3 (da confermare in Coding Plan 006) |

@@ -43,6 +43,17 @@
   Carico aggiornato a "documentazione completata in attesa
   validazione". Active Phase, Next Action, riga ledger P1.B4 e
   log di validazione 2026-05-21 aggiunti.
+- docs/2-projects/005-DESIGN_crypto-subtle: correzioni
+  C005-1..5 applicate. Nomenclatura vettori uniformata,
+  sezioni payload/KDF separate, nota operativa versione
+  lib aggiunta, path test e golden vectors documentati.
+  Versione aggiornata a v0.5.0.
+- docs/2-projects/006-DESIGN_kdf-pin: correzioni
+  C006-2, C006-3, C006-4, C006-6, C006-7 applicate.
+  Vincoli raccolti in sezione dedicata, Fase 0 benchmark
+  Hermes aggiunta, tabella file coinvolti inserita,
+  gate precondizione DESIGN 005 formalizzato, divieto
+  Math.random() esplicitato. Versione aggiornata a v0.3.0.
 
 ### DESIGN 002 — STEP 002 (Fix Provider Bootstrap — useInactivityTimer & detection SR)
 

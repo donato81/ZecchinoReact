@@ -1,8 +1,8 @@
 ---
 tipo: design
 titolo: Sostituzione crypto.subtle — N4 (encryptData / decryptData)
-versione: 0.4.0
-data: 2026-05-20
+versione: 0.5.0
+data: 2026-05-22
 stato: REVIEWED
 sorgente: docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md
 perimetro: src/lib/crypto.ts, index.js, package.json
@@ -89,7 +89,9 @@ prodotto dall'implementazione attuale. Serve come riferimento
 contrattuale per i golden test e come garanzia che i dati già salvati
 su Supabase non richiederanno alcuna migrazione.
 
-### Struttura del buffer
+### Struttura del payload cifrato
+
+#### Struttura del buffer
 
 Il payload cifrato viene costruito concatenando tre segmenti in questo
 ordine esatto:
@@ -106,25 +108,27 @@ ordine esatto:
 
 Il buffer finale ha quindi lunghezza `12 + N + 16` byte.
 
-### Encoding
+#### Encoding
 
 L'intero buffer viene codificato in Base64 usando l'alfabeto standard
 (`btoa`). Il risultato è una stringa ASCII trasportabile come campo
 testuale su Supabase.
 
-### Derivazione della chiave
-
-Il PIN dell'utente viene trasformato in una chiave di 32 byte tramite
-un'operazione di padding-e-troncatura: il PIN viene esteso con caratteri
-`0` fino a raggiungere i 32 caratteri, poi troncato ai primi 32. La
-conversione in byte avviene tramite UTF-8 (`TextEncoder`).
-
-### Separazione authTag nella decifratura
+#### Separazione authTag nella decifratura
 
 Durante la decifratura, il buffer viene diviso secondo le posizioni
 fisse: i primi 12 byte sono l'IV, tutto il resto (ciphertext + authTag)
 viene passato all'algoritmo AES-GCM. L'autenticità viene verificata
 automaticamente dall'algoritmo, che fallisce se l'authTag non corrisponde.
+
+### Parametri KDF
+
+#### Derivazione della chiave
+
+Il PIN dell'utente viene trasformato in una chiave di 32 byte tramite
+un'operazione di padding-e-troncatura: il PIN viene esteso con caratteri
+`0` fino a raggiungere i 32 caratteri, poi troncato ai primi 32. La
+conversione in byte avviene tramite UTF-8 (`TextEncoder`).
 
 ---
 
@@ -216,7 +220,7 @@ output (ciphertext, authTag). Non esiste alcun parametro proprietario o
 estensione non standard nei payload prodotti dalla funzione attuale.
 
 La dimostrazione pratica è fornita dai golden test nella sezione 5: il
-vettore V1, calcolato con WebCrypto, viene correttamente decifrato dalla
+vettore G1, calcolato con WebCrypto, viene correttamente decifrato dalla
 nuova implementazione.
 
 **Nota su btoa e atob**: il report N4 originale menziona `btoa` e `atob`
@@ -287,6 +291,12 @@ chiamata senza errori di compilazione visibili.
 
 ## 5. Golden Compatibility Tests
 
+> Origine dei golden vectors: generati offline con
+> implementazione di riferimento Python (@noble/ciphers
+> equivalente) o estratti dalla test suite ufficiale
+> della libreria. I vettori devono essere riproducibili
+> indipendentemente dalla piattaforma.
+
 Questa sezione definisce i vettori di test formali che il Coding Plan
 deve implementare prima di qualsiasi altra modifica. Questi vettori sono
 stati calcolati computazionalmente usando la stessa logica di `crypto.ts`
@@ -294,7 +304,7 @@ stati calcolati computazionalmente usando la stessa logica di `crypto.ts`
 codifica Base64). L'identità dei risultati tra WebCrypto e `@noble/ciphers`
 è verificabile ripetendo il calcolo con entrambi i motori.
 
-### Vettore 1 — Testo breve ASCII
+### G1 — Testo breve ASCII
 
 | Campo | Valore |
 |-------|--------|
@@ -305,7 +315,7 @@ codifica Base64). L'identità dei risultati tra WebCrypto e `@noble/ciphers`
 | Output atteso in Base64 | `AAAAAAAAAAAAAAABISANl2PDhDno5kCjLeQlUbd7CRo=` |
 | Lunghezza buffer decodificato | 32 byte (12 IV + 4 ciphertext + 16 authTag) |
 
-### Vettore 2 — Testo con caratteri Unicode e simboli
+### G2 — Testo con caratteri Unicode e simboli
 
 | Campo | Valore |
 |-------|--------|
@@ -319,7 +329,7 @@ codifica Base64). L'identità dei risultati tra WebCrypto e `@noble/ciphers`
 
 ### Test di decifratura inversa
 
-Il valore Base64 del Vettore 1, prodotto da WebCrypto, deve essere
+Il valore Base64 del vettore G1, prodotto da WebCrypto, deve essere
 decifrabile dalla nuova implementazione con la stessa chiave (`testkey`)
 e restituire il plaintext originale (`ciao`). Questo test dimostra la
 compatibilità bidirezionale tra la vecchia e la nuova implementazione.
@@ -373,6 +383,14 @@ Per l'attuale fase di sviluppo, questa considerazione è rinviata.
 
 ---
 
+> NOTA OPERATIVA C005-3 (solo per Plan):
+> Verificare prima dell'implementazione che la versione
+> di @noble/ciphers in uso supporti pure-JS senza
+> dipendenze native. Questa verifica appartiene al
+> Coding Plan 005, non al DESIGN.
+
+---
+
 ## 8. Dipendenze da aggiungere
 
 | Pacchetto | Versione minima | Motivazione |
@@ -414,6 +432,11 @@ regole senza eccezioni:
 
 Non esiste attualmente alcun file di test per `src/lib/crypto.ts`. Il
 Coding Plan deve creare la test suite contestualmente all'implementazione.
+
+- Path dei file di test: `__tests__/crypto/` oppure `src/__tests__/crypto/` (da confermare in Plan 005)
+- Framework di test atteso: Jest con preset react-native (già configurato nel progetto)
+- I test devono girare su Node (senza device) usando i golden vectors definiti nel documento.
+
 Di seguito l'elenco dei casi da coprire, descritti in linguaggio naturale.
 
 ### Casi obbligatori (golden test)
