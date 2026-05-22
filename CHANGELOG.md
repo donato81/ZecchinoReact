@@ -62,6 +62,13 @@
   Coding Plan 006 creato. Copre: benchmark Hermes Fase 0,
   PBKDF2-SHA256 via @noble/hashes, migration SQL
   pin_kdf_salt, golden vectors K1–K3, atomicità PIN.
+- docs/3-coding-plans/006-PLAN_kdf-pin_v1.0.0.md:
+  aggiornato a v1.1.0 stato REVIEWED. Integrate 5 prescrizioni
+  obbligatorie post-validazione Consiglio AI: divieto commit
+  crypto.ts prima Fase 0 (§2.4.1), contratto errore esplicito
+  updateFields (§8.2.1), freeze preventivo offline vettori
+  K1/K2/K3 (§9.2), serializzazione KDF_VERSION come UInt8
+  (§7.3), scope migration DOWN dichiarato (§4.2).
 
 ### DESIGN 002 — STEP 002 (Fix Provider Bootstrap — useInactivityTimer & detection SR)
 

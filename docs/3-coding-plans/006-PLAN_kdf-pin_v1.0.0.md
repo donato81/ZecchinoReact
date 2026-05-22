@@ -1,9 +1,10 @@
 ---
 tipo: plan
 titolo: Key Derivation Function per PIN privato
-versione: 1.0.0
+versione: 1.1.0
 data: 2026-05-22
-stato: DRAFT
+data-revisione: 2026-05-22
+stato: REVIEWED
 design: docs/2-projects/006-DESIGN_kdf-pin_v0.3.0.md
 perimetro: >
   src/lib/crypto.ts,
@@ -95,6 +96,27 @@ message):
 - Una volta scelto, il valore diventa **costante fissa** del modulo
   `src/lib/crypto.ts` (es. `PBKDF2_ITERATIONS`), usata in tutte le
   derivazioni successive e in tutti i test K1, K2, K3.
+
+### 2.4.1 Divieto di commit prima del completamento della Fase 0
+
+**DIVIETO ASSOLUTO**: nessun commit e nessun push di
+`src/lib/crypto.ts` è ammesso prima che la Fase 0 sia
+completata secondo il gate §2.6.
+
+Questo divieto è bloccante. Se il valore di `PBKDF2_ITERATIONS`
+è ancora un placeholder (`/* valore da Fase 0 */`), il file
+non può essere committato.
+
+Pre-commit check obbligatorio prima di ogni commit che tocchi
+`src/lib/crypto.ts`:
+
+```bash
+grep -n "valore da Fase 0" src/lib/crypto.ts
+```
+
+Il comando deve restituire 0 occorrenze prima che il commit
+sia eseguito. Se restituisce 1 o più: STOP, completare prima
+il benchmark di Fase 0.
 
 ### 2.5 Gestione del caso critico
 
@@ -214,6 +236,28 @@ ALTER TABLE impostazioni_utente
 ALTER TABLE impostazioni_utente
   DROP COLUMN IF EXISTS pin_kdf_salt;
 ```
+
+**Scope della migration DOWN**:
+
+Il blocco DOWN è ammesso esclusivamente nei seguenti ambienti:
+
+- **Sviluppo locale**: sempre ammesso.
+- **Staging / Test**: ammesso se i dati non sono reali.
+- **Produzione**: il blocco DOWN è da considerarsi
+  **no-op documentato**. Eseguire il blocco DOWN in
+  produzione elimina i salt già salvati per gli utenti
+  reali, rendendo i loro PIN irrecuperabili.
+
+Prima di eseguire il blocco DOWN in qualsiasi ambiente,
+verificare che l'ambiente sia corretto con:
+
+```bash
+# Verifica ambiente dal .env attivo
+grep -E "^SUPABASE_URL" .env
+```
+
+In caso di dubbio: STOP, attendere conferma esplicita
+prima di procedere con il rollback.
 
 ### 4.3 Gate Fase 2
 
@@ -386,6 +430,22 @@ const IV_LEN = 12;
 const TAG_LEN = 16;
 ```
 
+**Serializzazione di `KDF_VERSION`**: la costante `0x01`
+deve essere serializzata come un singolo byte `UInt8`
+(1 byte esatto, valore 0–255). In fase di costruzione del
+buffer, il byte deve essere scritto con:
+
+```ts
+buffer = KDF_VERSION; // UInt8, 1 byte esatto
+```
+
+oppure tramite `DataView.setUint8(0, KDF_VERSION)`.
+
+Non usare `Int8`, `Int16`, `Uint16` o tipi multi-byte.
+Ogni variazione del tipo di serializzazione produce offset
+errati in tutti i campi successivi (`SALT`, `IV`, `CT`,
+`TAG`), causando decifratura silenziosa fallita.
+
 Struttura del buffer per payload PIN:
 
 ```
@@ -489,6 +549,51 @@ export async function updatePinHashAndSalt(
 }
 ```
 
+### 8.2.1 Contratto errore di `updateFields`
+
+La funzione `updateFields` che deve essere introdotta nello
+stesso modulo ha il seguente contratto obbligatorio:
+
+```ts
+/**
+ * Aggiorna atomicamente uno o più campi di impostazioni_utente.
+ * Costruisce un singolo UPDATE Supabase multi-colonna.
+ *
+ * CONTRATTO ERRORE (obbligatorio, nessuna eccezione):
+ * - Deve controllare response.error restituito da Supabase.
+ * - Se response.error è non-null: deve rilanciare un'eccezione
+ *   esplicita con il messaggio dell'errore Supabase.
+ * - Non è ammesso swallow silenzioso dell'errore.
+ * - Non è ammesso fallback implicito (es. continuare
+ *   l'esecuzione come se l'update fosse avvenuto).
+ */
+async function updateFields(
+  fields: Partial<
+    Record<
+      'pinPrivatoHash' | 'pinKdfSalt',
+      string | number | null
+    >
+  >
+): Promise<void> {
+  // Costruire il mapping snake_case dai campi camelCase
+  // tramite fieldMap esistente, poi eseguire:
+  const response = await supabase
+    .from('impostazioni_utente')
+    .update(/* campi mappati */)
+    .eq('user_id', /* user id corrente */);
+
+  if (response.error) {
+    throw new Error(
+      `updateFields: aggiornamento fallito — ${response.error.message}`
+    );
+  }
+}
+```
+
+L'implementatore DEVE rispettare questo contratto senza
+eccezioni. Il mancato controllo di `response.error` rompe
+l'invariante architetturale di atomicità dichiarato dal PLAN.
+
 Dove `updateFields` è una variante multi-campo di `updateField` da
 introdurre nello stesso modulo, che costruisce un singolo `update(...)`
 Supabase con tutte le colonne specificate.
@@ -520,15 +625,34 @@ per impostare il PIN è **vietato** per non rompere l'invariante.
 
 ### 9.2 Calcolo dei valori esatti
 
-I valori numerici (hex, base64) dei vettori K devono essere **calcolati
-e fissati in questa fase** come costanti di test, non come valori
-dinamici. La procedura:
+I valori numerici (hex, base64) dei vettori K devono essere
+**calcolati offline in modo indipendente e fissati come
+costanti prima di scrivere qualsiasi riga della test suite**.
+Questa sequenza è obbligatoria e non invertibile.
 
-1. Scegliere PIN e salt di riferimento (vedi sotto).
-2. Eseguire `derivePinKey(pin, salt)` una volta (manualmente in REPL
-   Node o script dedicato).
-3. Annotare l'output hex.
-4. Hardcodare l'output come costante atteso nel test.
+Sequenza corretta:
+
+1. Attendere il completamento di PLAN 005 e la disponibilità
+   di `@noble/ciphers` installata e verificata.
+2. Eseguire `derivePinKey(pin, salt)` in un REPL Node.js
+   isolato (non nell'app, non in Jest) oppure tramite lo
+   script dedicato `docs/scripts/generate-golden-vectors.js`
+   se già disponibile.
+3. Per ciascuno dei tre vettori K1, K2, K3: annotare
+   l'output hex della chiave derivata e, per K3, il payload
+   Base64 completo del buffer `[KDF_VERSION|SALT|IV|CT|TAG]`.
+4. Verificare i valori con una seconda esecuzione indipendente
+   (stesso REPL, stessa invocazione) per escludere errori
+   di trascrizione.
+5. Hardcodare i valori verificati come costanti nel file
+   di test. I valori non devono mai essere calcolati
+   dinamicamente in `beforeAll` o in qualsiasi hook di test.
+6. Solo dopo il freeze dei valori, scrivere i test K1, K2, K3.
+
+**Motivazione**: vettori calcolati dall'implementatore senza
+verifica indipendente rischiano di creare test auto-consistenti
+che validano l'implementazione su sé stessa senza garantire
+la correttezza semantica dell'output crittografico.
 
 ### 9.3 K1 — Idempotenza della derivazione
 
