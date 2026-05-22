@@ -9,7 +9,7 @@ perimetro: src/lib/crypto.ts, index.js, package.json
 problema: N4
 ---
 
-# DESIGN — Sostituzione crypto.subtle (v0.4.0)
+# DESIGN — Sostituzione crypto.subtle (v0.5.0)
 
 > **Scope**: rendere le funzioni `encryptData` e `decryptData` di
 > `src/lib/crypto.ts` eseguibili in React Native sostituendo l'API

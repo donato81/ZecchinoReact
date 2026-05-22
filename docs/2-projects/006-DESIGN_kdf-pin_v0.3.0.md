@@ -4,7 +4,7 @@ titolo: Key Derivation Function per PIN privato
 versione: 0.3.0
 data: 2026-05-22
 stato: REVIEWED
-sorgente: docs/2-projects/005-DESIGN_sostituzione-crypto-N4_v0.4.0.md
+sorgente: docs/2-projects/005-DESIGN_sostituzione-crypto-N4_v0.5.0.md
 perimetro: src/lib/crypto.ts, src/lib/supabase/types.ts, src/lib/supabase/repositories/impostazioni-utente.ts, docs/6-sql/
 ---
 
@@ -18,7 +18,7 @@ perimetro: src/lib/crypto.ts, src/lib/supabase/types.ts, src/lib/supabase/reposi
 > aptici, segnali audio, componenti UI.
 >
 > **Precondizione**: DESIGN 005
-> ([005-DESIGN_sostituzione-crypto-N4_v0.4.0.md](../2-projects/005-DESIGN_sostituzione-crypto-N4_v0.4.0.md))
+> ([005-DESIGN_sostituzione-crypto-N4_v0.5.0.md](../2-projects/005-DESIGN_sostituzione-crypto-N4_v0.5.0.md))
 > deve essere completamente implementato e mergiato nel codebase prima
 > che qualsiasi implementazione derivante da questo documento possa
 > procedere.
