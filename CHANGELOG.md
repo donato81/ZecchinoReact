@@ -69,6 +69,12 @@
   updateFields (§8.2.1), freeze preventivo offline vettori
   K1/K2/K3 (§9.2), serializzazione KDF_VERSION come UInt8
   (§7.3), scope migration DOWN dichiarato (§4.2).
+- docs/scripts/generate-golden-vectors.js: creato. Script offline
+  CommonJS per il calcolo dei golden vectors K1/K2/K3 (PLAN 006
+  §9.2). PBKDF2_ITERATIONS bloccante fino al completamento Fase 0,
+  indipendente da src/lib/crypto.ts (no falsi positivi
+  crittografici), confronto K2 via bytesToHex, check lunghezze
+  post-conversione hex→bytes, output solo in console.
 
 ### DESIGN 002 — STEP 002 (Fix Provider Bootstrap — useInactivityTimer & detection SR)
 
