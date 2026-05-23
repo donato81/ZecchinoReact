@@ -17,11 +17,17 @@
   TSC baseline ridotta da 89 a 47 errori.
 - **Active Block:** Nessuno — implementazione DESIGN 004 completata.
 - **Last Updated:** 2026-05-23
-- **Pending Plans:** PLAN 007 (`docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md`)
-  in stato **DRAFT / PENDING** — stesura completata il 2026-05-23, in attesa
-  di review e autorizzazione all'implementazione. Perimetro:
-  `src/context/AppDataContext.tsx`. Dipendenza upstream: DESIGN 001 e 002
-  già implementati. Codice sorgente non ancora modificato.
+- **Pending Plans:**
+  - PLAN 007 (`docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md`)
+    in stato **DRAFT / PENDING** — stesura completata il 2026-05-23, in attesa
+    di review e autorizzazione all'implementazione. Perimetro:
+    `src/context/AppDataContext.tsx`. Dipendenza upstream: DESIGN 001 e 002
+    già implementati. Codice sorgente non ancora modificato.
+  - TODO 007 (`docs/4-todo-lists/007-TODO_async-cache-hydration_v0.1.0.md`)
+    in stato **PENDING** — creato il 2026-05-23, derivato da PLAN 007 v0.1.0.
+    Copre T1-T8 (async, state machine, generation counter, writeCache fail-soft,
+    censimento consumer, conversione spec, suite completa). Avvio subordinato
+    al completamento di DESIGN 001 e DESIGN 002 su main (gate bloccante §2).
 
 ### Mappa Documentale
 
@@ -81,6 +87,15 @@
   (review Consiglio AI → eventuali correzioni
   chirurgiche → convalida finale → avvio
   implementazione).
+
+> **Nota sessione stesura TODO 007 — 2026-05-23:** Creato
+> `docs/4-todo-lists/007-TODO_async-cache-hydration_v0.1.0.md`
+> (stato PENDING) derivato da PLAN 007 v0.1.0. Struttura: 8 sezioni
+> (Stato, Gate bloccante, Stato task, Task atomici T1-T8, Note operative,
+> Log validazione, Gate chiusura G1-G5, Riferimenti). Convalidato in
+> Fase 2 (9 criteri) e Fase 3 (6 criteri) con esito positivo al primo
+> tentativo. Nessuna modifica al codice sorgente. Prossimo passo: review
+> PLAN 007 e TODO 007 e autorizzazione all'implementazione.
 
 > **Nota sessione stesura PLAN 007 — 2026-05-23:** Redatto
 > `docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md`

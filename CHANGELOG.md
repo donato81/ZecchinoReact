@@ -43,6 +43,16 @@
 
 ### Documentation
 
+- docs/4-todo-lists/007-TODO_async-cache-hydration_v0.1.0.md: CREATO.
+  Documento operativo derivato dal PLAN 007 v0.1.0 (2026-05-23).
+  Copre T1 (readCachedDomainSnapshot async), T2 (hydrateFromCache async),
+  T3 (state machine `BootstrapState` + `transitionTo`), T4 (generation counter
+  anti-concorrenza), T5 (writeCache fail-soft per tabella), T6 (censimento
+  consumer), T7 (conversione spec `it.todo` → test eseguibili), T8 (suite
+  completa). Gate di chiusura G1-G5 allineati al PLAN 007 §5. Stato: PENDING.
+  Avvio subordinato a DESIGN 001 e DESIGN 002 implementati su `main`.
+- docs/todo-master.md: aggiunto riferimento a TODO 007 nel campo
+  `Pending Plans` e nota sessione 2026-05-23 (stesura TODO 007).
 - docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md: CREATO.
   Stesura PLAN 007 — Async cache hydration bootstrap lifecycle
   `AppDataContext` (DRAFT, v0.1.0, 2026-05-23). Derivato da DESIGN 007
