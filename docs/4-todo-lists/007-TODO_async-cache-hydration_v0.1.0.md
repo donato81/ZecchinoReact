@@ -611,6 +611,19 @@ Non ricrearlo: leggilo prima di iniziare T7 e convertine i casi in test
 eseguibili. La suite è già integrata nel normale ciclo `npx jest` (exit
 code 0, 1 passed 23 todo).
 
+### NOTA 7 — Timeout hydration
+
+Debito tecnico noto: al termine di PLAN 007 può restare assente un timeout
+esplicito durante lo stato `HYDRATING`. Se una lettura cache o una promise
+collegata alla hydration non si risolve mai, il provider può restare
+indefinitamente in `HYDRATING` senza completare la transizione a `READY`
+o `ERROR`.
+
+Questa gestione non va introdotta in PLAN 007, salvo esplicita estensione
+di perimetro. Se il problema emerge durante l'implementazione o nei test,
+documentarlo nel log di validazione come debito tecnico residuo e rinviarlo
+al passo successivo dedicato alla resilienza del bootstrap.
+
 ---
 
 ## 6. Log Validazione
