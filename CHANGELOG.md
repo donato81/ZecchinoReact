@@ -43,6 +43,27 @@
 
 ### Documentation
 
+- docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md: CREATO.
+  Stesura PLAN 007 — Async cache hydration bootstrap lifecycle
+  `AppDataContext` (DRAFT, v0.1.0, 2026-05-23). Derivato da DESIGN 007
+  (`docs/2-projects/007-DESIGN_async-cache-hydration_v0.1.0.md`). Copre i
+  sei stati della state machine bootstrap (IDLE, HYDRATING, CACHE-READY,
+  REMOTE-SYNC, READY, ERROR), le cinque invarianti (matrice di copertura
+  task↔gate in §5) e il contratto di concorrenza `refreshAll` risolto
+  via generation counter (motivato anche per React 18 Strict Mode).
+  Perimetro: `src/context/AppDataContext.tsx`. Esclusioni esplicite
+  (§7): rimozione di `navigator.onLine` rinviata a DESIGN 008,
+  nessuna modifica a `src/lib/supabase/cache.ts` e ai repository.
+- __tests__/AppDataContext.spec.ts: CREATO. File spec con `it.todo`
+  che documenta i quattro scenari obbligatori di accettazione di
+  PLAN 007 (hydration N9 con `await`, transizioni della state machine,
+  concorrenza `refreshAll`, `writeCache` fail-soft, vuoto legittimo
+  vs hydration fallita). Da convertire in test eseguibili durante
+  l'implementazione del PLAN (Gate G4). Nessuna modifica al codice
+  sorgente.
+- docs/todo-master.md: aggiunto campo `Pending Plans` con riferimento
+  a PLAN 007 e nota sessione 2026-05-23.
+
 - docs/4-todo-lists/004-TODO_announcements-layer_v1.0.0.md: ciclo validazione Consiglio AI completato. Log Validazione popolato. Next Action aggiornato a T1.
 - docs/3-coding-plans/004-PLAN_announcements-layer_v1_0_0.md: nota operativa baseline TypeScript aggiunta. Task T12 reso condizionale su verifica grep.
 

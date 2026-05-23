@@ -16,7 +16,12 @@
   `use-screen-reader.ts` e `screen-reader.ts` eliminati;
   TSC baseline ridotta da 89 a 47 errori.
 - **Active Block:** Nessuno — implementazione DESIGN 004 completata.
-- **Last Updated:** 2026-05-21
+- **Last Updated:** 2026-05-23
+- **Pending Plans:** PLAN 007 (`docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md`)
+  in stato **DRAFT / PENDING** — stesura completata il 2026-05-23, in attesa
+  di review e autorizzazione all'implementazione. Perimetro:
+  `src/context/AppDataContext.tsx`. Dipendenza upstream: DESIGN 001 e 002
+  già implementati. Codice sorgente non ancora modificato.
 
 ### Mappa Documentale
 
@@ -76,6 +81,19 @@
   (review Consiglio AI → eventuali correzioni
   chirurgiche → convalida finale → avvio
   implementazione).
+
+> **Nota sessione stesura PLAN 007 — 2026-05-23:** Redatto
+> `docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md`
+> (stato DRAFT) a partire da DESIGN 007. Copre i sei stati della
+> state machine bootstrap, le cinque invarianti (matrice in §5)
+> e il contratto di concorrenza `refreshAll` con generation counter.
+> Perimetro vincolato a `src/context/AppDataContext.tsx`; rimozione
+> `navigator.onLine` esplicitamente esclusa (competenza DESIGN 008).
+> Creato file spec `__tests__/AppDataContext.spec.ts` con `it.todo`
+> per i quattro scenari obbligatori (hydration N9, concorrenza,
+> writeCache fail-soft, vuoto vs hydration fallita). Nessuna modifica
+> a `src/`. Prossimo passo: review PLAN 007 e autorizzazione
+> all'implementazione.
 
 > **Nota sessione correzioni 2026-05-21:** Correzioni documentali A1/A2/A3 e nota operativa C2 applicate.
 > PLAN 001, DESIGN 002, PLAN 002, TODO 002 aggiornati. A2a su DESIGN 002 saltata (nessun riferimento riga presente).
