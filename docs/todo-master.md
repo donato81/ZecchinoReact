@@ -1,7 +1,7 @@
 ## 1. Metadata e Context Header
 
 - **Project Name:** ZecchinoReact
-- **Version:** 0.1.0
+- **Version:** 0.2.0
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
@@ -18,16 +18,16 @@
 - **Active Block:** Nessuno — implementazione DESIGN 004 completata.
 - **Last Updated:** 2026-05-23
 - **Pending Plans:**
-  - PLAN 007 (`docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md`)
-    in stato **DRAFT / PENDING** — stesura completata il 2026-05-23, in attesa
-    di review e autorizzazione all'implementazione. Perimetro:
-    `src/context/AppDataContext.tsx`. Dipendenza upstream: DESIGN 001 e 002
-    già implementati. Codice sorgente non ancora modificato.
-  - TODO 007 (`docs/4-todo-lists/007-TODO_async-cache-hydration_v0.1.0.md`)
-    in stato **PENDING** — creato il 2026-05-23, derivato da PLAN 007 v0.1.0.
-    Copre T1-T8 (async, state machine, generation counter, writeCache fail-soft,
-    censimento consumer, conversione spec, suite completa). Avvio subordinato
-    al completamento di DESIGN 001 e DESIGN 002 su main (gate bloccante §2).
+  - **PLAN 007 COMPLETATO** (release 0.2.0) —
+    `docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md`
+    e `docs/4-todo-lists/007-TODO_async-cache-hydration_v0.1.0.md` in stato
+    DONE. Implementazione T1-T8 su `src/context/AppDataContext.tsx` +
+    estrazione modulo isolato `src/context/app-data-cache.ts` per
+    testabilità. Bug N9 risolto. State machine bootstrap a 6 stati
+    introdotta. Generation counter contro hydration concorrenti.
+    writeCache fail-soft. 7 test eseguibili Bug N9/INV1/INV2/INV5 verdi;
+    16 it.todo per scenari Provider-mount (richiedono
+    `@testing-library/react` o equivalente, fuori scope).
 
 ### Mappa Documentale
 
@@ -44,16 +44,15 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** Implementazione DESIGN 003 — Fix accessibility engine.
-  Creati: src/accessibility/types.ts, engine.ts,
-  detection.ts; src/locales/it.ts, index.ts.
-  Eliminato: src/hooks/use-talkback.ts.
-  ADR_001 aggiornato a v1.3.0 con eccezione 1.bis.
-  DESIGN 001, 002, 003 tutti implementati e chiusi.
-- **Last Validated Block:** DESIGN 001, 002, 003 — implementazione completata
-  e committata. Validazione runtime su device ancora
-  da eseguire (gate differito per D3: App.tsx non monta
-  ancora i provider nella sequenza finale).
+- **Last Completed Task:** PLAN 007 v0.2.0 — risoluzione bug N9
+  (false-positive hydration) + state machine bootstrap esplicita
+  + generation counter + writeCache fail-soft + estrazione modulo
+  `src/context/app-data-cache.ts` con `readCachedDomainSnapshotPure`
+  testabile. 7 test Jest verdi per INV1/INV2/INV5.
+- **Last Validated Block:** PLAN 007 — gate F1-F6 + G4 PASS.
+  TSC baseline preservata (3 errori preesistenti: downloadFile,
+  @phosphor-icons/react x2). Jest baseline preservata (5/6 suite
+  PASS; App.test.tsx fallisce per problema AsyncStorage preesistente).
 - **Files Modified But Not Validated:** `babel.config.js`, `package.json`,
   `src/lib/supabase/client.ts`, `src/env.d.ts` (CREATO),
   `src/context/AuthContext.tsx`,

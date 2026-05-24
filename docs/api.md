@@ -441,7 +441,12 @@ Provider auth + gestione PIN privato.
 
 Provider CRUD dati di dominio + gestione dialog.  
 **Import problematici risolti (DESIGN 001)**: `sonner` sostituito da shim locale `toast` callable con metodi `success`/`error`/`warning`.  
-**Bug noto**: `readCache`/`isCacheStale` invocate come sincrone invece di `await`.
+**Bug N9 RISOLTO (PLAN 007 v0.2.0)**: hydration cache ora completamente
+asincrona con `await Promise.all([...])` su tutte le 5 tabelle e
+validazione strutturale (`Array.isArray && !Promise`). Aggiunti:
+state machine bootstrap a 6 stati (`IDLE | HYDRATING | CACHE-READY |
+REMOTE-SYNC | READY | ERROR`), generation counter contro hydration
+concorrenti, `writeCache` fail-soft per-tabella.
 
 ### Hook esportato
 
@@ -453,19 +458,33 @@ Provider CRUD dati di dominio + gestione dialog.
 |-------|------|----|
 | `accounts`, `transactions`, `categories`, `budgets`, `savingsGoals` | array di dominio | ✅ |
 | `safeAccounts`, `safeTransactions`, `safeCategories`, `safeBudgets`, `safeSavingsGoals` | memo delle stesse | ✅ |
-| `isLoading`, `error`, `isDataReady` | `boolean`, `string\|null`, `boolean` | ✅ |
+| `isLoading`, `error`, `isDataReady` | `boolean`, `string\|null`, `boolean` | ✅ (PLAN 007: aggiornati atomicamente da `transitionTo()`) |
 | `addAccount`, `updateAccount`, `removeAccount` | `async` | ✅ |
 | `addTransaction`, `updateTransaction`, `removeTransaction` | `async` | ✅ |
 | `addCategory`, `updateCategory`, `removeCategory` | `async` | ✅ |
 | `addBudget`, `updateBudget`, `removeBudget` | `async` | ✅ |
 | `addSavingsGoal`, `updateSavingsGoal`, `updateSavingsGoalProgress`, `removeSavingsGoal` | `async` | ✅ |
-| `refreshAll()` | `void` | ✅ |
+| `refreshAll()` | `void` (no-op se `HYDRATING`/`REMOTE-SYNC` in corso) | ✅ |
 | `handleExportCSV(visibleTransactions, visibleAccounts)` | `void` | ⚠️ (chiama `downloadFile` DOM) |
 | Dialog state/setters (`editingTransaction`, `showTransactionDialog`, ecc.) | vari | ✅ |
 
 ### Provider esportato
 
 `AppDataProvider({ children })` — richiede `AuthProvider` come antenato.
+
+---
+
+## `src/context/app-data-cache.ts` ✅
+
+Modulo isolato per testabilità (PLAN 007 T7). Nessuna dipendenza React.
+
+### Esporti
+
+- `type DomainSnapshot` — shape `{ accounts, transactions, categories, budgets, savingsGoals }`.
+- `async function readCachedDomainSnapshotPure(userId: string): Promise<{ snapshot: DomainSnapshot; isStale: boolean } | null>` —
+  legge le 5 cache con `await Promise.all`, valida struttura
+  (`Array.isArray && !Promise`), restituisce `null` su qualunque miss
+  o snapshot corrotto. Ri-esportata da `AppDataContext` per back-compat.
 
 ---
 

@@ -90,7 +90,8 @@ src/
                               # obiettivi-risparmio, impostazioni-utente
   context/
     AuthContext.tsx           # Auth, PIN privato, timeout inattivitÃ  (âš ï¸ blocchi B3/B4)
-    AppDataContext.tsx        # Tutti i dati di dominio (âš ï¸ blocco B3)
+    AppDataContext.tsx        # Tutti i dati di dominio (bug N9 risolto in v0.2.0)
+    app-data-cache.ts         # readCachedDomainSnapshotPure isolata (PLAN 007)
     UserSettingsContext.tsx   # Preferenze utente
     VisibleDataContext.tsx    # Dati filtrati per lock privato
   hooks/

@@ -144,7 +144,8 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `lib/supabase/repositories/obiettivi-risparmio.ts` | supabase | ✅ Compatibile | No | — |
 | `lib/supabase/repositories/impostazioni-utente.ts` | supabase | ✅ Compatibile | No | — |
 | `context/AuthContext.tsx` | context | ❌ Rottura | **Sì (B3, B4)** | `sonner` + `@/components/ui/button` mancanti; `document.*` |
-| `context/AppDataContext.tsx` | context | ⚠️ Bug + rottura | **Sì (B3)** | `sonner` mancante; async/await su cache mancante |
+| `context/AppDataContext.tsx` | context | ⚠️ Rottura residua (B3 shim) | **Sì (B3)** | `sonner` shim attivo; **bug N9 async/await su cache RISOLTO (PLAN 007 v0.2.0)** — state machine bootstrap + generation counter + fail-soft writeCache |
+| `context/app-data-cache.ts` | context | ✅ Compatibile | No | Modulo isolato (PLAN 007 T7): `readCachedDomainSnapshotPure` testabile direttamente |
 | `context/UserSettingsContext.tsx` | context | ✅ Compatibile | No | — |
 | `context/VisibleDataContext.tsx` | context | ✅ Compatibile | No | — |
 | `hooks/use-user-settings.ts` | hooks | ✅ Compatibile | No | — |
@@ -221,7 +222,7 @@ Fase 2 — Rimpiazza hook web-only
       Sostituito da src/accessibility/detection.ts + engine.ts
 
 Fase 3 — Pulisci context
-  ├── AppDataContext → fix async cache (await readCache)
+  ├── AppDataContext → ✅ COMPLETATO (PLAN 007 v0.2.0) bug N9 async cache risolto + state machine
   └── AuthContext → rimuovi document.*, sonner, Button
 
 Fase 4 — Crea componenti UI base (src/components/)

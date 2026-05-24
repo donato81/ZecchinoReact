@@ -2,6 +2,65 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-25
+
+### Fixed
+
+- **Bug N9 — false-positive hydration con collezioni `undefined`**
+  (`src/context/AppDataContext.tsx`, PLAN 007 T1).
+  Aggiunti i 10 `await` mancanti su `readCache`/`isCacheStale` tramite
+  `Promise.all` e introdotta validazione strutturale obbligatoria
+  (`Array.isArray && !Promise`). Bug risolto: il flag `isDataReady = true`
+  non può più convivere con collezioni non-Array.
+
+### Added
+
+- **State machine bootstrap esplicita a 6 stati** in `AppDataContext`
+  (PLAN 007 T3): `IDLE | HYDRATING | CACHE-READY | REMOTE-SYNC | READY |
+  ERROR`. Tutte le transizioni passano per `transitionTo()` che aggiorna
+  in modo atomico `bootstrapState`, `isLoading`, `isDataReady`, `error`.
+  Matrice `ALLOWED_TRANSITIONS` blocca salti illegali con `console.warn`.
+- **Generation counter `hydrationGen`** (PLAN 007 T4):
+  invalidazione hydration concorrenti/stale. Incrementato a
+  logout/login/refreshAll; checkato prima di ogni `applyDomainSnapshot`
+  e `transitionTo`. Protegge da React 18 Strict Mode double-invoke e
+  da race fra refresh concorrenti (INVARIANTE 3).
+- **`writeCache` fail-soft** (PLAN 007 T5, INVARIANTE 4):
+  try/catch per-tabella con `console.warn`, nessuna propagazione di
+  errori di persistenza allo stato React. Le scritture restanti
+  proseguono anche se una tabella fallisce.
+- **Modulo isolato `src/context/app-data-cache.ts`** (PLAN 007 T7):
+  estratta `readCachedDomainSnapshotPure` come funzione pura
+  esportata, indipendente dal Provider e dalla catena React Native.
+  `AppDataContext` ri-esporta per back-compat.
+- **Suite di test eseguibili** `__tests__/AppDataContext.spec.ts`
+  (PLAN 007 T7/T8): 7 test verdi per Bug N9, INV1, INV2, INV5
+  (await su tutte e 5 le cache; Caso A vuoto-valido; Caso B miss;
+  payload Promise non risolta; payload non-array; isStale propagato/no).
+  16 `it.todo` documentati per scenari che richiedono mount del
+  Provider (state machine completa, concorrenza refreshAll React 18
+  Strict Mode, writeCache fail-soft end-to-end): l'abilitazione
+  richiede `@testing-library/react` o harness equivalente, fuori
+  scope di PLAN 007.
+
+### Changed
+
+- `hydrateFromCache` ora è asincrona e accetta un `gen: number`
+  per la validazione di ownership (PLAN 007 T2).
+- `refreshAll` blocca esecuzioni concorrenti se lo stato corrente è
+  `HYDRATING` o `REMOTE-SYNC` e usa generation counter per scartare
+  esiti out-of-order.
+
+### Documentation
+
+- `docs/architettura.md`: tabella file aggiornata — `AppDataContext.tsx`
+  marcato con bug N9 RISOLTO (PLAN 007 v0.2.0); aggiunta riga per
+  `context/app-data-cache.ts`. Roadmap aggiornata.
+- `docs/todo-master.md`: versione bumped a 0.2.0; PLAN 007 spostato
+  da PENDING a COMPLETATO; Snapshot di Ripresa aggiornato.
+
+## [Pre-0.2.0]
+
 ### Documentation
 
 - Pre-flight Patch 007 (2026-05-24) — Allineamento documentale di
