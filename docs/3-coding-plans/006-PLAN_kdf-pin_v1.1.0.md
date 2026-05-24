@@ -3,9 +3,9 @@ tipo: plan
 titolo: Key Derivation Function per PIN privato
 versione: 1.1.0
 data: 2026-05-22
-data-revisione: 2026-05-22
-stato: REVIEWED
-design: docs/2-projects/006-DESIGN_kdf-pin_v0.3.0.md
+data-revisione: 2026-05-24
+stato: UPDATED
+design: docs/2-projects/006-DESIGN_kdf-pin_v0.4.0.md
 perimetro: >
   src/lib/crypto.ts,
   src/lib/supabase/types.ts,
@@ -18,7 +18,7 @@ perimetro: >
 
 > **Fonte di verità**: ogni decisione tecnica di questo piano è derivata
 > da
-> [docs/2-projects/006-DESIGN_kdf-pin_v0.3.0.md](../2-projects/006-DESIGN_kdf-pin_v0.3.0.md).
+> [docs/2-projects/006-DESIGN_kdf-pin_v0.4.0.md](../2-projects/006-DESIGN_kdf-pin_v0.4.0.md).
 > In caso di discrepanza, il documento di design prevale.
 
 ---
@@ -46,18 +46,26 @@ Riferimento: DESIGN 006 §2.
 
 ---
 
-## 2. Fase 0 — Benchmark PBKDF2-SHA256 su Hermes (PREREQUISITO)
+## 2. Fase 0 — Benchmark PBKDF2-SHA256 con `react-native-quick-crypto` (COMPLETATA)
 
-Questa fase è prerequisito a tutto il resto del Plan. Nessun'altra fase
-può iniziare prima che il numero di iterazioni sia stato calibrato e
-documentato qui.
+Questa fase è prerequisito a tutto il resto del Plan. Risulta **COMPLETATA**
+su Windows con backend nativo OpenSSL. Vedi §2.4 per i risultati definitivi.
+Il valore di `PBKDF2_ITERATIONS` è fissato a **600.000** (target operativo
+corrente). Le altre fasi possono procedere.
 
 ### 2.1 Obiettivo
 
-Misurare il tempo di esecuzione di PBKDF2-SHA256 con `@noble/hashes` sul
-device di riferimento per individuare il numero di iterazioni che
-rientra nel budget prestazionale **100–300 ms** rispettando il floor
-invalicabile di **100.000 iterazioni** (OWASP, DESIGN 006 §4 e §12).
+Misurare il tempo di esecuzione di PBKDF2-SHA256 con
+`react-native-quick-crypto` (backend OpenSSL nativo) sul device di
+riferimento per individuare il numero di iterazioni che soddisfi il
+floor invalicabile di **100.000 iterazioni** (OWASP) con margine di
+sicurezza adeguato. Riferimento: DESIGN 006 §4 e §12.
+
+> Nota DESIGN 006 v0.4.0 §7: con backend crittografici nativi (OpenSSL),
+> il parametro di sicurezza determinante è il numero di iterazioni e il
+> costo computazionale reale, non il tempo assoluto. Tempi inferiori al
+> range 100–300 ms originario sono accettabili se ottenuti aumentando
+> significativamente il numero di iterazioni rispetto al floor OWASP.
 
 ### 2.2 Device di riferimento
 
@@ -75,27 +83,44 @@ in questo Plan, senza abbassare il floor.
    o, in alternativa, un file di test temporaneo dedicato sotto
    `__tests__/crypto/benchmark.test.ts` da rimuovere prima del commit
    finale).
-2. Importare `pbkdf2` da `@noble/hashes/pbkdf2` e `sha256` da
-   `@noble/hashes/sha256`.
+2. Importare l'API PBKDF2 da `react-native-quick-crypto` (Web Crypto
+   compatibile via binding OpenSSL nativi).
 3. Eseguire la derivazione su un PIN rappresentativo (`'1234'`) con un
    salt fisso di 16 byte, per ciascuno dei seguenti valori di iterazioni:
    `100000`, `150000`, `200000`, `300000`, `450000`, `600000`.
 4. Per ogni valore, eseguire 10 invocazioni e calcolare la mediana del
    tempo (ms).
-5. Selezionare il valore di iterazioni più alto la cui mediana rientra
-   nel budget 100–300 ms.
+5. Selezionare il valore di iterazioni più alto che rientra entro un
+   tempo accettabile per l'esperienza utente, dato il floor invalicabile
+   di 100.000.
 
 ### 2.4 Esito e documentazione
 
-Documentare nel report di Fase 0 (allegato al PR o citato in commit
-message):
+**Esito Fase 0 (registrato il 2026-05-24)**:
 
-- Device usato (modello, OS, RAM, versione Hermes / RN).
-- Tabella `iterazioni → mediana ms` per i sei valori testati.
-- Valore di iterazioni scelto.
-- Una volta scelto, il valore diventa **costante fissa** del modulo
-  `src/lib/crypto.ts` (es. `PBKDF2_ITERATIONS`), usata in tutte le
-  derivazioni successive e in tutti i test K1, K2, K3.
+- **Device**: Windows (piattaforma primaria v1.0 di ZecchinoReact).
+- **Backend**: `react-native-quick-crypto` (OpenSSL nativo).
+- **Tabella `iterazioni → mediana ms`** (riferimento DESIGN 006 §4 e §7):
+
+  | Iterazioni | Mediana misurata |
+  |-----------:|-----------------:|
+  | 600.000    | 86 ms            |
+
+  Il benchmark condotto con backend nativo OpenSSL ha confermato che
+  600.000 iterazioni completano in 86 ms mediana su Windows: sei volte
+  il floor OWASP entro un costo computazionale trascurabile per l'utente.
+  La validazione multipiattaforma (Android, iOS) è delegata al Coding
+  Plan 006 prima del rilascio sulle piattaforme secondarie.
+
+- **Valore scelto**: **`PBKDF2_ITERATIONS = 600_000`** (target operativo
+  corrente, ≥ floor OWASP 100.000).
+- Il valore è fissato come **costante immutabile** del modulo
+  `src/lib/crypto.ts` (`PBKDF2_ITERATIONS = 600_000`) e usato in tutte
+  le derivazioni e in tutti i test K1, K2, K3.
+
+Riferimento documentale: DESIGN 006 v0.4.0 §4 (Parametri PBKDF2), §7
+(Budget prestazionale — Nota sull'interpretazione del budget temporale)
+e §15 (Fasi di implementazione).
 
 ### 2.4.1 Divieto di commit prima del completamento della Fase 0
 
@@ -146,7 +171,7 @@ Riferimento: DESIGN 006 §4 (floor invalicabile) e §7 (tradeoff).
 
 ---
 
-## 3. Fase 1 — Dipendenza `@noble/hashes`
+## 3. Fase 1 — Dipendenza `react-native-quick-crypto`
 
 ### 3.1 File toccati
 
@@ -154,36 +179,47 @@ Riferimento: DESIGN 006 §4 (floor invalicabile) e §7 (tradeoff).
 
 ### 3.2 Modifica
 
-Aggiungere in `dependencies` (rispettare l'ordine alfabetico, accanto a
-`@noble/ciphers` già installato da Plan 005):
+Aggiungere in `dependencies` la dipendenza `react-native-quick-crypto`
+con **versione esatta pinnata** (non range), come prescritto dalla
+Dependency Governance di DESIGN 006 §14:
 
 ```diff
    "dependencies": {
      "@noble/ciphers": "^1.0.0",
-+    "@noble/hashes": "^1.5.0",
++    "react-native-quick-crypto": "<versione fissata dal Coding Plan>",
 ```
 
-La versione minima `^1.5.0` è compatibile con `@noble/ciphers ^1.0.0`
-nella famiglia `@noble`. In caso di disallineamento, verificare il
-`peerDependencies` di `@noble/ciphers` installato e allineare.
+Il valore esatto della versione è fissato dal Coding Plan 006 in fase
+implementativa, dopo audit di sicurezza (DESIGN 006 §14). Il pinning
+esplicito (non `^` né `~`) è obbligatorio per evitare upgrade impliciti
+della dipendenza crittografica critica.
 
-### 3.3 Verifica pure-JS
+### 3.3 Verifica dipendenza nativa consolidata
 
 ```bash
-ls node_modules/@noble/hashes/
+ls node_modules/react-native-quick-crypto/
 ```
 
-Non devono esistere cartelle `android/`, `ios/`, `windows/`, né
-`binding.gyp`, `*.so`, `*.dylib`, `*.dll`. Se presenti: STOP, report
-diagnostico.
+La libreria utilizza binding nativi OpenSSL della piattaforma ospite
+(Android, iOS, Windows). La presenza di artefatti nativi è **attesa e
+consentita** dal vincolo aggiornato (DESIGN 006 §4 — Nota sul vincolo
+pure-JavaScript): è vietato solo codice nativo custom scritto o
+mantenuto internamente al progetto; sono consentite librerie esterne
+consolidate con binding nativi per operazioni crittografiche
+standardizzate.
+
+L'audit di sicurezza pre-aggiornamento prescritto da DESIGN 006 §14
+deve essere eseguito prima di ogni upgrade della versione pinnata.
 
 ### 3.4 Gate Fase 1
 
 **Prima di procedere alla Fase 2, verificare che**:
 
 - `npm install` termina con exit code 0.
-- `node_modules/@noble/hashes/pbkdf2.js` (o equivalente compilato) esiste.
-- Nessun binding nativo presente.
+- `node_modules/react-native-quick-crypto/` esiste con i binding
+  nativi attesi per la piattaforma corrente.
+- La versione installata corrisponde esattamente al valore pinnato in
+  `package.json` (no range).
 
 ---
 
@@ -207,7 +243,7 @@ esistenti in `docs/6-sql/`.
 -- P40 — Aggiungi colonna pin_kdf_salt a impostazioni_utente
 -- Branch: refactoring-architettura
 -- Data: 2026-05-22
--- Riferimento: docs/2-projects/006-DESIGN_kdf-pin_v0.3.0.md §5 e §9
+-- Riferimento: docs/2-projects/006-DESIGN_kdf-pin_v0.4.0.md §5 e §9
 --
 -- ISTRUZIONI DI ESECUZIONE:
 -- 1. Verificare che la tabella impostazioni_utente esista (P25).
@@ -392,16 +428,19 @@ esportata, da decidere in implementazione; il DESIGN non vincola
 l'esposizione).
 
 ```ts
-import { pbkdf2 } from '@noble/hashes/pbkdf2';
-import { sha256 } from '@noble/hashes/sha256';
+// Import indicativo: l'API esatta è incapsulata nel modulo
+// `KdfProvider` (livello di astrazione previsto dal Coding Plan 006).
+// La dipendenza diretta da `react-native-quick-crypto` resta interna
+// al provider; `src/lib/crypto.ts` consuma solo l'API del provider.
+import { derivePbkdf2Sha256 } from './kdf-provider';
 
 /**
  * Numero di iterazioni PBKDF2-SHA256.
- * Valore calibrato in Plan 006 Fase 0 sul device di riferimento.
- * Floor invalicabile: 100.000 (OWASP, DESIGN 006 §4).
- * VALORE DA FISSARE A FINE FASE 0.
+ * Valore calibrato in Plan 006 Fase 0 su Windows con backend nativo
+ * OpenSSL (mediana 86 ms). Floor invalicabile: 100.000 (OWASP,
+ * DESIGN 006 §4).
  */
-const PBKDF2_ITERATIONS = /* valore da Fase 0 */;
+const PBKDF2_ITERATIONS = 600_000;
 
 /**
  * Deriva una chiave AES-256 dal PIN tramite PBKDF2-SHA256.
@@ -412,10 +451,7 @@ const PBKDF2_ITERATIONS = /* valore da Fase 0 */;
  */
 function derivePinKey(pin: string, salt: Uint8Array): Uint8Array {
   const pinBytes = new TextEncoder().encode(pin);
-  return pbkdf2(sha256, pinBytes, salt, {
-    c: PBKDF2_ITERATIONS,
-    dkLen: 32,
-  });
+  return derivePbkdf2Sha256(pinBytes, salt, PBKDF2_ITERATIONS, 32);
 }
 ```
 
@@ -759,8 +795,11 @@ eccezioni.
 - **V3**: **floor invalicabile 100.000 iterazioni** (OWASP). Nessun
   valore inferiore è accettabile, anche se rientrasse nel budget
   temporale.
-- **V4**: solo dipendenze pure-JS (`@noble/hashes`). Nessun binding
-  nativo, nessuna WebAssembly.
+- **V4**: vietato codice nativo custom interno al progetto. Sono
+  consentite librerie esterne consolidate (`react-native-quick-crypto`)
+  con binding nativi per operazioni crittografiche standardizzate.
+  Riferimento: DESIGN 006 v0.4.0 §4 (Nota sul vincolo pure-JavaScript)
+  e §12.
 - **V5**: salt di **dimensione minima 16 byte** (128 bit).
 - **V6**: salt generato **esclusivamente** con
   `crypto.getRandomValues` tramite il polyfill

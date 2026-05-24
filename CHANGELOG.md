@@ -2,6 +2,30 @@
 
 ## [Unreleased]
 
+### Documentation
+
+- PLAN 006 v1.1.0 e TODO 006 v1.1.0 allineati a
+  `docs/2-projects/006-DESIGN_kdf-pin_v0.4.0.md` (2026-05-24).
+  Stato PLAN: REVIEWED → UPDATED. Stato TODO: PENDING → IN PROGRESS.
+  T1 (benchmark Fase 0) marcato completato: su Windows con
+  `react-native-quick-crypto` (OpenSSL nativo) la mediana di 600.000
+  iterazioni PBKDF2-SHA256 risulta 86 ms; valore scelto
+  `PBKDF2_ITERATIONS = 600_000` (≥ floor OWASP 100.000, target
+  operativo corrente). Sostituzione libreria KDF `@noble/hashes` →
+  `react-native-quick-crypto` propagata a PLAN §2 (benchmark Fase 0),
+  §3 (dipendenza con versione pinnata e Dependency Governance
+  DESIGN §14), §7.2 (import via modulo `KdfProvider` e costante
+  immutabile `PBKDF2_ITERATIONS = 600_000`) e §11 V4 (vincolo
+  pure-JavaScript rilassato: vietato solo codice nativo custom
+  interno). Propagata anche a TODO T1, T2, T6, sequenza calcolo
+  vettori K e NOTA 5 (tradeoff aggiornato). Aggiunta riga 2026-05-24
+  al §6 Log Validazione. Aggiornati riferimenti incrociati al DESIGN
+  da v0.3.0 a v0.4.0 (frontmatter PLAN/TODO, intestazioni di
+  riferimento e commento SQL P40). Il codice `src/lib/crypto.ts` non
+  è stato toccato in questa sessione: il placeholder
+  `/* valore da Fase 0 */` sarà rimosso dal Coding Plan 006 nella
+  Fase 5 implementativa.
+
 ### Changed
 
 - DESIGN/PLAN/TODO 005 — Sostituito `crypto.subtle` in `src/lib/crypto.ts`
