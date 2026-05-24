@@ -69,7 +69,7 @@
 // Riferimento: docs/3-coding-plans/006-PLAN_kdf-pin_v1.1.0.md §2.4.1
 // =============================================================================
 
-const PBKDF2_ITERATIONS = undefined;
+const PBKDF2_ITERATIONS = 600000;
 
 if (!PBKDF2_ITERATIONS) {
   console.error(

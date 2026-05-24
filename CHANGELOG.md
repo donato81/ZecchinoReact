@@ -4,6 +4,50 @@
 
 ### Documentation
 
+- Pre-flight Patch 007 (2026-05-24) — Allineamento documentale di
+  PLAN 007 v0.1.0 e TODO 007 v0.1.0 senza modifiche al codice
+  sorgente né ai file di test. Operazioni eseguite:
+  - **TODO 007 §6 Log Validazione**: aggiunte 4 righe pre-flight
+    datate 2026-05-24 (verifica DESIGN 001 implementato, DESIGN 002
+    implementato, AsyncStorage dipendenza presente, compilazione
+    TypeScript baseline reale).
+  - **Baseline TypeScript aggiornata da 47 a 8 errori** in 10
+    occorrenze nel TODO 007 (tabella precondizioni §2, gate ogni
+    task T1-T5, NOTA 1 riscritta con cronologia, G1 §7 + checkbox,
+    T8 checkbox) e in 2 occorrenze nel PLAN 007 (Gate G1 §5 +
+    blocco NOTA di aggiornamento). Baseline ufficiale per la
+    chiusura di PLAN 007 ora 8 errori, verificata con
+    `npx tsc --noEmit 2>&1 | grep -c "error TS"`.
+  - **PLAN 007 §8 Debiti tecnici registrati** (nuova sezione,
+    rinumerato Riferimenti a §9): registrato DT-007-01 "Assenza
+    di timeout/watchdog sulla hydration AsyncStorage" come debito
+    tecnico noto, non gestito in PLAN 007, rinviato a PLAN futuro.
+    Riferimento incrociato a TODO 007 §5 NOTA 7.
+  - **PLAN 007 §4 Task T7 e T8 espliciti** (Strategia A): aggiunti
+    T7 (conversione 23 `it.todo` in test eseguibili con distinzione
+    storage vuoto valido / hydration fallita / snapshot corrotto)
+    e T8 (esecuzione full suite con verifica regressioni). I
+    criteri di accettazione dettagliati restano nel TODO 007 §4.
+    Aggiunta nota di chiusura su G4 nel PLAN 007 §5.
+  - **TODO 007 §4 T7 — Direttiva QA "vuoto vs errore" (INVARIANTE
+    5)**: aggiunta direttiva obbligatoria con Caso A (storage vuoto
+    ma valido → `READY`, asserzione esplicita `expect(...).toEqual([])`
+    e `expect(...).not.toBeUndefined()`) e Caso B (hydration fallita
+    / snapshot corrotto → `ERROR`). Nota di chiusura: G4 non chiuso
+    finché Caso A/B non sono eseguibili e passanti.
+  - **TODO 007 §4 T7 — Direttiva QA Scenario React 18 Strict Mode**:
+    aggiunta direttiva obbligatoria per il gruppo "Concorrenza
+    refreshAll": scenario doppia invocazione `useEffect` con due
+    generazioni concorrenti (gen 1 e gen 2), completamento
+    out-of-order, applicazione solo dei dati di gen 2 via guard
+    `myGen !== hydrationGen.current`, nessuna race, `READY`
+    raggiunto una sola volta. Nota di chiusura su G4.
+  - **`docs/todo-master.md`**: aggiornata baseline TypeScript da
+    ~47 a 8 errori (Active Phase + Open Threads) per coerenza con
+    lo stato reale del workspace al 2026-05-24.
+  - Nessuna modifica a `src/`, `__tests__/`, `package.json`,
+    file `.github/` o configurazioni build. Lavoro su branch `main`.
+
 - PLAN 006 v1.1.0 e TODO 006 v1.1.0 allineati a
   `docs/2-projects/006-DESIGN_kdf-pin_v0.4.0.md` (2026-05-24).
   Stato PLAN: REVIEWED → UPDATED. Stato TODO: PENDING → IN PROGRESS.

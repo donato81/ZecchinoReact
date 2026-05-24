@@ -38,7 +38,7 @@ Riferimento: PLAN 007 §2 — DESIGN 007 §1 e §12.
 | DESIGN 001 implementato e mergiato su `main` | `grep -nE "DESIGN 001" docs/todo-master.md` | stato IMPLEMENTED o DONE |
 | DESIGN 002 implementato e mergiato su `main` | `grep -nE "DESIGN 002" docs/todo-master.md` | stato IMPLEMENTED o DONE |
 | `@react-native-async-storage/async-storage` versione 2.x installata | `node -p "require('./package.json').dependencies['@react-native-async-storage/async-storage']"` | valore `^2.x.x` |
-| `AuthProvider` e `AppDataProvider` montabili (no crash strutturale) | `npx tsc --noEmit` | exit code 0 o solo errori baseline ≤ 47 (vedi NOTA 1) |
+| `AuthProvider` e `AppDataProvider` montabili (no crash strutturale) | `npx tsc --noEmit` | exit code 0 o solo errori baseline ≤ 8 (vedi NOTA 1, baseline aggiornata 2026-05-24) |
 
 > **GATE INVALICABILE**
 >
@@ -91,7 +91,8 @@ Riferimento: PLAN 007 §2 — DESIGN 007 §1 e §12.
   npx tsc --noEmit
   ```
   Ogni occorrenza di `readCache(` e `isCacheStale(` deve essere preceduta
-  da `await`. `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 47).
+  da `await`. `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 8,
+  baseline aggiornata 2026-05-24).
 
 > **NOTA — PROMISE.ALL CONSIGLIATO MA NON OBBLIGATORIO**
 >
@@ -125,7 +126,7 @@ Riferimento: PLAN 007 §2 — DESIGN 007 §1 e §12.
 - [ ] Nessuna assegnazione di `.data` su `Promise` non risolta
 - [ ] `grep -n "readCache(" src/context/AppDataContext.tsx` → ogni riga contiene `await`
 - [ ] `grep -n "isCacheStale(" src/context/AppDataContext.tsx` → ogni riga contiene `await`
-- [ ] `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 47)
+- [ ] `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 8, baseline aggiornata 2026-05-24)
 
 ---
 
@@ -179,7 +180,7 @@ Riferimento: PLAN 007 §2 — DESIGN 007 §1 e §12.
 - [ ] Nessun call site ignora la `Promise` restituita da `hydrateFromCache`
 - [ ] Il ramo "successo" (`applyDomainSnapshot` + `setIsDataReady(true)`) è raggiungibile solo se `cached` non è `null`
 - [ ] Check `navigator.onLine` non toccato
-- [ ] `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 47)
+- [ ] `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 8, baseline aggiornata 2026-05-24)
 
 ---
 
@@ -255,7 +256,7 @@ Riferimento: PLAN 007 §2 — DESIGN 007 §1 e §12.
 - [ ] Nessuna chiamata diretta a `setIsLoading`/`setIsDataReady`/`setError` fuori da `transitionTo` (eccetto reset logout)
 - [ ] Transizione `* → IDLE` al logout implementata correttamente
 - [ ] `console.warn` (o equivalente) presente per transizioni vietate in development
-- [ ] `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 47)
+- [ ] `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 8, baseline aggiornata 2026-05-24)
 
 ---
 
@@ -317,7 +318,7 @@ Riferimento: PLAN 007 §2 — DESIGN 007 §1 e §12.
 - [ ] Check `if (myGen !== hydrationGen.current) return` presente prima di ogni `applyDomainSnapshot` + `transitionTo` in funzioni di hydration
 - [ ] Al logout: `hydrationGen.current++` (o incremento equivalente) per invalidare hydration in volo
 - [ ] Guard `isLoading` mantenuto in `refreshAll` come early-exit (non rimosso)
-- [ ] `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 47)
+- [ ] `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 8, baseline aggiornata 2026-05-24)
 
 ---
 
@@ -395,7 +396,7 @@ Riferimento: PLAN 007 §2 — DESIGN 007 §1 e §12.
 - [ ] Nessuna invalidazione della cache esistente in caso di errore
 - [ ] Nessun retry automatico
 - [ ] `grep -n "writeCache(" src/context/AppDataContext.tsx` → ogni occorrenza dentro `try { await ... }`
-- [ ] `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 47)
+- [ ] `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 8, baseline aggiornata 2026-05-24)
 
 ---
 
@@ -496,6 +497,65 @@ Riferimento: PLAN 007 §2 — DESIGN 007 §1 e §12.
 > Non è ammesso dichiarare G4 superato se almeno 8 dei casi sopra non
 > sono eseguibili.
 
+> **DIRETTIVA OBBLIGATORIA QA — Vuoto legittimo vs hydration fallita
+> (INVARIANTE 5)**
+>
+> Il gruppo "Vuoto legittimo vs hydration fallita (2 casi)" elencato fra
+> gli scenari prioritari deve includere **almeno** i seguenti due casi
+> con asserzioni esplicite sui valori delle collezioni:
+>
+> **Caso A — Storage vuoto ma valido**
+> - Scenario: `AsyncStorage` ritorna un oggetto valido con collezioni
+>   `Array` vuote o assenti.
+> - Stato atteso: `READY`.
+> - Valore atteso delle collezioni: array vuoto `[]`, **non** `undefined`.
+>   Asserzione obbligatoria: `expect(accounts).toEqual([])` (e analogo
+>   per `transactions`, `categories`, `budgets`, `savingsGoals`), e in
+>   aggiunta `expect(accounts).not.toBeUndefined()`.
+> - Invariante verificato: **INVARIANTE 5** del DESIGN §11.
+>
+> **Caso B — Hydration fallita o snapshot corrotto**
+> - Scenario: `AsyncStorage` lancia eccezione oppure ritorna un valore
+>   `null`/`undefined`/malformato per una o più collezioni.
+> - Stato atteso: `ERROR`.
+> - Asserzione obbligatoria: transizione corretta a `ERROR` da stato
+>   `HYDRATING`; `isDataReady === false`; messaggio di errore non
+>   `null`.
+> - Invariante verificato: transizione corretta `HYDRATING → ERROR`
+>   (DESIGN §4) e copertura **INVARIANTE 5** lato negativo.
+>
+> **Nota di chiusura gate**: il gate G4 non si considera chiuso finché
+> i casi A e B non sono eseguibili e passanti con asserzioni esplicite
+> sui valori delle collezioni (array vuoto vs `undefined`).
+
+> **DIRETTIVA OBBLIGATORIA QA — Scenario React 18 Strict Mode
+> (gruppo "Concorrenza refreshAll")**
+>
+> Il gruppo `describe('Concorrenza refreshAll (INVARIANTE 3)', ...)`
+> deve includere uno scenario esplicito che simuli la doppia invocazione
+> degli `useEffect` introdotta da React 18 Strict Mode in development.
+>
+> **Scenario React 18 Strict Mode — Doppia invocazione useEffect**
+> - **Setup**: avviare due hydration concorrenti in rapida successione
+>   con generazioni diverse (gen 1 e gen 2). Far completare gen 2
+>   **prima** di gen 1 (out-of-order).
+> - **Stato atteso**: solo i dati di gen 2 sono applicati a
+>   `applyDomainSnapshot` + `transitionTo`.
+> - **Stato intermedio gen 1**: scartato dal check
+>   `if (myGen !== hydrationGen.current) return` (T4), senza
+>   applicazione.
+> - **Verifica**: nessun update out-of-order, nessuna race; il provider
+>   raggiunge `READY` una sola volta, con i dati corretti di gen 2.
+> - **Invariante verificato**: **INVARIANTE 1** (state machine SSOT,
+>   `isDataReady = true` solo con `Array` validi) e comportamento
+>   "last hydration wins" descritto nel PLAN 007 §T4 e nella NOTA
+>   "REACT 18 STRICT MODE" sopra.
+>
+> **Nota di chiusura gate**: il gate G4 include la verifica esplicita
+> del comportamento Strict Mode. Il ciclo T7 deve includere questo
+> scenario (eseguibile e passante) prima della dichiarazione di
+> completamento del task.
+
 > **NOTA — NON MODIFICARE IL CODICE SORGENTE IN QUESTA FASE**
 >
 > T7 è una fase di test. Se durante la conversione di un test si
@@ -528,7 +588,7 @@ Riferimento: PLAN 007 §2 — DESIGN 007 §1 e §12.
   sui test preesistenti.
 
 - [ ] `npx jest` exit code 0
-- [ ] `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 47 pre-PLAN)
+- [ ] `npx tsc --noEmit` exit code 0 (o solo errori baseline ≤ 8 pre-PLAN, baseline aggiornata 2026-05-24)
 - [ ] `__tests__/crypto/golden.test.ts` (G1, G2, G3) passano — nessuna regressione PLAN 005
 - [ ] `__tests__/crypto/encrypt-decrypt.test.ts` (R1, E1, E2, E3, A1, S1) passano
 - [ ] `__tests__/crypto/pin.test.ts` passano
@@ -540,21 +600,27 @@ Riferimento: PLAN 007 §2 — DESIGN 007 §1 e §12.
 
 ## 5. Note Operative
 
-### NOTA 1 — Baseline TypeScript pre-PLAN
+### NOTA 1 — Baseline TypeScript pre-PLAN (aggiornata 2026-05-24)
 
-Al 2026-05-21 (ultimo aggiornamento `docs/todo-master.md`) la baseline
-TypeScript di `npx tsc --noEmit` conta ~47 errori documentati, attribuibili
-a file non pertinenti a PLAN 007 (`AppDataContext.tsx`, `AuthContext.tsx`,
-`use-online-status.ts`, `budget-templates.ts`, `crypto.ts`,
-`haptic-system.ts`, `sound-system.ts`). Gate G1 non richiede l'azzeramento
-di tutti gli errori: richiede che PLAN 007 non **aggiunga** errori alla
-baseline. Verificare con:
+**Aggiornamento baseline 2026-05-24**: dopo il consolidamento delle
+attività di PLAN 006 e dei lavori connessi, la baseline TypeScript di
+`npx tsc --noEmit` è scesa dai 47 errori storici (rilevati il 2026-05-21
+in `docs/todo-master.md`) a **8 errori** reali. La baseline ufficiale per
+la chiusura di PLAN 007 è dunque **8**, non più 47.
+
+Gate G1 non richiede l'azzeramento di tutti gli errori: richiede che
+PLAN 007 non **aggiunga** errori alla baseline aggiornata di 8.
+Verificare con:
 ```bash
 npx tsc --noEmit 2>&1 | grep -c "error TS"
 ```
-Il conteggio deve essere ≤ baseline al momento dell'avvio del PLAN. Se
-superiore: identificare i nuovi errori confrontando con la lista baseline
-prima di procedere.
+Il conteggio deve essere ≤ 8 al momento del gate. Se superiore:
+identificare i nuovi errori confrontando con la lista baseline prima di
+procedere. Per riferimento storico, il valore precedente di 47 era
+attribuibile a file non pertinenti a PLAN 007 (`AppDataContext.tsx`,
+`AuthContext.tsx`, `use-online-status.ts`, `budget-templates.ts`,
+`crypto.ts`, `haptic-system.ts`, `sound-system.ts`); la maggior parte è
+stata risolta dai cicli intermedi.
 
 ### NOTA 2 — Branch operativo
 
@@ -630,7 +696,10 @@ al passo successivo dedicato alla resilienza del bootstrap.
 
 | Data | Blocco | Agente | Esito | Note |
 |------|--------|--------|-------|------|
-| — | — | — | — | — |
+| 2026-05-24 | Pre-flight §2 — DESIGN 001 | Copilot | SODDISFATTA | DESIGN 001 presente e completato su `main`. AsyncStorage 2.x operativo, primitiva `readCache`/`writeCache` disponibile a runtime. |
+| 2026-05-24 | Pre-flight §2 — DESIGN 002 | Copilot | SODDISFATTA | DESIGN 002 presente e completato su `main`. `AuthProvider` stabile, `useAuth()` consumabile da `AppDataProvider` per `isAuthenticated` e `user?.id`. |
+| 2026-05-24 | Pre-flight §2 — AsyncStorage | Copilot | SODDISFATTA | Versione `@react-native-async-storage/async-storage` 2.x compatibile confermata. Nessun blocco operativo per T1. |
+| 2026-05-24 | Pre-flight §2 — Compilazione TypeScript | Copilot | SODDISFATTA (baseline aggiornata) | `npx tsc --noEmit` → 8 errori. Baseline storica precedente: 47 (rilevata 2026-05-21). Baseline aggiornata per PLAN 007: **8**. Vedi NOTA 1 aggiornata. |
 
 ---
 
@@ -646,11 +715,11 @@ seguenti punti siano soddisfatti.
 npx tsc --noEmit
 ```
 
-Exit code 0 o solo errori baseline pre-PLAN (≤ 47, cfr. NOTA 1). Il file
-`src/context/AppDataContext.tsx` non deve contribuire errori aggiuntivi
-rispetto alla baseline.
+Exit code 0 o solo errori baseline pre-PLAN (≤ **8**, baseline aggiornata
+al 2026-05-24, cfr. NOTA 1). Il file `src/context/AppDataContext.tsx`
+non deve contribuire errori aggiuntivi rispetto alla baseline.
 
-- [ ] `npx tsc --noEmit` exit code 0 o conteggio errori ≤ baseline pre-PLAN
+- [ ] `npx tsc --noEmit` exit code 0 o conteggio errori ≤ 8 (baseline aggiornata 2026-05-24)
 
 ### G2 — Assenza di usi sincroni di `readCache` e `isCacheStale`
 

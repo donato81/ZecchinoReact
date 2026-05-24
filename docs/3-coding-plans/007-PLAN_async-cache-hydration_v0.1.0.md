@@ -412,6 +412,44 @@ sezione 5.
   - Nessun consumer legge una collezione senza un guard preliminare
     su `isDataReady` quando ne dipende.
 
+### T7 — Conversione test `it.todo`
+
+- **File**: `__tests__/AppDataContext.spec.ts`.
+- **Modifica**: convertire i 23 casi `it.todo` presenti in test
+  eseguibili (`it(...)` / `test(...)`) e passanti. La conversione
+  deve distinguere obbligatoriamente tra:
+  - **storage vuoto ma valido** → stato `READY` con collezioni
+    `Array` vuote (non `undefined`) — copre **INVARIANTE 5** del
+    DESIGN §11;
+  - **hydration fallita** → stato `ERROR`;
+  - **snapshot corrotto** → stato `ERROR`.
+- **Dipende da**: T6 completato e gate G3 verificato. Il codice
+  sorgente deve essere già modificato (T1-T6); non ha senso testare
+  contro il codice rotto originale.
+- **Criteri di accettazione dettagliati**: definiti nel TODO 007
+  v0.1.0 §4 — T7 (gruppi prioritari, infrastruttura mock,
+  scenari obbligatori "vuoto legittimo vs hydration fallita" e
+  "React 18 Strict Mode").
+- **Gate di uscita**: tutti i 23 casi eseguibili e passanti
+  (Gate G4, vedi §5). Numero di `it.todo` residui = 0.
+
+### T8 — Esecuzione full suite
+
+- **File**: `__tests__/` (intera directory).
+- **Modifica**: eseguire `npx jest` sull'intera suite di test del
+  progetto dopo il completamento di T7. Verificare assenza di
+  regressioni sui test preesistenti
+  (`__tests__/crypto/golden.test.ts`,
+  `__tests__/crypto/encrypt-decrypt.test.ts`,
+  `__tests__/crypto/pin.test.ts`,
+  `__tests__/ExportService.test.ts`,
+  `__tests__/App.test.tsx`).
+- **Dipende da**: T7 completato.
+- **Criteri di accettazione dettagliati**: definiti nel TODO 007
+  v0.1.0 §4 — T8.
+- **Gate di uscita**: G4 chiuso, zero regressioni, `npx tsc --noEmit`
+  exit code 0 con baseline ≤ 8.
+
 ---
 
 ## 5. Gate di chiusura del PLAN
@@ -426,9 +464,21 @@ npx tsc --noEmit
 ```
 
 Exit code atteso: `0`. Nessun errore, nessun warning **nuovo** rispetto
-alla baseline pre-PLAN (47 errori documentati nel TODO master al
-2026-05-21). Il file `src/context/AppDataContext.tsx` non deve
-contribuire alla baseline con errori aggiuntivi.
+alla baseline pre-PLAN (**8 errori** documentati al 2026-05-24; baseline
+precedente di 47 errori superata dopo consolidamento PLAN 006 — vedi
+NOTA aggiornamento baseline più sotto). Il file
+`src/context/AppDataContext.tsx` non deve contribuire alla baseline con
+errori aggiuntivi.
+
+> **NOTA — Aggiornamento baseline TypeScript (2026-05-24)**
+>
+> La baseline storica di 47 errori (rilevata il 2026-05-21 nel
+> `docs/todo-master.md`) è stata superata. Dopo il consolidamento delle
+> attività di PLAN 006 e dei lavori connessi, il conteggio reale di
+> `npx tsc --noEmit 2>&1 | grep -c "error TS"` al 2026-05-24 risulta
+> **8 errori**. Questa è la baseline ufficiale per la chiusura di
+> PLAN 007. Gate G1 considera "regressione" qualunque conteggio
+> superiore a 8 introdotto da modifiche di questo PLAN.
 
 ### GATE G2 — Assenza di usi sincroni di `readCache` e `isCacheStale`
 
@@ -480,6 +530,16 @@ Nessuna regressione su:
 - `__tests__/crypto/pin.test.ts`
 - `__tests__/ExportService.test.ts`
 - `__tests__/App.test.tsx`
+
+> **Nota — chiusura G4 con T7 e T8**: il gate G4 si considera chiuso
+> solo dopo il completamento di T7 (conversione it.todo) e T8 (full
+> suite) come specificato nel TODO 007 v0.1.0 §4. I criteri di
+> accettazione dettagliati dei due task e dei gruppi di scenari (Bug N9,
+> writeCache fail-soft, state machine, concorrenza Strict Mode, vuoto
+> legittimo vs hydration fallita) sono normativi: G4 non si considera
+> chiuso finché tutti i casi A/B di "vuoto legittimo vs hydration
+> fallita" e lo scenario "React 18 Strict Mode" non sono eseguibili e
+> passanti con asserzioni esplicite.
 
 ### GATE G5 — Assenza di unhandled promise rejection su `writeCache`
 
@@ -569,7 +629,32 @@ agli elementi di questa sezione richiede un PLAN o DESIGN dedicato.
 
 ---
 
-## 8. Riferimenti
+## 8. Debiti tecnici registrati
+
+I debiti tecnici elencati di seguito sono **noti**, **non gestiti** in
+PLAN 007 e **rinviati** a piani futuri. Vengono registrati qui per
+garantirne la tracciabilità tra un PLAN e l'altro.
+
+### DT-007-01 — Assenza di timeout/watchdog sulla hydration AsyncStorage
+
+- **Titolo**: Assenza di timeout/watchdog sulla hydration AsyncStorage.
+- **Descrizione**: in assenza di un meccanismo di timeout o watchdog,
+  una `Promise` di hydration bloccata (`AsyncStorage` non responsivo,
+  loop infinito, dipendenza non risolta) può lasciare il provider
+  `AppDataContext` fermo indefinitamente nello stato `HYDRATING`,
+  senza mai raggiungere `READY` o `ERROR`.
+- **Rischio**: lock permanente del bootstrap. L'applicazione risulta
+  non operativa senza feedback all'utente e senza possibilità di
+  recovery automatico.
+- **Stato**: non gestito in PLAN 007. Rinviato a PLAN futuro dedicato
+  alla resilienza del bootstrap (candidato perimetro: introduzione di
+  `Promise.race` con timer configurabile + transizione esplicita a
+  `ERROR` allo scadere del timeout).
+- **Riferimento**: TODO 007 §5 — NOTA 7.
+
+---
+
+## 9. Riferimenti
 
 - DESIGN: [docs/2-projects/007-DESIGN_async-cache-hydration_v0.1.0.md](../2-projects/007-DESIGN_async-cache-hydration_v0.1.0.md)
 - Report fonte: [docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md](../1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md)
