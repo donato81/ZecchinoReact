@@ -412,6 +412,18 @@ Report di convalida di riferimento:
 - `docs/todo-master.md` — Snapshot di Ripresa aggiornato; Reference Documents aggiunti a Fase P1 e P2
 
 
+## [0.4.0] — 2026-05-24
+
+### DESIGN 006 — KDF PIN
+
+- Libreria KDF: sostituita @noble/hashes con
+  react-native-quick-crypto (benchmark: 75s → 86ms)
+- Iterazioni PBKDF2: fissate a 600.000 (target Windows)
+- Vincolo dipendenze: aggiornato da pure-JS a nativo consolidato
+- Nota architetturale futura: Wrapped Master Key (§13)
+- Dependency Governance prescritta (§14)
+
+
 ## [0.1.0] - 2026-05-13
 
 ### Origini del progetto
