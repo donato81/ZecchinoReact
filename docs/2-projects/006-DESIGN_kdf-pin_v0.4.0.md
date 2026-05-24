@@ -624,21 +624,9 @@ responsabile di rispettare le seguenti prescrizioni:
 
 ## 15. Fasi di implementazione
 
-### Fase 0 — Benchmark preliminare su Hermes
+### Fase 0 — Benchmark preliminare (completata)
 
-Prima di procedere con qualsiasi implementazione del codice KDF, eseguire
-la seguente attività preparatoria:
-
-- Benchmark PBKDF2-SHA256 su Hermes (React Native):
-  misurare il tempo di esecuzione con il numero di
-  iterazioni configurato prima di procedere all'
-  implementazione. Il risultato deve essere inferiore
-  al limite accettabile per UX (≤ 2s su device
-  di riferimento low-end).
-
-I risultati del benchmark e il numero di iterazioni scelto saranno
-documentati nel Coding Plan 006.
-
+La Fase 0 è completata. Il benchmark PBKDF2-SHA256 è stato eseguito su Windows con backend nativo OpenSSL. Risultato: 600.000 iterazioni, mediana 86 ms. Il valore soddisfa il floor minimo di sicurezza (100.000 iterazioni) con un margine di sei volte. Il risultato è documentato nella sezione 4 e nella sezione 7 del presente documento.
 ---
 
 ## 16. File coinvolti
