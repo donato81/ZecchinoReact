@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Account, Transaction, TransactionInput, Category, Budget, SavingsGoal } from '@/lib/types'
 import { formatCurrency, exportToCSV, downloadFile, getActiveBudgets, getBudgetProgress } from '@/lib/helpers'
 import { shouldShowBudgetNotification, getBudgetNotificationTitle } from '@/lib/budget-alerts'
@@ -45,7 +45,8 @@ import {
   update as updateObiettivo, remove as removeObiettivo,
   updateProgress as updateObiettivoProgress,
 } from '@/lib/supabase/repositories/obiettivi-risparmio'
-import { CACHE_TTL_MS, isCacheStale, readCache, writeCache } from '@/lib/supabase/cache'
+import { CACHE_TTL_MS, isCacheStale, readCache, writeCache, type CacheTable } from '@/lib/supabase/cache'
+import { readCachedDomainSnapshotPure, type DomainSnapshot } from '@/context/app-data-cache'
 import { useAuth } from '@/context/AuthContext'
 import { RepositoryError } from '@/lib/supabase/types'
 
@@ -125,17 +126,36 @@ type AppDataContextValue = {
 
 const AppDataContext = createContext<AppDataContextValue | null>(null)
 
-type DomainSnapshot = {
-  accounts: Account[]
-  transactions: Transaction[]
-  categories: Category[]
-  budgets: Budget[]
-  savingsGoals: SavingsGoal[]
-}
-
 const OFFLINE_CACHE_MESSAGE = 'Modalità offline: stai vedendo dati salvati in precedenza.'
 const OFFLINE_STALE_CACHE_MESSAGE = 'Modalità offline: stai vedendo dati salvati in precedenza. I dati potrebbero non essere aggiornati.'
 const OFFLINE_FIRST_ACCESS_MESSAGE = 'Non è possibile caricare i dati senza connessione al primo accesso. Connettiti e riprova.'
+
+// ============================================================================
+// T3 (PLAN 007): State machine esplicita del bootstrap
+// ============================================================================
+// 6 stati discreti (DESIGN §4). Tutti gli aggiornamenti dei flag React
+// (isLoading, isDataReady, error) passano da transitionTo() in modo atomico.
+type BootstrapState =
+  | 'IDLE'
+  | 'HYDRATING'
+  | 'CACHE-READY'
+  | 'REMOTE-SYNC'
+  | 'READY'
+  | 'ERROR'
+
+// Matrice transizioni consentite (DESIGN §4)
+const ALLOWED_TRANSITIONS: Readonly<Record<BootstrapState, ReadonlyArray<BootstrapState>>> = {
+  IDLE: ['HYDRATING'],
+  HYDRATING: ['CACHE-READY', 'READY', 'ERROR', 'IDLE'],
+  'CACHE-READY': ['REMOTE-SYNC', 'IDLE'],
+  'REMOTE-SYNC': ['READY', 'ERROR', 'IDLE'],
+  READY: ['REMOTE-SYNC', 'IDLE'],
+  ERROR: ['HYDRATING', 'IDLE'],
+}
+
+function isTransitionAllowed(from: BootstrapState, to: BootstrapState): boolean {
+  return ALLOWED_TRANSITIONS[from].includes(to)
+}
 
 async function loadDomainSnapshot(): Promise<DomainSnapshot> {
   const [accounts, transactions, categories, budgets, savingsGoals] = await Promise.all([
@@ -155,6 +175,14 @@ async function loadDomainSnapshot(): Promise<DomainSnapshot> {
   }
 }
 
+// ============================================================================
+// PLAN 007 — T1: readCachedDomainSnapshotPure
+// ============================================================================
+// La funzione pura è definita in @/context/app-data-cache per consentire
+// test unitari isolati (senza catena di import React Native). Qui la
+// ri-esportiamo per back-compat con eventuali consumatori interni.
+export { readCachedDomainSnapshotPure } from '@/context/app-data-cache'
+
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated, user } = useAuth()
 
@@ -166,6 +194,70 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isDataReady, setIsDataReady] = useState(false)
+
+  // T3 (PLAN 007): stato esplicito del bootstrap + transizioni atomiche
+  const [bootstrapState, setBootstrapState] = useState<BootstrapState>('IDLE')
+  const bootstrapStateRef = useRef<BootstrapState>('IDLE')
+
+  // T4 (PLAN 007): generation counter per evitare race condition tra
+  // hydration concorrenti (es. React 18 Strict Mode double-invoke,
+  // refreshAll lanciato mentre il bootstrap è in volo, logout + relogin).
+  const hydrationGen = useRef(0)
+
+  // T3: transitionTo aggiorna in modo atomico bootstrapState + flag derivati
+  // (isLoading, isDataReady, error). Le transizioni vietate dalla matrice
+  // ALLOWED_TRANSITIONS sono ignorate con warning diagnostico.
+  const transitionTo = useCallback(
+    (to: BootstrapState, payload?: { error?: string | null }): boolean => {
+      const from = bootstrapStateRef.current
+      if (from === to) {
+        // Idempotente: stessa fase, aggiorna solo payload se fornito
+        if (payload && 'error' in payload) setError(payload.error ?? null)
+        return true
+      }
+      if (!isTransitionAllowed(from, to)) {
+        console.warn(
+          `[AppDataContext] Transizione vietata ${from} → ${to} (T3)`,
+        )
+        return false
+      }
+      bootstrapStateRef.current = to
+      setBootstrapState(to)
+      switch (to) {
+        case 'IDLE':
+          setIsLoading(false)
+          setIsDataReady(false)
+          setError(null)
+          break
+        case 'HYDRATING':
+          setIsLoading(true)
+          setIsDataReady(false)
+          setError(null)
+          break
+        case 'CACHE-READY':
+          setIsLoading(false)
+          setIsDataReady(true)
+          setError(payload?.error ?? null)
+          break
+        case 'REMOTE-SYNC':
+          setIsLoading(true)
+          // isDataReady ed error preservati (background refresh)
+          break
+        case 'READY':
+          setIsLoading(false)
+          setIsDataReady(true)
+          setError(null)
+          break
+        case 'ERROR':
+          setIsLoading(false)
+          setIsDataReady(false)
+          setError(payload?.error ?? 'Errore sconosciuto')
+          break
+      }
+      return true
+    },
+    [],
+  )
 
   const [budgetPercentages, setBudgetPercentages] = useState<Record<string, number>>({})
 
@@ -214,126 +306,125 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setBudgetPercentages({})
   }, [])
 
-  const readCachedDomainSnapshot = useCallback((userId: string): { snapshot: DomainSnapshot; isStale: boolean } | null => {
-    const accounts = readCache<Account[]>(userId, 'conti')
-    const transactions = readCache<Transaction[]>(userId, 'transazioni')
-    const categories = readCache<Category[]>(userId, 'categorie')
-    const budgets = readCache<Budget[]>(userId, 'budget')
-    const savingsGoals = readCache<SavingsGoal[]>(userId, 'obiettivi_risparmio')
+  const readCachedDomainSnapshot = useCallback(
+    (userId: string) => readCachedDomainSnapshotPure(userId),
+    [],
+  )
 
-    if (!accounts || !transactions || !categories || !budgets || !savingsGoals) {
-      return null
-    }
+  const hydrateFromCache = useCallback(
+    async (userId: string, gen: number): Promise<boolean> => {
+      // T2 (PLAN 007): await sulla cache asincrona
+      // T4 (PLAN 007): gen guard prima di ogni applyDomainSnapshot/transitionTo
+      const cached = await readCachedDomainSnapshot(userId)
+      if (gen !== hydrationGen.current) return false
+      if (!cached) {
+        transitionTo('ERROR', { error: OFFLINE_FIRST_ACCESS_MESSAGE })
+        return false
+      }
+      if (gen !== hydrationGen.current) return false
+      applyDomainSnapshot(cached.snapshot)
+      transitionTo('CACHE-READY', {
+        error: cached.isStale ? OFFLINE_STALE_CACHE_MESSAGE : OFFLINE_CACHE_MESSAGE,
+      })
+      return true
+    },
+    [applyDomainSnapshot, readCachedDomainSnapshot, transitionTo],
+  )
 
-    return {
-      snapshot: {
-        accounts: accounts.data,
-        transactions: transactions.data,
-        categories: categories.data,
-        budgets: budgets.data,
-        savingsGoals: savingsGoals.data,
-      },
-      isStale: [
-        isCacheStale(userId, 'conti', CACHE_TTL_MS),
-        isCacheStale(userId, 'transazioni', CACHE_TTL_MS),
-        isCacheStale(userId, 'categorie', CACHE_TTL_MS),
-        isCacheStale(userId, 'budget', CACHE_TTL_MS),
-        isCacheStale(userId, 'obiettivi_risparmio', CACHE_TTL_MS),
-      ].some(Boolean),
-    }
-  }, [])
-
-  const hydrateFromCache = useCallback((userId: string): boolean => {
-    const cached = readCachedDomainSnapshot(userId)
-    if (!cached) {
-      setError(OFFLINE_FIRST_ACCESS_MESSAGE)
-      setIsLoading(false)
-      setIsDataReady(false)
-      return false
-    }
-
-    applyDomainSnapshot(cached.snapshot)
-    setError(cached.isStale ? OFFLINE_STALE_CACHE_MESSAGE : OFFLINE_CACHE_MESSAGE)
-    setIsLoading(false)
-    setIsDataReady(true)
-    return true
-  }, [applyDomainSnapshot, readCachedDomainSnapshot])
-
-  // Bootstrap: carica tutti i dati in parallelo al login, resetta al logout
+  // Bootstrap: carica tutti i dati al login, resetta al logout
   useEffect(() => {
-    let cancelled = false
-
     if (!isAuthenticated || !user?.id) {
+      // T4: invalida qualsiasi hydration in volo
+      hydrationGen.current += 1
       setAccounts([])
       setTransactions([])
       setCategories([])
       setBudgets([])
       setSavingsGoals([])
       setBudgetPercentages({})
-      setIsLoading(false)
-      setError(null)
-      setIsDataReady(false)
+      transitionTo('IDLE')
       return
     }
 
-    setIsLoading(true)
-    setError(null)
+    // T4: nuova generazione per questa hydration
+    const myGen = ++hydrationGen.current
+    transitionTo('HYDRATING')
 
     const loadBootstrapData = async () => {
       if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-        if (!cancelled) {
-          hydrateFromCache(user.id)
-        }
+        await hydrateFromCache(user.id, myGen)
         return
       }
 
       try {
         const snapshot = await loadDomainSnapshot()
-        if (cancelled) return
+        if (myGen !== hydrationGen.current) return
         applyDomainSnapshot(snapshot)
-        setError(null)
-        setIsLoading(false)
-        setIsDataReady(true)
+        transitionTo('READY')
       } catch {
-        if (cancelled) return
-        hydrateFromCache(user.id)
+        if (myGen !== hydrationGen.current) return
+        await hydrateFromCache(user.id, myGen)
       }
     }
 
     void loadBootstrapData()
+  }, [applyDomainSnapshot, hydrateFromCache, isAuthenticated, transitionTo, user?.id])
 
-    return () => { cancelled = true }
-  }, [applyDomainSnapshot, hydrateFromCache, isAuthenticated, user?.id])
-
+  // T5 (PLAN 007): persistenza cache fail-soft. Ogni writeCache è isolato
+  // in try/catch: un errore su una tabella non blocca le altre né propaga
+  // a React state. Loggato come warning per diagnostica.
   useEffect(() => {
     if (!isAuthenticated || !user?.id || !isDataReady) return
-
-    writeCache(user.id, 'conti', accounts)
-    writeCache(user.id, 'transazioni', transactions)
-    writeCache(user.id, 'categorie', categories)
-    writeCache(user.id, 'budget', budgets)
-    writeCache(user.id, 'obiettivi_risparmio', savingsGoals)
+    const userId = user.id
+    const targets: Array<[CacheTable, unknown[]]> = [
+      ['conti', accounts],
+      ['transazioni', transactions],
+      ['categorie', categories],
+      ['budget', budgets],
+      ['obiettivi_risparmio', savingsGoals],
+    ]
+    void (async () => {
+      for (const [table, data] of targets) {
+        try {
+          await writeCache(userId, table, data)
+        } catch (error) {
+          console.warn('[AppDataContext] writeCache fallito', { table, error })
+        }
+      }
+    })()
   }, [accounts, budgets, categories, isAuthenticated, isDataReady, savingsGoals, transactions, user?.id])
 
   const refreshAll = () => {
-    if (isLoading || !user?.id) return
-    setIsLoading(true)
-    setError(null)
+    if (!user?.id) return
+    // Blocca refresh se hydration iniziale ancora in corso
+    if (bootstrapStateRef.current === 'HYDRATING') return
+    if (bootstrapStateRef.current === 'REMOTE-SYNC') return
 
+    // T4: nuova generazione anche per refresh manuale
+    const myGen = ++hydrationGen.current
+    const fromReady = bootstrapStateRef.current === 'READY' || bootstrapStateRef.current === 'CACHE-READY'
+
+    if (fromReady) {
+      transitionTo('REMOTE-SYNC')
+    } else {
+      transitionTo('HYDRATING')
+    }
+
+    const userId = user.id
     const reloadData = async () => {
       if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-        hydrateFromCache(user.id)
+        await hydrateFromCache(userId, myGen)
         return
       }
 
       try {
         const snapshot = await loadDomainSnapshot()
+        if (myGen !== hydrationGen.current) return
         applyDomainSnapshot(snapshot)
-        setError(null)
-        setIsLoading(false)
-        setIsDataReady(true)
+        transitionTo('READY')
       } catch {
-        hydrateFromCache(user.id)
+        if (myGen !== hydrationGen.current) return
+        await hydrateFromCache(userId, myGen)
       }
     }
 
