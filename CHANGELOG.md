@@ -2,6 +2,76 @@
 
 ## [Unreleased]
 
+### PLAN 008 — Network connectivity via NetInfo (2026-05-25)
+
+#### Added
+
+- **Provider e hook di connettività dedicati**
+  ([src/context/NetworkStatusContext.tsx](src/context/NetworkStatusContext.tsx),
+  [src/hooks/use-network-status.ts](src/hooks/use-network-status.ts)).
+  Nuovo `NetworkStatusProvider` basato su `@react-native-community/netinfo`
+  che espone il contratto `NetworkStatus = { isOffline, isConnected,
+  isInternetReachable, connectionType, isInitialized }`. Semantica
+  `isOffline` conforme a DESIGN 008 §5 (INV-7): captive portal
+  trattato come offline, `isInternetReachable === null` interpretato
+  come online-first. Debounce di 1000 ms applicato SOLO sulla
+  transizione online → offline (offline → online immediato, INV-3).
+  Fail-Safe Online-First (INV-4): se `NetInfo.addEventListener` lancia
+  o non riceve eventi entro 1500 ms, lo stato viene forzato a
+  `{ isOffline:false, isConnected:true, isInternetReachable:true,
+  connectionType:'unknown', isInitialized:true }` con warning su
+  `console.warn`. Cleanup completo (`unsubscribe` + clear di tutti i
+  timer + `isMountedRef` guard) all'unmount.
+- **Test dedicati per il provider rete**
+  ([__tests__/use-network-status.spec.ts](__tests__/use-network-status.spec.ts)).
+  7 test verdi (PLAN 008 T6): Online, Offline confermato, Captive
+  portal, Flapping con debounce (4a online→offline 1000 ms, 4b
+  offline→online immediato), Fail-Safe su timeout init, Cleanup
+  con `unsubscribe` verificato. Mock di `@react-native-community/netinfo`
+  con utility `triggerNetInfo()` e `jest.useFakeTimers()`.
+
+#### Changed
+
+- **`AppDataContext` ora usa `useNetworkStatus`**
+  ([src/context/AppDataContext.tsx](src/context/AppDataContext.tsx)).
+  Sostituiti i due controlli inline `typeof navigator !== 'undefined'
+  && navigator.onLine === false` (righe 354 e 415) con la lettura di
+  `isOffline` proveniente da `useNetworkStatus()`. Aggiunto early
+  return `if (!isNetworkInitialized) return` nel primo `useEffect`
+  bootstrap per evitare di consumare uno stato di rete indeterminato
+  prima che il provider abbia emesso l'esito iniziale. Boundary
+  DESIGN 007 (INV-6) preservato: nessuna delle 5 keyword PLAN 007
+  (`transitionTo`, `hydrationGen`, `applyDomainSnapshot`,
+  `readCachedDomainSnapshot`, `writeCache`) è stata rimossa o
+  rinominata.
+- **`App.tsx` monta `NetworkStatusProvider`**
+  ([App.tsx](App.tsx)). `<NetworkStatusProvider>` inserito come
+  ancestor di `<AuthProvider>` (INV-5).
+- **`package.json`**: aggiunta dipendenza
+  `@react-native-community/netinfo ^12.0.1`.
+- **`jest.config.js`**: aggiunto `moduleNameMapper` su
+  `@react-native-community/netinfo` puntato al mock ufficiale
+  `node_modules/.../jest/netinfo-mock.js`. Necessario perché
+  `__tests__/App.test.tsx` ora monta `NetworkStatusProvider`. Il
+  test dedicato sovrascrive il mock con un `jest.mock` locale per
+  esporre `triggerNetInfo`.
+
+#### Removed
+
+- **`src/hooks/use-online-status.ts`** (24 righe). Vecchio hook
+  basato su `navigator.onLine` + `window.addEventListener('online'/
+  'offline')` non funzionante in React Native. Nessun consumer
+  esterno restava attivo prima della rimozione.
+
+#### Notes
+
+- **iOS**: il maintainer deve eseguire `cd ios && bundle exec pod
+  install && cd ..` prima del primo `npm run ios` (macOS non
+  disponibile in sessione, comando non eseguito).
+- Gate G1-G8 (PLAN 008 §7) tutti PASS. Baseline TypeScript = 3
+  errori, invariata pre/post-PLAN. Suite Jest: 7/7 suite verdi,
+  26 test passanti, 39 `it.todo` preservati.
+
 ### PLAN 009 — Pre-flight corrections (2026-05-25)
 
 - Fissata versione react-native-share@12.3.1 (P9)

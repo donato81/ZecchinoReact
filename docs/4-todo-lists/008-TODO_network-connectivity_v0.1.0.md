@@ -71,14 +71,35 @@ ramo: main
 
 | Task | Titolo | File principali | Status | Commit |
 |------|--------|-----------------|--------|--------|
-| T1 | Installazione NetInfo | `package.json`, `package-lock.json` | [ ] | — |
-| T2 | Provider + hook | `src/context/NetworkStatusContext.tsx`, `src/hooks/use-network-status.ts` | [ ] | — |
-| T3 | Eliminazione vecchio hook | `src/hooks/use-online-status.ts` (rimosso) | [ ] | — |
-| T4 | Sostituzione check inline | `src/context/AppDataContext.tsx` (righe 354 e 415) | [ ] | — |
-| T5 | Posizionamento provider | `App.tsx` | [ ] | — |
-| T6 | Test nuovi (4 scenari + fail-safe + cleanup) | `__tests__/use-network-status.spec.ts` | [ ] | — |
-| T7 | Conversione `it.todo` consumer | `__tests__/AppDataContext.spec.ts` | [ ] | — |
-| T8 | Full suite + tsc baseline | `__tests__/**` | [ ] | — |
+| T1 | Installazione NetInfo | `package.json`, `package-lock.json` | [x] | — |
+| T2 | Provider + hook | `src/context/NetworkStatusContext.tsx`, `src/hooks/use-network-status.ts` | [x] | — |
+| T3 | Eliminazione vecchio hook | `src/hooks/use-online-status.ts` (rimosso) | [x] | — |
+| T4 | Sostituzione check inline | `src/context/AppDataContext.tsx` (righe 354 e 415) | [x] | — |
+| T5 | Posizionamento provider | `App.tsx` | [x] | — |
+| T6 | Test nuovi (4 scenari + fail-safe + cleanup) | `__tests__/use-network-status.spec.ts` | [x] | — |
+| T7 | Conversione `it.todo` consumer | `__tests__/AppDataContext.spec.ts` | [x] (nessuna conversione necessaria, vedi NOTA T7) | — |
+| T8 | Full suite + tsc baseline | `__tests__/**`, `jest.config.js` | [x] | — |
+
+> **NOTA T7**: nessuno degli `it.todo` presenti in
+> `__tests__/AppDataContext.spec.ts` dipende specificamente dal
+> contratto rete del PLAN 008 — sono scenari di state machine
+> bootstrap già etichettati come "fuori scope PLAN 007" (riga 13)
+> perché richiedono l'introduzione di `@testing-library/react`.
+> Annotazione lasciata in cima al file di test.
+>
+> **NOTA iOS**: per Android l'autolinking di NetInfo avviene al
+> prossimo build; per iOS il maintainer deve eseguire
+> `cd ios && bundle exec pod install && cd ..` prima del primo
+> `npm run ios`. macOS non disponibile in sessione, comando NON
+> eseguito.
+>
+> **NOTA Jest globale**: `jest.config.js` è stato esteso con un
+> `moduleNameMapper` su `@react-native-community/netinfo` puntato al
+> mock ufficiale `node_modules/.../jest/netinfo-mock.js`. Necessario
+> perché `__tests__/App.test.tsx` monta l'App reale che ora include
+> `NetworkStatusProvider`. Il test dedicato
+> `__tests__/use-network-status.spec.ts` sovrascrive il mock con un
+> `jest.mock` locale per esporre l'utility `triggerNetInfo`.
 
 ---
 
@@ -401,6 +422,7 @@ Esempio:
 | Data | Blocco | Agente | Esito | Note |
 |------|--------|--------|-------|------|
 | 2026-05-25 | Pre-flight P1-P7 | Copilot | ✅ COMPLETATO | Sessione: pre-flight PLAN 008 — Agente: Copilot — tutte le precondizioni verificate, baseline TS aggiornata da 8 a 3 |
+| 2026-05-25 | Esecuzione T1-T8 | Copilot | ✅ COMPLETATO | Autonomia concessa fino a G8. T1 NetInfo ^12.0.1 installato; T2 Provider+hook creati; T3 hook deprecato rimosso (git rm); T4 due check `navigator.onLine` sostituiti con `isOffline` da `useNetworkStatus`; T5 `NetworkStatusProvider` montato sopra `AuthProvider`; T6 7 test verdi (6 scenari + split 4a/4b); T7 nessuna conversione necessaria; T8 7/7 suite verdi, 26 test, 39 todo preservati. TSC = 3 (baseline). `jest.config.js` esteso con `moduleNameMapper` su NetInfo mock ufficiale. iOS pod install RICHIESTO al maintainer (non eseguito, macOS non disponibile). |
 
 ---
 
@@ -408,19 +430,26 @@ Esempio:
 
 Rispecchia PLAN 008 §7. Spuntare solo dopo verifica strumentale.
 
-- [ ] **G1** — `npx tsc --noEmit` exit code 0 o errori ≤ baseline (3).
-- [ ] **G2** — `grep -RnE "navigator\.onLine" src/` → 0 occorrenze (INV-1).
-- [ ] **G3** — `grep -RnE "addEventListener\(['\"](online|offline)['\"]" src/` → 0 occorrenze (INV-1).
-- [ ] **G4** — `grep -RnE "NetInfo\.addEventListener|NetInfo\.fetch" src/`
+- [x] **G1** — `npx tsc --noEmit` exit code 0 o errori ≤ baseline (3). → 3 errori = baseline.
+- [x] **G2** — `grep -RnE "navigator\.onLine" src/` → 0 occorrenze (INV-1).
+- [x] **G3** — `grep -RnE "addEventListener\(['\"](online|offline)['\"]" src/` → 0 occorrenze (INV-1).
+- [x] **G4** — `grep -RnE "NetInfo\.addEventListener|NetInfo\.fetch" src/`
               → solo in `src/context/NetworkStatusContext.tsx` (INV-1, INV-2).
-- [ ] **G5** — `test ! -f src/hooks/use-online-status.ts`;
+- [x] **G5** — `test ! -f src/hooks/use-online-status.ts`;
               `grep -R "useOnlineStatus" src/` → 0;
               `grep -R "use-online-status" src/` → 0.
-- [ ] **G6** — `App.tsx`: `NetworkStatusProvider` ancestor di
+- [x] **G6** — `App.tsx`: `NetworkStatusProvider` ancestor di
               `AuthProvider` (INV-5).
-- [ ] **G7** — Boundary DESIGN 007: conteggio simboli PLAN 007 in
-              `AppDataContext.tsx` invariato (INV-6).
-- [ ] **G8** — `npx jest` exit code 0; nuovi test T6 ≥ 6 passanti.
+- [x] **G7** — Boundary DESIGN 007: conteggio simboli PLAN 007 in
+              `AppDataContext.tsx` invariato (INV-6). Nessuna delle 5
+              keyword PLAN 007 (`transitionTo`, `hydrationGen`,
+              `applyDomainSnapshot`, `readCachedDomainSnapshot`,
+              `writeCache`) è stata rimossa o rinominata; il T4 ha
+              aggiunto solo `useNetworkStatus` + early-return
+              `if (!isNetworkInitialized) return` + sostituzione dei
+              due controlli `navigator.onLine` con `isOffline`.
+- [x] **G8** — `npx jest` exit code 0; nuovi test T6 ≥ 6 passanti
+              (7 verdi: 6 scenari + split 4a/4b).
 
 ---
 
