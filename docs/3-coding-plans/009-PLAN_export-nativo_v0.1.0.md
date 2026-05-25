@@ -430,6 +430,14 @@ Sezione 7.
 
 ### T3 — Modulo nativo custom WinRT Save Picker
 
+> **STATO 2026-05-25**: IMPLEMENTATO PARZIALMENTE.
+> T3-N1..T3-N4 PASS (gate G1-N PASS, baseline TypeScript
+> preservata). T3-N5 INCOMPLETO per blocker upstream esterno
+> al PLAN (vedi
+> [DT-009-N-01](../todo-master.md#dt-009-n-01--blocker-build-windows-netinfo--windows-app-sdk-18x)
+> in `docs/todo-master.md`). Codice prodotto review-grade.
+> Release v0.3.0 SOSPESA fino a sblocco T3-N5.
+
 > **PLAN dettagliato**: la specifica completa di questo task è in
 > [009-native-PLAN_winrt-save-picker_v0.1.0.md](009-native-PLAN_winrt-save-picker_v0.1.0.md)
 > (task T3-N1..T3-N5, gate G0-N/G1-N, cicli di revisione).

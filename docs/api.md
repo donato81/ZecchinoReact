@@ -253,6 +253,97 @@ Vedi `src/announcements/index.ts` per la nuova API: `announce()`,
 
 ---
 
+## `src/lib/export-service.ts` ⚠️
+
+API pubblica di export file multi-piattaforma (DESIGN 009, DESIGN
+009-native).
+
+```typescript
+type ExportFailureReason =
+  | 'CANCELLED' | 'PERMISSION_DENIED' | 'FILESYSTEM_ERROR'
+  | 'UNSUPPORTED_PLATFORM' | 'INVALID_PATH'
+  | 'INSUFFICIENT_SPACE' | 'UNKNOWN'
+
+type ExportResult =
+  | { success: true }
+  | { success: false; reason: ExportFailureReason }
+
+export async function exportFile(
+  content: string,
+  fileName: string,
+  mimeType: string,
+): Promise<ExportResult>
+```
+
+- **iOS / Android**: share sheet nativa via `react-native-share`
+  (data URL base64).
+- **Windows**: `WinRTSavePicker.pickSavePath` (vedi `src/native/`) +
+  scrittura via `react-native-fs` (opzionale, fallback
+  `UNSUPPORTED_PLATFORM` se assente).
+- **Default**: `{ success: false, reason: 'UNSUPPORTED_PLATFORM' }`.
+
+INV-2: nessun side effect UX (toast, sound, haptic). INV-4: nessun
+throw non catturato. INV-CANCEL: cancellazione utente → reason
+`CANCELLED`, mai `success: true`.
+
+Stato: ramo Windows validato via test mock-based; build Windows
+runtime bloccata da [DT-009-N-01](todo-master.md#dt-009-n-01--blocker-build-windows-netinfo--windows-app-sdk-18x).
+
+---
+
+## `src/native/WinRTSavePicker/` ⚠️ (Windows-only runtime)
+
+Contratto TypeScript del modulo TurboModule nativo per il WinRT
+`FileSavePicker` (DESIGN 009-native).
+
+```typescript
+interface FileTypeChoice {
+  description: string
+  extensions: string[]   // es. ['.csv', '.txt']
+}
+
+interface PickSavePathOptions {
+  fileTypeChoices: FileTypeChoice[]
+  suggestedFileName?: string
+  defaultExtension?: string
+}
+
+type PickSavePathResult =
+  | { status: 'SUCCESS'; path: string }
+  | { status: 'USER_CANCELLED' }
+  | { status: 'PICKER_UNAVAILABLE' }
+  | { status: 'INVALID_ARGUMENT'; code: 'EMPTY_CHOICES' | 'INVALID_EXT' }
+  | { status: 'INTERNAL_ERROR'; code: 'DISPATCHER_DETACHED'
+      | 'INVALID_FILENAME' | 'HRESULT_E_FAIL' | 'STD_EXCEPTION'
+      | 'UNKNOWN_EXCEPTION' }
+
+interface WinRTSavePickerSpec {
+  pickSavePath(options: PickSavePathOptions): Promise<PickSavePathResult>
+}
+```
+
+- **Export**: `import { WinRTSavePicker, type FileTypeChoice, type
+  PickSavePathOptions, type PickSavePathResult } from '@/native'`.
+- **Variant Metro**: `WinRTSavePicker.windows.ts` carica il
+  TurboModule nativo. `WinRTSavePicker.macos.ts` /
+  `WinRTSavePicker.stub.ts` ritornano sempre `{ status:
+  'PICKER_UNAVAILABLE' }`.
+- **Invarianti**: INV-L10 (nessuna stringa localizzata sul bridge),
+  INV-CANCEL (`USER_CANCELLED` ≠ failure), INV-THREAD (chiamabile
+  da JS thread; il bridge nativo marshalla su UI thread via
+  `ReactContext.UIDispatcher().Post()`), INV-FILENAME
+  (`suggestedFileName` pass-through opaco; sanitization a carico
+  del chiamante).
+- **Bridge nativo**: `windows/ZecchinoReact/WinRTSavePickerModule
+  .{h,cpp}` (TurboModule attribute-based, registrato via
+  `AddAttributedModules(builder, true)`).
+
+Stato: contratto TS completo. Bridge nativo completo, runtime
+non validato (vedi
+[DT-009-N-01](todo-master.md#dt-009-n-01--blocker-build-windows-netinfo--windows-app-sdk-18x)).
+
+---
+
 ## `src/lib/supabase/types.ts` ✅
 
 Tipi DB e di settings. Uso interno al layer `src/lib/supabase/`.

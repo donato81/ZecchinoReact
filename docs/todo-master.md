@@ -5,8 +5,8 @@
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
-- **Ultimo Agente Attivo:** Agent-Code (implementazione DESIGN 004 completata — layer `src/announcements/` operativo)
-- **Blocco in Carico:** Nessuno — DESIGN 001, 002, 003, 004 implementati.
+- **Ultimo Agente Attivo:** Agent-Orchestrator (PLAN 009-native eseguito autonomamente — T3-N1..T3-N4 PASS, T3-N5 INCOMPLETO per blocker upstream)
+- **Blocco in Carico:** ⚠️ Release v0.3.0 SOSPESA — DT-009-N-01 (build Windows bloccata da netinfo+WAS 1.8). Implementazione 009-native completata lato codice.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente

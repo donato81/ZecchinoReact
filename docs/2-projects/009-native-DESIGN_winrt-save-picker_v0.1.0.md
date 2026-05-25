@@ -31,7 +31,7 @@ ramo: main
 - **Data**: 2026-05-25
 - **Fase**: P3
 - **Blocco**: P3.B2-EXT (sotto-componente di P3.B2)
-- **Stato**: DRAFT
+- **Stato**: IMPLEMENTED — T3-N5 INCOMPLETO (blocker upstream esterno, release v0.3.0 sospesa). Vedi §11 Validation log.
 - **Autore**: Copilot Agent (modalità Agent-Docs)
 - **Revisore**: donny-81
 - **Design padre**: [DESIGN 009 — Export File Nativo](009-DESIGN_export-nativo_v0.1.0.md)
@@ -648,6 +648,9 @@ state machine bootstrap, `transitionTo`, `hydrationGen`,
 | 2026-05-25 | Stesura v0.1.0 in DRAFT | DONE | Agent-Docs. Tutti i vincoli V1-V9 dichiarati. |
 | 2026-05-25 | Verifica precondizione P-B1 | SODDISFATTA (con dichiarazione invariante) | P9 (`react-native-share@12.3.1`) e P10 (`@react-native-windows/fs@0.82.0`) congelate nel TODO 009 alla data di stesura. La dipendenza formale resta dichiarata per invarianza. |
 | 2026-05-25 | Stesura PLAN 009-native + TODO 009-native | DONE | Agent-Docs. Contratto §5 propagato 1:1 nel PLAN; bloccante P-B1 confermato SODDISFATTO al momento della stesura. PLAN dettagliato delle T3-N1..T3-N5 disponibile in [009-native-PLAN_winrt-save-picker_v0.1.0.md](../3-coding-plans/009-native-PLAN_winrt-save-picker_v0.1.0.md). |
+| 2026-05-25 | Esecuzione T3-N1..T3-N4 | PASS (Gate G1-N PASS) | Agent-Code. Implementati: contratti TS `@/native/WinRTSavePicker` (T3-N1), bridge C++/WinRT `WinRTSavePickerModule.{h,cpp}` con FileSavePicker + IInitializeWithWindow + ReactDispatcher.Post + exception mapping esaustivo (T3-N2), integrazione `ExportService.exportFile` ramo Windows con caricamento opzionale react-native-fs (T3-N3), gate G1-N TypeScript baseline preservata a 3 errori (T3-N4). 9 commit su `main`. |
+| 2026-05-25 | T3-N5 build Windows | ⚠️ **INCOMPLETO** | Blocker upstream esterno al PLAN. `npx react-native run-windows` aborta in fase NuGet restore con `Microsoft.WindowsAppSDK.targets(19,9): error : No references were found for these Windows App SDK transitive dependencies [...] RNCNetInfoCPP.vcxproj`. Causa: `@react-native-community/netinfo@12.0.1` non dichiara come `PackageReference` le 9 sub-deps split di Windows App SDK 1.8.x. La build aborta prima della compilazione di `WinRTSavePickerModule.cpp`. Codice review-grade, validazione runtime in attesa di sblocco esterno. Tracciato in [DT-009-N-01](../todo-master.md#dt-009-n-01--blocker-build-windows-netinfo--windows-app-sdk-18x). |
+| 2026-05-25 | PLAN 009-native — chiusura | INCOMPLETO (4/5 task) | Esito complessivo: 4 task PASS (T3-N1..T3-N4), 1 task INCOMPLETO (T3-N5). Release v0.3.0 SOSPESA fino a sblocco T3-N5. Mitigazione validazione: 10 test Jest mock-based per il ramo Windows in `__tests__/ExportService.test.ts`. Verifica Android non-regressione rimandata ([DT-009-N-02](../todo-master.md#dt-009-n-02--ambiente-android-non-configurato)). |
 
 ### Checklist vincoli (auto-convalida iniziale)
 

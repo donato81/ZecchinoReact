@@ -57,6 +57,9 @@
 │  client  cache  types                                          │
 │  repositories: conti  transazioni  categorie  budget          │
 │               obiettivi-risparmio  impostazioni-utente         │
+├────────────────────────────────────────────────────────────────┤
+│                       native/                                  │  ← Native modules (TurboModules)
+│  WinRTSavePicker (windows/macos/stub) + index                  │  ← DESIGN 009-native
 └────────────────────────────────────────────────────────────────┘
 ```
 
@@ -67,7 +70,40 @@
 - `hooks/` → può importare da `lib/`, `lib/supabase/`, altri hook  
 - `lib/` → dipendenze solo interne (`types`, `helpers`, ecc.) o npm  
 - `lib/supabase/` → dipendenza esterna: `@supabase/supabase-js`, `AsyncStorage`  
+- `native/` → ponte verso moduli nativi piattaforma-specifici;
+  variant Metro `.windows.ts`/`.macos.ts`/`.stub.ts` per il dispatch.
+  Esposto come `@/native`; importabile solo da `lib/`.
 - **I tipi `Db*` in `lib/supabase/types.ts` sono interni** — non importare fuori da `lib/supabase/`
+
+### Layer `native/` — moduli nativi C++/WinRT (DESIGN 009-native)
+
+`src/native/` ospita il contratto TypeScript dei moduli TurboModule
+nativi e il loro dispatcher cross-platform. Il primo modulo è
+`WinRTSavePicker`:
+
+- **`WinRTSavePicker.ts`** — contratto astratto (interfaccia
+  `WinRTSavePickerSpec`, tipi `FileTypeChoice`,
+  `PickSavePathOptions`, `PickSavePathResult` con discriminated
+  union su `status`).
+- **`WinRTSavePicker.windows.ts`** — caricamento del TurboModule
+  `WinRTSavePickerModule` registrato dal bridge C++/WinRT.
+- **`WinRTSavePicker.macos.ts`** / **`WinRTSavePicker.stub.ts`** —
+  fallback che ritorna sempre `{ status: 'PICKER_UNAVAILABLE' }`.
+- **`index.ts`** — riesporta `WinRTSavePicker` e i tipi; Metro
+  resolver seleziona la variant per piattaforma.
+
+Il bridge C++/WinRT vive in
+`windows/ZecchinoReact/WinRTSavePickerModule.{h,cpp}`. Espone
+un solo metodo asincrono `pickSavePath(options)` che apre
+`Windows.Storage.Pickers.FileSavePicker` sull'HWND attivo
+(`IInitializeWithWindow`) e marshalla il risultato sull'UI thread
+via `ReactContext.UIDispatcher().Post()`. Le eccezioni
+(`hresult_canceled`, `E_INVALIDARG`, `E_FAIL`) sono mappate in
+modo esaustivo sul discriminated union JS.
+
+`ExportService.exportFile` (in `src/lib/`) consuma il modulo via
+`@/native` quando `Platform.OS === 'windows'`. Su altre
+piattaforme il fallback `PICKER_UNAVAILABLE` evita import nativi.
 
 ---
 

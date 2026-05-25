@@ -2,6 +2,72 @@
 
 ## [Unreleased]
 
+### PLAN 009-native — WinRT Save Picker bridge (2026-05-25)
+
+#### Added
+
+- **Modulo nativo TypeScript `@/native/WinRTSavePicker`**
+  ([src/native/WinRTSavePicker/](src/native/WinRTSavePicker/)).
+  Dispatcher multi-piattaforma con contratti tipizzati
+  (`FileTypeChoice`, `PickSavePathOptions`, `PickSavePathResult`)
+  e variant Metro per `.windows.ts`, `.macos.ts`, `.stub.ts`.
+  Le piattaforme non-Windows ritornano sempre
+  `{ status: 'PICKER_UNAVAILABLE' }` mantenendo il contratto
+  uniforme (DESIGN 009-native §5).
+
+- **Bridge nativo C++/WinRT `WinRTSavePickerModule`**
+  ([windows/ZecchinoReact/WinRTSavePickerModule.h](windows/ZecchinoReact/WinRTSavePickerModule.h),
+  [windows/ZecchinoReact/WinRTSavePickerModule.cpp](windows/ZecchinoReact/WinRTSavePickerModule.cpp)).
+  TurboModule attribute-based (`REACT_MODULE` + `REACT_METHOD`)
+  registrato via `AddAttributedModules(builder, true)`. Espone
+  `pickSavePath(options): Promise<PickSavePathResult>` che
+  apre `Windows.Storage.Pickers.FileSavePicker` sullo HWND
+  della finestra attiva (`IInitializeWithWindow`) e marshalla
+  il risultato sull'UI thread via `ReactContext.UIDispatcher()
+  .Post()`. Eccezioni C++/WinRT (`hresult_canceled`,
+  `E_INVALIDARG`, `E_FAIL`, std::exception) sono mappate in
+  modo esaustivo su `status`/`code` JSValueObject (DESIGN
+  009-native §6, §8).
+
+- **Integrazione `ExportService.exportFile` ramo Windows**
+  ([src/lib/export-service.ts](src/lib/export-service.ts)).
+  Su `Platform.OS === 'windows'` il flusso usa
+  `WinRTSavePicker.pickSavePath` + caricamento opzionale di
+  `react-native-fs` (`require()` difensivo che ritorna `null`
+  se assente → reason `UNSUPPORTED_PLATFORM`). La mappatura
+  `PickSavePathResult → ExportResult` segue la tabella DESIGN
+  009-native §8 con switch esaustivo, narrowing TypeScript e
+  cintura difensiva sul reject del bridge.
+
+- **Test mock-based ramo Windows**
+  ([__tests__/ExportService.test.ts](__tests__/ExportService.test.ts)).
+  10 test eseguibili che coprono SUCCESS, USER_CANCELLED,
+  PICKER_UNAVAILABLE, INVALID_ARGUMENT, INTERNAL_ERROR (con e
+  senza `code=INVALID_FILENAME`), bridge throw, write
+  EACCES, e l'assemblaggio di `PickSavePathOptions` (file
+  con/senza estensione). Suite globale: 7 suite PASS,
+  36 passed + 39 todo.
+
+#### Stato release v0.3.0
+
+- ⚠️ **SOSPESA** fino a sblocco T3-N5 (validazione build
+  Windows). Causa: blocker upstream
+  `@react-native-community/netinfo@12.0.1` +
+  Windows App SDK 1.8.x — `RNCNetInfoCPP.vcxproj` non
+  dichiara come `PackageReference` le 9 sub-deps split di
+  WAS 1.8 (AI/Base/DWrite/Foundation/InteractiveExperiences
+  /ML/Runtime/Widgets/WinUI). Il restore NuGet aborta prima
+  della compilazione del nostro bridge nativo. Codice nostro
+  review-grade, in attesa di sblocco esterno o workaround
+  maintainer. Vedi tech debt
+  [DT-009-N-01](docs/todo-master.md#dt-009-n-01--blocker-build-windows-netinfo--windows-app-sdk-18x).
+
+- Validazione non-regressione Android rimandata
+  ([DT-009-N-02](docs/todo-master.md#dt-009-n-02--ambiente-android-non-configurato)):
+  ambiente Android non configurato sulla macchina
+  maintainer. Mitigazione: i test Jest mock-based coprono il
+  fallback `PICKER_UNAVAILABLE` del dispatcher.
+
 ### Documentation
 
 - **PLAN 009-native: aggiunto documento**
