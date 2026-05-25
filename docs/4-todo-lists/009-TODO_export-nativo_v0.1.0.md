@@ -115,6 +115,8 @@ ramo: main
 - [ ] Verificare coesistenza chiavi esistenti: `export_completato` e `export_csv_completato`
   devono restare presenti e invariate.
 - [ ] **Verifica TypeScript**: `npx tsc --noEmit` exit code 0 (o ≤ 3).
+- [ ] Import `announce` e `accounts` aggiunto in `AppDataContext.tsx`
+  come documentato in PLAN 009 T1-bis punto 3 (revisione 25 maggio 2026).
 - [ ] **Commit T1-bis**:
   ```
   feat(locales): add 14 export status keys to it.ts (PLAN 009 T1-bis)
@@ -222,6 +224,10 @@ ramo: main
   - [ ] `grep -n "downloadFile" src/lib/helpers.ts` → 0.
   - [ ] `grep -nE "exportFile|ExportResult" src/context/AppDataContext.tsx` → ≥ 2.
   - [ ] INV-5: nessun `toast|soundSystem|hapticSystem|screenReader` in `src/lib/export-service.ts`.
+  - [ ] Verificato: nessuna chiamata `screenReader.announce*` nel blocco `handleExportCSV`
+    dopo la patch (`grep -n "screenReader.announce" src/context/AppDataContext.tsx` → 0).
+  - [ ] `announce(accounts.announceExportFile(...))` presente nel success branch.
+  - [ ] `announce(accounts.exportError(...))` presente in tutti e sei i case di errore.
   - [ ] INV-6: `handleExportCSV.*Promise<void>` presente sia nel tipo sia nell'implementazione.
   - [ ] INV-B1: conteggio simboli boundary PLAN 007 in `AppDataContext.tsx` invariato.
   - [ ] INV-1: `git diff src/lib/helpers.ts` rispetto al commit pre-PLAN-009 → vuoto.
@@ -297,11 +303,13 @@ ramo: main
 
 ---
 
-## T7 — Test eseguibili `handleExportCSV` (8 scenari)
+## T7 — Test eseguibili `handleExportCSV` (12 scenari)
 
 - [ ] Aprire `__tests__/AppDataContext.spec.ts`.
 - [ ] Configurare mock: `jest.mock('@/lib/export-service', () => ({ exportFile: jest.fn() }))`.
-- [ ] Implementare 8 nuovi `it(...)`:
+- [ ] Configurare spy su `announce` e mock di `accounts` per verificare
+  la delega degli annunci screen reader (decisione del 25 maggio 2026).
+- [ ] Implementare 12 nuovi `it(...)`:
   - [ ] (1) Firma asincrona: `handleExportCSV(...)` ritorna `Promise`.
   - [ ] (2) Success branch: `soundSystem.play('export')` + `hapticSystem.export()` + `toast.success` + `screenReader.announceSuccess` invocati.
   - [ ] (3) Cancelled branch: nessun `toast.error`, nessun `screenReader.announceError`.
@@ -311,7 +319,14 @@ ramo: main
   - [ ] (7) INVALID_PATH → toast/SR error invocati.
   - [ ] (8) INSUFFICIENT_SPACE → toast/SR error invocati.
   - [ ] (9) UNKNOWN → toast/SR error generico invocati.
-- [ ] **Verifica esecuzione**: `npx jest __tests__/AppDataContext.spec.ts` exit code 0; ≥ 8 nuovi test passanti.
+  - [ ] (10) Success branch: `announce(accounts.announceExportFile(visibleTransactions.length))`
+    invocato.
+  - [ ] (11) Error branches: `announce(accounts.exportError(reason))` invocato per
+    ciascuno dei 6 reason di errore (PERMISSION_DENIED, FILESYSTEM_ERROR,
+    UNSUPPORTED_PLATFORM, INVALID_PATH, INSUFFICIENT_SPACE, UNKNOWN).
+  - [ ] (12) Assenza chiamate dirette: `screenReader.announceSuccess` e
+    `screenReader.announceError` non invocati nel blocco `handleExportCSV`.
+- [ ] **Verifica esecuzione**: `npx jest __tests__/AppDataContext.spec.ts` exit code 0; ≥ 12 nuovi test passanti.
 - [ ] **Commit T7**:
   ```
   test(app-data): add coverage for handleExportCSV async branching (PLAN 009 T7)

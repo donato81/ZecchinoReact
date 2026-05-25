@@ -82,6 +82,8 @@
 
 ### Documentation
 
+- PLAN 009 / TODO 009: annunci screen reader per export delegati ad
+  `accounts.ts` — decisione del 25 maggio 2026 (coerenza DESIGN 004 §11)
 - PLAN 009: aggiunto Task T1-bis — registrazione 14 chiavi di
   localizzazione export in `src/locales/it.ts` (rimozione stringhe
   hardcoded da Task T4)

@@ -231,10 +231,11 @@ Sono derivate da DESIGN 009 §4 (Architettura a Tre Layer), §5
   `ExportService` **non solleva mai eccezioni**: ogni esito anomalo è
   trasformato in `{ success: false, reason: ... }`.
 - **INV-5 (Side effect UX in Layer 3)**: i side effect UX (`toast`,
-  `soundSystem.play('export')`, `hapticSystem.export()`,
-  `screenReader.announceSuccess(...)`) restano in `handleExportCSV` di
-  `AppDataContext.tsx` e non migrano in `ExportService` (DESIGN 009
-  §4 Layer 3).
+  `soundSystem.play('export')`, `hapticSystem.export()`) restano in
+  `handleExportCSV` di `AppDataContext.tsx`; gli annunci screen reader
+  sono delegati a `announce(accounts.announceExportFile(...))` e
+  `announce(accounts.exportError(...))` per coerenza con il pattern
+  DESIGN 004 §11 (decisione del 25 maggio 2026).
 - **INV-6 (Firma asincrona)**: `handleExportCSV` diventa
   `(...) => Promise<void>` ovunque (tipo `AppDataContextValue` e
   implementazione). La firma sincrona originale è eliminata
@@ -334,11 +335,16 @@ Sezione 7.
      conferma sintetica dello screen reader. **Non rimuovere né
      rinominare le chiavi già esistenti**.
   3. In T4.B, dopo l'import di `export-service`, aggiungere
-     l'import della funzione di localizzazione in
-     `AppDataContext.tsx`:
+     i seguenti import in `AppDataContext.tsx`:
      ```typescript
      import { t } from '@/announcements/_utils/t'
+     import { announce } from '@/announcements'
+     import * as accounts from '@/announcements/accounts'
      ```
+     L'import di `t` serve per i toast (es. `export_success_toast`).
+     Gli import di `announce` e `accounts` servono per gli annunci
+     screen reader tramite `accounts.announceExportFile` e
+     `accounts.exportError`, secondo la decisione del 25 maggio 2026.
 - **Gate di accettazione T1-bis**:
   - `grep -cE "export_success_toast|export_unknown_error_sr" src/locales/it.ts` → 2.
   - `npx tsc --noEmit` exit code 0 (o entro baseline ≤ 3).
@@ -507,9 +513,11 @@ Sezione 7.
      // Dopo
      import { formatCurrency, exportToCSV, getActiveBudgets, getBudgetProgress } from '@/lib/helpers'
      ```
-  2. Aggiungere import del nuovo servizio:
+  2. Aggiungere import del nuovo servizio e del layer annunci:
      ```typescript
      import { exportFile, type ExportResult } from '@/lib/export-service'
+     import { announce } from '@/announcements'
+     import * as accounts from '@/announcements/accounts'
      ```
   3. **Riga 72 di `AppDataContext.tsx`** (tipo
      `AppDataContextValue`): aggiornare la firma a `Promise<void>`:
@@ -533,7 +541,7 @@ Sezione 7.
            soundSystem.play('export')
            hapticSystem.export()
            toast.success(t('export_success_toast'))
-           screenReader.announceSuccess(t('export_success_sr'))
+           announce(accounts.announceExportFile(visibleTransactions.length))
            return
          }
          // Branching su result.reason — DESIGN 009 §5 tabella
@@ -543,28 +551,28 @@ Sezione 7.
              return
            case 'PERMISSION_DENIED':
              toast.error(t('export_permission_denied_toast'))
-             screenReader.announceError(t('export_permission_denied_sr'))
+             announce(accounts.exportError('PERMISSION_DENIED'))
              return
            case 'FILESYSTEM_ERROR':
              toast.error(t('export_filesystem_error_toast'))
-             screenReader.announceError(t('export_filesystem_error_sr'))
+             announce(accounts.exportError('FILESYSTEM_ERROR'))
              return
            case 'UNSUPPORTED_PLATFORM':
              toast.error(t('export_unsupported_platform_toast'))
-             screenReader.announceError(t('export_unsupported_platform_sr'))
+             announce(accounts.exportError('UNSUPPORTED_PLATFORM'))
              return
            case 'INVALID_PATH':
              toast.error(t('export_invalid_path_toast'))
-             screenReader.announceError(t('export_invalid_path_sr'))
+             announce(accounts.exportError('INVALID_PATH'))
              return
            case 'INSUFFICIENT_SPACE':
              toast.error(t('export_insufficient_space_toast'))
-             screenReader.announceError(t('export_insufficient_space_sr'))
+             announce(accounts.exportError('INSUFFICIENT_SPACE'))
              return
            case 'UNKNOWN':
            default:
              toast.error(t('export_unknown_error_toast'))
-             screenReader.announceError(t('export_unknown_error_sr'))
+             announce(accounts.exportError('UNKNOWN'))
              return
          }
        },
@@ -585,9 +593,13 @@ Sezione 7.
   - Tipo `AppDataContextValue.handleExportCSV` aggiornato a
     `Promise<void>`.
   - INV-5 verificata: side effect UX (`toast`, `soundSystem`,
-    `hapticSystem`, `screenReader`) sono presenti solo in
+    `hapticSystem`) e annunci screen reader tramite
+    `announce(accounts.*)` sono presenti solo in
     `handleExportCSV` di `AppDataContext.tsx`, non in
     `src/lib/export-service.ts`.
+    Verifica aggiuntiva:
+    `grep -n "screenReader.announce" src/context/AppDataContext.tsx`
+    → 0 occorrenze nel blocco `handleExportCSV` dopo la patch.
   - INV-6 verificata: `handleExportCSV` è `async` ovunque.
   - INV-B1 verificata: conteggio dei simboli
     `transitionTo|hydrationGen|applyDomainSnapshot|readCachedDomainSnapshot|writeCache`
@@ -688,8 +700,9 @@ Sezione 7.
     (già usati da test esistenti di `AppDataContext.spec.ts`).
 - **Gate di accettazione T7**:
   - `npx jest __tests__/AppDataContext.spec.ts` exit code 0.
-  - Almeno 8 nuovi test eseguibili e passanti (1 firma + 1 success +
-    1 cancelled + 6 reason di errore).
+  - Almeno 12 nuovi test eseguibili e passanti (1 firma + 1 success +
+    1 cancelled + 6 reason di errore + 1 announce_success +
+    1 announce_error + 1 absence_assert).
   - INV-5 e INV-6 coperte dai test.
 
 ### T8 — Aggiornamento `docs/api.md` ed esecuzione full suite
@@ -824,7 +837,7 @@ Exit code 0. Nessuna regressione sui test preesistenti
 (`__tests__/crypto/*.test.ts`, `__tests__/App.test.tsx`,
 `__tests__/AppDataContext.spec.ts` parte preesistente,
 `__tests__/use-network-status.spec.ts`). I nuovi test di T6 (≥ 11
-passanti) e T7 (≥ 8 passanti) passano.
+passanti) e T7 (≥ 12 passanti) passano.
 
 ### Copertura INVARIANTI ↔ Task/Gate
 
