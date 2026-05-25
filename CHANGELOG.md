@@ -4,6 +4,9 @@
 
 ### Documentation
 
+- PLAN 009: firma `pickSavePath` allineata al contratto `PickSavePathOptions` definito in
+  DESIGN 009-native (A-DOC-009-001).
+
 - **DESIGN 009-native: aggiunto documento**
   [docs/2-projects/009-native-DESIGN_winrt-save-picker_v0.1.0.md](docs/2-projects/009-native-DESIGN_winrt-save-picker_v0.1.0.md).
   Architettura del modulo nativo WinRT FileSavePicker.

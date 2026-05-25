@@ -444,10 +444,7 @@ Sezione 7.
   2. Definire l'interfaccia TypeScript del modulo:
      ```typescript
      export interface WinRTSavePickerSpec {
-       pickSavePath(
-         suggestedFileName: string,
-         fileTypeChoices: { description: string; extensions: string[] }[],
-       ): Promise<string | null>
+       pickSavePath(options: PickSavePathOptions): Promise<PickSavePathResult>
        // null = utente ha annullato
      }
      ```
