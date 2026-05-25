@@ -48,6 +48,7 @@ import {
 import { CACHE_TTL_MS, isCacheStale, readCache, writeCache, type CacheTable } from '@/lib/supabase/cache'
 import { readCachedDomainSnapshotPure, type DomainSnapshot } from '@/context/app-data-cache'
 import { useAuth } from '@/context/AuthContext'
+import { useNetworkStatus } from '@/hooks/use-network-status'
 import { RepositoryError } from '@/lib/supabase/types'
 
 type AppDataContextValue = {
@@ -185,6 +186,7 @@ export { readCachedDomainSnapshotPure } from '@/context/app-data-cache'
 
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated, user } = useAuth()
+  const { isOffline, isInitialized: isNetworkInitialized } = useNetworkStatus()
 
   const [accounts, setAccounts] = useState<Account[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -346,12 +348,17 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       return
     }
 
+    // PLAN 008 T4: attendi che NetworkStatusProvider abbia un esito
+    // (subscribe iniziale o Fail-Safe). Senza questa guard la prima
+    // hydration potrebbe usare un isOffline indeterminato.
+    if (!isNetworkInitialized) return
+
     // T4: nuova generazione per questa hydration
     const myGen = ++hydrationGen.current
     transitionTo('HYDRATING')
 
     const loadBootstrapData = async () => {
-      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      if (isOffline) {
         await hydrateFromCache(user.id, myGen)
         return
       }
@@ -368,7 +375,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     }
 
     void loadBootstrapData()
-  }, [applyDomainSnapshot, hydrateFromCache, isAuthenticated, transitionTo, user?.id])
+  }, [applyDomainSnapshot, hydrateFromCache, isAuthenticated, isNetworkInitialized, isOffline, transitionTo, user?.id])
 
   // T5 (PLAN 007): persistenza cache fail-soft. Ogni writeCache è isolato
   // in try/catch: un errore su una tabella non blocca le altre né propaga
@@ -412,7 +419,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
     const userId = user.id
     const reloadData = async () => {
-      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      if (isOffline) {
         await hydrateFromCache(userId, myGen)
         return
       }
