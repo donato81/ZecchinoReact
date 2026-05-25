@@ -13,6 +13,15 @@
  * concorrenza refreshAll) gli scenari restano dichiarati come `it.todo`:
  * la loro abilitazione richiede l'introduzione di `@testing-library/react`
  * o equivalente harness (fuori scope PLAN 007).
+ *
+ * PLAN 008 T7 — valutazione: nessuno degli it.todo esistenti dipende
+ * specificamente dal contratto rete (useNetworkStatus). Gli scenari
+ * "rete OK / rete KO" sono variazioni della state machine bootstrap e
+ * restano bloccati dallo stesso vincolo harness. Quando verranno
+ * abilitati (PLAN successivo), il mock di rete da usare e' quello
+ * descritto in __tests__/use-network-status.spec.ts (jest.mock di
+ * '@react-native-community/netinfo' + utility triggerNetInfo).
+ * T7: nessuna conversione necessaria.
  */
 
 jest.mock('@/lib/supabase/cache', () => ({
