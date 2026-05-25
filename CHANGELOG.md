@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Documentation
+
+- **DESIGN 009-native: aggiunto documento**
+  [docs/2-projects/009-native-DESIGN_winrt-save-picker_v0.1.0.md](docs/2-projects/009-native-DESIGN_winrt-save-picker_v0.1.0.md).
+  Architettura del modulo nativo WinRT FileSavePicker.
+  Approvato dal Consiglio AI il 25 maggio 2026.
+  Dipendenza dal bloccante B1 PLAN 009 dichiarata formalmente.
+  Non codificabile finché le versioni librerie non sono congelate.
+
 ### PLAN 008 — Network connectivity via NetInfo (2026-05-25)
 
 #### Added

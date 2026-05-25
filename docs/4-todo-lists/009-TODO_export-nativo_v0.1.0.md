@@ -25,6 +25,7 @@ ramo: main
   2026-05-25 — `npx tsc --noEmit | Select-String "error TS" | Measure-Object`).
 - **Working tree**: pulito al momento della stesura (`git status --short` vuoto).
 - **Commit di DESIGN 009 su `main`**: ✅ mergiato (verifica gate G0 sotto).
+- **Sotto-design del modulo nativo**: [docs/2-projects/009-native-DESIGN_winrt-save-picker_v0.1.0.md](../2-projects/009-native-DESIGN_winrt-save-picker_v0.1.0.md) — v0.1.0 DRAFT (approvato Consiglio AI 2026-05-25). Specifica il contratto del modulo `WinRTSavePicker` consumato in T3.
 - **Boundary `helpers.ts`**: contiene `exportToCSV`, **non contiene** `downloadFile`.
 - **Boundary `AppDataContext.tsx`**: import rotto su `downloadFile` (riga 3); `handleExportCSV` ancora sincrono (tipo riga 72, corpo righe 630-637).
 

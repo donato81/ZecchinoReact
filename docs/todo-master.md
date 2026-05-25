@@ -456,6 +456,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B1 | Pulizia AuthContext — rimozione residui DOM | [ ] TODO | [ ] OPEN |
 | P3.B2 | Pulizia AppDataContext — fix completo async | [ ] TODO | [ ] OPEN |
 | P3.B2-EXT | Stesura DESIGN 009 — Export File Nativo | [X] DONE | [X] PASSED |
+| P3.B2-EXT-NATIVE | Stesura DESIGN 009-native — Modulo nativo WinRT Save Picker (sotto-design di DESIGN 009 §6 Layer B, approvato Consiglio AI 2026-05-25) | [X] DONE | [X] PASSED |
 | P4.B1 | Creazione componente Button nativo | [ ] TODO | [ ] OPEN |
 | P4.B2 | Creazione sistema Toast/notifica nativo | [ ] TODO | [ ] OPEN |
 | P5.B1 | Implementazione screens | [ ] TODO | [ ] OPEN |
