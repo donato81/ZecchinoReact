@@ -303,6 +303,48 @@ Sezione 7.
 > Vincolo verificato: ultima major stabile compatibile con `react-native ^0.82.1`
 > e con la New Architecture (TurboModules, Fabric).
 
+### T1-bis — Aggiunta chiavi di localizzazione export in `src/locales/it.ts`
+
+- **File**: `src/locales/it.ts`, `src/context/AppDataContext.tsx` (solo import, in T4.B).
+- **Dipende da**: T1 completato.
+- **Azione**:
+  1. Aprire `src/locales/it.ts`. Nella sezione
+     `// --- export/import shared (4) ---` (dopo `export_in_corso`),
+     aggiungere le seguenti 14 chiavi:
+     ```typescript
+     export_success_toast: 'Export completato',
+     export_success_sr: 'Esportazione completata',
+     export_permission_denied_toast: 'Permesso negato: concedi accesso allo storage',
+     export_permission_denied_sr: 'Permesso negato',
+     export_filesystem_error_toast: 'Errore di scrittura, riprova',
+     export_filesystem_error_sr: 'Errore di scrittura',
+     export_unsupported_platform_toast: 'Funzionalità non disponibile su questa piattaforma',
+     export_unsupported_platform_sr: 'Funzionalità non disponibile',
+     export_invalid_path_toast: 'Percorso non valido, scegline un altro',
+     export_invalid_path_sr: 'Percorso non valido',
+     export_insufficient_space_toast: 'Spazio insufficiente sul dispositivo',
+     export_insufficient_space_sr: 'Spazio insufficiente',
+     export_unknown_error_toast: "Errore durante l'esportazione",
+     export_unknown_error_sr: 'Errore di esportazione',
+     ```
+  2. **NOTA COESISTENZA**: la chiave `export_completato` esistente
+     (`'Esportazione completata. {count} {plural_elemento} esportati.'`)
+     serve per il riepilogo movimenti (con parametro `{count}`);
+     `export_success_sr` (nuova, senza `{count}`) serve per la
+     conferma sintetica dello screen reader. **Non rimuovere né
+     rinominare le chiavi già esistenti**.
+  3. In T4.B, dopo l'import di `export-service`, aggiungere
+     l'import della funzione di localizzazione in
+     `AppDataContext.tsx`:
+     ```typescript
+     import { t } from '@/announcements/_utils/t'
+     ```
+- **Gate di accettazione T1-bis**:
+  - `grep -cE "export_success_toast|export_unknown_error_sr" src/locales/it.ts` → 2.
+  - `npx tsc --noEmit` exit code 0 (o entro baseline ≤ 3).
+  - Chiavi `export_completato` e `export_csv_completato` ancora
+    presenti e invariate.
+
 ### T2 — Installazione dipendenze e creazione `ExportService`
 
 - **File**: `package.json`, `package-lock.json`,
@@ -490,8 +532,8 @@ Sezione 7.
          if (result.success) {
            soundSystem.play('export')
            hapticSystem.export()
-           toast.success('Export completato')
-           screenReader.announceSuccess('Esportazione completata')
+           toast.success(t('export_success_toast'))
+           screenReader.announceSuccess(t('export_success_sr'))
            return
          }
          // Branching su result.reason — DESIGN 009 §5 tabella
@@ -500,29 +542,29 @@ Sezione 7.
              // UX neutra: nessun toast di errore
              return
            case 'PERMISSION_DENIED':
-             toast.error('Permesso negato: concedi accesso allo storage')
-             screenReader.announceError('Permesso negato')
+             toast.error(t('export_permission_denied_toast'))
+             screenReader.announceError(t('export_permission_denied_sr'))
              return
            case 'FILESYSTEM_ERROR':
-             toast.error('Errore di scrittura, riprova')
-             screenReader.announceError('Errore di scrittura')
+             toast.error(t('export_filesystem_error_toast'))
+             screenReader.announceError(t('export_filesystem_error_sr'))
              return
            case 'UNSUPPORTED_PLATFORM':
-             toast.error('Funzionalità non disponibile su questa piattaforma')
-             screenReader.announceError('Funzionalità non disponibile')
+             toast.error(t('export_unsupported_platform_toast'))
+             screenReader.announceError(t('export_unsupported_platform_sr'))
              return
            case 'INVALID_PATH':
-             toast.error('Percorso non valido, scegline un altro')
-             screenReader.announceError('Percorso non valido')
+             toast.error(t('export_invalid_path_toast'))
+             screenReader.announceError(t('export_invalid_path_sr'))
              return
            case 'INSUFFICIENT_SPACE':
-             toast.error('Spazio insufficiente sul dispositivo')
-             screenReader.announceError('Spazio insufficiente')
+             toast.error(t('export_insufficient_space_toast'))
+             screenReader.announceError(t('export_insufficient_space_sr'))
              return
            case 'UNKNOWN':
            default:
-             toast.error('Errore durante l\'esportazione')
-             screenReader.announceError('Errore di esportazione')
+             toast.error(t('export_unknown_error_toast'))
+             screenReader.announceError(t('export_unknown_error_sr'))
              return
          }
        },

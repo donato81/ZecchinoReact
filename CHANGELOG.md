@@ -10,6 +10,16 @@
 - Aggiunta nota di governance su P4/P5 (verifica pre-codifica)
 - Corretti comandi di install in T2
 
+### Documentation
+
+- PLAN 009: aggiunto Task T1-bis — registrazione 14 chiavi di
+  localizzazione export in `src/locales/it.ts` (rimozione stringhe
+  hardcoded da Task T4)
+- TODO 009: aggiunta voce T1-bis nella checklist
+- Correzione architetturale: il codice di esempio di `handleExportCSV`
+  (T4) ora usa `t('chiave')` invece di stringhe letterali, in conformità
+  con il pattern di localizzazione del progetto
+
 ### Added — 2026-05-25
 
 - **PLAN 009 / TODO 009 — Export File Nativo (DRAFT)**

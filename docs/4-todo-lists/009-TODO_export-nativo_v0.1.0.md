@@ -52,6 +52,7 @@ ramo: main
 | Task | Titolo | File principali | Stato |
 |------|--------|-----------------|-------|
 | T1 | Verifica breaking change `handleExportCSV` | (read-only, nessuna mod) | [ ] |
+| T1-bis | Aggiunta chiavi di localizzazione export in `src/locales/it.ts` | `src/locales/it.ts` | [ ] |
 | T2 | Install deps + skeleton `ExportService` | `package.json`, `src/lib/export-service.ts` | [ ] |
 | T3 | Modulo nativo custom WinRT Save Picker | `src/native/`, `windows/ZecchinoReact/` | [ ] |
 | T4 | Integrazione Windows + riscrittura `handleExportCSV` async | `src/lib/export-service.ts`, `src/context/AppDataContext.tsx` | [ ] |
@@ -90,6 +91,40 @@ ramo: main
 > **NOTA QA T1**: questo task non modifica codice. Produce solo
 > registrazioni nel Log Validazione. Se le precondizioni P4, P5, P9,
 > P10 non sono tutte SODDISFATTE, **non procedere** a T2.
+
+---
+
+## T1-bis — Aggiunta chiavi di localizzazione export in `src/locales/it.ts`
+
+- [ ] Aprire `src/locales/it.ts`, sezione `// --- export/import shared (4) ---`.
+- [ ] Aggiungere le seguenti 14 chiavi dopo `export_in_corso`:
+  - [ ] `export_success_toast: 'Export completato'`
+  - [ ] `export_success_sr: 'Esportazione completata'`
+  - [ ] `export_permission_denied_toast: 'Permesso negato: concedi accesso allo storage'`
+  - [ ] `export_permission_denied_sr: 'Permesso negato'`
+  - [ ] `export_filesystem_error_toast: 'Errore di scrittura, riprova'`
+  - [ ] `export_filesystem_error_sr: 'Errore di scrittura'`
+  - [ ] `export_unsupported_platform_toast: 'Funzionalità non disponibile su questa piattaforma'`
+  - [ ] `export_unsupported_platform_sr: 'Funzionalità non disponibile'`
+  - [ ] `export_invalid_path_toast: 'Percorso non valido, scegline un altro'`
+  - [ ] `export_invalid_path_sr: 'Percorso non valido'`
+  - [ ] `export_insufficient_space_toast: 'Spazio insufficiente sul dispositivo'`
+  - [ ] `export_insufficient_space_sr: 'Spazio insufficiente'`
+  - [ ] `export_unknown_error_toast: "Errore durante l'esportazione"`
+  - [ ] `export_unknown_error_sr: 'Errore di esportazione'`
+- [ ] Verificare coesistenza chiavi esistenti: `export_completato` e `export_csv_completato`
+  devono restare presenti e invariate.
+- [ ] **Verifica TypeScript**: `npx tsc --noEmit` exit code 0 (o ≤ 3).
+- [ ] **Commit T1-bis**:
+  ```
+  feat(locales): add 14 export status keys to it.ts (PLAN 009 T1-bis)
+  ```
+
+> **NOTA QA T1-bis**: queste chiavi sono usate nel branching di
+> `handleExportCSV` (T4) tramite `t('chiave')`. Devono essere
+> aggiunte prima di T4 per evitare errori TypeScript su `StringKey`.
+> Non modificare le chiavi già presenti nella sezione export/import
+> di `it.ts`.
 
 ---
 
