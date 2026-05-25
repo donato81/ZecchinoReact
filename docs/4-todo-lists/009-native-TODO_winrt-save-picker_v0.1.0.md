@@ -346,25 +346,52 @@ Verifiche statiche (la compilazione effettiva sarà parte di T3-N5):
 
 ---
 
-### ☐ T3-N5 — Verifica build Windows (manuale)
+### ⚠️ T3-N5 — Verifica build Windows (manuale) — **INCOMPLETO**
 
 > Eseguibile solo su macchina Windows con SDK installato.
 
-- [ ] Eseguire:
-  `npx react-native run-windows --no-launch --no-deploy --logging`
-- [ ] Registrare log di validazione:
-  - **Esito build Windows**: ⬜ PASS / ⬜ FAIL
-  - **Versione SDK Windows**: ________
-  - **Tempo di build (min)**: ________
-  - **Warning C++/WinRT**: ________
-  - **Errori di linker** (se FAIL): ________
-- [ ] Eseguire build Android per verifica non-regressione stub:
-  `npx react-native run-android --variant=debug`
-  - **Esito build Android**: ⬜ PASS / ⬜ FAIL
-- [ ] (Facoltativa) Build iOS, se ambiente macOS disponibile.
-  - **Esito build iOS**: ⬜ PASS / ⬜ FAIL / ⬜ N/A
+- [x] Tentativo build Windows eseguito.
+- [ ] ~~Build Windows PASS~~ → **FAIL per blocker upstream
+  esterno al PLAN 009-native** (vedi log sotto).
+- [ ] Build Android — **POSTICIPATA**: ambiente Android non
+  configurato sulla macchina maintainer; progetto attualmente
+  senza UI Android specifica → registrato come debito tecnico
+  (DT-009-N-02 in `docs/todo-master.md`).
+- [ ] Build iOS — N/A (nessun ambiente macOS disponibile).
 
-**Esito T3-N5**: ⬜ PASS / ⬜ FAIL — _data: ____ — _operatore: ____
+**Esito T3-N5**: ⚠️ INCOMPLETO — _data: 2026-05-25_ —
+_operatore: maintainer (Donato)_ — _causa: blocker upstream
+netinfo + Windows App SDK 1.8.x_
+
+#### Log Validazione T3-N5
+
+- **Comando**: `npx react-native run-windows --no-launch
+  --no-deploy --logging`
+- **Errore**:
+  `Microsoft.WindowsAppSDK.targets(19,9): error : No references
+  were found for these Windows App SDK transitive dependencies
+  [...] RNCNetInfoCPP.vcxproj`
+- **Modulo che fallisce**: `RNCNetInfoCPP.vcxproj` di
+  `@react-native-community/netinfo@12.0.1` (terzo, non nostro).
+- **Causa root**: `RNCNetInfoCPP.vcxproj` non dichiara come
+  `PackageReference` esplicite le 9 sub-deps split di Windows
+  App SDK 1.8.x (`Microsoft.WindowsAppSDK.{AI, Base, DWrite,
+  Foundation, InteractiveExperiences, ML, Runtime, Widgets,
+  WinUI}`). I `.targets` di WAS 1.8 verificano la completezza
+  e abortiscono il restore.
+- **Impatto su `WinRTSavePickerModule`**: nullo a livello di
+  codice. La build aborta **prima** della compilazione di
+  `windows/ZecchinoReact/WinRTSavePickerModule.cpp`, quindi
+  non è stato possibile validare runtime il bridge nativo.
+  Il codice sorgente è comunque review-grade e conforme a
+  DESIGN 009-native §6, §8.
+- **Validazione possibile post-blocker**: una volta sbloccato
+  il restore (fix upstream o workaround maintainer), rieseguire
+  T3-N5 senza modifiche al nostro codice.
+- **Decisione**: PLAN 009-native chiuso come **INCOMPLETO**
+  con T3-N5 sospeso. Tracciato debito tecnico DT-009-N-01 in
+  `docs/todo-master.md`. Release v0.3.0 **sospesa** fino a
+  sblocco T3-N5.
 
 ---
 
@@ -411,7 +438,7 @@ Procedura standard (vedi [PLAN §5.1](../3-coding-plans/009-native-PLAN_winrt-sa
 | T3-N2 | 1 / 10 | ✅ PASS | bridge C++/WinRT (uncommitted in batch T3-N2+N3) |
 | T3-N3 | 1 / 10 | ✅ PASS | export-service.ts ramo windows (uncommitted) |
 | T3-N4 | 1 / 10 | ✅ PASS | gate G1-N PASS, baseline tsc=3 |
-| T3-N5 | __ / 10 | ⬜ PASS / ⬜ FAIL | _build manuale Windows, STOP maintainer_ |
+| T3-N5 | 1 / 10 | ⚠️ INCOMPLETO | blocker upstream netinfo+WAS 1.8 → DT-009-N-01 |
 
 > Se per una task il contatore raggiunge **10/10 FAIL**:
 > registrare nel campo "Report diagnostico" i campi obbligatori
@@ -473,17 +500,25 @@ Dopo PASS di entrambi i cicli (5.1 + 5.2):
 
 ## Sezione 7 — Stato finale TODO
 
-Compilare al termine dell'esecuzione.
-
-- **Data chiusura**: ________
-- **Esito complessivo**: ⬜ COMPLETO / ⬜ INCOMPLETO
-- **Task completate**: ___ / 5
-- **Task saltate (10/10 FAIL)**: ___ / 5 — elenco: ________
-- **Gate G1-N**: ⬜ PASS / ⬜ FAIL
-- **Build Windows (T3-N5)**: ⬜ PASS / ⬜ FAIL / ⬜ NON ESEGUITA
-- **Build Android (T3-N5)**: ⬜ PASS / ⬜ FAIL / ⬜ NON ESEGUITA
-- **Baseline TypeScript preservata**: ⬜ SÌ / ⬜ NO (delta = ___)
-- **Note finali**: ________
+- **Data chiusura**: 2026-05-25
+- **Esito complessivo**: ⚠️ **INCOMPLETO** (T3-N5 bloccato da
+  causa esterna)
+- **Task completate**: 4 / 5 (T3-N1, T3-N2, T3-N3, T3-N4)
+- **Task saltate (10/10 FAIL)**: 0 / 5
+- **Task INCOMPLETE per blocker esterno**: 1 / 5 (T3-N5)
+- **Gate G1-N**: ✅ PASS
+- **Build Windows (T3-N5)**: ❌ FAIL — blocker upstream
+  netinfo + WAS 1.8 (vedi DT-009-N-01)
+- **Build Android (T3-N5)**: ⬜ NON ESEGUITA — ambiente non
+  configurato (DT-009-N-02)
+- **Baseline TypeScript preservata**: ✅ SÌ (delta = 0; 3 errori
+  pre = 3 errori post)
+- **Note finali**: il codice del bridge nativo
+  (`WinRTSavePickerModule.h` / `.cpp`) è completo e
+  review-grade; manca solo la validazione runtime su build
+  Windows reale. La release v0.3.0 è **SOSPESA** fino a
+  sblocco T3-N5. Vedere debiti tecnici DT-009-N-01 e
+  DT-009-N-02 in `docs/todo-master.md`.
 
 Se INCOMPLETO: segnalare al maintainer per pianificare ripresa o
 ridefinizione del PLAN 009-native (eventuale v0.2.0).

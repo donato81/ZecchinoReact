@@ -518,6 +518,70 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 
 ---
 
+## 7.1 Debiti Tecnici Aperti
+
+### DT-009-N-01 — Blocker build Windows: netinfo + Windows App SDK 1.8.x
+
+- **Data apertura:** 2026-05-25
+- **Origine:** PLAN 009-native T3-N5 (validazione build Windows).
+- **Sintomo:**
+  `Microsoft.WindowsAppSDK.targets(19,9): error : No references
+  were found for these Windows App SDK transitive dependencies
+  [...] RNCNetInfoCPP.vcxproj`
+- **Causa root:** `@react-native-community/netinfo@12.0.1` →
+  `windows/RNCNetInfoCPP/RNCNetInfoCPP.vcxproj` non dichiara come
+  `PackageReference` esplicite le 9 sub-deps split di Windows App
+  SDK 1.8.x (`Microsoft.WindowsAppSDK.{AI, Base, DWrite,
+  Foundation, InteractiveExperiences, ML, Runtime, Widgets,
+  WinUI}`). I `.targets` di WAS 1.8 verificano la completezza e
+  abortiscono il restore.
+- **Impatto:** build Windows completa impossibile. Validazione
+  runtime di `WinRTSavePickerModule` (PLAN 009-native) bloccata.
+  Release v0.3.0 **sospesa**.
+- **Codice nostro coinvolto:** **nessuno**. Il bridge nativo
+  (`windows/ZecchinoReact/WinRTSavePickerModule.{h,cpp}`) è
+  review-grade e conforme a DESIGN 009-native; aspetta solo
+  validazione runtime.
+- **Opzioni di sblocco** (ranked):
+  1. Attendere PR upstream netinfo che aggiunga le sub-deps WAS
+     1.8 esplicite (preferibile).
+  2. `patch-package` su netinfo per pinare WAS a 1.7.x compatibile
+     (rischio regressione netinfo runtime).
+  3. Rimuovere temporaneamente `RNCNetInfoCPP` da
+     `windows/ZecchinoReact.sln` + disabilitare init JS netinfo
+     (modifica invasiva, perdita feature offline detection).
+- **Owner:** maintainer (donny-81)
+- **Stato:** APERTO — release v0.3.0 bloccata fino a sblocco.
+
+### DT-009-N-02 — Ambiente Android non configurato
+
+- **Data apertura:** 2026-05-25
+- **Origine:** PLAN 009-native T3-N5 (verifica non-regressione
+  stub Android).
+- **Sintomo:** impossibile eseguire
+  `npx react-native run-android --variant=debug`: SDK Android /
+  emulatore / NDK non installati sulla macchina maintainer.
+- **Impatto:** non è possibile validare runtime che il fallback
+  `WinRTSavePicker.macos.ts` / `.stub.ts` mantenga
+  `{status:'PICKER_UNAVAILABLE'}` su Android. Il modulo nativo
+  Windows non altera il bundle Android in alcun modo (Metro
+  resolver: `WinRTSavePicker.windows.ts` non viene incluso fuori
+  da target windows).
+- **Mitigazione attuale:** test Jest mock-based in
+  `__tests__/ExportService.test.ts` (FASE 3) coprono il fallback
+  PICKER_UNAVAILABLE a livello unit.
+- **Nota:** il progetto al momento non ha UI Android specifica;
+  Android è target secondario.
+- **Opzioni di sblocco:**
+  1. Configurare Android SDK + emulatore sulla macchina maintainer
+     o su CI dedicata.
+  2. Mantenere validazione solo via test unit + smoke su Windows
+     finché Android non diventa target primario.
+- **Owner:** maintainer (donny-81)
+- **Stato:** APERTO — non bloccante per release Windows.
+
+---
+
 ## 8. Protocollo di Rollback
 
 > Esistono tre livelli di rollback. L'agente deve sempre partire dal livello più basso possibile.
