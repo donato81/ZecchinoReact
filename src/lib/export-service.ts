@@ -17,6 +17,13 @@
 import { Platform } from 'react-native'
 import Share from 'react-native-share'
 
+import {
+  WinRTSavePicker,
+  type FileTypeChoice,
+  type PickSavePathOptions,
+  type PickSavePathResult,
+} from '@/native'
+
 // ---------------------------------------------------------------------------
 // Tipi pubblici — coerenti con DESIGN 009 §5 (sette reason di errore).
 // ---------------------------------------------------------------------------
@@ -107,17 +114,152 @@ async function exportViaShareSheet(
 }
 
 /**
- * Windows: skeleton. L'implementazione reale è introdotta in T3-N3
- * dopo che T3-N1 e T3-N2 forniscono il modulo nativo `WinRTSavePicker`.
- * Per ora restituisce `UNSUPPORTED_PLATFORM` per mantenere il contratto
- * pubblico verificabile e non rompere la build TypeScript.
+ * Windows: WinRT FileSavePicker tramite modulo nativo `WinRTSavePicker`
+ * (DESIGN 009-native §5). Mappatura risultati per tabella §8:
+ *
+ *   PickSavePathResult.status        →  ExportResult
+ *   ─────────────────────────────────────────────────────────────────
+ *   SUCCESS                          →  scrittura file su result.path
+ *                                       (success se write ok,
+ *                                       altrimenti mapErrorToReason)
+ *   USER_CANCELLED                   →  { reason: 'CANCELLED' } (INV-CANCEL)
+ *   PICKER_UNAVAILABLE               →  { reason: 'UNSUPPORTED_PLATFORM' }
+ *   INVALID_ARGUMENT                 →  { reason: 'UNKNOWN' }
+ *   INTERNAL_ERROR code='INVALID_FILENAME'
+ *                                    →  { reason: 'INVALID_PATH' }
+ *   INTERNAL_ERROR (altri codici)    →  { reason: 'UNKNOWN' }
+ *
+ * INV-CONTRACT-2: la derivazione di `fileTypeChoices` da `mimeType` è
+ * generica (description + estensione derivata dal `fileName` o defaulting a
+ * estensione opaca derivata dal MIME). Nessuna conoscenza CSV/budget/Zecchino.
+ *
+ * INV-FILENAME: `suggestedFileName` pass-through opaco verso il modulo.
+ *
+ * Dipendenza opzionale: il write su disco richiede un modulo FS Windows
+ * (`react-native-fs` o equivalente). Caricato via dynamic require: se
+ * assente, ritorna `UNSUPPORTED_PLATFORM` senza lanciare. L'installazione
+ * effettiva è prevista come prerequisito di T3-N5 (build manuale).
  */
+
+// Tipo minimo del modulo FS dinamico, per evitare dipendenze TS forti.
+type FsModule = {
+  writeFile: (path: string, content: string, encoding: string) => Promise<void>
+}
+
+/**
+ * Carica un modulo FS Windows in modo opzionale. Non fallisce se assente.
+ * Ritorna `null` quando la dipendenza non è installata.
+ */
+function loadOptionalFsModule(): FsModule | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+    return require('react-native-fs') as FsModule
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Estrae l'estensione (senza punto, lowercase) dalla coda di `fileName`.
+ * Ritorna `null` se non trovata.
+ */
+function extractExtension(fileName: string): string | null {
+  const idx = fileName.lastIndexOf('.')
+  if (idx <= 0 || idx === fileName.length - 1) return null
+  return fileName.slice(idx + 1).toLowerCase()
+}
+
+/**
+ * Costruisce un singolo `FileTypeChoice` generico a partire da
+ * `fileName` e `mimeType`. Non distingue formati specifici:
+ *   - description: il `mimeType` stesso (opaco, senza localizzazione → INV-L10)
+ *   - extensions: ['.<ext>'] derivata dal fileName, oppure ['.bin'] di fallback
+ */
+function buildFileTypeChoices(fileName: string, mimeType: string): FileTypeChoice[] {
+  const ext = extractExtension(fileName)
+  const extension = ext ? `.${ext}` : '.bin'
+  return [
+    {
+      description: mimeType,
+      extensions: [extension],
+    },
+  ]
+}
+
+/**
+ * Mappa `PickSavePathResult` su `ExportResult` (esclusa la write, gestita
+ * separatamente per il caso SUCCESS).
+ */
+function mapPickResultToFailure(result: PickSavePathResult): ExportResult | null {
+  switch (result.status) {
+    case 'SUCCESS':
+      return null
+    case 'USER_CANCELLED':
+      return { success: false, reason: 'CANCELLED' }
+    case 'PICKER_UNAVAILABLE':
+      return { success: false, reason: 'UNSUPPORTED_PLATFORM' }
+    case 'INVALID_ARGUMENT':
+      return { success: false, reason: 'UNKNOWN' }
+    case 'INTERNAL_ERROR':
+      return {
+        success: false,
+        reason: result.code === 'INVALID_FILENAME' ? 'INVALID_PATH' : 'UNKNOWN',
+      }
+    default: {
+      // Esaustività: se in futuro il contratto aggiunge nuovi status,
+      // questo blocco rivela il gap senza crash (INV-CONTRACT-5).
+      const _exhaustive: never = result
+      void _exhaustive
+      return { success: false, reason: 'UNKNOWN' }
+    }
+  }
+}
+
 async function exportViaWindowsSavePicker(
-  _content: string,
-  _fileName: string,
-  _mimeType: string,
+  content: string,
+  fileName: string,
+  mimeType: string,
 ): Promise<ExportResult> {
-  return { success: false, reason: 'UNSUPPORTED_PLATFORM' }
+  const options: PickSavePathOptions = {
+    fileTypeChoices: buildFileTypeChoices(fileName, mimeType),
+    suggestedFileName: fileName,
+  }
+  const ext = extractExtension(fileName)
+  if (ext) {
+    options.defaultExtension = `.${ext}`
+  }
+
+  let pickResult: PickSavePathResult
+  try {
+    pickResult = await WinRTSavePicker.pickSavePath(options)
+  } catch {
+    // Cintura ridondante: il binding TS già intercetta i reject del bridge
+    // (BRIDGE_REJECT). Questo catch garantisce INV-4 anche in caso di
+    // implementazione fallback difettosa.
+    return { success: false, reason: 'UNKNOWN' }
+  }
+
+  const failure = mapPickResultToFailure(pickResult)
+  if (failure) return failure
+
+  // pickResult.status === 'SUCCESS' a questo punto.
+  if (pickResult.status !== 'SUCCESS') {
+    // Defensive: ridondante rispetto a mapPickResultToFailure ma serve al
+    // type narrowing TypeScript per accedere a `pickResult.path`.
+    return { success: false, reason: 'UNKNOWN' }
+  }
+
+  const fs = loadOptionalFsModule()
+  if (!fs) {
+    return { success: false, reason: 'UNSUPPORTED_PLATFORM' }
+  }
+
+  try {
+    await fs.writeFile(pickResult.path, content, 'utf8')
+    return { success: true }
+  } catch (err) {
+    return { success: false, reason: mapErrorToReason(err) }
+  }
 }
 
 // ---------------------------------------------------------------------------
