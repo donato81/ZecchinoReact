@@ -9,6 +9,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZecchinoReact", "ZecchinoRe
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ReactNativeAsyncStorage", "..\node_modules\@react-native-async-storage\async-storage\windows\ReactNativeAsyncStorage\ReactNativeAsyncStorage.vcxproj", "{4855D892-E16C-404D-8286-0089E0F7F9C4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RNCNetInfoCPP", "..\node_modules\@react-native-community\netinfo\windows\RNCNetInfoCPP\RNCNetInfoCPP.vcxproj", "{37E37094-01B3-44A5-AAB7-F0379B1CE8FA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ReactNativeShare", "..\node_modules\react-native-share\windows\ReactNativeShare\ReactNativeShare.vcxproj", "{BD58576E-3205-4762-8B1B-EA33774079B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -67,6 +71,30 @@ Global
 		{4855D892-E16C-404D-8286-0089E0F7F9C4}.Release|x86.Build.0 = Release|Win32
 		{4855D892-E16C-404D-8286-0089E0F7F9C4}.Release|ARM64.ActiveCfg = Release|ARM64
 		{4855D892-E16C-404D-8286-0089E0F7F9C4}.Release|ARM64.Build.0 = Release|ARM64
+		{37E37094-01B3-44A5-AAB7-F0379B1CE8FA}.Debug|x64.ActiveCfg = Debug|x64
+		{37E37094-01B3-44A5-AAB7-F0379B1CE8FA}.Debug|x64.Build.0 = Debug|x64
+		{37E37094-01B3-44A5-AAB7-F0379B1CE8FA}.Debug|x86.ActiveCfg = Debug|Win32
+		{37E37094-01B3-44A5-AAB7-F0379B1CE8FA}.Debug|x86.Build.0 = Debug|Win32
+		{37E37094-01B3-44A5-AAB7-F0379B1CE8FA}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{37E37094-01B3-44A5-AAB7-F0379B1CE8FA}.Debug|ARM64.Build.0 = Debug|ARM64
+		{37E37094-01B3-44A5-AAB7-F0379B1CE8FA}.Release|x64.ActiveCfg = Release|x64
+		{37E37094-01B3-44A5-AAB7-F0379B1CE8FA}.Release|x64.Build.0 = Release|x64
+		{37E37094-01B3-44A5-AAB7-F0379B1CE8FA}.Release|x86.ActiveCfg = Release|Win32
+		{37E37094-01B3-44A5-AAB7-F0379B1CE8FA}.Release|x86.Build.0 = Release|Win32
+		{37E37094-01B3-44A5-AAB7-F0379B1CE8FA}.Release|ARM64.ActiveCfg = Release|ARM64
+		{37E37094-01B3-44A5-AAB7-F0379B1CE8FA}.Release|ARM64.Build.0 = Release|ARM64
+		{BD58576E-3205-4762-8B1B-EA33774079B7}.Debug|x64.ActiveCfg = Debug|x64
+		{BD58576E-3205-4762-8B1B-EA33774079B7}.Debug|x64.Build.0 = Debug|x64
+		{BD58576E-3205-4762-8B1B-EA33774079B7}.Debug|x86.ActiveCfg = Debug|Win32
+		{BD58576E-3205-4762-8B1B-EA33774079B7}.Debug|x86.Build.0 = Debug|Win32
+		{BD58576E-3205-4762-8B1B-EA33774079B7}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{BD58576E-3205-4762-8B1B-EA33774079B7}.Debug|ARM64.Build.0 = Debug|ARM64
+		{BD58576E-3205-4762-8B1B-EA33774079B7}.Release|x64.ActiveCfg = Release|x64
+		{BD58576E-3205-4762-8B1B-EA33774079B7}.Release|x64.Build.0 = Release|x64
+		{BD58576E-3205-4762-8B1B-EA33774079B7}.Release|x86.ActiveCfg = Release|Win32
+		{BD58576E-3205-4762-8B1B-EA33774079B7}.Release|x86.Build.0 = Release|Win32
+		{BD58576E-3205-4762-8B1B-EA33774079B7}.Release|ARM64.ActiveCfg = Release|ARM64
+		{BD58576E-3205-4762-8B1B-EA33774079B7}.Release|ARM64.Build.0 = Release|ARM64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

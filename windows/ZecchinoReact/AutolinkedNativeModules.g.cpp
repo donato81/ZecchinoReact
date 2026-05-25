@@ -6,6 +6,12 @@
 // Includes from @react-native-async-storage/async-storage
 #include <winrt/ReactNativeAsyncStorage.h>
 
+// Includes from @react-native-community/netinfo
+#include <winrt/ReactNativeNetInfo.h>
+
+// Includes from react-native-share
+#include <winrt/ReactNativeShare.h>
+
 namespace winrt::Microsoft::ReactNative
 {
 
@@ -13,6 +19,10 @@ void RegisterAutolinkedNativeModulePackages(winrt::Windows::Foundation::Collecti
 { 
     // IReactPackageProviders from @react-native-async-storage/async-storage
     packageProviders.Append(winrt::ReactNativeAsyncStorage::ReactPackageProvider());
+    // IReactPackageProviders from @react-native-community/netinfo
+    packageProviders.Append(winrt::ReactNativeNetInfo::ReactPackageProvider());
+    // IReactPackageProviders from react-native-share
+    packageProviders.Append(winrt::ReactNativeShare::ReactPackageProvider());
 }
 
 }
