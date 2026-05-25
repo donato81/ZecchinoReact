@@ -14,6 +14,14 @@
   test nel perimetro (da "4 scenari" a "6 scenari" nella tabella §4.1 di
   PLAN 008 e nel messaggio di commit T6); aggiunta nota esito da compilare
   per task T7.
+- **DESIGN 009**: registrata decisione formale Precondizione P1 —
+  strategia Windows per selezione cartella di salvataggio.
+  Scelta: modulo nativo custom in `src/native/` tramite WinRT
+  `FileSavePicker` via C++/WinRT bridge (decisione 2026-05-23,
+  confermata 2026-05-25). Precondizione P1 promossa da APERTA
+  a SODDISFATTA. Aggiornati Sezione 10 (P1) e Sezione 9
+  (TurboModule WinRT Save Picker) di
+  [docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md](docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md).
 
 ### Documentation
 

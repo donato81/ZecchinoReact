@@ -337,13 +337,11 @@ implementa l'integrazione del formato CSV come prima istanza.
 
 ### TurboModule WinRT Save Picker (Windows)
 
-- **Stato:** non presente nel repository — da identificare o
-  progettare.
+- **Stato:** Decisione presa (2026-05-25): modulo nativo custom
+  da creare in `src/native/` al Coding Plan 009.
 - **Destinazione:** dipendenza nativa RNW oppure modulo interno
   in `src/native/` se realizzato custom.
-- **Precondizione:** identificazione formale del componente
-  (libreria community o custom) come parte della precondizione
-  P1 aggiornata della Sezione 10.
+- **Precondizione:** Soddisfatta. Vedi Sezione 10, P1.
 - **Uso:** esposizione della finestra nativa di selezione
   percorso di salvataggio su Windows (Layer B, Sezione 6).
 
@@ -354,18 +352,21 @@ implementa l'integrazione del formato CSV come prima istanza.
 Le seguenti precondizioni devono essere **soddisfatte e documentate**
 prima che il **Coding Plan 009** possa essere scritto.
 
-1. **P1 — Strategia Windows: TurboModule WinRT picker.**
-   La strategia di delivery su Windows è stata definita
-   architetturalmente (vedere Sezione 6): scrittura file via
-   `@react-native-windows/fs` e selezione destinazione via
-   WinRT Save File Picker esposto tramite TurboModule o modulo
-   nativo RNW. La precondizione residua prima della stesura del
-   Coding Plan 009 è l'identificazione formale del componente
-   che espone il WinRT picker: libreria community esistente,
-   modulo nativo custom leggero o API WinRT
-   `Windows.Storage.Pickers.FileSavePicker` via C++/WinRT bridge.
-   La scelta va documentata con motivazione prima che il Coding
-   Plan possa essere scritto.
+1. **P1 — Strategia Windows: modulo nativo custom.**
+   Precondizione soddisfatta (decisione 2026-05-23,
+   confermata 2026-05-25).
+   La selezione della cartella di destinazione su Windows
+   (Layer B, Sezione 6) viene realizzata tramite un modulo
+   nativo custom scritto internamente al progetto,
+   posizionato in `src/native/`.
+   Il modulo espone la finestra nativa di selezione
+   del percorso di salvataggio tramite l'API WinRT
+   `Windows.Storage.Pickers.FileSavePicker`
+   via C++/WinRT bridge.
+   Motivazione della scelta: indipendenza da librerie
+   di terze parti, controllo totale sul codice,
+   assenza di dipendenze esterne con cicli di vita incerti.
+   Il modulo verrà creato come parte del Coding Plan 009.
 2. **P2 — Versione `react-native-share`.**
    Precondizione soddisfatta (verificata 2026-05-20).
    `react-native-share` è compatibile con `react-native ^0.82.1`
