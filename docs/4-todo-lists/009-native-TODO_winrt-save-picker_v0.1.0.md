@@ -192,74 +192,157 @@ Procedere con T3-N1.
 
 ---
 
-### ☐ T3-N2 — Bridge C++/WinRT (lato nativo Windows)
+### ✅ T3-N2 — Bridge C++/WinRT (lato nativo Windows)
 
-- [ ] Creare `windows/ZecchinoReact/WinRTSavePickerModule.h`.
-- [ ] Creare `windows/ZecchinoReact/WinRTSavePickerModule.cpp`.
-  - [ ] Ottenere dispatcher main UI thread.
-  - [ ] Marshalare costruzione `FileSavePicker` + chiamata
+- [x] Creare `windows/ZecchinoReact/WinRTSavePickerModule.h`.
+- [x] Creare `windows/ZecchinoReact/WinRTSavePickerModule.cpp`.
+  - [x] Ottenere dispatcher main UI thread (`ReactContext.UIDispatcher()`).
+  - [x] Marshalare costruzione `FileSavePicker` + chiamata
     `PickSaveFileAsync()` sul dispatcher (INV-THREAD).
-  - [ ] Mappare `options.fileTypeChoices` → `FileTypeChoices`
-    WinRT (estensioni senza punto iniziale).
-  - [ ] Impostare `SuggestedFileName` e `DefaultFileExtension`
+  - [x] Mappare `options.fileTypeChoices` → `FileTypeChoices`
+    WinRT (estensioni normalizzate con leading dot, richiesto da WinRT).
+  - [x] Impostare `SuggestedFileName` e `DefaultFileExtension`
     solo se forniti, senza alterazioni (INV-FILENAME).
-  - [ ] Mappare esiti `StorageFile`/`nullptr`/eccezioni →
+  - [x] Mappare esiti `StorageFile`/`nullptr`/eccezioni →
     `PickSavePathResult` per tabella DESIGN §8.
-  - [ ] Validare input lato C++: `EMPTY_CHOICES`, `INVALID_EXT`.
-  - [ ] Nessuna eccezione attraversa il bridge (INV-CONTRACT-4).
-  - [ ] Nessuna stringa user-facing (INV-L10).
-- [ ] Modificare `ReactPackageProvider.h` / `.cpp` per
-  registrazione del modulo, preservando moduli esistenti.
-- [ ] Verifica INV-NVDA: nessuna API
+  - [x] Validare input lato C++: `EMPTY_CHOICES`, `INVALID_EXT`.
+  - [x] Nessuna eccezione attraversa il bridge (INV-CONTRACT-4): try/catch
+    annidato cattura `hresult_canceled`, `hresult_error`, `std::exception`, `...`.
+  - [x] Nessuna stringa user-facing (INV-L10): solo codici opachi.
+- [x] Modificare `ZecchinoReact.cpp` per registrazione del modulo
+  (adattamento: in questo progetto il package provider è
+  `CompReactPackageProvider` inline e usa `AddAttributedModules(builder, true)`,
+  quindi basta l'include `#include "WinRTSavePickerModule.h"` per attivare
+  la registrazione via attributi `REACT_MODULE`). Nessun nuovo package
+  provider introdotto. Moduli esistenti preservati.
+- [x] Aggiunti i file ai progetti `ZecchinoReact.vcxproj` e
+  `ZecchinoReact.vcxproj.filters` (ClInclude + ClCompile).
+- [x] Verifica INV-NVDA: nessuna API
   `AnnounceForAccessibility` / `LiveRegion` /
   `AutomationProperties.LiveSetting` chiamata nel codice C++.
 
-**Esito T3-N2**: ⬜ PASS / ⬜ FAIL — _data: ____ — _tentativi: __/10
+**Esito T3-N2**: ✅ PASS — _data: 2026-05-25_ — _tentativi: 1/10_
+
+**Log Validazione T3-N2**
+
+File creati:
+- `windows/ZecchinoReact/WinRTSavePickerModule.h` (modulo TurboModule attribute-based).
+- `windows/ZecchinoReact/WinRTSavePickerModule.cpp` (impl: validazione input,
+  marshalling UI thread via `UIDispatcher().Post`, coroutine `fire_and_forget`
+  per `co_await PickSaveFileAsync()`, IInitializeWithWindow per HWND su Win32
+  host Composition, mappatura completa DESIGN §8).
+
+File modificati (additivi):
+- `windows/ZecchinoReact/ZecchinoReact.cpp`: aggiunta `#include "WinRTSavePickerModule.h"`
+  prima della definizione di `CompReactPackageProvider`. `AddAttributedModules(builder, true)`
+  invariato.
+- `windows/ZecchinoReact/ZecchinoReact.vcxproj`: aggiunti `ClInclude` e `ClCompile`
+  per i 2 nuovi file.
+- `windows/ZecchinoReact/ZecchinoReact.vcxproj.filters`: stesso, sotto i Filter
+  Header Files e Source Files.
+
+Note di adattamento al PLAN:
+- Il PLAN cita `ReactPackageProvider.h/.cpp`. Questo progetto RNW non ha file
+  separati: il provider è la struct `CompReactPackageProvider` definita inline
+  in `ZecchinoReact.cpp` con `AddAttributedModules(builder, true)`. Il pattern
+  attribute-based di RNW (`REACT_MODULE`) registra automaticamente tutti i
+  moduli annotati il cui header è incluso nel TU che chiama
+  `AddAttributedModules`. La modifica corretta in questo contesto è quindi
+  l'aggiunta dell'`#include` (non l'invenzione di un provider parallelo).
+- Il PLAN cita "dispatcher associato a `CoreApplication.MainView.CoreWindow.Dispatcher`"
+  (UWP). Questa è un'app Win32/Composition (`ReactNativeAppBuilder` →
+  `reactNativeWin32App`), quindi il dispatcher canonico è
+  `ReactContext.UIDispatcher()`. La semantica (marshalling sul main UI thread
+  obbligatorio per `FileSavePicker`) è preservata.
+- Su Win32 host `FileSavePicker` richiede `IInitializeWithWindow.Initialize(HWND)`
+  altrimenti fallisce con `E_FAIL` (caso documentato in DESIGN §8). HWND
+  best-effort: `GetActiveWindow()` con fallback `GetForegroundWindow()`.
+
+Verifiche statiche (la compilazione effettiva sarà parte di T3-N5):
+- `grep -RnE "AnnounceForAccessibility|LiveRegion|LiveSetting" windows/ZecchinoReact/WinRTSavePickerModule.*` → 0.
+- `grep -RnE "throw " windows/ZecchinoReact/WinRTSavePickerModule.cpp` → 0
+  (solo `co_return` dopo Resolve; ogni branch chiude in Resolve).
+- Stringhe user-facing: 0 (solo codici opachi `EMPTY_CHOICES`, `INVALID_EXT`,
+  `DISPATCHER_DETACHED`, `HRESULT_E_FAIL`, `INVALID_FILENAME`, `HRESULT_<int>`,
+  `STD_EXCEPTION`, `UNKNOWN_EXCEPTION`, `USER_CANCELLED`, `SUCCESS`).
+- Nome modulo: `"WinRTSavePickerModule"` (via `REACT_MODULE(WinRTSavePickerModule)`)
+  combacia con `TurboModuleRegistry.get<Spec>('WinRTSavePickerModule')` in
+  `src/native/WinRTSavePicker/WinRTSavePicker.windows.ts`.
 
 ---
 
-### ☐ T3-N3 — Aggiornamento `ExportService`
+### ✅ T3-N3 — Aggiornamento `ExportService`
 
-- [ ] Importare `WinRTSavePicker` e tipi da `@/native` in
+- [x] Importare `WinRTSavePicker` e tipi da `@/native` in
   `src/lib/export-service.ts`.
-- [ ] Nel ramo `Platform.OS === 'windows'` di `exportFile`:
-  - [ ] Costruire `PickSavePathOptions` derivando
+- [x] Nel ramo `Platform.OS === 'windows'` di `exportFile`:
+  - [x] Costruire `PickSavePathOptions` derivando
     `fileTypeChoices` dal `mimeType` (mai CSV hardcoded —
     INV-CONTRACT-2).
-  - [ ] Passare `suggestedFileName` opaco (INV-FILENAME).
-  - [ ] Estrarre `defaultExtension` solo se coerente con
+  - [x] Passare `suggestedFileName` opaco (INV-FILENAME).
+  - [x] Estrarre `defaultExtension` solo se coerente con
     `fileTypeChoices`.
-  - [ ] Invocare `WinRTSavePicker.pickSavePath(options)`.
-  - [ ] Mappare `PickSavePathResult` → `ExportResult` per
+  - [x] Invocare `WinRTSavePicker.pickSavePath(options)`.
+  - [x] Mappare `PickSavePathResult` → `ExportResult` per
     tabella DESIGN §8 (SUCCESS, USER_CANCELLED → CANCELLED,
     INVALID_ARGUMENT → UNKNOWN, PICKER_UNAVAILABLE →
     UNSUPPORTED_PLATFORM, INTERNAL_ERROR `INVALID_FILENAME` →
     INVALID_PATH, INTERNAL_ERROR altro → UNKNOWN).
-  - [ ] `USER_CANCELLED`: nessun log di errore (max `info`).
-- [ ] Verifica chiamante unico (P-N3):
+  - [x] `USER_CANCELLED`: nessun log di errore (max `info`).
+- [x] Verifica chiamante unico (P-N3):
   `grep -RnE "WinRTSavePicker|pickSavePath" src/ |
    grep -v "src/lib/export-service.ts" | grep -v "src/native/"`
   → 0 occorrenze.
-- [ ] Verifica baseline TS: `npx tsc --noEmit` errori ≤ 3.
+- [x] Verifica baseline TS: `npx tsc --noEmit` errori ≤ 3.
 
-**Esito T3-N3**: ⬜ PASS / ⬜ FAIL — _data: ____ — _tentativi: __/10
+**Esito T3-N3**: ✅ PASS — _data: 2026-05-25_ — _tentativi: 1/10_
+
+#### Log Validazione T3-N3
+
+- **File modificato**: `src/lib/export-service.ts` (import
+  `@/native` + funzione `exportViaWindowsSavePicker` reale).
+- **Helper introdotti**: `extractExtension`, `buildFileTypeChoices`,
+  `mapPickResultToFailure` (switch esaustivo con default unreachable),
+  `loadOptionalFsModule` (`require('react-native-fs')` in try/catch).
+- **Mapping DESIGN §8**: implementato 1-a-1 (USER_CANCELLED → CANCELLED,
+  PICKER_UNAVAILABLE → UNSUPPORTED_PLATFORM, INVALID_ARGUMENT → UNKNOWN,
+  INTERNAL_ERROR `INVALID_FILENAME` → INVALID_PATH, altri INTERNAL_ERROR
+  → UNKNOWN).
+- **fs write**: `await fs.writeFile(pickResult.path, content, 'utf8')`
+  con try/catch → `mapErrorToReason`; se modulo `react-native-fs` non
+  installato → `UNSUPPORTED_PLATFORM` (deps opzionale da installare in
+  T3-N5).
+- **Narrowing TS**: ramo difensivo extra `if (pickResult.status !==
+  'SUCCESS') return mapPickResultToFailure(...)` per restringere il
+  tipo prima di accedere a `pickResult.path`.
+- **Verifiche**:
+  - `npx tsc --noEmit` → 3 errori (= baseline, AppDataContext +
+    budget-templates, nessuno introdotto dal modulo nativo).
+  - `grep "from '@/native'" src/**/*.{ts,tsx}` → 1 sola occorrenza
+    effettiva in `src/lib/export-service.ts` (le altre 2 sono JSDoc
+    interni a `src/native/`).
+  - `grep "from '@/(announcements|accessibility|locales)'"
+    src/native/` → 0 (INV-NVDA / INV-L10 preservate).
+  - `jest --silent` → 7 suites passed, 26 passed + 39 todo
+    (= baseline, nessuna regressione).
+- **Adattamento**: `react-native-fs` non è ancora in `package.json`;
+  caricato via `require` dinamico per non rompere il bundler RN-Windows
+  in assenza del pacchetto. Installazione obbligatoria prima di T3-N5.
 
 ---
 
-### ☐ T3-N4 — Gate TypeScript e pulizia chiamanti (G1-N)
+### ✅ T3-N4 — Gate TypeScript e pulizia chiamanti (G1-N)
 
-- [ ] Esecuzione `tsc`:
-  ```
-  npx tsc --noEmit 2>&1 | Select-String "error TS" |
-    Measure-Object | Select-Object -ExpandProperty Count
-  ```
-- [ ] Verifica P-N3 (chiamante unico) — 0 occorrenze fuori da
+- [x] Esecuzione `tsc`: 3 errori (= baseline).
+- [x] Verifica P-N3 (chiamante unico) — 0 occorrenze fuori da
   `src/lib/export-service.ts` e `src/native/`.
-- [ ] Verifica INV-NVDA / INV-L10 lato TS del modulo —
+- [x] Verifica INV-NVDA / INV-L10 lato TS del modulo —
   0 occorrenze.
-- [ ] Verifica INV-CONTRACT-1 — un solo metodo nello spec.
+- [x] Verifica INV-CONTRACT-1 — un solo metodo `pickSavePath`
+  in `WinRTSavePickerSpec` (file
+  `src/native/WinRTSavePicker/WinRTSavePicker.ts`).
 
-**Esito T3-N4**: ⬜ PASS / ⬜ FAIL — _data: ____ — _tentativi: __/10
+**Esito T3-N4**: ✅ PASS — _data: 2026-05-25_ — _tentativi: 1/10_
 
 ---
 
@@ -291,16 +374,16 @@ Convalida del gate definito in [PLAN 009-native §3](../3-coding-plans/009-nativ
 
 | Misurazione | Valore | Soglia |
 |-------------|--------|--------|
-| Errori `tsc` **prima** di T3-N1 (baseline) | ___ | ≤ 3 |
-| Errori `tsc` **dopo** T3-N4 | ___ | ≤ 3 |
-| **Delta** (dopo − prima) | ___ | = 0 |
+| Errori `tsc` **prima** di T3-N1 (baseline) | 3 | ≤ 3 |
+| Errori `tsc` **dopo** T3-N4 | 3 | ≤ 3 |
+| **Delta** (dopo − prima) | 0 | = 0 |
 
-- [ ] Delta = 0 (nessuna regressione TypeScript introdotta).
-- [ ] Vincolo P-N3 confermato (chiamante unico).
-- [ ] Invarianti INV-CONTRACT-1, INV-L10, INV-NVDA verificate
+- [x] Delta = 0 (nessuna regressione TypeScript introdotta).
+- [x] Vincolo P-N3 confermato (chiamante unico).
+- [x] Invarianti INV-CONTRACT-1, INV-L10, INV-NVDA verificate
   testualmente sui file TS del modulo.
 
-**Esito G1-N**: ⬜ PASS / ⬜ FAIL — _data: ____ — _operatore: ____
+**Esito G1-N**: ✅ PASS — _data: 2026-05-25_ — _operatore: Agent-Orchestrator_
 
 Se FAIL: rientrare in T3-N1..T3-N3 per correggere le sorgenti
 dei nuovi errori prima di chiudere il PLAN.
@@ -324,11 +407,11 @@ Procedura standard (vedi [PLAN §5.1](../3-coding-plans/009-native-PLAN_winrt-sa
 
 | Task | Tentativi consumati | Esito finale | Report diagnostico (se 10/10 FAIL) |
 |------|---------------------|--------------|-------------------------------------|
-| T3-N1 | __ / 10 | ⬜ PASS / ⬜ FAIL | _link o nota: ____ |
-| T3-N2 | __ / 10 | ⬜ PASS / ⬜ FAIL | _link o nota: ____ |
-| T3-N3 | __ / 10 | ⬜ PASS / ⬜ FAIL | _link o nota: ____ |
-| T3-N4 | __ / 10 | ⬜ PASS / ⬜ FAIL | _link o nota: ____ |
-| T3-N5 | __ / 10 | ⬜ PASS / ⬜ FAIL | _link o nota: ____ |
+| T3-N1 | 1 / 10 | ✅ PASS | commit 15e58d3 |
+| T3-N2 | 1 / 10 | ✅ PASS | bridge C++/WinRT (uncommitted in batch T3-N2+N3) |
+| T3-N3 | 1 / 10 | ✅ PASS | export-service.ts ramo windows (uncommitted) |
+| T3-N4 | 1 / 10 | ✅ PASS | gate G1-N PASS, baseline tsc=3 |
+| T3-N5 | __ / 10 | ⬜ PASS / ⬜ FAIL | _build manuale Windows, STOP maintainer_ |
 
 > Se per una task il contatore raggiunge **10/10 FAIL**:
 > registrare nel campo "Report diagnostico" i campi obbligatori
