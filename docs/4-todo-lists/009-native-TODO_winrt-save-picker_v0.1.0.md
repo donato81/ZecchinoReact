@@ -12,9 +12,15 @@ Gate G0-N: verifica precondizioni per implementazione save-picker Windows.
 Stato iniziale: FAIL
 - `src/lib/export-service.ts` non esisteva al momento della verifica.
 
+Stato finale: ✅ PASS (2026-05-25, post-T2 PLAN 009 padre)
+- T2 PLAN 009 padre completato (commit 04ad0f5):
+  - `src/lib/export-service.ts` creato (7 reason, dispatch Platform.OS)
+  - `react-native-share@12.3.1` installato pinned exact
+- Tutte le precondizioni P-N1..P-N6 + P-B1 ora SODDISFATTE.
+- Baseline TS confermata = 3; jest 26 passed + 39 todo.
+
 Dettagli:
-- P-N1..P-N3, P-N5, P-N6, P-B1: SODDISFATTE
-- P-N4: FAIL (file mancante) — verrà ri-marcato PASS dopo T2
+- P-N1..P-N6, P-B1: ✅ SODDISFATTE (tutte)
 ---
 tipo: todo
 titolo: TODO 009-native — Bridge C++/WinRT WinRT Save Picker
@@ -96,7 +102,7 @@ voce in stato non-soddisfatto blocca l'intero TODO.
   (`src/lib/export-service.ts` presente da T2 PLAN 009 padre).
   - Comando: `Test-Path src/lib/export-service.ts`
   - Esito atteso: `True`.
-  - Status: ❌ **NON SODDISFATTA** — _data: 2026-05-25_ — _esito: `src/lib/export-service.ts` ASSENTE. PLAN 009 padre T2 non eseguita lato applicativo (scheletro ExportService mancante)._
+  - Status: ✅ SODDISFATTA — _data: 2026-05-25 (post-T2)_ — _esito: `src/lib/export-service.ts` creato in commit 04ad0f5 (T2 PLAN 009 padre)_
 
 - [x] **P-N5** — Working tree pulito su ramo `main`.
   - Comando: `git status --short ; git branch --show-current`
@@ -121,7 +127,7 @@ voce in stato non-soddisfatto blocca l'intero TODO.
     [TODO 009 padre](009-TODO_export-nativo_v0.1.0.md), entrambe
     devono essere **SODDISFATTA** con versioni registrate.
   - Esito atteso al 2026-05-25: SODDISFATTA (versioni come sopra).
-  - Status: ✅ SODDISFATTA — _data: 2026-05-25_ — _esito: P9/P10 marcati [x] nel TODO padre; `@react-native-windows/fs@0.82.0` installato fisicamente; `react-native-share` non richiesto per ambito WinRT (sarà installato in T4 padre)_
+  - Status: ✅ SODDISFATTA — _data: 2026-05-25 (post-T2)_ — _esito: P9/P10 marcati [x] nel TODO padre; `@react-native-windows/fs@0.82.0` e `react-native-share@12.3.1` installati fisicamente (commit 04ad0f5)_
 
 ---
 
@@ -133,40 +139,56 @@ voce in stato non-soddisfatto blocca l'intero TODO.
 - [x] **G0-N.4** — Baseline TypeScript ≤ 3 errori.
   - Comando: `npx tsc --noEmit 2>&1 | Select-String "error TS" | Measure-Object | Select-Object -ExpandProperty Count`
   - Valore rilevato: **3** (atteso ≤ 3)
-- [ ] **G0-N.5** — PLAN 009 padre T2 completata
-  (dipendenze RNW installate). **PARZIALE**: `@react-native-windows/fs@0.82.0` installato; `react-native-share` non installato; **`src/lib/export-service.ts` ASSENTE** (P-N4 fallita).
+- [x] **G0-N.5** — PLAN 009 padre T2 completata
+  (dipendenze RNW installate). ✅ **PASS**: `@react-native-windows/fs@0.82.0` installato; `react-native-share@12.3.1` installato pinned exact; `src/lib/export-service.ts` presente (commit 04ad0f5).
 - [x] **G0-N.6** — `src/native/` non esistente o vuoto.
 
-**Esito G0-N**: ❌ **FAIL** — _data: 2026-05-25_ — _operatore: Agent-Orchestrator_
+**Esito G0-N**: ✅ **PASS** — _data: 2026-05-25 (post-T2)_ — _operatore: Agent-Orchestrator_
 
-Se FAIL: **STOP**. Non avviare T3-N1. Registrare causa qui sotto.
+Procedere con T3-N1.
 
-> Causa FAIL G0-N: **P-N4 non soddisfatta** — `src/lib/export-service.ts` non esiste nel workspace. Il T2 del PLAN 009 padre (creazione scheletro ExportService applicativo) non risulta eseguito. T3-N3 del PLAN 009-native presuppone un file esistente da modificare nel ramo `Platform.OS === 'windows'`. Procedere con T3-N1/T3-N2 sarebbe possibile (modulo nativo è autonomo), ma T3-N3 sarebbe bloccante e violerebbe il vincolo di chiamante unico (P-N3) perché il consumatore non esisterebbe.
+> Storico FAIL iniziale (per audit): G0-N inizialmente FAIL per P-N4 (assenza `src/lib/export-service.ts`). Risolto eseguendo T1+T2 PLAN 009 padre (commit 413a9a8 + 04ad0f5).
 
 ---
 
 ## Sezione 3 — Task operative
 
-### ☐ T3-N1 — Struttura directory e file TypeScript
+### ✅ T3-N1 — Struttura directory e file TypeScript
 
-- [ ] Creare directory `src/native/WinRTSavePicker/`.
-- [ ] Creare `src/native/WinRTSavePicker/WinRTSavePicker.ts`
+- [x] Creare directory `src/native/WinRTSavePicker/`.
+- [x] Creare `src/native/WinRTSavePicker/WinRTSavePicker.ts`
   (contratto pubblico, firma DESIGN §5).
-- [ ] Creare `src/native/WinRTSavePicker/WinRTSavePicker.windows.ts`
+- [x] Creare `src/native/WinRTSavePicker/WinRTSavePicker.windows.ts`
   (binding TurboModule, sola passthrough).
-- [ ] Creare `src/native/WinRTSavePicker/WinRTSavePicker.macos.ts`
+- [x] Creare `src/native/WinRTSavePicker/WinRTSavePicker.macos.ts`
   (stub `PICKER_UNAVAILABLE`).
-- [ ] Creare `src/native/WinRTSavePicker/WinRTSavePicker.stub.ts`
+- [x] Creare `src/native/WinRTSavePicker/WinRTSavePicker.stub.ts`
   (stub `PICKER_UNAVAILABLE` per Android/iOS).
-- [ ] Creare `src/native/index.ts` (dispatcher Metro + re-export tipi).
-- [ ] Verifica INV-NVDA / INV-L10 sui file TS del modulo:
+- [x] Creare `src/native/index.ts` (dispatcher Metro + re-export tipi).
+- [x] Verifica INV-NVDA / INV-L10 sui file TS del modulo:
   `Select-String -Path src/native/WinRTSavePicker/*.ts -Pattern "from '@/(announcements|accessibility|locales)'"`
-  → 0 occorrenze.
-- [ ] Verifica INV-CONTRACT-1: in `WinRTSavePicker.ts` lo
-  spec contiene **un solo** metodo.
-- [ ] Verifica baseline TS: `npx tsc --noEmit` errori ≤ 3.
+  → **0 occorrenze**.
+- [x] Verifica INV-CONTRACT-1: in `WinRTSavePicker.ts` lo
+  spec contiene **un solo** metodo (`pickSavePath`).
+- [x] Verifica baseline TS: `npx tsc --noEmit` errori = **3** (= baseline).
 
-**Esito T3-N1**: ⬜ PASS / ⬜ FAIL — _data: ____ — _tentativi: __/10
+**Esito T3-N1**: ✅ **PASS** — _data: 2026-05-25_ — _tentativi: 1/10_
+
+**Log Validazione T3-N1**:
+- 5 file creati: `WinRTSavePicker.ts` (contratto + fallback stub),
+  `WinRTSavePicker.windows.ts` (binding TurboModule reale via
+  `TurboModuleRegistry.get<Spec>('WinRTSavePickerModule')` con
+  cintura `catch → INTERNAL_ERROR/BRIDGE_REJECT`),
+  `WinRTSavePicker.macos.ts` (stub),
+  `WinRTSavePicker.stub.ts` (stub Android/iOS, mantenuto per
+  conformità PLAN benché Metro risolva `.ts` come fallback su
+  Android/iOS), `src/native/index.ts` (dispatcher + re-export tipi).
+- Firma `WinRTSavePickerSpec` allineata letteralmente a DESIGN §5.
+- jest: 7 passed (26 + 39 todo). tsc: 3 errori (= baseline).
+- Pre-fix necessario: rimossa duplicazione legacy in
+  `src/lib/export-service.ts` (57 righe vecchio `exportFile` +
+  `ExportReason` ereditate prima di T2; il file conteneva due
+  implementazioni concatenate). Commit fix separato.
 
 ---
 
