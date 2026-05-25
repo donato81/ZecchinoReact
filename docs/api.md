@@ -587,15 +587,44 @@ File rimosso (DESIGN 004). Sostituito dalle funzioni builder esposte da
 
 ---
 
-## `src/hooks/use-online-status.ts` ❌
+## `src/hooks/use-network-status.ts` ✅ (pianificato — PLAN 008)
 
-Hook stato connessione. Usa `navigator.onLine` e `window.addEventListener('online'/'offline')`.
+Hook pubblico per consumo del contratto di connettività centralizzato
+(`NetworkStatusProvider`). Sostituisce `useOnlineStatus` (rimosso da
+PLAN 008, Strategia A — migrazione completa: 0 consumer verificati nel
+codebase prima della rimozione).
 
 ```ts
-useOnlineStatus(): { isOffline: boolean }
+export type NetworkStatus = {
+  isOffline: boolean
+  isConnected: boolean
+  isInternetReachable: boolean
+  connectionType: string
+  isInitialized: boolean
+}
+
+export function useNetworkStatus(): NetworkStatus
 ```
 
-> Da riscrivere con `@react-native-community/netinfo`.
+**Semantica `isOffline`** (DESIGN 008 §5, INV-7):
+`isOffline === true` se `isConnected === false | null` **oppure**
+`isInternetReachable === false`. Il caso captive portal
+(`isConnected === true && isInternetReachable === false`) è trattato
+come `isOffline === true`. Il caso `isInternetReachable === null` è
+online-first (non determinato → consumi come online).
+
+**Errori**: lancia `Error('useNetworkStatus must be used within NetworkStatusProvider')`
+se invocato fuori dal provider.
+
+> Provider associato: `NetworkStatusProvider`, esposto da
+> `src/context/NetworkStatusContext.tsx`. Posizionato in `App.tsx`
+> sopra `AuthProvider` (e sopra `AppDataProvider` quando wired).
+> Debounce direzionale 1000 ms solo su online → offline (INV-3).
+> Fail-Safe Online-First su fallimento NetInfo o timeout init (INV-4).
+>
+> Stato implementazione: **pianificato** (DRAFT), task T2 di
+> [PLAN 008](3-coding-plans/008-PLAN_network-connectivity_v0.1.0.md).
+> Sostituisce `useOnlineStatus` (rimosso in PLAN 008 T3).
 
 ---
 

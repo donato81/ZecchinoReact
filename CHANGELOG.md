@@ -2,6 +2,48 @@
 
 ## [Unreleased]
 
+### Documentation
+
+- **PLAN 008 — Network connectivity (DRAFT)**
+  ([docs/3-coding-plans/008-PLAN_network-connectivity_v0.1.0.md](docs/3-coding-plans/008-PLAN_network-connectivity_v0.1.0.md),
+  [docs/4-todo-lists/008-TODO_network-connectivity_v0.1.0.md](docs/4-todo-lists/008-TODO_network-connectivity_v0.1.0.md)).
+  Piano operativo derivato da DESIGN 008 (REVIEWED) per sostituire il
+  rilevamento di connettività basato su `navigator.onLine` /
+  `window.addEventListener('online'|'offline')` — non funzionante in
+  React Native — con un *connectivity contract* centralizzato basato su
+  `@react-native-community/netinfo`. Strategia adottata: **Strategia A
+  (migrazione completa)** — eliminazione di `src/hooks/use-online-status.ts`
+  (zero consumer verificati nel codebase). 8 task atomici T1-T8,
+  8 gate di chiusura G1-G8, 7 invarianti normative, 3 debiti tecnici
+  registrati. Boundary con DESIGN 007 preservato (INV-6): nessuna
+  modifica alla state machine bootstrap, generation counter, `writeCache`,
+  `applyDomainSnapshot` o validazioni snapshot. Aggiornata la sezione
+  `src/hooks/use-online-status.ts` di `docs/api.md` per riflettere la
+  rimozione pianificata e introdurre il contratto del nuovo hook
+  `useNetworkStatus()` e del provider `NetworkStatusProvider`.
+
+### Planned (non ancora implementato)
+
+- **Network connectivity contract** (PLAN 008): nuovo
+  `NetworkStatusProvider` (`src/context/NetworkStatusContext.tsx`) e
+  hook pubblico `useNetworkStatus()` (`src/hooks/use-network-status.ts`)
+  con contratto `{ isOffline, isConnected, isInternetReachable, connectionType, isInitialized }`.
+  Semantica captive portal trattato come offline (INV-7). Debounce
+  direzionale 1000 ms (solo online → offline; offline → online
+  immediato, INV-3). Fail-Safe Online-First su fallimento NetInfo o
+  timeout di inizializzazione (INV-4). Rimozione dei due check inline
+  `navigator.onLine === false` in `src/context/AppDataContext.tsx`
+  (righe 354 e 415) sostituiti dal consumo di
+  `useNetworkStatus().isOffline`. Eliminazione di
+  `src/hooks/use-online-status.ts` (breaking change ammessa in
+  pre-release 0.x.x; nessun consumer interno).
+
+> Nota versionamento: la rimozione di `useOnlineStatus` è una breaking
+> change formale dell'API pubblica del modulo `src/hooks/`, ma il
+> simbolo non ha consumer nel codebase e la versione corrente è
+> `0.2.0` (pre-release SemVer 0.x.x), che ammette breaking change
+> senza bump major. La versione di `package.json` resta `0.2.0`.
+
 ## [0.2.0] - 2026-05-25
 
 ### Fixed
