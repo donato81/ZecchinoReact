@@ -89,6 +89,11 @@ le precondizioni seguenti sono soddisfatte e mergiate su `main`.
   indirettamente (l'export non richiede rete, ma la coesistenza
   architetturale dei due provider è garantita da PLAN 008 T5).
 
+> NOTA GOVERNANCE: P4 e P5 devono essere verificate PRIMA
+> dell'autorizzazione alla codifica, non durante T1. Il maintainer
+> deve compilare manualmente le voci corrispondenti nel Validation
+> Log §6 prima di avviare qualsiasi task.
+
 ### 2.3 Precondizioni di AMBIENTE
 
 - **Ramo corrente** = `main`. Verifica: `git branch --show-current`.
@@ -292,11 +297,10 @@ Sezione 7.
 
 > **NOTA 1 — Versione `react-native-share`**: in fase di stesura di
 > PLAN 009 (2026-05-25), la verifica della versione stabile più recente
-> di `react-native-share` su npm non è stata possibile (DATO NON
-> DISPONIBILE — verifica manuale richiesta prima della codifica). T2
-> non può iniziare finché il maintainer non registra la versione
-> esatta nel TODO (campo "Versione `react-native-share` fissata").
-> Vincolo: ultima major stabile compatibile con `react-native ^0.82.1`
+> di `react-native-share` su npm ha fissato la versione a
+> `react-native-share@12.3.1` (latest stabile, verificata 2026-05-25).
+> P9 nel TODO soddisfatta.
+> Vincolo verificato: ultima major stabile compatibile con `react-native ^0.82.1`
 > e con la New Architecture (TurboModules, Fabric).
 
 ### T2 — Installazione dipendenze e creazione `ExportService`
@@ -308,15 +312,14 @@ Sezione 7.
 - **Azione**:
   1. Installare `react-native-share` alla versione fissata in NOTA 1:
      ```bash
-     npm install react-native-share@<versione-fissata>
+     npm install react-native-share@12.3.1
      ```
   2. Installare `@react-native-windows/fs` all'ultima stabile
      compatibile con `react-native-windows ^0.82.5`:
      ```bash
-     npm install @react-native-windows/fs@<versione-da-fissare>
+     npm install @react-native-windows/fs@0.82.0
      ```
-     **NOTA**: la versione esatta va fissata al momento della
-     codifica, verificando compatibilità RNW 0.82.x sul registry npm
+     **NOTA**: versione allineata a react-native-windows ^0.82.5 presente in package.json
      (vedi NOTA 2 sotto).
   3. Su iOS: eseguire `bundle exec pod install` dalla cartella `ios/`.
   4. Su Windows: nessun autolinking aggiuntivo per
@@ -373,10 +376,9 @@ Sezione 7.
     mappano su `ExportResult.reason`.
   - `npx tsc --noEmit` exit code 0 (o entro baseline ≤ 3).
 
-> **NOTA 2 — Versione `@react-native-windows/fs`**: come per NOTA 1,
-> la verifica npm non è stata possibile durante la stesura. T2 non può
-> chiudersi finché il maintainer non registra la versione fissata nel
-> TODO (campo "Versione `@react-native-windows/fs` fissata").
+> **NOTA 2 — Versione `@react-native-windows/fs`**: versione fissata a
+> `@react-native-windows/fs@0.82.0` (allineata a react-native-windows ^0.82.5,
+> verificata 2026-05-25). P10 nel TODO soddisfatta.
 
 ### T3 — Modulo nativo custom WinRT Save Picker
 

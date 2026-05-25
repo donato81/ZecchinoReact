@@ -37,13 +37,13 @@ ramo: main
 | P1 | Strategia Windows = modulo nativo custom in `src/native/` (WinRT `FileSavePicker` C++/WinRT) | DESIGN 009 §10 P1 | [x] **SODDISFATTA** | `Select-String "modulo nativo custom" docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md` ≥ 1 hit (verificato 2026-05-25). |
 | P2 | `react-native-share` compatibile con RN 0.82.x + New Architecture | DESIGN 009 §10 P2 | [x] **SODDISFATTA (architetturalmente)** | Compatibilità confermata; **versione esatta da fissare** in T2 (vedi NOTA 1). |
 | P3 | Censimento consumer `handleExportCSV` (≥ 9 occorrenze, 0 consumer runtime esterni rischiosi) | DESIGN 009 §10 P3 | [x] **SODDISFATTA** | Risultato registrato in DESIGN 009 §10; verifica in T1. |
-| P4 | PLAN 007 (async cache hydration) mergiato su `main` | PLAN 009 §2.2 | [ ] **DA VERIFICARE in T1** | `git log --oneline main -- src/context/AppDataContext.tsx` deve mostrare i commit T1-T8 di PLAN 007 ✅ |
-| P5 | PLAN 008 (network connectivity) mergiato su `main` | PLAN 009 §2.2 | [ ] **DA VERIFICARE in T1** | `git log --oneline main -- src/context/network-status-context.tsx` ≥ 1 commit. |
+| P4 | PLAN 007 (async cache hydration) mergiato su `main` | PLAN 009 §2.2 | [ ] **DA VERIFICARE in T1** | `git log --oneline main -- src/context/AppDataContext.tsx` deve mostrare i commit T1-T8 di PLAN 007 ✅ — Verificare PRIMA dell'avvio coding, non durante T1. |
+| P5 | PLAN 008 (network connectivity) mergiato su `main` | PLAN 009 §2.2 | [ ] **DA VERIFICARE in T1** | `git log --oneline main -- src/context/network-status-context.tsx` ≥ 1 commit. — Verificare PRIMA dell'avvio coding, non durante T1. |
 | P6 | Ramo corrente = `main` | PLAN 009 §2.3 | [x] **VERIFICATO 2026-05-25** | `git branch --show-current` → `main`. |
 | P7 | Working tree pulito | PLAN 009 §2.3 | [x] **VERIFICATO 2026-05-25** | `git status --short` vuoto. |
 | P8 | Baseline TypeScript = 3 errori | PLAN 009 §2.3 | [x] **VERIFICATO 2026-05-25** | `npx tsc --noEmit 2>&1 \| Select-String "error TS" \| Measure-Object` → `3` (exit code 1, conteggio coerente). |
-| P9 | Versione esatta `react-native-share` fissata | NOTA 1 PLAN 009 T1 | [ ] **DATO NON DISPONIBILE** | Verifica npm registry non eseguibile in stesura. Bloccante per T2: il maintainer deve registrare la versione qui prima dell'avvio. **Campo: `Versione react-native-share fissata: __________`** |
-| P10 | Versione esatta `@react-native-windows/fs` fissata | NOTA 2 PLAN 009 T2 | [ ] **DATO NON DISPONIBILE** | Stesso vincolo di P9. **Campo: `Versione @react-native-windows/fs fissata: __________`** |
+| P9 | Versione esatta `react-native-share` fissata | NOTA 1 PLAN 009 T1 | [x] **SODDISFATTA — versione 12.3.1 (latest stabile, supporto Windows nativo confermato, deps: none)** | Versione fissata il 2026-05-25. **Campo: `Versione react-native-share fissata: 12.3.1`** |
+| P10 | Versione esatta `@react-native-windows/fs` fissata | NOTA 2 PLAN 009 T2 | [x] **SODDISFATTA — versione 0.82.0 (allineata a react-native-windows ^0.82.5 presente in package.json)** | Versione fissata il 2026-05-25. **Campo: `Versione @react-native-windows/fs fissata: 0.82.0`** |
 
 ---
 
@@ -99,11 +99,11 @@ ramo: main
   nel campo dedicato in tabella precondizioni).
 - [ ] Installare `react-native-share`:
   ```bash
-  npm install react-native-share@<versione-fissata-in-P9>
+  npm install react-native-share@12.3.1
   ```
 - [ ] Installare `@react-native-windows/fs`:
   ```bash
-  npm install @react-native-windows/fs@<versione-fissata-in-P10>
+  npm install @react-native-windows/fs@0.82.0
   ```
 - [ ] iOS: `cd ios; bundle exec pod install; cd ..`.
 - [ ] Windows: verificare autolinking con `npx react-native config`.
@@ -275,7 +275,7 @@ ramo: main
   - [ ] (6) UNSUPPORTED_PLATFORM → toast/SR error invocati.
   - [ ] (7) INVALID_PATH → toast/SR error invocati.
   - [ ] (8) INSUFFICIENT_SPACE → toast/SR error invocati.
-  - [ ] (8.b — opzionale) UNKNOWN → toast/SR error generico invocati.
+  - [ ] (9) UNKNOWN → toast/SR error generico invocati.
 - [ ] **Verifica esecuzione**: `npx jest __tests__/AppDataContext.spec.ts` exit code 0; ≥ 8 nuovi test passanti.
 - [ ] **Commit T7**:
   ```

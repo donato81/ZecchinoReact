@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### PLAN 009 — Pre-flight corrections (2026-05-25)
+
+- Fissata versione react-native-share@12.3.1 (P9)
+- Fissata versione @react-native-windows/fs@0.82.0 (P10)
+- Reso obbligatorio il test UNKNOWN in T6
+- Aggiunta nota di governance su P4/P5 (verifica pre-codifica)
+- Corretti comandi di install in T2
+
 ### Added — 2026-05-25
 
 - **PLAN 009 / TODO 009 — Export File Nativo (DRAFT)**
