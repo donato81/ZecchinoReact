@@ -106,10 +106,12 @@
     <ClInclude Include="AutolinkedNativeModules.g.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="WinRTSavePickerModule.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ZecchinoReact.cpp" />
     <ClCompile Include="AutolinkedNativeModules.g.cpp" />
+    <ClCompile Include="WinRTSavePickerModule.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

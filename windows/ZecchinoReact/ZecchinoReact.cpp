@@ -8,6 +8,10 @@
 
 #include "NativeModules.h"
 
+// Inclusione TurboModule progetto-locali (registrati via AddAttributedModules).
+// Vedi DESIGN 009-native §5 (contratto WinRTSavePicker).
+#include "WinRTSavePickerModule.h"
+
 // A PackageProvider containing any turbo modules you define within this app project
 struct CompReactPackageProvider
     : winrt::implements<CompReactPackageProvider, winrt::Microsoft::ReactNative::IReactPackageProvider> {
