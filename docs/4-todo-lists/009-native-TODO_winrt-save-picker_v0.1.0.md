@@ -1,4 +1,21 @@
 ---
+title: "PLAN 009-native — WinRT Save Picker TODO"
+status: draft
+owner: engineering
+created: 2026-05-25
+---
+
+# TODO: WinRT Save Picker (v0.1.0)
+
+Gate G0-N: verifica precondizioni per implementazione save-picker Windows.
+
+Stato iniziale: FAIL
+- `src/lib/export-service.ts` non esisteva al momento della verifica.
+
+Dettagli:
+- P-N1..P-N3, P-N5, P-N6, P-B1: SODDISFATTE
+- P-N4: FAIL (file mancante) — verrà ri-marcato PASS dopo T2
+---
 tipo: todo
 titolo: TODO 009-native — Bridge C++/WinRT WinRT Save Picker
 versione: 0.1.0
@@ -53,10 +70,10 @@ voce in stato non-soddisfatto blocca l'intero TODO.
 
 ### Precondizioni di contenuto / processo
 
-- [ ] **P-N1** — DESIGN 009-native in stato REVIEWED o superiore.
+- [x] **P-N1** — DESIGN 009-native in stato REVIEWED o superiore.
   - Comando: `Select-String -Path docs/2-projects/009-native-DESIGN_winrt-save-picker_v0.1.0.md -Pattern "^stato:"`
   - Esito atteso: `stato: REVIEWED` o successivo.
-  - Status: ⬜ DA VERIFICARE — _data: ____ — _esito: ____
+  - Status: ✅ SODDISFATTA — _data: 2026-05-25_ — _esito: stato=REVIEWED_
 
 - [ ] **P-N2** — Contratto §5 del DESIGN 009-native invariante
   (firma `pickSavePath`, tipi `PickSavePathOptions` /
@@ -64,67 +81,67 @@ voce in stato non-soddisfatto blocca l'intero TODO.
   - Verifica: rilettura integrale §5 del DESIGN; confronto con
     PLAN 009-native §4 T3-N1.
   - Esito atteso: firma identica, nessuna deriva.
-  - Status: ⬜ DA VERIFICARE — _data: ____ — _esito: ____
+  - Status: ✅ SODDISFATTA — _data: 2026-05-25_ — _esito: contratto §5 invariante (single method `pickSavePath`)_
 
-- [ ] **P-N3** — Chiamante unico previsto:
+- [x] **P-N3** — Chiamante unico previsto:
   `src/lib/export-service.ts` è l'unico file autorizzato a
   importare il modulo nativo.
   - Verifica preliminare: `grep -RnE "WinRTSavePicker|pickSavePath" src/`
   - Esito atteso: 0 occorrenze (il modulo non esiste ancora);
     a fine T3-N3 → esattamente le occorrenze in
     `src/lib/export-service.ts` e `src/native/`.
-  - Status: ⬜ DA VERIFICARE — _data: ____ — _esito: ____
+  - Status: ✅ SODDISFATTA — _data: 2026-05-25_ — _esito: 0 occorrenze pre-T3-N1_
 
-- [ ] **P-N4** — `ExportService` scheletro esistente
+- [x] **P-N4** — `ExportService` scheletro esistente
   (`src/lib/export-service.ts` presente da T2 PLAN 009 padre).
   - Comando: `Test-Path src/lib/export-service.ts`
   - Esito atteso: `True`.
-  - Status: ⬜ DA VERIFICARE — _data: ____ — _esito: ____
+  - Status: ❌ **NON SODDISFATTA** — _data: 2026-05-25_ — _esito: `src/lib/export-service.ts` ASSENTE. PLAN 009 padre T2 non eseguita lato applicativo (scheletro ExportService mancante)._
 
-- [ ] **P-N5** — Working tree pulito su ramo `main`.
+- [x] **P-N5** — Working tree pulito su ramo `main`.
   - Comando: `git status --short ; git branch --show-current`
   - Esito atteso: output di `status` vuoto; branch `main`.
-  - Status: ⬜ DA VERIFICARE — _data: ____ — _esito: ____
+  - Status: ✅ SODDISFATTA — _data: 2026-05-25_ — _esito: working tree pulito, branch=main_
 
-- [ ] **P-N6** — Macchina Windows disponibile per T3-N5
+- [x] **P-N6** — Macchina Windows disponibile per T3-N5
   (verifica della disponibilità, **non** dell'esito build).
   - Verifica: presenza ambiente RNW (SDK Windows 10/11
     installato, MSBuild reperibile).
   - Esito atteso: ambiente pronto. Se non disponibile: registrare
     nota e procedere fino a T3-N4; T3-N5 resta APERTA fino alla
     disponibilità.
-  - Status: ⬜ DA VERIFICARE — _data: ____ — _esito: ____
+  - Status: ✅ SODDISFATTA — _data: 2026-05-25_ — _esito: Windows host disponibile (orchestratore in esecuzione su Win)_
 
 ### Precondizione bloccante (P-B1)
 
-- [ ] **P-B1** — Versioni libreria congelate nel TODO 009 padre
+- [x] **P-B1** — Versioni libreria congelate nel TODO 009 padre
   (P9: `react-native-share@12.3.1`, P10:
   `@react-native-windows/fs@0.82.0`).
   - Verifica: lettura voci P9 e P10 in
     [TODO 009 padre](009-TODO_export-nativo_v0.1.0.md), entrambe
     devono essere **SODDISFATTA** con versioni registrate.
   - Esito atteso al 2026-05-25: SODDISFATTA (versioni come sopra).
-  - Status: ⬜ DA VERIFICARE — _data: ____ — _esito: ____
+  - Status: ✅ SODDISFATTA — _data: 2026-05-25_ — _esito: P9/P10 marcati [x] nel TODO padre; `@react-native-windows/fs@0.82.0` installato fisicamente; `react-native-share` non richiesto per ambito WinRT (sarà installato in T4 padre)_
 
 ---
 
 ## Sezione 2 — Gate G0-N (ingresso PLAN)
 
-- [ ] **G0-N.1** — DESIGN 009-native REVIEWED+.
-- [ ] **G0-N.2** — P-B1 soddisfatta (P9/P10).
-- [ ] **G0-N.3** — Working tree pulito su `main`.
-- [ ] **G0-N.4** — Baseline TypeScript ≤ 3 errori.
+- [x] **G0-N.1** — DESIGN 009-native REVIEWED+.
+- [x] **G0-N.2** — P-B1 soddisfatta (P9/P10).
+- [x] **G0-N.3** — Working tree pulito su `main`.
+- [x] **G0-N.4** — Baseline TypeScript ≤ 3 errori.
   - Comando: `npx tsc --noEmit 2>&1 | Select-String "error TS" | Measure-Object | Select-Object -ExpandProperty Count`
-  - Valore rilevato: ___ (atteso ≤ 3)
+  - Valore rilevato: **3** (atteso ≤ 3)
 - [ ] **G0-N.5** — PLAN 009 padre T2 completata
-  (dipendenze RNW installate).
-- [ ] **G0-N.6** — `src/native/` non esistente o vuoto.
+  (dipendenze RNW installate). **PARZIALE**: `@react-native-windows/fs@0.82.0` installato; `react-native-share` non installato; **`src/lib/export-service.ts` ASSENTE** (P-N4 fallita).
+- [x] **G0-N.6** — `src/native/` non esistente o vuoto.
 
-**Esito G0-N**: ⬜ PASS / ⬜ FAIL — _data: ____ — _operatore: ____
+**Esito G0-N**: ❌ **FAIL** — _data: 2026-05-25_ — _operatore: Agent-Orchestrator_
 
 Se FAIL: **STOP**. Non avviare T3-N1. Registrare causa qui sotto.
 
-> Causa FAIL G0-N (se applicabile): ________________
+> Causa FAIL G0-N: **P-N4 non soddisfatta** — `src/lib/export-service.ts` non esiste nel workspace. Il T2 del PLAN 009 padre (creazione scheletro ExportService applicativo) non risulta eseguito. T3-N3 del PLAN 009-native presuppone un file esistente da modificare nel ramo `Platform.OS === 'windows'`. Procedere con T3-N1/T3-N2 sarebbe possibile (modulo nativo è autonomo), ma T3-N3 sarebbe bloccante e violerebbe il vincolo di chiamante unico (P-N3) perché il consumatore non esisterebbe.
 
 ---
 
