@@ -430,6 +430,14 @@ Sezione 7.
 
 ### T3 — Modulo nativo custom WinRT Save Picker
 
+> **PLAN dettagliato**: la specifica completa di questo task è in
+> [009-native-PLAN_winrt-save-picker_v0.1.0.md](009-native-PLAN_winrt-save-picker_v0.1.0.md)
+> (task T3-N1..T3-N5, gate G0-N/G1-N, cicli di revisione).
+> Il presente blocco T3 resta come riferimento di alto livello;
+> ogni decisione tecnica del modulo nativo è governata dal PLAN
+> dettagliato. Checklist operativa:
+> [009-native-TODO_winrt-save-picker_v0.1.0.md](../4-todo-lists/009-native-TODO_winrt-save-picker_v0.1.0.md).
+
 - **File**: `src/native/WinRTSavePicker/` (nuovo), `src/native/index.ts`
   (nuovo), file C++/WinRT in `windows/ZecchinoReact/` per il bridge
   TurboModule.

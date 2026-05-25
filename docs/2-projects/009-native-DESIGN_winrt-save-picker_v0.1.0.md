@@ -647,6 +647,7 @@ state machine bootstrap, `transitionTo`, `hydrationGen`,
 | 2026-05-25 | Approvazione Consiglio AI | APPROVATO | Decisione formale di estrarre il sotto-design del modulo nativo dal DESIGN 009 padre. |
 | 2026-05-25 | Stesura v0.1.0 in DRAFT | DONE | Agent-Docs. Tutti i vincoli V1-V9 dichiarati. |
 | 2026-05-25 | Verifica precondizione P-B1 | SODDISFATTA (con dichiarazione invariante) | P9 (`react-native-share@12.3.1`) e P10 (`@react-native-windows/fs@0.82.0`) congelate nel TODO 009 alla data di stesura. La dipendenza formale resta dichiarata per invarianza. |
+| 2026-05-25 | Stesura PLAN 009-native + TODO 009-native | DONE | Agent-Docs. Contratto §5 propagato 1:1 nel PLAN; bloccante P-B1 confermato SODDISFATTO al momento della stesura. PLAN dettagliato delle T3-N1..T3-N5 disponibile in [009-native-PLAN_winrt-save-picker_v0.1.0.md](../3-coding-plans/009-native-PLAN_winrt-save-picker_v0.1.0.md). |
 
 ### Checklist vincoli (auto-convalida iniziale)
 

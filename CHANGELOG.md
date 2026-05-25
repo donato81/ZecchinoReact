@@ -4,6 +4,31 @@
 
 ### Documentation
 
+- **PLAN 009-native: aggiunto documento**
+  [docs/3-coding-plans/009-native-PLAN_winrt-save-picker_v0.1.0.md](docs/3-coding-plans/009-native-PLAN_winrt-save-picker_v0.1.0.md).
+  Piano di coding dettagliato per il bridge C++/WinRT del modulo
+  nativo WinRT Save Picker. Specifica T3-N1..T3-N5 (struttura
+  TypeScript multi-piattaforma, bridge C++/WinRT, integrazione
+  `ExportService`, gate G0-N/G1-N TypeScript, verifica build
+  Windows manuale). Sostituisce la specifica della task T3 del
+  PLAN 009 padre. Stato: DRAFT.
+
+- **TODO 009-native: aggiunto documento**
+  [docs/4-todo-lists/009-native-TODO_winrt-save-picker_v0.1.0.md](docs/4-todo-lists/009-native-TODO_winrt-save-picker_v0.1.0.md).
+  Checklist operativa con precondizioni P-N1..P-N6 + P-B1,
+  gate G0-N/G1-N, task T3-N1..T3-N5, cicli di revisione (max 10
+  tentativi per task, post-task e post-implementazione/test) e
+  aggiornamenti documentali post-implementazione. Stato: PENDING.
+
+- **DESIGN 009-native §11 Validation Log: aggiornato**
+  ([docs/2-projects/009-native-DESIGN_winrt-save-picker_v0.1.0.md](docs/2-projects/009-native-DESIGN_winrt-save-picker_v0.1.0.md)).
+  Aggiunta riga 2026-05-25 per stesura PLAN/TODO 009-native.
+
+- **PLAN 009 padre §6 T3: aggiornato riferimento**
+  ([docs/3-coding-plans/009-PLAN_export-nativo_v0.1.0.md](docs/3-coding-plans/009-PLAN_export-nativo_v0.1.0.md)).
+  Nota additiva che rimanda al PLAN dettagliato 009-native come
+  fonte di specifica per la task T3.
+
 - PLAN 009: firma `pickSavePath` allineata al contratto `PickSavePathOptions` definito in
   DESIGN 009-native (A-DOC-009-001).
 

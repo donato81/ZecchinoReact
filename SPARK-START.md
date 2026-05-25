@@ -21,3 +21,8 @@ necessari per il tuo progetto.
 
 - [DESIGN 009 — Export File Nativo](docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 009-native — Modulo nativo WinRT Save Picker](docs/2-projects/009-native-DESIGN_winrt-save-picker_v0.1.0.md) — v0.1.0 — DRAFT (approvato Consiglio AI 2026-05-25)
+
+## Stato PLAN / TODO
+
+- [PLAN 009-native — Bridge C++/WinRT WinRT Save Picker](docs/3-coding-plans/009-native-PLAN_winrt-save-picker_v0.1.0.md) — v0.1.0 — DRAFT
+- [TODO 009-native — Bridge C++/WinRT WinRT Save Picker](docs/4-todo-lists/009-native-TODO_winrt-save-picker_v0.1.0.md) — v0.1.0 — PENDING
