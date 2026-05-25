@@ -54,13 +54,13 @@ ramo: main
 
 | # | Precondizione | Comando di verifica | Esito atteso | Status |
 |---|--------------|---------------------|--------------|--------|
-| P1 | DESIGN 001 MERGED | `grep -n "DESIGN 001" docs/todo-master.md` | IMPLEMENTED | [ ] |
-| P2 | DESIGN 002 MERGED | `grep -n "DESIGN 002" docs/todo-master.md` | IMPLEMENTED | [ ] |
-| P3 | DESIGN 007 REVIEWED+ | Frontmatter `docs/2-projects/007-DESIGN_async-cache-hydration_v0.1.0.md` | `stato: REVIEWED` o successivo | [ ] |
+| P1 | DESIGN 001 MERGED | `grep -n "DESIGN 001" docs/todo-master.md` | IMPLEMENTED | [x] VERIFIED — 2026-05-25 — confermato da utente |
+| P2 | DESIGN 002 MERGED | `grep -n "DESIGN 002" docs/todo-master.md` | IMPLEMENTED | [x] VERIFIED — 2026-05-25 — confermato da utente |
+| P3 | DESIGN 007 REVIEWED+ | Frontmatter `docs/2-projects/007-DESIGN_async-cache-hydration_v0.1.0.md` | `stato: REVIEWED` o successivo | [x] VERIFIED — 2026-05-25 — stato: REVIEWED (comando Select-String confermato) |
 | P4 | DESIGN 008 REVIEWED | Frontmatter `docs/2-projects/008-DESIGN_network-connectivity_v0.1.0.md` | `stato: REVIEWED` | [x] |
 | P5 | Consumer di `useOnlineStatus` = 0 | `grep -R "useOnlineStatus" src/`; `grep -R "use-online-status" src/` | 0 occorrenze entrambi | [x] (verificato Fase 0) |
-| P6 | Branch corrente = `main` | `git branch --show-current` | `main` | [ ] |
-| P7 | Working tree pulito | `git status --short` | (vuoto) o solo file di lavoro autorizzati | [ ] |
+| P6 | Branch corrente = `main` | `git branch --show-current` | `main` | [x] VERIFIED — 2026-05-25 — comando git branch --show-current: main |
+| P7 | Working tree pulito | `git status --short` | (vuoto) o solo file di lavoro autorizzati | [x] VERIFIED — 2026-05-25 — file di lavoro rimosso dal tracciamento Git |
 
 > Se anche una sola precondizione non è soddisfatta: **STOP**, risolvere
 > e ripetere la verifica. Non passare a T1.
@@ -97,7 +97,7 @@ ramo: main
       `cd ios && bundle exec pod install && cd ..`. Per Android, nessuna
       azione (autolinking RN 0.74+).
 - [ ] Verificare TypeScript: `npx tsc --noEmit` exit code 0 (entro
-      baseline ≤ 8 errori; vedi NOTA 1).
+      baseline ≤ 3 errori; vedi NOTA 1).
 
 > **NOTA QA T1**: la libreria NetInfo non deve essere importata in nessun
 > file applicativo in T1. L'unico import previsto è in T2 dentro
@@ -253,10 +253,13 @@ ramo: main
 > scenari su `AppDataContext.spec.ts` oltre a quanto già previsto da
 > PLAN 007. T7 è una conversione, non una creazione.
 
+> **[NOTA T7]** Esito da compilare a conclusione del task:
+> indicare "zero anomalie" oppure elenco anomalie rilevate.
+
 ### T8 — Full suite + verifica baseline tsc
 
 - [ ] `npx jest` (intera suite). Exit code 0.
-- [ ] `npx tsc --noEmit`. Errori ≤ baseline (8). I nuovi file non
+- [ ] `npx tsc --noEmit`. Errori ≤ baseline (3). I nuovi file non
       contribuiscono errori aggiuntivi.
 - [ ] Verifica manuale che la suite di crypto, ExportService e App.test
       continuino a passare (non-regressione).
@@ -269,8 +272,10 @@ ramo: main
 
 ### NOTA 1 — Baseline TypeScript
 
-La baseline corrente di `npx tsc --noEmit` su `main` è ≤ 8 errori
-(coerente con PLAN 007 NOTA 1). PLAN 008 non deve aumentarla. I file
+La baseline corrente di `npx tsc --noEmit` su `main` è ≤ 3 errori
+(verificata il 2026-05-25; il valore precedente di 8 era una stima
+derivata da PLAN 007 NOTA 1 non basata su misurazione reale).
+PLAN 008 non deve aumentarla. I file
 nuovi `src/context/NetworkStatusContext.tsx` e
 `src/hooks/use-network-status.ts` devono compilare senza errori.
 
@@ -385,7 +390,7 @@ Esempio:
 - T3: `refactor(network): remove deprecated use-online-status hook (PLAN 008 T3)`
 - T4: `refactor(app-data): replace navigator.onLine with useNetworkStatus (PLAN 008 T4)`
 - T5: `feat(app): wire NetworkStatusProvider above AuthProvider (PLAN 008 T5)`
-- T6: `test(network): add 4-scenario coverage for useNetworkStatus (PLAN 008 T6)`
+- T6: `test(network): add 6-scenario coverage for useNetworkStatus (PLAN 008 T6)`
 - T7: `test(app-data): convert it.todo to executable network-mock tests (PLAN 008 T7)`
 - T8: `chore(plan-008): close PLAN 008 — full suite green, gates verified`
 
@@ -395,7 +400,7 @@ Esempio:
 
 | Data | Blocco | Agente | Esito | Note |
 |------|--------|--------|-------|------|
-| | | | | |
+| 2026-05-25 | Pre-flight P1-P7 | Copilot | ✅ COMPLETATO | Sessione: pre-flight PLAN 008 — Agente: Copilot — tutte le precondizioni verificate, baseline TS aggiornata da 8 a 3 |
 
 ---
 
@@ -403,7 +408,7 @@ Esempio:
 
 Rispecchia PLAN 008 §7. Spuntare solo dopo verifica strumentale.
 
-- [ ] **G1** — `npx tsc --noEmit` exit code 0 o errori ≤ baseline (8).
+- [ ] **G1** — `npx tsc --noEmit` exit code 0 o errori ≤ baseline (3).
 - [ ] **G2** — `grep -RnE "navigator\.onLine" src/` → 0 occorrenze (INV-1).
 - [ ] **G3** — `grep -RnE "addEventListener\(['\"](online|offline)['\"]" src/` → 0 occorrenze (INV-1).
 - [ ] **G4** — `grep -RnE "NetInfo\.addEventListener|NetInfo\.fetch" src/`

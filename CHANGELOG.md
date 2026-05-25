@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Changed — 2026-05-25
+
+- **PLAN 008 / TODO 008**: compilato log pre-flight precondizioni P1-P7
+  con esiti verificati da utente in data 2026-05-25. Stato operativo:
+  tutte le precondizioni soddisfatte, PLAN 008 pronto all'esecuzione.
+- **PLAN 008 / TODO 008**: aggiornata baseline TypeScript da 8 a 3 errori
+  (valore reale verificato il 2026-05-25; la stima precedente di 8 era
+  derivata da PLAN 007 NOTA 1, non da misurazione diretta).
+- **TODO 008**: corretti refusi minori — uniformato conteggio scenari di
+  test nel perimetro (da "4 scenari" a "6 scenari" nella tabella §4.1 di
+  PLAN 008 e nel messaggio di commit T6); aggiunta nota esito da compilare
+  per task T7.
+
 ### Documentation
 
 - **PLAN 008 — Network connectivity (DRAFT)**

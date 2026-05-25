@@ -172,7 +172,7 @@ aggiungono solo nuovi test.
 | `src/hooks/use-online-status.ts` | **eliminazione** | T3 |
 | `src/context/AppDataContext.tsx` | rimozione 2 check inline `navigator.onLine`, consumo `useNetworkStatus()` | T4 |
 | `App.tsx` | inserimento `<NetworkStatusProvider>` sopra `<AuthProvider>` | T5 |
-| `__tests__/use-network-status.spec.ts` (nuovo) | unit + integration test sui 4 scenari | T6 |
+| `__tests__/use-network-status.spec.ts` (nuovo) | unit + integration test sui 6 scenari | T6 |
 | `__tests__/AppDataContext.spec.ts` | conversione/aggiunta di `it.todo` esistenti che dipendono dal contratto rete | T7 |
 
 ### 4.2 Fuori scope (esplicito)
@@ -283,7 +283,7 @@ di validazione locale (vedi anche gate Sezione 7).
 - **Gate di accettazione T1**:
   - `node -p "require('./package.json').dependencies['@react-native-community/netinfo']"`
     restituisce una stringa di versione non `undefined`.
-  - `npx tsc --noEmit` exit code 0 (o entro baseline ≤ 8, vedi Gate G1).
+  - `npx tsc --noEmit` exit code 0 (o entro baseline ≤ 3, vedi Gate G1).
   - Annotazione manuale `pod install` documentata in TODO 008.
 
 ### T2 — Creazione `NetworkStatusProvider` e hook `useNetworkStatus`
@@ -499,7 +499,7 @@ di validazione locale (vedi anche gate Sezione 7).
   ```
 - **Dipende da**: T7 completato.
 - **Gate di accettazione T8**: tutti i test esistenti passano +
-  i nuovi test di T6 passano + `npx tsc --noEmit` entro baseline ≤ 8.
+  i nuovi test di T6 passano + `npx tsc --noEmit` entro baseline ≤ 3.
 
 ---
 
@@ -514,8 +514,9 @@ gate seguenti siano superati.
 npx tsc --noEmit
 ```
 
-Exit code 0 oppure conteggio errori ≤ 8 (baseline aggiornata
-2026-05-24, vedi PLAN 007 NOTA 1). I file nuovi
+Exit code 0 oppure conteggio errori ≤ 3 (baseline verificata il
+2026-05-25, aggiornata da 8; precedente stima PLAN 007 NOTA 1
+non rifletteva il valore reale). I file nuovi
 `src/context/NetworkStatusContext.tsx` e
 `src/hooks/use-network-status.ts` non devono contribuire errori
 aggiuntivi rispetto alla baseline.
@@ -671,7 +672,7 @@ Sezione 4.2. Sono ripresi fedelmente da DESIGN 008 §10:
 
 | Data | Blocco | Agente | Esito | Note |
 |------|--------|--------|-------|------|
-| | | | | |
+| 2026-05-25 | Pre-flight P1-P7 | Copilot | ✅ COMPLETATO | Sessione: pre-flight PLAN 008 — baseline TS aggiornata da 8 a 3 |
 
 ---
 
