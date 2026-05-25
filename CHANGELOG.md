@@ -2,6 +2,36 @@
 
 ## [Unreleased]
 
+### Added — 2026-05-25
+
+- **PLAN 009 / TODO 009 — Export File Nativo (DRAFT)**
+  ([docs/3-coding-plans/009-PLAN_export-nativo_v0.1.0.md](docs/3-coding-plans/009-PLAN_export-nativo_v0.1.0.md),
+  [docs/4-todo-lists/009-TODO_export-nativo_v0.1.0.md](docs/4-todo-lists/009-TODO_export-nativo_v0.1.0.md)).
+  Piano operativo derivato da DESIGN 009 (REVIEWED+, P1/P2/P3 SODDISFATTE)
+  per costruire ex novo il delivery layer di export file in
+  `src/context/AppDataContext.tsx`, eliminando l'import rotto di
+  `downloadFile` (riga 3) e introducendo l'architettura a tre layer:
+  L1 `exportToCSV` (invariante in `helpers.ts`), L2 `ExportService` nuovo
+  in `src/lib/export-service.ts` (asincrono, multi-formato, disaccoppiato
+  dalla UI), L3 `handleExportCSV` riscritto come `async` con branching
+  sui 7 reason di `ExportResult`. Strategia di delivery condizionale per
+  piattaforma: iOS/Android share sheet via `react-native-share`; Windows
+  via `@react-native-windows/fs` (Layer A scrittura) + modulo nativo
+  custom in `src/native/WinRTSavePicker/` con bridge C++/WinRT su
+  `Windows.Storage.Pickers.FileSavePicker` (Layer B selezione path —
+  decisione P1 DESIGN 009 §10). 8 task atomici T1-T8, 10 gate di chiusura
+  G1-G10, 8 invarianti normative (INV-1..INV-6 + INV-B1/B2 di boundary
+  PLAN 007/008), 4 debiti tecnici registrati DT-009-01..04. Baseline
+  TypeScript di partenza = 3 errori (verificata 2026-05-25 su `main`,
+  working tree pulito, DESIGN 009 mergiato). Versioni esatte di
+  `react-native-share` e `@react-native-windows/fs` marcate come
+  **DATO NON DISPONIBILE** in stesura (DT-009-01, DT-009-02): T2 bloccato
+  finché il maintainer non le fissa nelle precondizioni P9/P10 del TODO.
+  Breaking change pianificato sulla firma di `handleExportCSV`:
+  `() => void` → `() => Promise<void>` (DESIGN 009 §7, ammesso in
+  pre-release 0.x.x). Censimento consumer P3 conferma 9 occorrenze in 8
+  file, nessun consumer runtime esterno a `AppDataContext.tsx`.
+
 ### Changed — 2026-05-25
 
 - **PLAN 008 / TODO 008**: compilato log pre-flight precondizioni P1-P7
