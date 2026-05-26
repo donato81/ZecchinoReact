@@ -3,7 +3,7 @@ tipo: coding-plan
 riferimento-design: docs/2-projects/003-DESIGN_fix-accessibility-engine_v1.0.0.md
 versione: 1.0.0
 data-estrazione: 2026-05-19
-stato: READY
+stato: IMPLEMENTED
 ---
 
 # PLAN 003 — Fix accessibility engine

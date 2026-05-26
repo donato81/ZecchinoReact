@@ -3,7 +3,7 @@ tipo: coding-plan
 titolo: PLAN 009-native — Bridge C++/WinRT WinRT Save Picker
 versione: 0.1.0
 data: 2026-05-25
-stato: DRAFT
+stato: IMPLEMENTED
 design-padre: docs/2-projects/009-native-DESIGN_winrt-save-picker_v0.1.0.md
 plan-padre: docs/3-coding-plans/009-PLAN_export-nativo_v0.1.0.md
 ramo: main

@@ -3,7 +3,7 @@ tipo: todo
 titolo: Fix provider bootstrap — Gruppo 2 (N11, N8, N6)
 versione: 0.2.0
 data: 2026-05-14
-stato: STATIC_GATES_PASSED
+stato: IMPLEMENTED
 coding-plan: docs/3-coding-plans/002-PLAN_fix-provider-bootstrap_v0.2.0.md
 design: docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md
 ---

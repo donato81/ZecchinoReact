@@ -3,7 +3,7 @@ tipo: coding-plan
 titolo: Fix provider bootstrap — Gruppo 2 (N11, N8, N6)
 versione: 0.2.0
 data: 2026-05-14
-stato: READY
+stato: IMPLEMENTED
 sorgente: docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md
 branch-suggerito: fix/provider-bootstrap-n11-n8-n6
 ---

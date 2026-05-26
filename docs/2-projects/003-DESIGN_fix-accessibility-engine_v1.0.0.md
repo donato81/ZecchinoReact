@@ -4,7 +4,7 @@ titolo: "Fix accessibility engine — layer src/accessibility/ e locales minimal
 versione: 1.0.0
 data: 2026-05-18
 data-ultima-revisione: 2026-05-21
-stato: CORRETTO — IN ATTESA DI IMPLEMENTAZIONE
+stato: IMPLEMENTED
 stato-revisione: VALIDATO
 governance-version: 1.0.0
 autore: donny-81

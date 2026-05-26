@@ -3,7 +3,7 @@ tipo: todo-list
 titolo: TODO operativa — Network connectivity (PLAN 008)
 versione: 0.1.0
 data: 2026-05-25
-stato: DRAFT
+stato: IMPLEMENTED
 plan: docs/3-coding-plans/008-PLAN_network-connectivity_v0.1.0.md
 design: docs/2-projects/008-DESIGN_network-connectivity_v0.1.0.md
 strategia: Strategia A — migrazione completa (file `use-online-status.ts` eliminato, 0 consumer verificati)

@@ -3,7 +3,7 @@ tipo: plan
 titolo: Export File Nativo — delivery layer multi-formato e multi-piattaforma
 versione: 0.1.0
 data: 2026-05-25
-stato: DRAFT
+stato: IMPLEMENTED
 design: docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md
 perimetro: src/lib/export-service.ts (nuovo), src/context/AppDataContext.tsx, src/native/ (nuovo, Windows)
 ramo: main

@@ -5,7 +5,7 @@ riferimento-design: docs/2-projects/004-DESIGN_announcements-layer_v1_0_0.md
 riferimento-plan: docs/3-coding-plans/004-PLAN_announcements-layer_v1_0_0.md
 versione: 1.0.0
 data-creazione: 2026-05-21
-stato: PENDING
+stato: IMPLEMENTED
 agente: —
 data-completamento: —
 note-stato: >-

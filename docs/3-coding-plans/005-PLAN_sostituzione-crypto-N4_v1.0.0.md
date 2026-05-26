@@ -3,7 +3,7 @@ tipo: plan
 titolo: Sostituzione crypto.subtle — N4 (encryptData / decryptData)
 versione: 1.0.0
 data: 2026-05-22
-stato: DRAFT
+stato: IMPLEMENTED
 design: docs/2-projects/005-DESIGN_sostituzione-crypto-N4_v0.5.0.md
 perimetro: src/lib/crypto.ts, index.js, package.json, __tests__/crypto/
 ---

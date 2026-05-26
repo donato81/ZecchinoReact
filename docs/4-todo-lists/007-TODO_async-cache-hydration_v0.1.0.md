@@ -5,7 +5,7 @@ riferimento-design: docs/2-projects/007-DESIGN_async-cache-hydration_v0.1.0.md
 riferimento-plan: docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md
 versione: 0.1.0
 data-creazione: 2026-05-23
-stato: PENDING
+stato: IMPLEMENTED
 ramo: main
 agente: —
 data-completamento: —

@@ -3,7 +3,7 @@ tipo: design
 titolo: Fix provider bootstrap — Gruppo 2 (N11, N8, N6)
 versione: 0.2.0
 data: 2026-05-14
-stato: REVIEWED
+stato: IMPLEMENTED
 sorgente: docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md
 perimetro: tsconfig.json, src/context/AuthContext.tsx, src/hooks/use-inactivity-timer.ts, src/components/ActivityDetectorView.tsx (CREATE — fuori perimetro originale, indispensabile per N6)
 ---

@@ -3,7 +3,7 @@ tipo: todo
 titolo: Fix blocchi di avvio — Gruppo 1 (B1–B6)
 versione: 0.1.0
 data: 2026-05-13
-stato: ACTIVE
+stato: IMPLEMENTED
 coding-plan: docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md
 design: docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md
 ---

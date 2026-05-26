@@ -3,7 +3,7 @@ tipo: design
 titolo: Fix blocchi di avvio â€” Gruppo 1 (B1â€“B6)
 versione: 0.1.0
 data: 2026-05-13
-stato: REVIEWED
+stato: IMPLEMENTED
 sorgente: docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md
 perimetro: babel.config.js, package.json, src/context/AuthContext.tsx, src/context/AppDataContext.tsx, src/lib/supabase/client.ts, src/components/ui/button.tsx, src/env.d.ts
 ---

@@ -6,7 +6,7 @@ riferimento-plan: docs/3-coding-plans/006-PLAN_kdf-pin_v1.1.0.md
 versione: 1.1.0
 data-creazione: 2026-05-22
 data-revisione: 2026-05-26
-stato: COMPLETED
+stato: IMPLEMENTED
 agente: GitHub Copilot
 data-completamento: 2026-05-26
 note-stato: >-

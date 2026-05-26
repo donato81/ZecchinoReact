@@ -1,6 +1,6 @@
 ---
 title: "PLAN 009 — Export nativo v0.1.0"
-status: done
+status: IMPLEMENTED
 owner: engineering
 created: 2026-05-25
 ---

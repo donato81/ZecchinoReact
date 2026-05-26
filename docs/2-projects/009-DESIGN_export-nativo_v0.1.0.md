@@ -3,7 +3,7 @@ tipo: design
 titolo: Export File Nativo — delivery layer multi-formato e multi-piattaforma
 versione: 0.1.0
 data: 2026-05-20
-stato: REVIEWED
+stato: IMPLEMENTED
 sorgente: docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md (punto N10)
 perimetro: src/lib/export-service.ts (nuovo), src/context/AppDataContext.tsx
 ---

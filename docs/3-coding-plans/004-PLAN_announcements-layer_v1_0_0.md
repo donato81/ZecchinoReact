@@ -3,7 +3,7 @@ tipo: coding-plan
 riferimento-design: docs/2-projects/004-DESIGN_announcements-layer_v1_0_0.md
 versione: 1.0.0
 data-estrazione: 2026-05-19
-stato: READY
+stato: IMPLEMENTED
 ---
 
 # PLAN 004 — Layer announcements/ e migrazione context

@@ -4,7 +4,7 @@ titolo: Key Derivation Function per PIN privato
 versione: 1.1.0
 data: 2026-05-22
 data-revisione: 2026-05-24
-stato: UPDATED
+stato: IMPLEMENTED
 design: docs/2-projects/006-DESIGN_kdf-pin_v0.4.0.md
 perimetro: >
   src/lib/crypto.ts,

@@ -3,7 +3,7 @@ tipo: coding-plan
 titolo: Network connectivity — sostituzione browser detection con NetInfo
 versione: 0.1.0
 data: 2026-05-25
-stato: DRAFT
+stato: IMPLEMENTED
 design: docs/2-projects/008-DESIGN_network-connectivity_v0.1.0.md
 dipendenze: DESIGN 001, DESIGN 002, DESIGN 007
 perimetro: src/hooks/use-network-status.ts (nuovo), src/hooks/use-online-status.ts (rimosso), src/context/NetworkStatusContext.tsx (nuovo), src/context/AppDataContext.tsx, App.tsx, __tests__/use-network-status.spec.ts (nuovo)

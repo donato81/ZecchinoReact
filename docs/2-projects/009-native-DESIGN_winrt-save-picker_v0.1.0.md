@@ -3,7 +3,7 @@ tipo: design
 titolo: Modulo nativo WinRT Save Picker — bridge C++/WinRT per FileSavePicker
 versione: 0.1.0
 data: 2026-05-25
-stato: REVIEWED
+stato: IMPLEMENTED
 sorgente: docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md (Sezione 6 Layer B + Sezione 9)
 perimetro: src/native/WinRTSavePicker/ (nuovo), windows/ZecchinoReact/ (file C++/WinRT del bridge), src/native/index.ts (nuovo)
 design-padre: docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md

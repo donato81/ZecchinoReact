@@ -3,7 +3,7 @@ tipo: design
 titolo: Sostituzione crypto.subtle — N4 (encryptData / decryptData)
 versione: 0.5.0
 data: 2026-05-22
-stato: REVIEWED
+stato: IMPLEMENTED
 sorgente: docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md
 perimetro: src/lib/crypto.ts, index.js, package.json
 problema: N4

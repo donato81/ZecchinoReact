@@ -1,6 +1,6 @@
 ---
 title: "PLAN 009-native — WinRT Save Picker TODO"
-status: draft
+status: IMPLEMENTED
 owner: engineering
 created: 2026-05-25
 ---

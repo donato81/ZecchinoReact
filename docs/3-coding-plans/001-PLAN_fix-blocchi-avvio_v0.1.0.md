@@ -3,7 +3,7 @@ tipo: coding-plan
 titolo: Fix blocchi di avvio — Gruppo 1 (B1–B6)
 versione: 0.1.0
 data: 2026-05-13
-stato: DRAFT
+stato: IMPLEMENTED
 sorgente: docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md
 branch-suggerito: fix/blocchi-avvio-b1-b6
 ---

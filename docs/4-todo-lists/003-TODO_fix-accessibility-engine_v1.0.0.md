@@ -4,7 +4,7 @@ riferimento-design: docs/2-projects/003-DESIGN_fix-accessibility-engine_v1.0.0.m
 riferimento-plan: docs/3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md
 versione: 1.0.0
 data-creazione: 2026-05-21
-stato: COMPLETATO-PARZIALE
+stato: IMPLEMENTED
 agente: Agent-Docs (modalità Agent-Coder)
 data-completamento: 2026-05-21
 note-stato: >-
