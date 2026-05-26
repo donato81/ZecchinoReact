@@ -5,6 +5,7 @@ import type { Announcement } from './types'
 import { t } from './_utils/t'
 import { formatCurrencyVocal } from './_utils/currency'
 import { pluralize } from './_utils/plurals'
+import type { ExportFailureReason } from '@/lib/export-service'
 
 function build(text: string, priority: Announcement['priority'] = 'polite'): Announcement {
   return { text, priority }
@@ -113,4 +114,28 @@ export function announceImportComplete(count: number): Announcement {
 
 export function announceExportInProgress(): Announcement {
   return build(t('export_in_corso'))
+}
+
+export function announceExportFile(_count: number): Announcement {
+  return build(t('export_success_sr'))
+}
+
+export function exportError(
+  reason: Exclude<ExportFailureReason, 'CANCELLED'>,
+): Announcement {
+  switch (reason) {
+    case 'PERMISSION_DENIED':
+      return build(t('export_permission_denied_sr'))
+    case 'FILESYSTEM_ERROR':
+      return build(t('export_filesystem_error_sr'))
+    case 'UNSUPPORTED_PLATFORM':
+      return build(t('export_unsupported_platform_sr'))
+    case 'INVALID_PATH':
+      return build(t('export_invalid_path_sr'))
+    case 'INSUFFICIENT_SPACE':
+      return build(t('export_insufficient_space_sr'))
+    case 'UNKNOWN':
+    default:
+      return build(t('export_unknown_error_sr'))
+  }
 }

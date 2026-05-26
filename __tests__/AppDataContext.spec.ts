@@ -10,19 +10,18 @@
  * di lettura cache + validazione strutturale (il punto in cui il bug N9
  * si manifestava). Per gli scenari che richiedono il mount completo del
  * Provider (state machine, generation counter su React 18 Strict Mode,
- * concorrenza refreshAll) gli scenari restano dichiarati come `it.todo`:
- * la loro abilitazione richiede l'introduzione di `@testing-library/react`
- * o equivalente harness (fuori scope PLAN 007).
+ * concorrenza refreshAll) gli scenari restano dichiarati come `it.todo`.
  *
- * PLAN 008 T7 — valutazione: nessuno degli it.todo esistenti dipende
- * specificamente dal contratto rete (useNetworkStatus). Gli scenari
- * "rete OK / rete KO" sono variazioni della state machine bootstrap e
- * restano bloccati dallo stesso vincolo harness. Quando verranno
- * abilitati (PLAN successivo), il mock di rete da usare e' quello
- * descritto in __tests__/use-network-status.spec.ts (jest.mock di
- * '@react-native-community/netinfo' + utility triggerNetInfo).
- * T7: nessuna conversione necessaria.
+ * PLAN 009 T7 aggiunge un harness minimo con react-test-renderer per
+ * esercitare solo `handleExportCSV`, lasciando invariati i boundary di
+ * bootstrap di PLAN 007/008.
  */
+
+import React from 'react'
+import TestRenderer, { act } from 'react-test-renderer'
+
+const mockScreenReaderSuccess = jest.fn()
+const mockScreenReaderError = jest.fn()
 
 jest.mock('@/lib/supabase/cache', () => ({
   CACHE_TTL_MS: 1000 * 60 * 60 * 24,
@@ -31,24 +30,191 @@ jest.mock('@/lib/supabase/cache', () => ({
   isCacheStale: jest.fn(),
 }))
 
-// Mock minimi per evitare side-effect di import a catena
 jest.mock('@/lib/supabase/client', () => ({ supabase: {} }), { virtual: true })
+jest.mock('@/context/AuthContext', () => ({ useAuth: jest.fn() }))
+jest.mock('@/hooks/use-network-status', () => ({ useNetworkStatus: jest.fn() }))
+jest.mock('@/lib/export-service', () => ({ exportFile: jest.fn() }))
+jest.mock('@/lib/helpers', () => ({
+  formatCurrency: jest.fn((value: number) => String(value)),
+  exportToCSV: jest.fn(() => 'csv-content'),
+  getActiveBudgets: jest.fn(() => []),
+  getBudgetProgress: jest.fn(() => ({ percentage: 0, spent: 0, remaining: 0 })),
+}))
+jest.mock('@/lib/budget-alerts', () => ({
+  shouldShowBudgetNotification: jest.fn(() => ({ shouldShow: false, level: null })),
+  getBudgetNotificationTitle: jest.fn(() => 'Budget'),
+}))
+jest.mock('@/lib/sound-system', () => ({
+  soundSystem: {
+    play: jest.fn(),
+  },
+}))
+jest.mock('@/lib/haptic-system', () => ({
+  hapticSystem: {
+    export: jest.fn(),
+    save: jest.fn(),
+    income: jest.fn(),
+    expense: jest.fn(),
+    transfer: jest.fn(),
+    delete: jest.fn(),
+    accountCreated: jest.fn(),
+    accountDeleted: jest.fn(),
+    budgetCreated: jest.fn(),
+    budgetDeleted: jest.fn(),
+    goalCreated: jest.fn(),
+    dialogOpen: jest.fn(),
+    budgetExceeded: jest.fn(),
+    budgetCritical: jest.fn(),
+    budgetWarning: jest.fn(),
+  },
+}))
+jest.mock('@/announcements', () => ({
+  announce: jest.fn(),
+  accounts: {
+    announceExportFile: jest.fn((count: number) => ({ text: `export:${count}`, priority: 'polite' })),
+    exportError: jest.fn((reason: string) => ({ text: `error:${reason}`, priority: 'assertive' })),
+    announceAccountModified: jest.fn(),
+    announceAccountCreated: jest.fn(),
+    announceTransactionModified: jest.fn(),
+    announceTransaction: jest.fn(),
+    announceAccountDeleted: jest.fn(),
+    announceAccountDeletedGeneric: jest.fn(),
+    announceTransactionDeleted: jest.fn(),
+  },
+  budgets: {
+    announceBudgetModified: jest.fn(),
+    announceBudgetCreated: jest.fn(),
+    announceSavingsGoalModified: jest.fn(),
+    announceSavingsGoalCreated: jest.fn(),
+    announceBudgetDeleted: jest.fn(),
+    announceBudgetDeletedGeneric: jest.fn(),
+    announceSavingsGoalDeleted: jest.fn(),
+    announceSavingsGoalDeletedGeneric: jest.fn(),
+  },
+}))
+jest.mock('@/lib/supabase/repositories/conti', () => ({
+  getAll: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  remove: jest.fn(),
+}))
+jest.mock('@/lib/supabase/repositories/transazioni', () => ({
+  getAll: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  remove: jest.fn(),
+}))
+jest.mock('@/lib/supabase/repositories/categorie', () => ({
+  getAll: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  remove: jest.fn(),
+}))
+jest.mock('@/lib/supabase/repositories/budget', () => ({
+  getAll: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  remove: jest.fn(),
+}))
+jest.mock('@/lib/supabase/repositories/obiettivi-risparmio', () => ({
+  getAll: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  remove: jest.fn(),
+  updateProgress: jest.fn(),
+}))
+jest.mock(
+  '@/lib/screen-reader',
+  () => ({
+    screenReader: {
+      announceSuccess: mockScreenReaderSuccess,
+      announceError: mockScreenReaderError,
+    },
+  }),
+  { virtual: true },
+)
 
+import { AppDataProvider, useAppData } from '@/context/AppDataContext'
+import { useAuth } from '@/context/AuthContext'
+import { useNetworkStatus } from '@/hooks/use-network-status'
 import { readCachedDomainSnapshotPure } from '@/context/app-data-cache'
+import { announce, accounts as accountsAnn } from '@/announcements'
+import { exportFile } from '@/lib/export-service'
+import { exportToCSV } from '@/lib/helpers'
+import { soundSystem } from '@/lib/sound-system'
+import { hapticSystem } from '@/lib/haptic-system'
 import { readCache, isCacheStale } from '@/lib/supabase/cache'
 
 const mockReadCache = readCache as jest.MockedFunction<typeof readCache>
 const mockIsCacheStale = isCacheStale as jest.MockedFunction<typeof isCacheStale>
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
+const mockUseNetworkStatus = useNetworkStatus as jest.MockedFunction<typeof useNetworkStatus>
+const mockExportFile = exportFile as jest.MockedFunction<typeof exportFile>
+const mockExportToCSV = exportToCSV as jest.MockedFunction<typeof exportToCSV>
+const mockAnnounce = announce as jest.MockedFunction<typeof announce>
+const mockAnnounceExportFile = accountsAnn.announceExportFile as jest.Mock
+const mockExportErrorAnnouncement = accountsAnn.exportError as jest.Mock
+const mockSoundPlay = soundSystem.play as jest.Mock
+const mockHapticExport = hapticSystem.export as jest.Mock
 
 const USER = 'user-test-007'
+
+type AppDataValue = ReturnType<typeof useAppData>
 
 function entry<T>(data: T, cachedAt = new Date().toISOString()) {
   return { data, cachedAt, version: 1 }
 }
 
+function renderAppDataProvider(): {
+  getValue: () => AppDataValue
+  unmount: () => void
+} {
+  let captured: AppDataValue | null = null
+  let renderer: TestRenderer.ReactTestRenderer
+
+  function CaptureContext(): null {
+    captured = useAppData()
+    return null
+  }
+
+  act(() => {
+    renderer = TestRenderer.create(
+      React.createElement(
+        AppDataProvider,
+        null,
+        React.createElement(CaptureContext),
+      ),
+    )
+  })
+
+  return {
+    getValue: () => {
+      if (!captured) {
+        throw new Error('AppDataContext non disponibile nel test')
+      }
+      return captured
+    },
+    unmount: () => {
+      act(() => {
+        renderer.unmount()
+      })
+    },
+  }
+}
+
 beforeEach(() => {
   jest.clearAllMocks()
   mockIsCacheStale.mockResolvedValue(false)
+  mockUseAuth.mockReturnValue({ isAuthenticated: false, user: null } as never)
+  mockUseNetworkStatus.mockReturnValue({
+    isOffline: false,
+    isInitialized: true,
+    isConnected: true,
+    isInternetReachable: true,
+    connectionType: 'wifi',
+  } as never)
+  mockExportFile.mockResolvedValue({ success: true })
+  mockExportToCSV.mockReturnValue('csv-content')
 })
 
 describe('AppDataContext — PLAN 007', () => {
@@ -85,12 +251,8 @@ describe('AppDataContext — PLAN 007', () => {
     })
 
     it('Bug N9 originale — payload Promise non risolta → null (guard struttura)', async () => {
-      // Simula il bug: readCache restituisce CacheEntry il cui .data è una Promise
-      // (sintomo storico: assenza di await all'interno della lettura).
       const fakePromise = Promise.resolve([])
-      mockReadCache.mockImplementation(
-        async () => entry(fakePromise as unknown as never),
-      )
+      mockReadCache.mockImplementation(async () => entry(fakePromise as unknown as never))
       const out = await readCachedDomainSnapshotPure(USER)
       expect(out).toBeNull()
     })
@@ -139,6 +301,212 @@ describe('AppDataContext — PLAN 007', () => {
     it.todo('errore writeCache: no unhandled promise rejection')
     it.todo('errore writeCache: no alterazione stato React in memoria')
     it.todo('errore su una tabella: altre tabelle vengono comunque scritte')
+  })
+
+  describe('PLAN 009 — handleExportCSV async branching', () => {
+    let logSpy: jest.SpyInstance
+    let errorSpy: jest.SpyInstance
+    let warnSpy: jest.SpyInstance
+
+    beforeEach(() => {
+      logSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined)
+      errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+      warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    })
+
+    afterEach(() => {
+      logSpy.mockRestore()
+      errorSpy.mockRestore()
+      warnSpy.mockRestore()
+    })
+
+    it('handleExportCSV ritorna Promise<void>', async () => {
+      const harness = renderAppDataProvider()
+      const transactions = [{ id: 't1' }] as never
+      const accounts = [{ id: 'a1' }] as never
+
+      const promise = harness.getValue().handleExportCSV(transactions, accounts)
+
+      expect(promise).toBeInstanceOf(Promise)
+      await expect(promise).resolves.toBeUndefined()
+      harness.unmount()
+    })
+
+    it('success branch: sound, haptic, toast success e exportFile invocati', async () => {
+      const harness = renderAppDataProvider()
+      const transactions = [{ id: 't1' }, { id: 't2' }] as never
+      const accounts = [{ id: 'a1' }] as never
+
+      await act(async () => {
+        await harness.getValue().handleExportCSV(transactions, accounts)
+      })
+
+      expect(mockExportToCSV).toHaveBeenCalledWith(transactions, accounts, [])
+      expect(mockExportFile).toHaveBeenCalledWith(
+        'csv-content',
+        expect.stringMatching(/^zecchino-export-\d+\.csv$/),
+        'text/csv',
+      )
+      expect(mockSoundPlay).toHaveBeenCalledWith('export')
+      expect(mockHapticExport).toHaveBeenCalled()
+      expect(logSpy).toHaveBeenCalledWith('[toast:success]', 'Export completato', '')
+      harness.unmount()
+    })
+
+    it('cancelled branch: nessun toast di errore e nessun announce errore', async () => {
+      const harness = renderAppDataProvider()
+      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'CANCELLED' })
+
+      await act(async () => {
+        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
+      })
+
+      expect(errorSpy).not.toHaveBeenCalledWith('[toast:error]', expect.any(String), '')
+      expect(mockExportErrorAnnouncement).not.toHaveBeenCalled()
+      harness.unmount()
+    })
+
+    it('PERMISSION_DENIED -> toast error e announce exportError', async () => {
+      const harness = renderAppDataProvider()
+      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'PERMISSION_DENIED' })
+
+      await act(async () => {
+        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
+      })
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        '[toast:error]',
+        'Permesso negato: concedi accesso allo storage',
+        '',
+      )
+      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('PERMISSION_DENIED')
+      harness.unmount()
+    })
+
+    it('FILESYSTEM_ERROR -> toast error e announce exportError', async () => {
+      const harness = renderAppDataProvider()
+      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'FILESYSTEM_ERROR' })
+
+      await act(async () => {
+        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
+      })
+
+      expect(errorSpy).toHaveBeenCalledWith('[toast:error]', 'Errore di scrittura, riprova', '')
+      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('FILESYSTEM_ERROR')
+      harness.unmount()
+    })
+
+    it('UNSUPPORTED_PLATFORM -> toast error e announce exportError', async () => {
+      const harness = renderAppDataProvider()
+      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'UNSUPPORTED_PLATFORM' })
+
+      await act(async () => {
+        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
+      })
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        '[toast:error]',
+        'Funzionalità non disponibile su questa piattaforma',
+        '',
+      )
+      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('UNSUPPORTED_PLATFORM')
+      harness.unmount()
+    })
+
+    it('INVALID_PATH -> toast error e announce exportError', async () => {
+      const harness = renderAppDataProvider()
+      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'INVALID_PATH' })
+
+      await act(async () => {
+        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
+      })
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        '[toast:error]',
+        'Percorso non valido, scegline un altro',
+        '',
+      )
+      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('INVALID_PATH')
+      harness.unmount()
+    })
+
+    it('INSUFFICIENT_SPACE -> toast error e announce exportError', async () => {
+      const harness = renderAppDataProvider()
+      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'INSUFFICIENT_SPACE' })
+
+      await act(async () => {
+        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
+      })
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        '[toast:error]',
+        'Spazio insufficiente sul dispositivo',
+        '',
+      )
+      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('INSUFFICIENT_SPACE')
+      harness.unmount()
+    })
+
+    it('UNKNOWN -> toast error e announce exportError generico', async () => {
+      const harness = renderAppDataProvider()
+      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'UNKNOWN' })
+
+      await act(async () => {
+        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
+      })
+
+      expect(errorSpy).toHaveBeenCalledWith('[toast:error]', "Errore durante l'esportazione", '')
+      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('UNKNOWN')
+      harness.unmount()
+    })
+
+    it('success branch: announceExportFile riceve visibleTransactions.length', async () => {
+      const harness = renderAppDataProvider()
+      const transactions = [{ id: 't1' }, { id: 't2' }, { id: 't3' }] as never
+
+      await act(async () => {
+        await harness.getValue().handleExportCSV(transactions, [{ id: 'a1' }] as never)
+      })
+
+      expect(mockAnnounceExportFile).toHaveBeenCalledWith(3)
+      expect(mockAnnounce).toHaveBeenCalledWith({ text: 'export:3', priority: 'polite' })
+      harness.unmount()
+    })
+
+    it('error branches: exportError viene invocato per tutti i 6 reason di errore', async () => {
+      const harness = renderAppDataProvider()
+      const reasons = [
+        'PERMISSION_DENIED',
+        'FILESYSTEM_ERROR',
+        'UNSUPPORTED_PLATFORM',
+        'INVALID_PATH',
+        'INSUFFICIENT_SPACE',
+        'UNKNOWN',
+      ] as const
+
+      for (const reason of reasons) {
+        mockExportFile.mockResolvedValueOnce({ success: false, reason })
+        await act(async () => {
+          await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
+        })
+      }
+
+      expect(mockExportErrorAnnouncement.mock.calls.map(([reason]) => reason)).toEqual(reasons)
+      harness.unmount()
+    })
+
+    it('assenza chiamate dirette screenReader: announceSuccess e announceError non vengono invocati', async () => {
+      const harness = renderAppDataProvider()
+      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'PERMISSION_DENIED' })
+
+      await act(async () => {
+        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
+      })
+
+      expect(mockScreenReaderSuccess).not.toHaveBeenCalled()
+      expect(mockScreenReaderError).not.toHaveBeenCalled()
+      harness.unmount()
+    })
   })
 })
 

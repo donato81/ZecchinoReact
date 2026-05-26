@@ -153,7 +153,7 @@ type FsModule = {
 function loadOptionalFsModule(): FsModule | null {
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
-    return require('react-native-fs') as FsModule
+    return require('@react-native-windows/fs') as FsModule
   } catch {
     return null
   }

@@ -48,9 +48,9 @@
   con/senza estensione). Suite globale: 7 suite PASS,
   36 passed + 39 todo.
 
-#### Stato release v0.3.0
+#### Stato
 
-- ⚠️ **SOSPESA** fino a sblocco T3-N5 (validazione build
+- ⚠️ **Fuori dalla release 0.3.0** fino a sblocco T3-N5 (validazione build
   Windows). Causa: blocker upstream
   `@react-native-community/netinfo@12.0.1` +
   Windows App SDK 1.8.x — `RNCNetInfoCPP.vcxproj` non
@@ -67,6 +67,18 @@
   ambiente Android non configurato sulla macchina
   maintainer. Mitigazione: i test Jest mock-based coprono il
   fallback `PICKER_UNAVAILABLE` del dispatcher.
+
+## [0.3.0] - 2026-05-26
+
+### Rollup release
+
+- Promossi in release i piani 001, 002, 003, 004, 005, 007, 008 e 009
+  padre. Il sotto-piano `009-native` resta in `Unreleased` perché manca
+  ancora la validazione runtime T3-N5 su Windows e Android.
+- Baseline TypeScript migliorata da 3 a 2 errori residui, entrambi
+  esterni al perimetro release in `src/lib/budget-templates.ts` su
+  `@phosphor-icons/react`.
+- Suite completa verde: 7 suite PASS, 50 test PASS, 16 `todo`.
 
 ### Documentation
 
@@ -182,6 +194,32 @@
 - Reso obbligatorio il test UNKNOWN in T6
 - Aggiunta nota di governance su P4/P5 (verifica pre-codifica)
 - Corretti comandi di install in T2
+
+### PLAN 009 — Export File Nativo (2026-05-26)
+
+- **Wiring runtime completato in `AppDataContext`**
+  ([src/context/AppDataContext.tsx](src/context/AppDataContext.tsx)).
+  `handleExportCSV` passa da `void` a `Promise<void>`, rimuove il
+  riferimento rotto a `downloadFile`, usa `exportFile(...)`, gestisce i
+  7 reason di `ExportResult` e delega gli annunci a
+  `announce(accounts.announceExportFile(...))` /
+  `announce(accounts.exportError(...))`.
+- **Nuove chiavi localizzazione export**
+  ([src/locales/it.ts](src/locales/it.ts)).
+  Aggiunte 14 chiavi per toast e annunci screen reader di export
+  (`export_success_*`, `export_permission_denied_*`,
+  `export_filesystem_error_*`, `export_unsupported_platform_*`,
+  `export_invalid_path_*`, `export_insufficient_space_*`,
+  `export_unknown_error_*`).
+- **Announcements export allineati al piano**
+  ([src/announcements/accounts.ts](src/announcements/accounts.ts)).
+  Aggiunti `announceExportFile()` ed `exportError()` per il routing
+  accessibile del risultato export.
+- **Test eseguibili export**
+  ([__tests__/ExportService.test.ts](__tests__/ExportService.test.ts),
+  [__tests__/AppDataContext.spec.ts](__tests__/AppDataContext.spec.ts)).
+  Coperti 11 scenari contrattuali + no-throw per `ExportService` e 12
+  scenari per il branching async di `handleExportCSV`.
 
 ### Documentation
 
@@ -428,6 +466,9 @@
   `hashPin`/`verifyPin` (bcryptjs) NON toccati.
   Errori di decifratura normalizzati a `'Decryption failed: authentication
   tag mismatch'` (chiave errata, payload manomesso o troncato).
+
+[Unreleased]: https://github.com/donato81/ZecchinoReact/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/donato81/ZecchinoReact/compare/v0.2.0...v0.3.0
 
 ### Added
 

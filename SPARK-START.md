@@ -24,5 +24,11 @@ necessari per il tuo progetto.
 
 ## Stato PLAN / TODO
 
+- [PLAN 009 — Export File Nativo](docs/3-coding-plans/009-PLAN_export-nativo_v0.1.0.md) — v0.1.0 — COMPLETATO lato piano padre
+- [TODO 009 — Export File Nativo](docs/4-todo-lists/009-TODO_export-nativo_v0.1.0.md) — v0.1.0 — DONE
 - [PLAN 009-native — Bridge C++/WinRT WinRT Save Picker](docs/3-coding-plans/009-native-PLAN_winrt-save-picker_v0.1.0.md) — v0.1.0 — DRAFT
 - [TODO 009-native — Bridge C++/WinRT WinRT Save Picker](docs/4-todo-lists/009-native-TODO_winrt-save-picker_v0.1.0.md) — v0.1.0 — PENDING
+
+Blocco residuo: `009-native` resta aperto solo per le validazioni runtime
+T3-N5 su Windows e Android. Non blocca la promozione della release 0.3.0 del
+piano padre.

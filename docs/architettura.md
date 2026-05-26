@@ -102,8 +102,9 @@ via `ReactContext.UIDispatcher().Post()`. Le eccezioni
 modo esaustivo sul discriminated union JS.
 
 `ExportService.exportFile` (in `src/lib/`) consuma il modulo via
-`@/native` quando `Platform.OS === 'windows'`. Su altre
-piattaforme il fallback `PICKER_UNAVAILABLE` evita import nativi.
+`@/native` quando `Platform.OS === 'windows'` e completa il delivery
+con `@react-native-windows/fs`. Su altre piattaforme usa share sheet
+mobile o fallback `UNSUPPORTED_PLATFORM` senza import nativi.
 
 ---
 
@@ -161,7 +162,8 @@ Tutti i file SQL sono in `docs/6-sql/`.
 |------|-------|-------|--------------|------|
 | `lib/types.ts` | lib | ✅ Compatibile | No | — |
 | `lib/constants.ts` | lib | ✅ Compatibile | No | `color` oklch / `badgeVariant` da adattare per RN |
-| `lib/helpers.ts` | lib | ✅ Compatibile | No | `downloadFile()` usa DOM (solo export CSV, non critico al boot) |
+| `lib/helpers.ts` | lib | ✅ Compatibile | No | Layer 1 invariato: contiene `exportToCSV`, nessun delivery file DOM residuo |
+| `lib/export-service.ts` | lib | ✅ Compatibile | No | Delivery export multi-piattaforma: iOS/Android via `react-native-share`, Windows via `@react-native-windows/fs` + `@/native` |
 | `lib/budget-alerts.ts` | lib | ✅ Compatibile | No | — |
 | `lib/budget-forecasting.ts` | lib | ✅ Compatibile | No | — |
 | `lib/budget-history.ts` | lib | ✅ Compatibile | No | — |
@@ -180,7 +182,7 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `lib/supabase/repositories/obiettivi-risparmio.ts` | supabase | ✅ Compatibile | No | — |
 | `lib/supabase/repositories/impostazioni-utente.ts` | supabase | ✅ Compatibile | No | — |
 | `context/AuthContext.tsx` | context | ❌ Rottura | **Sì (B3, B4)** | `sonner` + `@/components/ui/button` mancanti; `document.*` |
-| `context/AppDataContext.tsx` | context | ⚠️ Rottura residua (B3 shim) | **Sì (B3)** | `sonner` shim attivo; **bug N9 async/await su cache RISOLTO (PLAN 007 v0.2.0)** — state machine bootstrap + generation counter + fail-soft writeCache |
+| `context/AppDataContext.tsx` | context | ⚠️ Rottura residua (B3 shim) | **Sì (B3)** | `sonner` shim attivo; bug N9 RISOLTO (PLAN 007) e export nativo padre RISOLTO (PLAN 009): `handleExportCSV` ora usa `exportFile` e firma `Promise<void>` |
 | `context/app-data-cache.ts` | context | ✅ Compatibile | No | Modulo isolato (PLAN 007 T7): `readCachedDomainSnapshotPure` testabile direttamente |
 | `context/UserSettingsContext.tsx` | context | ✅ Compatibile | No | — |
 | `context/VisibleDataContext.tsx` | context | ✅ Compatibile | No | — |

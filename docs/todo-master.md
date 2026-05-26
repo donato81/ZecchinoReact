@@ -1,12 +1,12 @@
 ## 1. Metadata e Context Header
 
 - **Project Name:** ZecchinoReact
-- **Version:** 0.2.0
+- **Version:** 0.3.0
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
-- **Ultimo Agente Attivo:** Agent-Orchestrator (PLAN 009-native eseguito autonomamente — T3-N1..T3-N4 PASS, T3-N5 INCOMPLETO per blocker upstream)
-- **Blocco in Carico:** ⚠️ Release v0.3.0 SOSPESA — DT-009-N-01 (build Windows bloccata da netinfo+WAS 1.8). Implementazione 009-native completata lato codice.
+- **Ultimo Agente Attivo:** Agent-Orchestrator (PLAN 009 padre completato — T1-bis, T4, T5, T6, T7, T8 PASS; 009-native resta aperto solo per validazioni runtime T3-N5)
+- **Blocco in Carico:** Follow-up 009-native — DT-009-N-01 e DT-009-N-02 aperti per validazioni runtime Windows/Android; release 0.3.0 promossa per i piani 001–005, 007, 008, 009.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
@@ -16,7 +16,7 @@
   `use-screen-reader.ts` e `screen-reader.ts` eliminati;
   TSC baseline ridotta da 89 a 47 errori.
 - **Active Block:** Nessuno — implementazione DESIGN 004 completata.
-- **Last Updated:** 2026-05-23
+- **Last Updated:** 2026-05-26
 - **Pending Plans:**
   - **PLAN 007 COMPLETATO** (release 0.2.0) —
     `docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md`
@@ -537,7 +537,8 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
   abortiscono il restore.
 - **Impatto:** build Windows completa impossibile. Validazione
   runtime di `WinRTSavePickerModule` (PLAN 009-native) bloccata.
-  Release v0.3.0 **sospesa**.
+  Non blocca la release 0.3.0 del piano padre: blocca solo la
+  chiusura del sotto-piano 009-native.
 - **Codice nostro coinvolto:** **nessuno**. Il bridge nativo
   (`windows/ZecchinoReact/WinRTSavePickerModule.{h,cpp}`) è
   review-grade e conforme a DESIGN 009-native; aspetta solo
@@ -551,7 +552,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
      `windows/ZecchinoReact.sln` + disabilitare init JS netinfo
      (modifica invasiva, perdita feature offline detection).
 - **Owner:** maintainer (donny-81)
-- **Stato:** APERTO — release v0.3.0 bloccata fino a sblocco.
+- **Stato:** APERTO — blocca la validazione runtime Windows del modulo nativo, non la release 0.3.0 del piano padre.
 
 ### DT-009-N-02 — Ambiente Android non configurato
 

@@ -7,6 +7,12 @@ Il dominio â€” nomi variabili, tipi, label UI â€” Ã¨ interamente in 
 > L'app **non Ã¨ avviabile** fino alla risoluzione dei 6 blocchi di build documentati in  
 > [`docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md`](docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md).
 
+Stato rilascio: la release `0.3.0` promuove i piani 001, 002, 003, 004,
+005, 007, 008 e 009 padre. Il sotto-piano `009-native` resta fuori dalla
+release corrente: il codice del bridge WinRT esiste, ma la validazione
+runtime Windows/Android è ancora bloccata dai debiti tecnici documentati in
+`docs/todo-master.md`.
+
 ---
 
 ## Stack tecnologico

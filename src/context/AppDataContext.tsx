@@ -1,10 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Account, Transaction, TransactionInput, Category, Budget, SavingsGoal } from '@/lib/types'
-import { formatCurrency, exportToCSV, downloadFile, getActiveBudgets, getBudgetProgress } from '@/lib/helpers'
+import { formatCurrency, exportToCSV, getActiveBudgets, getBudgetProgress } from '@/lib/helpers'
 import { shouldShowBudgetNotification, getBudgetNotificationTitle } from '@/lib/budget-alerts'
+import { t } from '@/announcements/_utils/t'
 import { soundSystem } from '@/lib/sound-system'
 import { hapticSystem } from '@/lib/haptic-system'
 import { announce, accounts as accountsAnn, budgets as budgetsAnn } from '@/announcements'
+import { exportFile, type ExportResult } from '@/lib/export-service'
 
 // Shim temporaneo — rimpiazzare con react-native-toast-message nella fase UI.
 // Lo shim e' callable: i call site usano sia `toast(title, opts)` (in
@@ -89,7 +91,7 @@ type AppDataContextValue = {
   handleSaveBudget: (budget: Budget) => void
   handleSaveSavingsGoal: (goal: SavingsGoal) => void
   handleDeleteConfirm: () => void
-  handleExportCSV: (visibleTransactions: Transaction[], visibleAccounts: Account[]) => void
+  handleExportCSV: (visibleTransactions: Transaction[], visibleAccounts: Account[]) => Promise<void>
   handleViewBudget: (budgetId: string, onNavigate: (budget: Budget) => void) => void
   // Dialog transaction
   editingTransaction: Transaction | undefined
@@ -743,14 +745,51 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const handleExportCSV = (visibleTransactions: Transaction[], visibleAccounts: Account[]) => {
-    const csv = exportToCSV(visibleTransactions, visibleAccounts, safeCategories)
-    downloadFile(csv, `zecchino-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv')
-    soundSystem.play('export')
-    hapticSystem.export()
-    toast.success('Dati esportati in CSV')
-    announce(accountsAnn.announceExportCSV(visibleTransactions.length))
-  }
+  const handleExportCSV = useCallback(
+    async (visibleTransactions: Transaction[], visibleAccounts: Account[]): Promise<void> => {
+      const csv = exportToCSV(visibleTransactions, visibleAccounts, safeCategories)
+      const fileName = `zecchino-export-${Date.now()}.csv`
+      const result: ExportResult = await exportFile(csv, fileName, 'text/csv')
+
+      if (result.success) {
+        soundSystem.play('export')
+        hapticSystem.export()
+        toast.success(t('export_success_toast'))
+        announce(accountsAnn.announceExportFile(visibleTransactions.length))
+        return
+      }
+
+      switch (result.reason) {
+        case 'CANCELLED':
+          return
+        case 'PERMISSION_DENIED':
+          toast.error(t('export_permission_denied_toast'))
+          announce(accountsAnn.exportError('PERMISSION_DENIED'))
+          return
+        case 'FILESYSTEM_ERROR':
+          toast.error(t('export_filesystem_error_toast'))
+          announce(accountsAnn.exportError('FILESYSTEM_ERROR'))
+          return
+        case 'UNSUPPORTED_PLATFORM':
+          toast.error(t('export_unsupported_platform_toast'))
+          announce(accountsAnn.exportError('UNSUPPORTED_PLATFORM'))
+          return
+        case 'INVALID_PATH':
+          toast.error(t('export_invalid_path_toast'))
+          announce(accountsAnn.exportError('INVALID_PATH'))
+          return
+        case 'INSUFFICIENT_SPACE':
+          toast.error(t('export_insufficient_space_toast'))
+          announce(accountsAnn.exportError('INSUFFICIENT_SPACE'))
+          return
+        case 'UNKNOWN':
+        default:
+          toast.error(t('export_unknown_error_toast'))
+          announce(accountsAnn.exportError('UNKNOWN'))
+      }
+    },
+    [safeCategories],
+  )
 
   const handleViewBudget = (budgetId: string, onNavigate: (budget: Budget) => void) => {
     soundSystem.play('dialog-open')

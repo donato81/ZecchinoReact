@@ -69,7 +69,9 @@ Costanti di dominio. Dipendenza interna: `./types`.
 ## `src/lib/helpers.ts` ⚠️
 
 Calcoli e utilità. Dipendenze interne: `./types`.  
-Tutte le funzioni sono compatibili RN tranne `downloadFile` (non definita nel file corrente ma referenziata da `AppDataContext`).
+Tutte le funzioni esportate sono compatibili React Native. La generazione
+CSV resta confinata a `exportToCSV`; il delivery nativo del file è stato
+spostato in `src/lib/export-service.ts`.
 
 ### Funzioni esportate
 
@@ -278,7 +280,7 @@ export async function exportFile(
 - **iOS / Android**: share sheet nativa via `react-native-share`
   (data URL base64).
 - **Windows**: `WinRTSavePicker.pickSavePath` (vedi `src/native/`) +
-  scrittura via `react-native-fs` (opzionale, fallback
+  scrittura via `@react-native-windows/fs` (opzionale, fallback
   `UNSUPPORTED_PLATFORM` se assente).
 - **Default**: `{ success: false, reason: 'UNSUPPORTED_PLATFORM' }`.
 
@@ -556,7 +558,7 @@ concorrenti, `writeCache` fail-soft per-tabella.
 | `addBudget`, `updateBudget`, `removeBudget` | `async` | ✅ |
 | `addSavingsGoal`, `updateSavingsGoal`, `updateSavingsGoalProgress`, `removeSavingsGoal` | `async` | ✅ |
 | `refreshAll()` | `void` (no-op se `HYDRATING`/`REMOTE-SYNC` in corso) | ✅ |
-| `handleExportCSV(visibleTransactions, visibleAccounts)` | `void` | ⚠️ (chiama `downloadFile` DOM) |
+| `handleExportCSV(visibleTransactions, visibleAccounts)` | `Promise<void>` | ✅ (usa `exportToCSV` + `exportFile`, branching su `ExportResult`) |
 | Dialog state/setters (`editingTransaction`, `showTransactionDialog`, ecc.) | vari | ✅ |
 
 ### Provider esportato
