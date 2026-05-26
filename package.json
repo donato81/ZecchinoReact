@@ -1,6 +1,6 @@
 {
   "name": "ZecchinoReact",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -22,11 +22,12 @@
     "@supabase/supabase-js": "^2.105.4",
     "bcryptjs": "^3.0.3",
     "react": "19.1.1",
+    "react-dom": "19.1.1",
     "react-native": "0.82.1",
     "react-native-dotenv": "^3.4.11",
     "react-native-fs": "^2.20.0",
     "react-native-get-random-values": "^1.11.0",
-    "react-native-quick-crypto": "^1.1.5",
+    "react-native-quick-crypto": "1.1.5",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-share": "12.3.1",
     "react-native-windows": "^0.82.5"

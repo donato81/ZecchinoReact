@@ -1,6 +1,6 @@
 # Architettura — ZecchinoReact
 
-> Aggiornato al: 2026-05-13  
+> Aggiornato al: 2026-05-26  
 > Stato: Migrazione Web → React Native in corso — app non avviabile fino alla risoluzione dei 6 blocchi (vedi [REPORT_diagnosi-compatibilita-RN_v0.1.0.md](1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md))
 
 ---
@@ -17,6 +17,7 @@
 | Auth | Supabase Auth | — | ✅ |
 | Storage locale | AsyncStorage | ^2.1.2 | ✅ allineato (DESIGN 001) |
 | Hashing PIN | bcryptjs | ^3.0.3 | ✅ |
+| KDF PIN | react-native-quick-crypto | 1.1.5 | ✅ backend OpenSSL nativo |
 | Cifratura dati | @noble/ciphers (AES-256-GCM, pure-JS) | ^1.0.0 | ✅ Hermes-compatible (PLAN 005) |
 | CSPRNG | react-native-get-random-values (polyfill `crypto.getRandomValues`) | ^1.11.0 | ✅ |
 | Env vars | react-native-dotenv | ^3.4.11 | ✅ configurato in babel.config.js (DESIGN 001) |
@@ -40,7 +41,7 @@
 ├─────────────────────────────────────────────────────────────┤
 │                      lib/ (dominio)                            │  ← Logica pura + utility
 │  types  constants  helpers  budget-alerts  budget-forecasting  │
-│  budget-history  budget-templates  crypto                      │
+│  budget-history  budget-templates  crypto  kdf-provider        │
 │  haptic-system  sound-system                                   │
 ├─────────────────────────────────────────────────────────────┤
 │                    accessibility/                              │  ← Accessibility engine (DESIGN 003)
@@ -146,7 +147,7 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `categorie` | schema P25 | seed in P35 |
 | `budget` | schema P25 | |
 | `obiettivi_risparmio` | schema P25 | |
-| `impostazioni_utente` | P25 | JSONB `preferences` (32 chiavi), hash PIN |
+| `impostazioni_utente` | P25 + P40 | JSONB `preferences` (32 chiavi), hash PIN e `pin_kdf_salt` |
 
 ### RPC Supabase
 
@@ -168,7 +169,8 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `lib/budget-forecasting.ts` | lib | ✅ Compatibile | No | — |
 | `lib/budget-history.ts` | lib | ✅ Compatibile | No | — |
 | `lib/budget-templates.ts` | lib | ⚠️ Valuta | No | `@phosphor-icons/react` da sostituire con stringhe o componenti RN |
-| `lib/crypto.ts` | lib | ✅ OK | Sì | `hashPin`/`verifyPin` (bcryptjs) + `encryptData`/`decryptData` (@noble/ciphers AES-GCM) — PLAN 005 implementato |
+| `lib/crypto.ts` | lib | ✅ OK | Sì | `hashPin`/`verifyPin` invariati; `derivePinKey`, `encryptDataPin` e `decryptDataPin` aggiungono PBKDF2-SHA256 (600.000 iterazioni) e payload `KDF_VERSION[1] | SALT[16] | IV[12] | Ciphertext[N] | AuthTag[16]` |
+| `lib/kdf-provider.ts` | lib | ✅ Compatibile | No | Boundary KDF verso `react-native-quick-crypto`; fallback Node/OpenSSL usato solo nei test Jest |
 | `lib/haptic-system.ts` | lib | ❌ Incompatibile | No | `localStorage` + `navigator.vibrate` — da riscrivere |
 | `lib/sound-system.ts` | lib | ❌ Incompatibile | No | Web Audio API — da riscrivere |
 | `lib/screen-reader.ts` | lib | **ELIMINATO (DESIGN 004)** | — | Sostituito da `src/announcements/` |
@@ -180,7 +182,7 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `lib/supabase/repositories/categorie.ts` | supabase | ✅ Compatibile | No | — |
 | `lib/supabase/repositories/budget.ts` | supabase | ✅ Compatibile | No | — |
 | `lib/supabase/repositories/obiettivi-risparmio.ts` | supabase | ✅ Compatibile | No | — |
-| `lib/supabase/repositories/impostazioni-utente.ts` | supabase | ✅ Compatibile | No | — |
+| `lib/supabase/repositories/impostazioni-utente.ts` | supabase | ✅ Compatibile | No | `updatePinSalt` e `updatePinHashAndSalt` garantiscono coerenza hash/salt con update multi-colonna |
 | `context/AuthContext.tsx` | context | ❌ Rottura | **Sì (B3, B4)** | `sonner` + `@/components/ui/button` mancanti; `document.*` |
 | `context/AppDataContext.tsx` | context | ⚠️ Rottura residua (B3 shim) | **Sì (B3)** | `sonner` shim attivo; bug N9 RISOLTO (PLAN 007) e export nativo padre RISOLTO (PLAN 009): `handleExportCSV` ora usa `exportFile` e firma `Promise<void>` |
 | `context/app-data-cache.ts` | context | ✅ Compatibile | No | Modulo isolato (PLAN 007 T7): `readCachedDomainSnapshotPure` testabile direttamente |

@@ -3,15 +3,18 @@
 App di finanza personale per **Android**, **iOS** e **Windows** (react-native-windows).  
 Il dominio â€” nomi variabili, tipi, label UI â€” Ã¨ interamente in italiano.
 
+Versione progetto: **0.4.0**.
+
 > **Stato attuale**: migrazione da web (React + shadcn) a React Native in corso.  
 > L'app **non Ã¨ avviabile** fino alla risoluzione dei 6 blocchi di build documentati in  
 > [`docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md`](docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md).
 
-Stato rilascio: la release `0.3.0` promuove i piani 001, 002, 003, 004,
-005, 007, 008 e 009 padre. Il sotto-piano `009-native` resta fuori dalla
-release corrente: il codice del bridge WinRT esiste, ma la validazione
-runtime Windows/Android è ancora bloccata dai debiti tecnici documentati in
-`docs/todo-master.md`.
+Stato rilascio: la release `0.4.0` estende la `0.3.0` completando il PLAN 006
+con KDF PIN PBKDF2-SHA256, payload versionato `0x01`, colonna Supabase
+`pin_kdf_salt` e aggiornamento atomico hash+salt. Il sotto-piano
+`009-native` resta fuori dalla release corrente: il codice del bridge WinRT
+esiste, ma la validazione runtime Windows/Android è ancora bloccata dai debiti
+tecnici documentati in `docs/todo-master.md`.
 
 ---
 
@@ -25,6 +28,7 @@ runtime Windows/Android è ancora bloccata dai debiti tecnici documentati in
 | Supabase JS | ^2.105.4 | Backend: auth, DB PostgreSQL, RLS |
 | AsyncStorage | ^2.x | Cache locale (24h TTL) |
 | bcryptjs | ^3.0.3 | Hashing PIN privato |
+| react-native-quick-crypto | 1.1.5 | PBKDF2-SHA256 nativa (OpenSSL) per KDF PIN |
 | TypeScript | â€” | Tipizzazione completa |
 
 ---
@@ -85,7 +89,8 @@ src/
     budget-forecasting.ts     # Previsione spesa con livello confidence
     budget-history.ts         # Storico periodi budget
     budget-templates.ts       # Template predefiniti (âš ï¸ phosphor-icons da rimuovere)
-    crypto.ts                 # Hash PIN (bcrypt âœ…) + cifratura (crypto.subtle âŒ)
+    crypto.ts                 # Hash PIN, AES-GCM legacy e payload PIN versionato
+    kdf-provider.ts           # Boundary PBKDF2-SHA256 verso react-native-quick-crypto
     haptic-system.ts          # Feedback aptico (❌ navigator.vibrate)
     sound-system.ts           # Audio (❌ Web Audio API)
     supabase/

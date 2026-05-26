@@ -5,17 +5,15 @@ riferimento-design: docs/2-projects/006-DESIGN_kdf-pin_v0.4.0.md
 riferimento-plan: docs/3-coding-plans/006-PLAN_kdf-pin_v1.1.0.md
 versione: 1.1.0
 data-creazione: 2026-05-22
-data-revisione: 2026-05-24
-stato: IN PROGRESS
-agente: —
-data-completamento: —
+data-revisione: 2026-05-26
+stato: COMPLETED
+agente: GitHub Copilot
+data-completamento: 2026-05-26
 note-stato: >-
   Documento operativo derivato dal PLAN 006 v1.1.0, allineato a
-  DESIGN 006 v0.4.0. T1 (benchmark Fase 0) completato il 2026-05-24
-  su Windows con `react-native-quick-crypto`: valore scelto
-  PBKDF2_ITERATIONS = 600.000 (mediana 86 ms). I task T2–T9 restano
-  PENDING. Avvio subordinato al completamento di PLAN 005
-  (DESIGN 005 implementato e mergiato su main).
+  DESIGN 006 v0.4.0. T1 completato il 2026-05-24 su Windows con
+  `react-native-quick-crypto`: PBKDF2_ITERATIONS = 600.000 (mediana
+  86 ms). T2–T9 completati il 2026-05-26 con gate finali PASS.
 ---
 
 # TODO 006 — Key Derivation Function per PIN privato
@@ -24,11 +22,11 @@ note-stato: >-
 
 | Campo | Valore |
 |-------|--------|
-| Ultimo Agente Attivo | — |
-| Blocco in Carico | — |
-| Last Completed Task | T1 — Benchmark PBKDF2-SHA256 (Fase 0) |
-| Next Action | T2 — Aggiunta dipendenza `react-native-quick-crypto` in `package.json` |
-| Open Threads | — |
+| Ultimo Agente Attivo | GitHub Copilot |
+| Blocco in Carico | Chiuso |
+| Last Completed Task | T9 — Esecuzione suite completa |
+| Next Action | — |
+| Open Threads | Nessuno |
 
 ---
 
@@ -57,14 +55,14 @@ Riferimento: PLAN 006 §1 — DESIGN 006 §2.
 | Task | File target | Azione | Gate | Stato |
 |------|-------------|--------|------|-------|
 | T1 | `scripts/bench-pbkdf2.ts` (temporaneo) | RUN (benchmark PBKDF2) | Gate F0 | ☑ |
-| T2 | `package.json` | PATCH (aggiungi `react-native-quick-crypto`) | Gate F1 | ☐ |
-| T3 | `docs/6-sql/P40-add-pin-kdf-salt.sql` | CREATE | Gate F2 | ☐ |
-| T4 | `src/lib/supabase/types.ts` | PATCH (`pin_kdf_salt` / `pinKdfSalt`) | Gate F3 | ☐ |
-| T5 | `src/lib/supabase/repositories/impostazioni-utente.ts` | PATCH (`updatePinSalt` + `fieldMap`) | Gate F4 | ☐ |
-| T6 | `src/lib/crypto.ts` | PATCH (`derivePinKey` + `PBKDF2_ITERATIONS` + payload versionato) | Gate F5 | ☐ |
-| T7 | `src/lib/supabase/repositories/impostazioni-utente.ts` | PATCH (`updatePinHashAndSalt` + `updateFields`) | Gate F6 | ☐ |
-| T8 | `__tests__/crypto/kdf.test.ts` | CREATE (K1, K2, K3) | Gate F7 | ☐ |
-| T9 | [esecuzione suite completa] | RUN | Gate chiusura | ☐ |
+| T2 | `package.json` | PATCH (aggiungi `react-native-quick-crypto`) | Gate F1 | ☑ |
+| T3 | `docs/6-sql/P40-add-pin-kdf-salt.sql` | CREATE | Gate F2 | ☑ |
+| T4 | `src/lib/supabase/types.ts` | PATCH (`pin_kdf_salt` / `pinKdfSalt`) | Gate F3 | ☑ |
+| T5 | `src/lib/supabase/repositories/impostazioni-utente.ts` | PATCH (`updatePinSalt` + `fieldMap`) | Gate F4 | ☑ |
+| T6 | `src/lib/crypto.ts` | PATCH (`derivePinKey` + `PBKDF2_ITERATIONS` + payload versionato) | Gate F5 | ☑ |
+| T7 | `src/lib/supabase/repositories/impostazioni-utente.ts` | PATCH (`updatePinHashAndSalt` + `updateFields`) | Gate F6 | ☑ |
+| T8 | `__tests__/crypto/kdf.test.ts` | CREATE (K1, K2, K3) | Gate F7 | ☑ |
+| T9 | [esecuzione suite completa] | RUN | Gate chiusura | ☑ |
 
 ---
 

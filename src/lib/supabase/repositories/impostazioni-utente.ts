@@ -6,6 +6,7 @@ function toClient(row: DbUserSettings): UserSettings {
     nomeVisualizzato: row.nome_visualizzato,
     valutaDefault: row.valuta_default,
     pinPrivatoHash: row.pin_privato_hash,
+    pinKdfSalt: row.pin_kdf_salt,
     preferences: row.preferences,
   }
 }
@@ -14,12 +15,39 @@ const fieldMap: Record<keyof Omit<UserSettings, 'preferences'>, string> = {
   nomeVisualizzato: 'nome_visualizzato',
   valutaDefault: 'valuta_default',
   pinPrivatoHash: 'pin_privato_hash',
+  pinKdfSalt: 'pin_kdf_salt',
 }
 
 async function getUid(): Promise<string> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new RepositoryError('Utente non autenticato')
   return user.id
+}
+
+async function updateFields(
+  campi: Partial<Record<keyof Omit<UserSettings, 'preferences'>, string | null>>
+): Promise<UserSettings> {
+  const uid = await getUid()
+  const payload: Record<string, string | null> = {}
+
+  for (const [campo, valore] of Object.entries(campi)) {
+    if (valore !== undefined) {
+      payload[fieldMap[campo as keyof typeof fieldMap]] = valore
+    }
+  }
+
+  const response = await supabase
+    .from('impostazioni_utente')
+    .update(payload)
+    .eq('user_id', uid)
+    .select()
+    .single()
+
+  if (response.error) {
+    throw new Error(`updateFields: aggiornamento fallito — ${response.error.message}`)
+  }
+
+  return toClient(response.data as DbUserSettings)
 }
 
 // Se il record esiste lo restituisce; altrimenti lo inserisce usando i default DB
@@ -63,16 +91,7 @@ export async function updateField(
   campo: keyof Omit<UserSettings, 'preferences'>,
   valore: string | null
 ): Promise<UserSettings> {
-  const uid = await getUid()
-  const colonna = fieldMap[campo]
-  const { data, error } = await supabase
-    .from('impostazioni_utente')
-    .update({ [colonna]: valore })
-    .eq('user_id', uid)
-    .select()
-    .single()
-  if (error) throw new RepositoryError(error)
-  return toClient(data as DbUserSettings)
+  return updateFields({ [campo]: valore })
 }
 
 // Merge JSONB atomico su singola chiave tramite RPC — non read-modify-write in JS.
@@ -100,4 +119,26 @@ export async function updatePreference(
 
 export async function updatePinHash(hash: string | null): Promise<void> {
   await updateField('pinPrivatoHash', hash)
+}
+
+/**
+ * Aggiorna il salt PBKDF2 del PIN privato.
+ * uso diretto vietato per impostare il PIN; usare esclusivamente updatePinHashAndSalt.
+ */
+export async function updatePinSalt(salt: string | null): Promise<void> {
+  await updateField('pinKdfSalt', salt)
+}
+
+export async function updatePinHashAndSalt(
+  hash: string | null,
+  salt: string | null
+): Promise<void> {
+  if ((hash === null) !== (salt === null)) {
+    throw new Error('updatePinHashAndSalt: hash e salt devono essere entrambi null o entrambi non-null')
+  }
+
+  await updateFields({
+    pinPrivatoHash: hash,
+    pinKdfSalt: salt,
+  })
 }

@@ -173,16 +173,20 @@ Template predefiniti. Dipendenza esterna: `@phosphor-icons/react` (icone web —
 
 ---
 
-## `src/lib/crypto.ts` ⚠️
+## `src/lib/crypto.ts` ✅
 
-Hashing PIN e cifratura dati. Dipendenza esterna: `bcryptjs`.
+Hashing PIN e cifratura dati. Dipendenze esterne: `bcryptjs`,
+`@noble/ciphers`, `react-native-quick-crypto` (via `src/lib/kdf-provider.ts`).
 
 | Funzione | Parametri | Ritorna | RN |
 |----------|-----------|---------|-----|
 | `hashPin(pin)` | `string` | `Promise<string>` (bcrypt hash, salt 12) | ✅ |
 | `verifyPin(pin, hash)` | `string`, `string` | `Promise<boolean>` | ✅ |
-| `encryptData(data, key)` | `string`, `string` | `Promise<string>` (AES-GCM + btoa) | ❌ (`crypto.subtle` non disponibile in Hermes — sostituire con `expo-crypto`) |
-| `decryptData(encryptedData, key)` | `string`, `string` | `Promise<string>` | ❌ (stesso problema) |
+| `derivePinKey(pin, salt)` | `string`, `Uint8Array` | `Uint8Array` (32 byte PBKDF2-SHA256, 600.000 iterazioni) | ✅ |
+| `encryptData(data, key)` | `string`, `string` | `Promise<string>` (AES-GCM legacy: `Base64(IV[12] | Ciphertext[N] | AuthTag[16])`) | ✅ |
+| `decryptData(encryptedData, key)` | `string`, `string` | `Promise<string>` | ✅ |
+| `encryptDataPin(data, pin)` | `string`, `string` | `Promise<string>` (payload versionato `Base64(KDF_VERSION[1] | SALT[16] | IV[12] | Ciphertext[N] | AuthTag[16])`) | ✅ |
+| `decryptDataPin(encryptedData, pin)` | `string`, `string` | `Promise<string>` | ✅ |
 
 ---
 
@@ -487,6 +491,8 @@ Lettura/scrittura preferenze utente. Dipendenza: `@supabase/supabase-js`.
 | `updateField(campo, valore)` | `keyof Omit<UserSettings,'preferences'>`, `string \| null` | `Promise<UserSettings>` |
 | `updatePreference(chiave, valore)` | `keyof UserPreferences`, `boolean \| number \| string \| object \| null` | `Promise<UserSettings>` (merge JSONB atomico via RPC) |
 | `updatePinHash(hash)` | `string \| null` | `Promise<void>` |
+| `updatePinSalt(salt)` | `string \| null` | `Promise<void>` |
+| `updatePinHashAndSalt(hash, salt)` | `string \| null`, `string \| null` | `Promise<void>` (update multi-colonna atomico; rifiuta stati misti null/non-null) |
 
 ---
 

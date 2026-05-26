@@ -15,6 +15,9 @@ necessari per il tuo progetto.
 *Puoi eliminare questo file dopo il primo avvio.*
 *Per domande sull'architettura SPARK, usa l'agente `spark-guide`.*
 
+Versione corrente progetto: `0.4.0`.
+Prossimo PLAN da affrontare: `007`.
+
 ---
 
 ## Stato DESIGN
@@ -30,5 +33,5 @@ necessari per il tuo progetto.
 - [TODO 009-native — Bridge C++/WinRT WinRT Save Picker](docs/4-todo-lists/009-native-TODO_winrt-save-picker_v0.1.0.md) — v0.1.0 — PENDING
 
 Blocco residuo: `009-native` resta aperto solo per le validazioni runtime
-T3-N5 su Windows e Android. Non blocca la promozione della release 0.3.0 del
-piano padre.
+T3-N5 su Windows e Android. Non blocca la promozione della release 0.4.0 del
+progetto.

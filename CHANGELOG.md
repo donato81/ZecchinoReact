@@ -68,6 +68,30 @@
   maintainer. Mitigazione: i test Jest mock-based coprono il
   fallback `PICKER_UNAVAILABLE` del dispatcher.
 
+## [0.4.0] - 2026-05-26
+
+### Security
+
+- Completato PLAN 006 con KDF PIN basata su `PBKDF2-SHA256` via
+  `react-native-quick-crypto` `1.1.5`, 600.000 iterazioni e backend
+  OpenSSL nativo.
+- Introdotto il payload PIN versionato
+  `KDF_VERSION[1] | SALT[16] | IV[12] | Ciphertext[N] | AuthTag[16]`
+  con `KDF_VERSION = 0x01`.
+- Aggiunta la migration
+  `docs/6-sql/P40-add-pin-kdf-salt.sql` per la colonna nullable
+  `pin_kdf_salt` in `impostazioni_utente`.
+- Implementata la Strategia C di atomicità applicativa per PIN hash e salt
+  tramite `updateFields` e `updatePinHashAndSalt`.
+- Aggiunti i golden vectors K1, K2 e K3 per KDF e pipeline PIN; confermata
+  la non regressione dei golden G1, G2 e G3 del PLAN 005.
+
+### Changed
+
+- Bump versione da `0.3.0` a `0.4.0`: motivato dal completamento del layer
+  crittografico privato con KDF PIN + AES-GCM versionata, non da semplice
+  manutenzione incrementale.
+
 ## [0.3.0] - 2026-05-26
 
 ### Rollup release
@@ -467,7 +491,8 @@
   Errori di decifratura normalizzati a `'Decryption failed: authentication
   tag mismatch'` (chiave errata, payload manomesso o troncato).
 
-[Unreleased]: https://github.com/donato81/ZecchinoReact/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/donato81/ZecchinoReact/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/donato81/ZecchinoReact/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/donato81/ZecchinoReact/compare/v0.2.0...v0.3.0
 
 ### Added
