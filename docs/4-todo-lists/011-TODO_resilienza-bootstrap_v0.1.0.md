@@ -122,6 +122,14 @@ regola che ERROR_NETWORK ed ERROR_DATA restano interni al provider.
    Criterio di accettazione associato: CA-3.
    Stato iniziale: APERTO.
 
+8. Verificare che nei rami timeout, offline e fallback del bootstrap
+   vengano utilizzate esclusivamente chiavi da src/locales/ senza
+   stringhe hardcoded. Verificare che gli annunci TalkBack e VoiceOver
+   utilizzino lo stesso sistema di localizzazione.
+   File o percorso coinvolto: __tests__/AppDataContext.spec.ts.
+   Criterio di accettazione associato: CA-2, CA-3.
+   Stato iniziale: APERTO.
+
 ## Sezione 5 — Debiti tecnici
 
 - DT-011-01: telemetria centralizzata per errori di bootstrap.
