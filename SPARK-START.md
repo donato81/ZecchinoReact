@@ -17,11 +17,15 @@ necessari per il tuo progetto.
 
 Versione corrente progetto: `0.4.0`.
 Analisi Android completata (DUSU-ANALYZER 2025-07-25).
-Stato aggiornato: 2026-05-27
-Prossima azione: codifica blocco 010
-Wrapped Master Key PIN.
-Gate ingresso verificato.
-Sequenza: 010 → 011 → 012.
+Stato aggiornato: 2026-05-27.
+Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
+012 Export Nativo Guard Concorrente.
+Suite di test: PASS (`11/11` suite, `75` test passati, `13` `it.todo`
+documentati).
+Decisione release: nessun minor bump automatico; prima vanno chiusi i debiti
+Android/Windows gia' aperti nel master TODO.
+Prossima azione: review architetturale finale e prioritizzazione dei blocchi
+BC-01/02/03, AN-01/02/03, DD-01/02.
 
 ---
 
@@ -53,5 +57,5 @@ Sequenza: 010 → 011 → 012.
 - [TODO 009-native — Bridge C++/WinRT WinRT Save Picker](docs/4-todo-lists/009-native-TODO_winrt-save-picker_v0.1.0.md) — v0.1.0 — PENDING
 
 Blocco residuo: `009-native` resta aperto solo per le validazioni runtime
-T3-N5 su Windows e Android. Non blocca la promozione della release 0.4.0 del
-progetto.
+T3-N5 su Windows e Android. Non sblocca da solo una nuova release: il progetto
+resta alla `0.4.0` finche' i blocchi compatibilita' aperti non vengono chiusi.

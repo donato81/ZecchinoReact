@@ -113,16 +113,16 @@ mobile o fallback `UNSUPPORTED_PLATFORM` senza import nativi.
 
 ```
 App.tsx
-  └── AuthProvider (AuthContext.tsx)
-        ├── legge sessione da Supabase Auth
-        ├── carica UserSettings da repository
-        └── UserSettingsProvider
-              └── VisibleDataContext
-                    └── AppDataProvider
-                          ├── legge conti/transazioni/categorie/budget/obiettivi
-                          │    └── controlla cache AsyncStorage (24h TTL)
-                          │    └── fallback Supabase se cache stale
-                          └── (screens e componenti)
+  └── NetworkStatusProvider (NetworkStatusContext.tsx)
+    └── AuthProvider (AuthContext.tsx)
+      ├── legge sessione da Supabase Auth
+      ├── carica UserSettings da repository
+      └── UserSettingsProvider
+        └── VisibleDataContext
+          └── AppDataProvider
+            ├── bootstrap a tre casi: offline / online / NetInfo init
+            ├── timeout remoto nominato a 10 s
+            └── (screens e componenti)
 ```
 
 ### Scrittura preferenze
@@ -147,7 +147,7 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `categorie` | schema P25 | seed in P35 |
 | `budget` | schema P25 | |
 | `obiettivi_risparmio` | schema P25 | |
-| `impostazioni_utente` | P25 + P40 | JSONB `preferences` (32 chiavi), hash PIN e `pin_kdf_salt` |
+| `impostazioni_utente` | P25 + P40 + P41 | JSONB `preferences` (32 chiavi), hash PIN, `pin_kdf_salt` e `pin_master_key_encrypted` |
 
 ### RPC Supabase
 
@@ -164,12 +164,12 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `lib/types.ts` | lib | ✅ Compatibile | No | — |
 | `lib/constants.ts` | lib | ✅ Compatibile | No | `color` oklch / `badgeVariant` da adattare per RN |
 | `lib/helpers.ts` | lib | ✅ Compatibile | No | Layer 1 invariato: contiene `exportToCSV`, nessun delivery file DOM residuo |
-| `lib/export-service.ts` | lib | ✅ Compatibile | No | Delivery export multi-piattaforma: iOS/Android via `react-native-share`, Windows via `@react-native-windows/fs` + `@/native` |
+| `lib/export-service.ts` | lib | ✅ Compatibile | No | Delivery export multi-piattaforma: iOS/Android via `react-native-share`, Windows via `@react-native-windows/fs` + `@/native`. PLAN 012 aggiunge guardia concorrente sincrona `inProgress`, reason `ALREADY_IN_PROGRESS` e rilascio del flag nel `finally`. |
 | `lib/budget-alerts.ts` | lib | ✅ Compatibile | No | — |
 | `lib/budget-forecasting.ts` | lib | ✅ Compatibile | No | — |
 | `lib/budget-history.ts` | lib | ✅ Compatibile | No | — |
 | `lib/budget-templates.ts` | lib | ⚠️ Valuta | No | `@phosphor-icons/react` da sostituire con stringhe o componenti RN |
-| `lib/crypto.ts` | lib | ✅ OK | Sì | `hashPin`/`verifyPin` invariati; `derivePinKey`, `encryptDataPin` e `decryptDataPin` aggiungono PBKDF2-SHA256 (600.000 iterazioni) e payload `KDF_VERSION[1] | SALT[16] | IV[12] | Ciphertext[N] | AuthTag[16]` |
+| `lib/crypto.ts` | lib | ✅ OK | Sì | `hashPin`/`verifyPin` invariati; `derivePinKey`, `encryptDataPin` e `decryptDataPin` aggiungono PBKDF2-SHA256 (600.000 iterazioni) e payload `KDF_VERSION[1] | SALT[16] | IV[12] | Ciphertext[N] | AuthTag[16]`. PLAN 010 aggiunge `generateMasterKey`, `wrapMasterKeyWithPin`, `unwrapMasterKeyWithPin` e `rewrapMasterKeyWithPin` per la wrapped master key versionata del PIN. |
 | `lib/kdf-provider.ts` | lib | ✅ Compatibile | No | Boundary KDF verso `react-native-quick-crypto`; fallback Node/OpenSSL usato solo nei test Jest |
 | `lib/haptic-system.ts` | lib | ❌ Incompatibile | No | `localStorage` + `navigator.vibrate` — da riscrivere |
 | `lib/sound-system.ts` | lib | ❌ Incompatibile | No | Web Audio API — da riscrivere |
@@ -182,9 +182,10 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `lib/supabase/repositories/categorie.ts` | supabase | ✅ Compatibile | No | — |
 | `lib/supabase/repositories/budget.ts` | supabase | ✅ Compatibile | No | — |
 | `lib/supabase/repositories/obiettivi-risparmio.ts` | supabase | ✅ Compatibile | No | — |
-| `lib/supabase/repositories/impostazioni-utente.ts` | supabase | ✅ Compatibile | No | `updatePinSalt` e `updatePinHashAndSalt` garantiscono coerenza hash/salt con update multi-colonna |
-| `context/AuthContext.tsx` | context | ❌ Rottura | **Sì (B3, B4)** | `sonner` + `@/components/ui/button` mancanti; `document.*` |
-| `context/AppDataContext.tsx` | context | ⚠️ Rottura residua (B3 shim) | **Sì (B3)** | `sonner` shim attivo; bug N9 RISOLTO (PLAN 007) e export nativo padre RISOLTO (PLAN 009): `handleExportCSV` ora usa `exportFile` e firma `Promise<void>` |
+| `lib/supabase/repositories/impostazioni-utente.ts` | supabase | ✅ Compatibile | No | `updatePinSecurityMaterial` garantisce update atomico di `pin_privato_hash`, `pin_kdf_salt` e `pin_master_key_encrypted`; il repository rifiuta stati parziali del materiale PIN. |
+| `context/AuthContext.tsx` | context | ⚠️ Rottura residua | **Sì (B4)** | PLAN 010 completato: set/change/remove PIN ora gestiscono wrapped master key, reset distruttivo e localizzazione dei messaggi PIN. Resta il placeholder UI `Button` nel perimetro migrazione RN. |
+| `context/AppDataContext.tsx` | context | ⚠️ Rottura residua (B3 shim) | **Sì (B3)** | `sonner` shim attivo; bug N9 RISOLTO (PLAN 007), bootstrap resiliente RISOLTO (PLAN 011: casi offline/online/init, timeout 10 s, errori interni confinati), export nativo padre RISOLTO (PLAN 009): `handleExportCSV` ora usa `exportFile` e firma `Promise<void>` |
+| `context/NetworkStatusContext.tsx` | context | ✅ Compatibile | No | `NetworkStatusProvider` con debounce offline e fail-safe Online-First a 3000 ms; primo provider della catena applicativa |
 | `context/app-data-cache.ts` | context | ✅ Compatibile | No | Modulo isolato (PLAN 007 T7): `readCachedDomainSnapshotPure` testabile direttamente |
 | `context/UserSettingsContext.tsx` | context | ✅ Compatibile | No | — |
 | `context/VisibleDataContext.tsx` | context | ✅ Compatibile | No | — |

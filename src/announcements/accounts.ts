@@ -124,6 +124,8 @@ export function exportError(
   reason: Exclude<ExportFailureReason, 'CANCELLED'>,
 ): Announcement {
   switch (reason) {
+    case 'ALREADY_IN_PROGRESS':
+      return build(t('export_already_in_progress_sr'))
     case 'PERMISSION_DENIED':
       return build(t('export_permission_denied_sr'))
     case 'FILESYSTEM_ERROR':

@@ -22,7 +22,7 @@ export type NetworkStatus = {
   isInitialized: boolean
 }
 
-const INIT_TIMEOUT_MS = 1500
+const INIT_TIMEOUT_MS = 3000
 const OFFLINE_DEBOUNCE_MS = 1000
 
 const FAIL_SAFE_ONLINE: NetworkStatus = {

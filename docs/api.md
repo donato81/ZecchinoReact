@@ -183,10 +183,26 @@ Hashing PIN e cifratura dati. Dipendenze esterne: `bcryptjs`,
 | `hashPin(pin)` | `string` | `Promise<string>` (bcrypt hash, salt 12) | ✅ |
 | `verifyPin(pin, hash)` | `string`, `string` | `Promise<boolean>` | ✅ |
 | `derivePinKey(pin, salt)` | `string`, `Uint8Array` | `Uint8Array` (32 byte PBKDF2-SHA256, 600.000 iterazioni) | ✅ |
+| `generatePinSalt()` | — | `Uint8Array` (16 byte random) | ✅ |
+| `generateMasterKey()` | — | `Uint8Array` (32 byte random) | ✅ |
+| `encodeBase64(data)` | `Uint8Array` | `string` | ✅ |
+| `decodeBase64(data)` | `string` | `Uint8Array` | ✅ |
+| `serializeWrappedMasterKeyPayload(payload)` | `WrappedMasterKeyPayload` | `string` (JSON versionato) | ✅ |
+| `deserializeWrappedMasterKeyPayload(serialized)` | `string \| null` | `WrappedMasterKeyPayload \| null` | ✅ |
+| `wrapMasterKeyWithPin(masterKey, pin, salt)` | `Uint8Array`, `string`, `Uint8Array` | `WrappedMasterKeyPayload` | ✅ |
+| `unwrapMasterKeyWithPin(serializedPayload, pin, salt)` | `string \| null`, `string`, `Uint8Array` | `Uint8Array` | ✅ |
+| `rewrapMasterKeyWithPin(serializedPayload, oldPin, oldSalt, newPin, newSalt)` | `string`, `string`, `Uint8Array`, `string`, `Uint8Array` | `string` | ✅ |
 | `encryptData(data, key)` | `string`, `string` | `Promise<string>` (AES-GCM legacy: `Base64(IV[12] | Ciphertext[N] | AuthTag[16])`) | ✅ |
 | `decryptData(encryptedData, key)` | `string`, `string` | `Promise<string>` | ✅ |
 | `encryptDataPin(data, pin)` | `string`, `string` | `Promise<string>` (payload versionato `Base64(KDF_VERSION[1] | SALT[16] | IV[12] | Ciphertext[N] | AuthTag[16])`) | ✅ |
 | `decryptDataPin(encryptedData, pin)` | `string`, `string` | `Promise<string>` | ✅ |
+
+### Tipi esportati
+
+| Nome | Tipo | Descrizione |
+|------|------|-------------|
+| `WrappedMasterKeyPayload` | `type` | Payload JSON `{ version, iv, ciphertext, tag }` della master key cifrata con il PIN |
+| `WrappedMasterKeyPayloadError` | `class extends Error` | Errore business per payload master key non configurato, malformato o non decifrabile |
 
 ---
 
@@ -266,7 +282,7 @@ API pubblica di export file multi-piattaforma (DESIGN 009, DESIGN
 
 ```typescript
 type ExportFailureReason =
-  | 'CANCELLED' | 'PERMISSION_DENIED' | 'FILESYSTEM_ERROR'
+  | 'ALREADY_IN_PROGRESS' | 'CANCELLED' | 'PERMISSION_DENIED' | 'FILESYSTEM_ERROR'
   | 'UNSUPPORTED_PLATFORM' | 'INVALID_PATH'
   | 'INSUFFICIENT_SPACE' | 'UNKNOWN'
 
@@ -287,10 +303,13 @@ export async function exportFile(
   scrittura via `@react-native-windows/fs` (opzionale, fallback
   `UNSUPPORTED_PLATFORM` se assente).
 - **Default**: `{ success: false, reason: 'UNSUPPORTED_PLATFORM' }`.
+- **Guardia concorrente**: se un export è già in corso, `exportFile()`
+  ritorna subito `{ success:false, reason:'ALREADY_IN_PROGRESS' }`.
 
 INV-2: nessun side effect UX (toast, sound, haptic). INV-4: nessun
 throw non catturato. INV-CANCEL: cancellazione utente → reason
-`CANCELLED`, mai `success: true`.
+`CANCELLED`, mai `success: true`. INV-CA-4: il flag interno di guardia
+è sempre rilasciato nel blocco `finally`, anche per errori non-`Error`.
 
 Stato: ramo Windows validato via test mock-based; build Windows
 runtime bloccata da [DT-009-N-01](todo-master.md#dt-009-n-01--blocker-build-windows-netinfo--windows-app-sdk-18x).
@@ -361,7 +380,7 @@ Tipi DB e di settings. Uso interno al layer `src/lib/supabase/`.
 | `RepositoryError` | `class extends Error` | Wrapper errori Supabase/PostgREST. Proprietà: `code`, `details`, `hint`, `pgError?`. Costruttore: `(cause: DbError \| string)` |
 | `TalkBackAdaptations` | `interface` | 8 flag booleani per adattamenti TalkBack |
 | `UserPreferences` | `interface` | 32 chiavi JSONB: display (12), sr (12), audio (2), talkback (2), session (2), onboarding (1), alert (1) |
-| `UserSettings` | `interface` | `nomeVisualizzato`, `valutaDefault`, `pinPrivatoHash`, `preferences: UserPreferences` |
+| `UserSettings` | `interface` | `nomeVisualizzato`, `valutaDefault`, `pinPrivatoHash`, `pinKdfSalt`, `pinMasterKeyEncrypted`, `preferences: UserPreferences` |
 | `DbAccount`, `DbTransaction`, `DbCategory`, `DbBudget`, `DbSavingsGoal`, `DbSavingsGoalProgress`, `DbUserSettings` | `interface` | Row types snake_case — **uso interno** al layer supabase |
 
 ---
@@ -492,14 +511,15 @@ Lettura/scrittura preferenze utente. Dipendenza: `@supabase/supabase-js`.
 | `updatePreference(chiave, valore)` | `keyof UserPreferences`, `boolean \| number \| string \| object \| null` | `Promise<UserSettings>` (merge JSONB atomico via RPC) |
 | `updatePinHash(hash)` | `string \| null` | `Promise<void>` |
 | `updatePinSalt(salt)` | `string \| null` | `Promise<void>` |
-| `updatePinHashAndSalt(hash, salt)` | `string \| null`, `string \| null` | `Promise<void>` (update multi-colonna atomico; rifiuta stati misti null/non-null) |
+| `updatePinHashAndSalt(hash, salt)` | `string \| null`, `string \| null` | `Promise<void>` (legacy reset-only; i flussi attivi usano `updatePinSecurityMaterial`) |
+| `updatePinSecurityMaterial(material)` | `{ hash, salt, encryptedMasterKey }` | `Promise<void>` (update atomico dei tre campi PIN; rifiuta stati parziali) |
 
 ---
 
 ## `src/context/AuthContext.tsx` ⚠️
 
 Provider auth + gestione PIN privato.  
-**Import problematici risolti (DESIGN 001)**: `sonner` sostituito da shim locale `sonnerNotify`; `@/components/ui/button` ora esiste come placeholder RN (`src/components/ui/button.tsx`); le chiamate residue `document.querySelector` per screen reader detection appartengono al perimetro DESIGN 002.
+**Import problematici risolti (DESIGN 001)**: `sonner` sostituito da shim locale `sonnerNotify`; `@/components/ui/button` ora esiste come placeholder RN (`src/components/ui/button.tsx`). PLAN 010 estende `setPin`, `changePin` e `removePin` con wrapped master key, persistenza atomica dei tre campi PIN e reset distruttivo con logout globale.
 
 ### Hook esportato
 
@@ -515,7 +535,7 @@ Provider auth + gestione PIN privato.
 | `isAuthenticated` | `boolean` | |
 | `needsOnboarding` | `boolean` | Primo accesso senza `nomeVisualizzato` |
 | `userSettings` | `UserSettings \| null` | Settings letti da Supabase |
-| `isPrivateEnabled` | `boolean` | PIN privato configurato |
+| `isPrivateEnabled` | `boolean` | PIN privato configurato con hash, salt e wrapped master key coerenti |
 | `isPrivateUnlocked` | `boolean` | Sezione privata sbloccata |
 | `inactivityTimeout` | `number` | Minuti di inattività |
 | `signIn(email, password)` | `async` | `Promise<void>` |
@@ -526,7 +546,7 @@ Provider auth + gestione PIN privato.
 | `lockPrivate()` | — | `void` |
 | `setPin(pin)` | `async` | `Promise<void>` |
 | `changePin(oldPin, newPin)` | `async` | `Promise<void>` |
-| `removePin(pin)` | `async` | `Promise<void>` |
+| `removePin(pin)` | `async` | `Promise<void>` (azzera i tre campi PIN e richiede logout globale Supabase) |
 | `setInactivityTimeout(minutes)` | `async` | `Promise<void>` |
 | `completeOnboarding()` | — | `void` |
 
@@ -545,7 +565,8 @@ asincrona con `await Promise.all([...])` su tutte le 5 tabelle e
 validazione strutturale (`Array.isArray && !Promise`). Aggiunti:
 state machine bootstrap a 6 stati (`IDLE | HYDRATING | CACHE-READY |
 REMOTE-SYNC | READY | ERROR`), generation counter contro hydration
-concorrenti, `writeCache` fail-soft per-tabella.
+concorrenti, `writeCache` fail-soft per-tabella.  
+**PLAN 011**: bootstrap separato in tre casi (`offline`, `online`, `NetInfo init`), timeout remoto nominato a 10 secondi e codici interni `ERROR_NETWORK` / `ERROR_DATA` confinati al modulo; la UI riceve solo messaggi localizzati.
 
 ### Hook esportato
 

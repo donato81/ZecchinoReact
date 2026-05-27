@@ -7,6 +7,7 @@ function toClient(row: DbUserSettings): UserSettings {
     valutaDefault: row.valuta_default,
     pinPrivatoHash: row.pin_privato_hash,
     pinKdfSalt: row.pin_kdf_salt,
+    pinMasterKeyEncrypted: row.pin_master_key_encrypted,
     preferences: row.preferences,
   }
 }
@@ -16,6 +17,13 @@ const fieldMap: Record<keyof Omit<UserSettings, 'preferences'>, string> = {
   valutaDefault: 'valuta_default',
   pinPrivatoHash: 'pin_privato_hash',
   pinKdfSalt: 'pin_kdf_salt',
+  pinMasterKeyEncrypted: 'pin_master_key_encrypted',
+}
+
+type PinSecurityMaterial = {
+  hash: string | null
+  salt: string | null
+  encryptedMasterKey: string | null
 }
 
 async function getUid(): Promise<string> {
@@ -133,12 +141,35 @@ export async function updatePinHashAndSalt(
   hash: string | null,
   salt: string | null
 ): Promise<void> {
-  if ((hash === null) !== (salt === null)) {
-    throw new Error('updatePinHashAndSalt: hash e salt devono essere entrambi null o entrambi non-null')
+  if (hash !== null || salt !== null) {
+    throw new Error(
+      'updatePinHashAndSalt: usare updatePinSecurityMaterial per i flussi PIN con master key cifrata'
+    )
+  }
+
+  await updatePinSecurityMaterial({
+    hash,
+    salt,
+    encryptedMasterKey: null,
+  })
+}
+
+export async function updatePinSecurityMaterial(
+  material: PinSecurityMaterial
+): Promise<void> {
+  const values = [material.hash, material.salt, material.encryptedMasterKey]
+  const allNull = values.every((value) => value === null)
+  const allPresent = values.every((value) => typeof value === 'string' && value.length > 0)
+
+  if (!allNull && !allPresent) {
+    throw new Error(
+      'updatePinSecurityMaterial: hash, salt e encryptedMasterKey devono essere tutti null o tutti non-null'
+    )
   }
 
   await updateFields({
-    pinPrivatoHash: hash,
-    pinKdfSalt: salt,
+    pinPrivatoHash: material.hash,
+    pinKdfSalt: material.salt,
+    pinMasterKeyEncrypted: material.encryptedMasterKey,
   })
 }

@@ -11,10 +11,14 @@ Versione progetto: **0.4.0**.
 
 Stato rilascio: la release `0.4.0` estende la `0.3.0` completando il PLAN 006
 con KDF PIN PBKDF2-SHA256, payload versionato `0x01`, colonna Supabase
-`pin_kdf_salt` e aggiornamento atomico hash+salt. Il sotto-piano
-`009-native` resta fuori dalla release corrente: il codice del bridge WinRT
-esiste, ma la validazione runtime Windows/Android è ancora bloccata dai debiti
-tecnici documentati in `docs/todo-master.md`.
+`pin_kdf_salt` e aggiornamento atomico hash+salt.
+
+Aggiornamento 2026-05-27: i blocchi 010, 011 e 012 sono stati completati e
+validati con suite Jest completa verde (`11/11` suite, `75` test passati,
+`13` `it.todo` documentati). Non e' stato promosso un nuovo minor bump: la
+versione resta `0.4.0` finche' non vengono chiusi i debiti Android/Windows gia'
+tracciati in `docs/todo-master.md` e nel report compatibilita'. Il sotto-piano
+`009-native` resta quindi fuori dalla release corrente.
 
 ---
 

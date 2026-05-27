@@ -12,7 +12,7 @@
  *   4. Flapping con debounce
  *        4a. online → offline propagato dopo 1000 ms
  *        4b. offline → online immediato (no debounce)
- *   5. Fail-Safe: timeout init 1500 ms senza eventi NetInfo
+ *   5. Fail-Safe: timeout init 3000 ms senza eventi NetInfo
  *   6. Cleanup: unsubscribe invocato all'unmount
  */
 
@@ -205,9 +205,9 @@ describe('useNetworkStatus / NetworkStatusProvider — PLAN 008 T6', () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
     const { read } = mountProbe()
 
-    // Nessun evento NetInfo: scatta il timer di init a 1500 ms.
+    // Nessun evento NetInfo: scatta il timer di init a 3000 ms.
     act(() => {
-      jest.advanceTimersByTime(1500)
+      jest.advanceTimersByTime(3000)
     })
 
     const s = read()

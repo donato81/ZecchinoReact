@@ -6,7 +6,7 @@
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
 - **Ultimo Agente Attivo:** Agent-Analyze / DUSU-ANALYZER (analisi statica Android v1.0.0 completata — 3 BC, 4 AN, 3 DD identificati; report prodotto in docs/1-reports/REPORT-compatibilita-android-v1.0.0.md)
- - **Blocco in Carico:** AGENT-DOCS completato — prossimo blocco: codifica sequenziale 010, 011, 012 (Wrapped Master Key PIN → Resilienza Bootstrap → Export Nativo Guard). Gate ingresso 010: colonne pin_kdf_salt e pin_master_key_encrypted presenti in impostazioni_utente. Verificato il 2026-05-27.
+ - **Blocco in Carico:** AGENT-CODE completato — blocchi 010, 011, 012 chiusi e validati il 2026-05-27.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
@@ -44,10 +44,10 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
- - **Last Completed Task:** AGENT-DOCS — Aggiornamento chirurgico todo-master.md per codifica 010/011/012 (2026-05-27). Sei documenti di pianificazione creati, validati dal Consiglio AI e approvati. TODO 011 corretto con aggiunta Test 8 (localizzazione messaggi bootstrap). Colonne database pin_kdf_salt e pin_master_key_encrypted aggiunte alla tabella impostazioni_utente. Tutti i gate di ingresso per 010/011/012 verificati come PASS.
+ - **Last Completed Task:** AGENT-CODE — Blocco 012 Export Nativo Guard Concorrente implementato e validato (2026-05-27). `export-service.ts` aggiornato con guardia sincrona `inProgress`, nuovo reason `ALREADY_IN_PROGRESS` e rilascio del flag in `finally`; `AppDataContext.tsx` gestisce il nuovo esito con messaggi localizzati. Suite export a 13 casi verde.
   Codebase v0.4.0 (PLAN 006 completato). PLAN 006 ha portato il
   KDF PBKDF2-SHA256 con PBKDF2_ITERATIONS=600_000.
-- **Last Validated Block:** PLAN 006 — T2-T9 PASS, golden vectors K1/K2/K3
+- **Last Validated Block:** PLAN 012 — Export Nativo Guard Concorrente — gate G-012-1..G-012-5 PASSED (2026-05-27, Agent-Code)
   verificati. Suite npm test EXIT:0, tsc EXIT:0, npm install EXIT:0.
 - **Files Modified But Not Validated:** Nessuno (sessione DUSU-ANALYZER
   è read-only per src/). Documenti aggiornati: REPORT-compatibilita-android-v1.0.0.md
@@ -63,7 +63,7 @@
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
- - **Next Action:** Codifica blocco 010 — Wrapped Master Key PIN. Riferimento: docs/3-coding-plans/010-PLAN_wrapped-master-key-pin_v0.1.0.md Gate ingresso confermato: schema database aggiornato. Dopo 010: codifica blocco 011 — Resilienza Bootstrap. Dopo 011: codifica blocco 012 — Export Nativo Guard. Sequenza obbligatoria: 010 → 011 → 012. Nessun blocco può partire senza gate PASSED del blocco precedente.
+ - **Next Action:** Eseguire review finale architetturale e pianificare la chiusura dei debiti Android/Windows residui; minor release non promossa, versione confermata a 0.4.0 dopo i blocchi 010/011/012.
 
 > **Nota sessione stesura TODO 007 — 2026-05-23:** Creato
 > `docs/4-todo-lists/007-TODO_async-cache-hydration_v0.1.0.md`
@@ -482,6 +482,9 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B3-DOCS-010 | Documenti 010 approvati — Wrapped Master Key PIN — schema DB aggiornato | [x] DONE | [x] PASSED |
 | P3.B3-DOCS-011 | Documenti 011 approvati — Resilienza Bootstrap — TODO 011 corretto Test 8 | [x] DONE | [x] PASSED |
 | P3.B3-DOCS-012 | Documenti 012 approvati — Export Nativo Guard Concorrente | [x] DONE | [x] PASSED |
+| P3.B4-IMPL-010 | Codifica blocco 010 — Wrapped Master Key PIN | [x] DONE — 2026-05-27 Agent-Code | [x] PASSED |
+| P3.B4-IMPL-011 | Codifica blocco 011 — Resilienza Bootstrap | [x] DONE — 2026-05-27 Agent-Code | [x] PASSED |
+| P3.B4-IMPL-012 | Codifica blocco 012 — Export Nativo Guard Concorrente | [x] DONE — 2026-05-27 Agent-Code | [x] PASSED |
 
 ### Log di Validazione
 
@@ -498,6 +501,9 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-22 | P1.B4-IMPL | Agent-Code | DONE | DESIGN 004 — `src/announcements/` operativo, AuthContext+AppDataContext migrati, legacy SR eliminati |
 | 2026-05-22 | P1.B5-DOC | Agent-Orchestrator | DONE | PLAN 005 — TODO 005 creato. TODO operativo 8 task T1–T8 con gate bash. PLAN pronto per implementazione. |
 | 2026-05-22 | P1.B6-DOC | Agent-Orchestrator | DONE | PLAN 006 v1.1.0 — TODO 006 creato. TODO operativo 9 task T1–T9 con gate bash. Note critiche: divieto commit Fase 0 con placeholder, sequenza calcolo offline vettori K1/K2/K3 (6 passi), contratto errore updateFields (no swallow), serializzazione KDF_VERSION UInt8, posizioni buffer 0/1-16/17-28/29+. Gate bloccante: dipendenza da PLAN 005 implementato e mergiato. Checklist chiusura 12 punti da PLAN §10. |
+| 2026-05-27 | P3.B4-IMPL-010 | Agent-Code | DONE | PLAN 010 — wrapped master key versionata, update atomico `pin_privato_hash`/`pin_kdf_salt`/`pin_master_key_encrypted`, reset PIN distruttivo con logout globale, messaggi PIN localizzati. Gate G-010-1..G-010-5 PASS. |
+| 2026-05-27 | P3.B4-IMPL-011 | Agent-Code | DONE | PLAN 011 — `NetworkStatusProvider` fail-safe a 3000 ms, `App.tsx` con provider rete primo nella catena, `AppDataContext` con bootstrap offline/online/init, timeout remoto 10000 ms e codici interni `ERROR_NETWORK`/`ERROR_DATA` non esposti alla UI. Gate G-011-1..G-011-5 PASS. |
+| 2026-05-27 | P3.B4-IMPL-012 | Agent-Code | DONE | PLAN 012 — `export-service.ts` con guardia sincrona `inProgress`, nuovo reason `ALREADY_IN_PROGRESS`, rilascio del flag in `finally` e suite export riallineata a 13 casi. Gate G-012-1..G-012-5 PASS. |
 | 2026-05-26 | P1.B6-IMPL | GitHub Copilot | DONE | PLAN 006 completato su `main`: `react-native-quick-crypto` pinnata a 1.1.5, migration P40 aggiunta, `pin_kdf_salt` propagato ai tipi e al repository, Strategia A (`derivePinKey`, `encryptDataPin`, `decryptDataPin`) implementata con `PBKDF2_ITERATIONS = 600_000`, update multi-colonna `updatePinHashAndSalt`, suite K1/K2/K3 aggiunta, G1/G2/G3 e `npx tsc --noEmit` verdi. |
 | 2025-07-25 | DUSU-ANALYZER | Agent-Analyze | DONE | Analisi statica Android completata (read-only). 3 blocchi critici (BC-01/02/03: @phosphor-icons/react + react-dom), 4 adattamenti necessari (AN-01/02/03/04: haptic-system, sound-system, oklch colors), 3 discrepanze doc (DD-01/02/03). Report: docs/1-reports/REPORT-compatibilita-android-v1.0.0.md. P2.B2 risolta (use-online-status.ts → use-network-status.ts). |
 

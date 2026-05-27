@@ -1,10 +1,22 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { AccessibilityInfo, View, Text } from 'react-native'
 import type { Session, User } from '@supabase/supabase-js'
-import { hashPin, verifyPin } from '@/lib/crypto'
+import {
+  WrappedMasterKeyPayloadError,
+  decodeBase64,
+  generateMasterKey,
+  generatePinSalt,
+  hashPin,
+  rewrapMasterKeyWithPin,
+  serializeWrappedMasterKeyPayload,
+  unwrapMasterKeyWithPin,
+  verifyPin,
+  wrapMasterKeyWithPin,
+  encodeBase64,
+} from '@/lib/crypto'
 import { supabase } from '@/lib/supabase/client'
 import { invalidateCache } from '@/lib/supabase/cache'
-import { getOrCreate, updatePinHash, updatePreference } from '@/lib/supabase/repositories/impostazioni-utente'
+import { getOrCreate, updatePinSecurityMaterial, updatePreference } from '@/lib/supabase/repositories/impostazioni-utente'
 import type { UserSettings } from '@/lib/supabase/types'
 import { soundSystem } from '@/lib/sound-system'
 import { hapticSystem } from '@/lib/haptic-system'
@@ -13,6 +25,7 @@ import { ActivityDetectorView } from '@/components/ActivityDetectorView'
 import { useInactivityTimer } from '@/hooks/use-inactivity-timer'
 import { useAccessibilityDetection } from '@/accessibility/detection'
 import { announce, auth } from '@/announcements'
+import { t } from '@/announcements/_utils/t'
 
 // Shim temporaneo — rimpiazzare con react-native-toast-message nella fase UI
 const sonnerNotify = {
@@ -83,15 +96,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const signOut = useCallback(async () => {
+  const syncPinSecurityState = useCallback((next: {
+    hash: string | null
+    salt: string | null
+    encryptedMasterKey: string | null
+  }) => {
+    setPrivatePinHashCache(next.hash)
+    setUserSettings(prev => prev ? {
+      ...prev,
+      pinPrivatoHash: next.hash,
+      pinKdfSalt: next.salt,
+      pinMasterKeyEncrypted: next.encryptedMasterKey,
+    } : prev)
+  }, [])
+
+  const performSignOut = useCallback(async (scope: 'local' | 'global' = 'local') => {
     if (user?.id) {
       invalidateCache(user.id)
     }
-    const { error } = await supabase.auth.signOut()
+    const { error } = await supabase.auth.signOut(scope === 'global' ? { scope: 'global' } : undefined)
     if (error) throw error
     setIsPrivateUnlocked(false)
     setShowPrivatePinDialog(false)
   }, [user?.id])
+
+  const getPinSecurityMaterial = useCallback(() => {
+    const pinPrivatoHash = privatePinHashCache ?? null
+    const pinKdfSalt = userSettings?.pinKdfSalt ?? null
+    const pinMasterKeyEncrypted = userSettings?.pinMasterKeyEncrypted ?? null
+
+    if (!pinPrivatoHash || !pinKdfSalt || !pinMasterKeyEncrypted) {
+      throw new Error(t('pin_non_configurato'))
+    }
+
+    return {
+      pinPrivatoHash,
+      pinKdfSalt,
+      pinMasterKeyEncrypted,
+    }
+  }, [privatePinHashCache, userSettings?.pinKdfSalt, userSettings?.pinMasterKeyEncrypted])
+
+  const signOut = useCallback(async () => {
+    await performSignOut('local')
+  }, [performSignOut])
 
   const { resetTimer, showWarning } = useInactivityTimer({
     timeoutMinutes: isAuthenticated ? inactivityTimeoutState : 0,
@@ -189,7 +236,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     resetTimer()
   }, [resetTimer])
 
-  const isPrivateEnabled = privatePinHashCache !== null && privatePinHashCache !== undefined && privatePinHashCache !== ''
+  const isPrivateEnabled = Boolean(
+    privatePinHashCache
+    && userSettings?.pinKdfSalt
+    && userSettings?.pinMasterKeyEncrypted
+  )
 
   const unlockPrivate = useCallback(async (pin: string) => {
     if (!isPrivateEnabled || !privatePinHashCache) {
@@ -197,9 +248,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       hapticSystem.pinError()
       announce(auth.pinNotConfigured())
       if (!isScreenReaderActive) {
-        sonnerNotify.error('PIN privato non configurato')
+        sonnerNotify.error(t('pin_non_configurato'))
       }
-      throw new Error('PIN privato non configurato')
+      throw new Error(t('pin_non_configurato'))
     }
 
     const isValid = await verifyPin(pin, privatePinHashCache)
@@ -208,9 +259,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       hapticSystem.pinError()
       announce(auth.pinInvalid())
       if (!isScreenReaderActive) {
-        sonnerNotify.error('PIN privato non corretto')
+        sonnerNotify.error(t('pin_non_valido'))
       }
-      throw new Error('PIN non corretto')
+      throw new Error(t('pin_non_valido'))
     }
 
     setIsPrivateUnlocked(true)
@@ -219,7 +270,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     hapticSystem.privateUnlock()
     announce(auth.privateUnlocked())
     if (!isScreenReaderActive) {
-      sonnerNotify.success('Conto privato sbloccato')
+      sonnerNotify.success(t('conto_privato_sbloccato'))
     }
   }, [isPrivateEnabled, isScreenReaderActive, privatePinHashCache])
 
@@ -230,68 +281,113 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setPin = useCallback(async (pin: string) => {
     if (isPrivateEnabled) {
-      throw new Error('PIN privato già configurato')
+      throw new Error(t('pin_gia_configurato'))
     }
 
+    const pinSalt = generatePinSalt()
+    const encodedSalt = encodeBase64(pinSalt)
+    const masterKey = generateMasterKey()
     const hash = await hashPin(pin)
-    await updatePinHash(hash)
-    setPrivatePinHashCache(hash)
-    setUserSettings(prev => prev ? { ...prev, pinPrivatoHash: hash } : prev)
+    const encryptedMasterKey = serializeWrappedMasterKeyPayload(
+      wrapMasterKeyWithPin(masterKey, pin, pinSalt),
+    )
+
+    await updatePinSecurityMaterial({
+      hash,
+      salt: encodedSalt,
+      encryptedMasterKey,
+    })
+    syncPinSecurityState({
+      hash,
+      salt: encodedSalt,
+      encryptedMasterKey,
+    })
     setIsPrivateUnlocked(true)
     soundSystem.play('private-unlock')
     hapticSystem.privateUnlock()
     announce(auth.pinSet())
     if (!isScreenReaderActive) {
-      sonnerNotify.success('PIN privato configurato con successo')
+      sonnerNotify.success(t('pin_configurato'))
     }
-  }, [isPrivateEnabled, isScreenReaderActive])
+  }, [isPrivateEnabled, isScreenReaderActive, syncPinSecurityState])
 
   const changePin = useCallback(async (oldPin: string, newPin: string) => {
-    if (!isPrivateEnabled || !privatePinHashCache) {
-      throw new Error('PIN privato non configurato')
-    }
+    const material = getPinSecurityMaterial()
 
-    const isValid = await verifyPin(oldPin, privatePinHashCache)
+    const isValid = await verifyPin(oldPin, material.pinPrivatoHash)
     if (!isValid) {
       soundSystem.play('pin-error')
       hapticSystem.pinError()
-      throw new Error('PIN attuale non corretto')
+      throw new Error(t('pin_non_valido'))
+    }
+
+    const oldSalt = decodeBase64(material.pinKdfSalt)
+    const newSalt = generatePinSalt()
+    const encodedNewSalt = encodeBase64(newSalt)
+    let rewrappedMasterKey: string
+    try {
+      rewrappedMasterKey = rewrapMasterKeyWithPin(
+        material.pinMasterKeyEncrypted,
+        oldPin,
+        oldSalt,
+        newPin,
+        newSalt,
+      )
+    } catch (error) {
+      if (error instanceof WrappedMasterKeyPayloadError) {
+        throw new Error(t('errore_generico'))
+      }
+      throw error
     }
 
     const newHash = await hashPin(newPin)
-    await updatePinHash(newHash)
-    setPrivatePinHashCache(newHash)
-    setUserSettings(prev => prev ? { ...prev, pinPrivatoHash: newHash } : prev)
+
+    await updatePinSecurityMaterial({
+      hash: newHash,
+      salt: encodedNewSalt,
+      encryptedMasterKey: rewrappedMasterKey,
+    })
+    syncPinSecurityState({
+      hash: newHash,
+      salt: encodedNewSalt,
+      encryptedMasterKey: rewrappedMasterKey,
+    })
     soundSystem.play('private-unlock')
     hapticSystem.privateUnlock()
     announce(auth.pinChanged())
     if (!isScreenReaderActive) {
-      sonnerNotify.success('PIN privato modificato con successo')
+      sonnerNotify.success(t('pin_modificato'))
     }
-  }, [isPrivateEnabled, isScreenReaderActive, privatePinHashCache])
+  }, [getPinSecurityMaterial, isScreenReaderActive, syncPinSecurityState])
 
   const removePin = useCallback(async (pin: string) => {
-    if (!isPrivateEnabled || !privatePinHashCache) {
-      throw new Error('PIN privato non configurato')
-    }
+    const material = getPinSecurityMaterial()
 
-    const isValid = await verifyPin(pin, privatePinHashCache)
+    const isValid = await verifyPin(pin, material.pinPrivatoHash)
     if (!isValid) {
       soundSystem.play('pin-error')
       hapticSystem.pinError()
-      throw new Error('PIN attuale non corretto')
+      throw new Error(t('pin_non_valido'))
     }
 
-    await updatePinHash(null)
-    setPrivatePinHashCache(null)
-    setUserSettings(prev => prev ? { ...prev, pinPrivatoHash: null } : prev)
+    await updatePinSecurityMaterial({
+      hash: null,
+      salt: null,
+      encryptedMasterKey: null,
+    })
+    syncPinSecurityState({
+      hash: null,
+      salt: null,
+      encryptedMasterKey: null,
+    })
     setIsPrivateUnlocked(false)
     soundSystem.play('dialog-close')
     announce(auth.pinRemoved())
     if (!isScreenReaderActive) {
-      sonnerNotify.success('PIN privato rimosso')
+      sonnerNotify.success(t('pin_rimosso'))
     }
-  }, [isPrivateEnabled, isScreenReaderActive, privatePinHashCache])
+    await performSignOut('global')
+  }, [getPinSecurityMaterial, isScreenReaderActive, performSignOut, syncPinSecurityState])
 
   const completeOnboarding = useCallback(() => {
     setNeedsOnboarding(false)
@@ -355,8 +451,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         children
       )}
       {showWarning && isAuthenticated ? (
-        <View accessibilityRole="alert" accessibilityLabel="Avviso scadenza sessione">
-          <Text>La tua sessione scadrà tra 1 minuto. Vuoi rimanere connesso?</Text>
+        <View accessibilityRole="alert" accessibilityLabel={t('sessione_scadenza_avviso')}>
+          <Text>{t('sessione_scadenza_testo')}</Text>
           <View>
             <Button
               variant="outline"
@@ -365,13 +461,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 announce(auth.sessionKept())
               }}
             >
-              Rimani connesso
+              {t('sessione_rimani_connesso')}
             </Button>
             <Button
               variant="destructive"
               onPress={() => { void signOut() }}
             >
-              Esci ora
+              {t('sessione_esci_ora')}
             </Button>
           </View>
         </View>

@@ -70,6 +70,8 @@ export const it = {
   export_in_corso: 'Esportazione in corso.',
   export_success_toast: 'Export completato',
   export_success_sr: 'Esportazione completata',
+  export_already_in_progress_toast: 'Esportazione già in corso. Attendi il completamento.',
+  export_already_in_progress_sr: 'Esportazione già in corso',
   export_permission_denied_toast: 'Permesso negato: concedi accesso allo storage',
   export_permission_denied_sr: 'Permesso negato',
   export_filesystem_error_toast: 'Errore di scrittura, riprova',
@@ -106,12 +108,20 @@ export const it = {
   // --- auth / sessione (8) ---
   pin_non_configurato: 'PIN privato non configurato.',
   pin_non_valido: 'PIN privato non corretto. Riprova.',
+  pin_gia_configurato: 'PIN privato già configurato.',
   conto_privato_sbloccato: 'Conto privato sbloccato.',
   conto_privato_bloccato: 'Conto privato bloccato.',
   pin_configurato: 'PIN privato configurato.',
   pin_modificato: 'PIN privato modificato.',
   pin_rimosso: 'PIN privato rimosso.',
   sessione_mantenuta: 'Sessione mantenuta attiva.',
+  sessione_scadenza_avviso: 'Avviso scadenza sessione.',
+  sessione_scadenza_testo: 'La tua sessione scadrà tra 1 minuto. Vuoi rimanere connesso?',
+  sessione_rimani_connesso: 'Rimani connesso',
+  sessione_esci_ora: 'Esci ora',
+  bootstrap_offline_error: 'Connessione non disponibile. Effettua di nuovo il caricamento quando torni online.',
+  bootstrap_timeout_error: 'Il caricamento iniziale dei dati ha richiesto troppo tempo. Riprova.',
+  bootstrap_data_error: 'Errore durante il caricamento dei dati. Riprova.',
 } as const
 
 export type Strings = typeof it

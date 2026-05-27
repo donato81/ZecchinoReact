@@ -129,9 +129,35 @@ type AppDataContextValue = {
 
 const AppDataContext = createContext<AppDataContextValue | null>(null)
 
-const OFFLINE_CACHE_MESSAGE = 'Modalità offline: stai vedendo dati salvati in precedenza.'
-const OFFLINE_STALE_CACHE_MESSAGE = 'Modalità offline: stai vedendo dati salvati in precedenza. I dati potrebbero non essere aggiornati.'
-const OFFLINE_FIRST_ACCESS_MESSAGE = 'Non è possibile caricare i dati senza connessione al primo accesso. Connettiti e riprova.'
+const NETWORK_INIT_FAILSAFE_TIMEOUT_MS = 3000
+const BOOTSTRAP_REMOTE_TIMEOUT_MS = 10_000
+
+type InternalBootstrapError = 'ERROR_NETWORK' | 'ERROR_DATA'
+
+function createTimeoutError(): Error {
+  return new Error('BOOTSTRAP_TIMEOUT')
+}
+
+function isBootstrapTimeoutError(error: unknown): boolean {
+  return error instanceof Error && error.message === 'BOOTSTRAP_TIMEOUT'
+}
+
+async function withBootstrapTimeout<T>(operation: Promise<T>, timeoutMs: number): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null
+
+  try {
+    return await Promise.race([
+      operation,
+      new Promise<T>((_resolve, reject) => {
+        timeoutId = setTimeout(() => reject(createTimeoutError()), timeoutMs)
+      }),
+    ])
+  } finally {
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId)
+    }
+  }
+}
 
 // ============================================================================
 // T3 (PLAN 007): State machine esplicita del bootstrap
@@ -207,6 +233,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   // hydration concorrenti (es. React 18 Strict Mode double-invoke,
   // refreshAll lanciato mentre il bootstrap è in volo, logout + relogin).
   const hydrationGen = useRef(0)
+  const networkInitFallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // T3: transitionTo aggiorna in modo atomico bootstrapState + flag derivati
   // (isLoading, isDataReady, error). Le transizioni vietate dalla matrice
@@ -315,6 +342,43 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const clearNetworkInitFallbackTimer = useCallback(() => {
+    if (networkInitFallbackTimerRef.current !== null) {
+      clearTimeout(networkInitFallbackTimerRef.current)
+      networkInitFallbackTimerRef.current = null
+    }
+  }, [])
+
+  const reportBootstrapFailure = useCallback(
+    (kind: InternalBootstrapError, message: string, gen: number) => {
+      if (gen !== hydrationGen.current) return
+      console.warn('[AppDataContext] bootstrap failure', { kind, message })
+      transitionTo('ERROR', { error: message })
+    },
+    [transitionTo],
+  )
+
+  const runOnlineBootstrap = useCallback(
+    async (userId: string, gen: number) => {
+      try {
+        const snapshot = await withBootstrapTimeout(loadDomainSnapshot(), BOOTSTRAP_REMOTE_TIMEOUT_MS)
+        if (gen !== hydrationGen.current) return
+        applyDomainSnapshot(snapshot)
+        transitionTo('READY')
+      } catch (error) {
+        const message = isBootstrapTimeoutError(error)
+          ? t('bootstrap_timeout_error')
+          : t('bootstrap_data_error')
+        reportBootstrapFailure(
+          isBootstrapTimeoutError(error) ? 'ERROR_NETWORK' : 'ERROR_DATA',
+          message,
+          gen,
+        )
+      }
+    },
+    [applyDomainSnapshot, reportBootstrapFailure, transitionTo],
+  )
+
   const hydrateFromCache = useCallback(
     async (userId: string, gen: number): Promise<boolean> => {
       // T2 (PLAN 007): await sulla cache asincrona
@@ -322,13 +386,13 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       const cached = await readCachedDomainSnapshot(userId)
       if (gen !== hydrationGen.current) return false
       if (!cached) {
-        transitionTo('ERROR', { error: OFFLINE_FIRST_ACCESS_MESSAGE })
+        transitionTo('ERROR', { error: t('bootstrap_offline_error') })
         return false
       }
       if (gen !== hydrationGen.current) return false
       applyDomainSnapshot(cached.snapshot)
       transitionTo('CACHE-READY', {
-        error: cached.isStale ? OFFLINE_STALE_CACHE_MESSAGE : OFFLINE_CACHE_MESSAGE,
+        error: cached.isStale ? t('bootstrap_data_error') : t('bootstrap_offline_error'),
       })
       return true
     },
@@ -340,6 +404,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     if (!isAuthenticated || !user?.id) {
       // T4: invalida qualsiasi hydration in volo
       hydrationGen.current += 1
+      clearNetworkInitFallbackTimer()
       setAccounts([])
       setTransactions([])
       setCategories([])
@@ -350,34 +415,42 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    // PLAN 008 T4: attendi che NetworkStatusProvider abbia un esito
-    // (subscribe iniziale o Fail-Safe). Senza questa guard la prima
-    // hydration potrebbe usare un isOffline indeterminato.
-    if (!isNetworkInitialized) return
+    if (bootstrapStateRef.current === 'HYDRATING' || bootstrapStateRef.current === 'REMOTE-SYNC') {
+      return
+    }
 
-    // T4: nuova generazione per questa hydration
-    const myGen = ++hydrationGen.current
-    transitionTo('HYDRATING')
+    if (!isNetworkInitialized) {
+      clearNetworkInitFallbackTimer()
+      networkInitFallbackTimerRef.current = setTimeout(() => {
+        if (bootstrapStateRef.current === 'HYDRATING' || bootstrapStateRef.current === 'REMOTE-SYNC') {
+          return
+        }
+        const myGen = ++hydrationGen.current
+        transitionTo('HYDRATING')
+        void runOnlineBootstrap(user.id, myGen)
+      }, NETWORK_INIT_FAILSAFE_TIMEOUT_MS)
 
-    const loadBootstrapData = async () => {
-      if (isOffline) {
-        await hydrateFromCache(user.id, myGen)
-        return
-      }
-
-      try {
-        const snapshot = await loadDomainSnapshot()
-        if (myGen !== hydrationGen.current) return
-        applyDomainSnapshot(snapshot)
-        transitionTo('READY')
-      } catch {
-        if (myGen !== hydrationGen.current) return
-        await hydrateFromCache(user.id, myGen)
+      return () => {
+        clearNetworkInitFallbackTimer()
       }
     }
 
-    void loadBootstrapData()
-  }, [applyDomainSnapshot, hydrateFromCache, isAuthenticated, isNetworkInitialized, isOffline, transitionTo, user?.id])
+    clearNetworkInitFallbackTimer()
+
+    const myGen = ++hydrationGen.current
+    transitionTo('HYDRATING')
+
+    if (isOffline) {
+      reportBootstrapFailure('ERROR_NETWORK', t('bootstrap_offline_error'), myGen)
+      return
+    }
+
+    void runOnlineBootstrap(user.id, myGen)
+
+    return () => {
+      clearNetworkInitFallbackTimer()
+    }
+  }, [clearNetworkInitFallbackTimer, isAuthenticated, isNetworkInitialized, isOffline, reportBootstrapFailure, runOnlineBootstrap, transitionTo, user?.id])
 
   // T5 (PLAN 007): persistenza cache fail-soft. Ogni writeCache è isolato
   // in try/catch: un errore su una tabella non blocca le altre né propaga
@@ -422,18 +495,29 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     const userId = user.id
     const reloadData = async () => {
       if (isOffline) {
-        await hydrateFromCache(userId, myGen)
+        reportBootstrapFailure('ERROR_NETWORK', t('bootstrap_offline_error'), myGen)
         return
       }
 
       try {
-        const snapshot = await loadDomainSnapshot()
+        const snapshot = await withBootstrapTimeout(loadDomainSnapshot(), BOOTSTRAP_REMOTE_TIMEOUT_MS)
         if (myGen !== hydrationGen.current) return
         applyDomainSnapshot(snapshot)
         transitionTo('READY')
-      } catch {
+      } catch (error) {
+        const fromReadyState = bootstrapStateRef.current === 'REMOTE-SYNC'
         if (myGen !== hydrationGen.current) return
-        await hydrateFromCache(userId, myGen)
+        if (fromReadyState) {
+          transitionTo('CACHE-READY', {
+            error: isBootstrapTimeoutError(error) ? t('bootstrap_timeout_error') : t('bootstrap_data_error'),
+          })
+          return
+        }
+        reportBootstrapFailure(
+          isBootstrapTimeoutError(error) ? 'ERROR_NETWORK' : 'ERROR_DATA',
+          isBootstrapTimeoutError(error) ? t('bootstrap_timeout_error') : t('bootstrap_data_error'),
+          myGen,
+        )
       }
     }
 
@@ -761,6 +845,10 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
       switch (result.reason) {
         case 'CANCELLED':
+          return
+        case 'ALREADY_IN_PROGRESS':
+          toast.error(t('export_already_in_progress_toast'))
+          announce(accountsAnn.exportError('ALREADY_IN_PROGRESS'))
           return
         case 'PERMISSION_DENIED':
           toast.error(t('export_permission_denied_toast'))

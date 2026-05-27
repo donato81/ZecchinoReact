@@ -4,9 +4,31 @@ import { derivePbkdf2Sha256 } from './kdf-provider'
 
 const PBKDF2_ITERATIONS = 600_000
 const KDF_VERSION = 0x01 // UInt8, 1 byte esatto
+const WRAPPED_MASTER_KEY_VERSION = 1
 const SALT_LEN = 16
 const IV_LEN = 12
 const TAG_LEN = 16
+const MASTER_KEY_LEN = 32
+
+export type WrappedMasterKeyPayload = {
+  version: number
+  iv: string
+  ciphertext: string
+  tag: string
+}
+
+export class WrappedMasterKeyPayloadError extends Error {
+  readonly code: 'MASTER_KEY_NOT_CONFIGURED' | 'MASTER_KEY_PAYLOAD_INVALID' | 'MASTER_KEY_UNWRAP_FAILED'
+
+  constructor(
+    code: 'MASTER_KEY_NOT_CONFIGURED' | 'MASTER_KEY_PAYLOAD_INVALID' | 'MASTER_KEY_UNWRAP_FAILED',
+    message: string,
+  ) {
+    super(message)
+    this.name = 'WrappedMasterKeyPayloadError'
+    this.code = code
+  }
+}
 
 function bytesToBase64(data: Uint8Array): string {
   return btoa(String.fromCharCode(...data))
@@ -14,6 +36,29 @@ function bytesToBase64(data: Uint8Array): string {
 
 function base64ToBytes(data: string): Uint8Array {
   return Uint8Array.from(atob(data), (c: string) => c.charCodeAt(0))
+}
+
+function isWrappedMasterKeyPayload(value: unknown): value is WrappedMasterKeyPayload {
+  if (!value || typeof value !== 'object') return false
+
+  const candidate = value as Record<string, unknown>
+  return (
+    candidate.version === WRAPPED_MASTER_KEY_VERSION
+    && typeof candidate.iv === 'string'
+    && typeof candidate.ciphertext === 'string'
+    && typeof candidate.tag === 'string'
+  )
+}
+
+function ensureWrappedMasterKeyPayload(payload: unknown): WrappedMasterKeyPayload {
+  if (!isWrappedMasterKeyPayload(payload)) {
+    throw new WrappedMasterKeyPayloadError(
+      'MASTER_KEY_PAYLOAD_INVALID',
+      'Wrapped master key payload is invalid',
+    )
+  }
+
+  return payload
 }
 
 export async function hashPin(pin: string): Promise<string> {
@@ -26,6 +71,113 @@ export async function verifyPin(pin: string, hash: string): Promise<boolean> {
 
 export function derivePinKey(pin: string, salt: Uint8Array): Uint8Array {
   return derivePbkdf2Sha256(pin, salt, PBKDF2_ITERATIONS, 32)
+}
+
+export function generatePinSalt(): Uint8Array {
+  return crypto.getRandomValues(new Uint8Array(SALT_LEN))
+}
+
+export function generateMasterKey(): Uint8Array {
+  return crypto.getRandomValues(new Uint8Array(MASTER_KEY_LEN))
+}
+
+export function encodeBase64(data: Uint8Array): string {
+  return bytesToBase64(data)
+}
+
+export function decodeBase64(data: string): Uint8Array {
+  return base64ToBytes(data)
+}
+
+export function serializeWrappedMasterKeyPayload(payload: WrappedMasterKeyPayload): string {
+  return JSON.stringify(ensureWrappedMasterKeyPayload(payload))
+}
+
+export function deserializeWrappedMasterKeyPayload(
+  serialized: string | null,
+): WrappedMasterKeyPayload | null {
+  if (serialized === null) {
+    return null
+  }
+
+  try {
+    return ensureWrappedMasterKeyPayload(JSON.parse(serialized))
+  } catch (error) {
+    if (error instanceof WrappedMasterKeyPayloadError) {
+      throw error
+    }
+
+    throw new WrappedMasterKeyPayloadError(
+      'MASTER_KEY_PAYLOAD_INVALID',
+      'Wrapped master key payload is invalid',
+    )
+  }
+}
+
+export function wrapMasterKeyWithPin(
+  masterKey: Uint8Array,
+  pin: string,
+  salt: Uint8Array,
+): WrappedMasterKeyPayload {
+  const iv = crypto.getRandomValues(new Uint8Array(IV_LEN))
+  const sealed = gcm(derivePinKey(pin, salt), iv).encrypt(masterKey)
+  const ciphertext = sealed.slice(0, sealed.length - TAG_LEN)
+  const tag = sealed.slice(sealed.length - TAG_LEN)
+
+  return {
+    version: WRAPPED_MASTER_KEY_VERSION,
+    iv: bytesToBase64(iv),
+    ciphertext: bytesToBase64(ciphertext),
+    tag: bytesToBase64(tag),
+  }
+}
+
+export function unwrapMasterKeyWithPin(
+  serializedPayload: string | null,
+  pin: string,
+  salt: Uint8Array,
+): Uint8Array {
+  if (serializedPayload === null) {
+    throw new WrappedMasterKeyPayloadError(
+      'MASTER_KEY_NOT_CONFIGURED',
+      'Wrapped master key payload is not configured',
+    )
+  }
+
+  const payload = deserializeWrappedMasterKeyPayload(serializedPayload)
+  if (payload === null) {
+    throw new WrappedMasterKeyPayloadError(
+      'MASTER_KEY_NOT_CONFIGURED',
+      'Wrapped master key payload is not configured',
+    )
+  }
+
+  const iv = base64ToBytes(payload.iv)
+  const ciphertext = base64ToBytes(payload.ciphertext)
+  const tag = base64ToBytes(payload.tag)
+  const sealed = new Uint8Array(ciphertext.length + tag.length)
+  sealed.set(ciphertext, 0)
+  sealed.set(tag, ciphertext.length)
+
+  try {
+    return gcm(derivePinKey(pin, salt), iv).decrypt(sealed)
+  } catch {
+    throw new WrappedMasterKeyPayloadError(
+      'MASTER_KEY_UNWRAP_FAILED',
+      'Wrapped master key could not be decrypted',
+    )
+  }
+}
+
+export function rewrapMasterKeyWithPin(
+  serializedPayload: string,
+  oldPin: string,
+  oldSalt: Uint8Array,
+  newPin: string,
+  newSalt: Uint8Array,
+): string {
+  const masterKey = unwrapMasterKeyWithPin(serializedPayload, oldPin, oldSalt)
+  return serializeWrappedMasterKeyPayload(wrapMasterKeyWithPin(masterKey, newPin, newSalt))
 }
 
 // PLAN 005: AES-256-GCM via @noble/ciphers (pure-JS, Hermes-compatible).

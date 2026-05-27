@@ -2,6 +2,34 @@
 
 ## [Unreleased]
 
+### Security
+- Introdotta la Wrapped Master Key Architecture per il PIN privato con payload versionato `{version, iv, ciphertext, tag}` e rewrap della sola master key durante `changePin`.
+  Riferimento: [PLAN-010]
+
+### Changed
+- Il repository `impostazioni-utente` ora aggiorna in modo atomico `pin_privato_hash`, `pin_kdf_salt` e `pin_master_key_encrypted`; `removePin` cancella i tre campi e forza il logout globale.
+  Riferimento: [PLAN-010]
+
+### Fixed
+- Rimossi i messaggi hardcoded dai flussi PIN di `AuthContext` a favore delle chiavi di localizzazione già usate dagli announcement auth.
+  Riferimento: [PLAN-010]
+
+### Reliability
+- `NetworkStatusProvider` usa ora un fail-safe di inizializzazione a 3 secondi e `AppDataContext` separa i casi offline, online e NetInfo non inizializzato con timeout bootstrap nominato a 10 secondi.
+  Riferimento: [PLAN-011]
+
+### Changed
+- `App.tsx` monta `NetworkStatusProvider` come primo provider della catena; `AppDataContext` confina `ERROR_NETWORK` e `ERROR_DATA` al modulo e propaga solo messaggi localizzati verso la UI.
+  Riferimento: [PLAN-011]
+
+### Correctness
+- `export-service.ts` introduce la guardia concorrente sincrona `inProgress`, il reason pubblico `ALREADY_IN_PROGRESS` e il rilascio obbligatorio del flag nel blocco `finally`.
+  Riferimento: [PLAN-012]
+
+### Changed
+- `AppDataContext` gestisce il nuovo esito `ALREADY_IN_PROGRESS` con toast e announcement localizzati; la suite export è riallineata ai 13 casi richiesti dal design.
+  Riferimento: [PLAN-012]
+
 ### Documentazione
 - Aggiunte tre righe nel registro di stato del todo-master.md per i blocchi 010, 011, 012.
 - Aggiornato campo Blocco in Carico e Snapshot di Ripresa per codifica sequenziale 010/011/012.

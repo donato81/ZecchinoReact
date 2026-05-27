@@ -81,9 +81,10 @@ export interface UserSettings {
   valutaDefault: string
   pinPrivatoHash: string | null
   /**
-   * pinKdfSalt e pinPrivatoHash devono essere entrambi null o entrambi non-null. Vedi Plan 006 §8.
+   * I materiali crittografici del PIN devono essere tutti null o tutti non-null.
    */
   pinKdfSalt: string | null
+  pinMasterKeyEncrypted: string | null
   preferences: UserPreferences
 }
 
@@ -179,9 +180,10 @@ export interface DbUserSettings {
   valuta_default: string
   pin_privato_hash: string | null
   /**
-   * pinKdfSalt e pinPrivatoHash devono essere entrambi null o entrambi non-null. Vedi Plan 006 §8.
+   * I materiali crittografici del PIN devono essere tutti null o tutti non-null.
    */
   pin_kdf_salt: string | null
+  pin_master_key_encrypted: string | null
   preferences: UserPreferences
   created_at: string
   updated_at: string

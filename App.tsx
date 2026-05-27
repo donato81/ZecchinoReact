@@ -18,14 +18,14 @@ function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <NetworkStatusProvider>
+    <NetworkStatusProvider>
+      <SafeAreaProvider>
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
         <AuthProvider>
           <AppContent />
         </AuthProvider>
-      </NetworkStatusProvider>
-    </SafeAreaProvider>
+      </SafeAreaProvider>
+    </NetworkStatusProvider>
   );
 }
 

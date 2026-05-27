@@ -29,6 +29,7 @@ import {
 // ---------------------------------------------------------------------------
 
 export type ExportFailureReason =
+  | 'ALREADY_IN_PROGRESS'
   | 'CANCELLED'
   | 'PERMISSION_DENIED'
   | 'FILESYSTEM_ERROR'
@@ -40,6 +41,8 @@ export type ExportFailureReason =
 export type ExportResult =
   | { success: true }
   | { success: false; reason: ExportFailureReason }
+
+let inProgress = false
 
 // ---------------------------------------------------------------------------
 // Helper interni (privati al modulo).
@@ -279,13 +282,25 @@ export async function exportFile(
   fileName: string,
   mimeType: string,
 ): Promise<ExportResult> {
-  switch (Platform.OS) {
-    case 'ios':
-    case 'android':
-      return exportViaShareSheet(content, fileName, mimeType)
-    case 'windows':
-      return exportViaWindowsSavePicker(content, fileName, mimeType)
-    default:
-      return { success: false, reason: 'UNSUPPORTED_PLATFORM' }
+  if (inProgress) {
+    return { success: false, reason: 'ALREADY_IN_PROGRESS' }
+  }
+
+  inProgress = true
+
+  try {
+    switch (Platform.OS) {
+      case 'ios':
+      case 'android':
+        return await exportViaShareSheet(content, fileName, mimeType)
+      case 'windows':
+        return await exportViaWindowsSavePicker(content, fileName, mimeType)
+      default:
+        return { success: false, reason: 'UNSUPPORTED_PLATFORM' }
+    }
+  } catch (error) {
+    return { success: false, reason: mapErrorToReason(error) }
+  } finally {
+    inProgress = false
   }
 }
