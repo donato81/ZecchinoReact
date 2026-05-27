@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+- Aggiunti i documenti di design:
+  - `docs/2-projects/013-DESIGN_repository-ricorrenze_v0.1.0.md`
+  - `docs/2-projects/014-DESIGN_repository-tag-transazioni-tag_v0.1.0.md`
+  - `docs/2-projects/015-DESIGN_repository-notifiche-notification-service_v0.1.0.md`
+  - `docs/2-projects/016-DESIGN_allegati-transazioni_v0.1.0.md`
+  - `docs/2-projects/016-bis-DESIGN_cleanup-orfani-storage_v0.1.0.md`
+  - `docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md`
+
 ### Security
 - Introdotta la Wrapped Master Key Architecture per il PIN privato con payload versionato `{version, iv, ciphertext, tag}` e rewrap della sola master key durante `changePin`.
   Riferimento: [PLAN-010]
