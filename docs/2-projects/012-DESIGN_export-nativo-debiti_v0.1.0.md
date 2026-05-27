@@ -3,7 +3,7 @@ tipo: design
 titolo: Export nativo — copertura dei debiti formati (PDF/XLSX) e guard concorrente
 versione: 0.1.0
 data: 2026-05-27
-stato: DRAFT
+stato: REVIEWED
 sorgente: docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md
 perimetro: src/lib/export-service.ts, src/context/AppDataContext.tsx, __tests__/
 ---
@@ -16,7 +16,7 @@ perimetro: src/lib/export-service.ts, src/context/AppDataContext.tsx, __tests__/
 - **Titolo:** Export nativo — debiti e guard concorrente
 - **Versione:** v0.1.0
 - **Data:** 2026-05-27
-- **Stato:** DRAFT
+- **Stato:** REVIEWED
 - **Fonte primaria:** DESIGN 009 (Export File Nativo)
 - **Perimetro:** `ExportService`, test unitari, contratto `ExportResult` e gestione `ALREADY_IN_PROGRESS`
 

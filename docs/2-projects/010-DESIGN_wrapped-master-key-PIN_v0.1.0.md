@@ -3,7 +3,7 @@ tipo: design
 titolo: Wrapped Master Key per PIN privato — Wrapped Master Key Architecture
 versione: 0.1.0
 data: 2026-05-27
-stato: DRAFT
+stato: REVIEWED
 sorgente: docs/2-projects/006-DESIGN_kdf-pin_v0.4.0.md
 perimetro: src/lib/crypto.ts, docs/6-sql/, src/lib/supabase/repositories/impostazioni-utente.ts
 ---
@@ -16,7 +16,7 @@ perimetro: src/lib/crypto.ts, docs/6-sql/, src/lib/supabase/repositories/imposta
 - **Titolo:** Wrapped Master Key per PIN privato
 - **Versione:** v0.1.0
 - **Data:** 2026-05-27
-- **Stato:** DRAFT
+- **Stato:** REVIEWED
 - **Fonte primaria:** DESIGN 006 (KDF PIN), `docs/6-sql/P25-schema-impostazioni-utente.sql`, `docs/6-sql/P40-add-pin-kdf-salt.sql`
 - **Perimetro:** modifica schema `impostazioni_utente`, definizione payload `pin_master_key_encrypted`, flusso cambio/reset PIN, contratto operativo atomico su Supabase
 

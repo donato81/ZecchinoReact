@@ -46,6 +46,25 @@
   - `docs/2-projects/011-DESIGN_resilienza-bootstrap_v0.1.0.md`: vincolo timeout bootstrap a 10s, sottosezione per gestione NetInfo tardivo e chiarimento scope dei codici ERROR_NETWORK/ERROR_DATA.
   - `docs/2-projects/012-DESIGN_export-nativo-debiti_v0.1.0.md`: aggiunta criterio CA-4 sul rilascio di `inProgress` tramite `finally` e nota obbligatoria sul Test 13 che verifica il reset definitivo del flag.
 
+### Planning — 2026-05-27
+
+- Promossi a **REVIEWED** i documenti
+  `docs/2-projects/010-DESIGN_wrapped-master-key-PIN_v0.1.0.md`,
+  `docs/2-projects/011-DESIGN_resilienza-bootstrap_v0.1.0.md` e
+  `docs/2-projects/012-DESIGN_export-nativo-debiti_v0.1.0.md` come
+  completamento formale del ciclo di revisione architetturale approvato dal
+  Consiglio AI.
+- Creati i nuovi documenti di pianificazione:
+  `docs/3-coding-plans/010-PLAN_wrapped-master-key-pin_v0.1.0.md`,
+  `docs/3-coding-plans/011-PLAN_resilienza-bootstrap_v0.1.0.md`,
+  `docs/3-coding-plans/012-PLAN_export-nativo-debiti_v0.1.0.md`,
+  `docs/4-todo-lists/010-TODO_wrapped-master-key-pin_v0.1.0.md`,
+  `docs/4-todo-lists/011-TODO_resilienza-bootstrap_v0.1.0.md` e
+  `docs/4-todo-lists/012-TODO_export-nativo-debiti_v0.1.0.md`.
+- Aggiornato `docs/todo-master.md` con i riferimenti ai sei nuovi documenti,
+  lo stato iniziale APERTO e il riepilogo operativo dei task principali per i
+  design 010, 011 e 012.
+
 
 ### PLAN 009-native — WinRT Save Picker bridge (2026-05-25)
 

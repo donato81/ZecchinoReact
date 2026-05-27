@@ -412,6 +412,24 @@ Verificare che src/context/AppDataContext.tsx esista e sia accessibile in scritt
 
 - **DT-012-02**: DESIGN per esportazione XLSX — creare design dedicato prima di implementare supporto XLSX in `ExportService`. Priorità: bassa. Riferimento: `docs/2-projects/012-DESIGN_export-nativo-debiti_v0.1.0.md`.
 
+- **Documenti di pianificazione 010 — Wrapped Master Key per PIN privato**
+  - Design di riferimento: `docs/2-projects/010-DESIGN_wrapped-master-key-PIN_v0.1.0.md` — stato REVIEWED (2026-05-27).
+  - File: `docs/3-coding-plans/010-PLAN_wrapped-master-key-pin_v0.1.0.md` — stato iniziale APERTO.
+  - File: `docs/4-todo-lists/010-TODO_wrapped-master-key-pin_v0.1.0.md` — stato iniziale APERTO.
+  - Task principali: migration coordinate schema-first; estensione tipi/repository per `pin_master_key_encrypted`; helper crypto per wrap/unwrap Master Key; update atomico Supabase con verifica `response.error`; integrazione flussi `setPin` / `changePin` / reset PIN; localizzazione completa messaggi PIN.
+
+- **Documenti di pianificazione 011 — Resilienza bootstrap**
+  - Design di riferimento: `docs/2-projects/011-DESIGN_resilienza-bootstrap_v0.1.0.md` — stato REVIEWED (2026-05-27).
+  - File: `docs/3-coding-plans/011-PLAN_resilienza-bootstrap_v0.1.0.md` — stato iniziale APERTO.
+  - File: `docs/4-todo-lists/011-TODO_resilienza-bootstrap_v0.1.0.md` — stato iniziale APERTO.
+  - Task principali: conferma `NetworkStatusProvider` come primo provider; costante nominata per timeout 10s; implementazione separata Caso 1, Caso 2 e Caso 3; gestione risposta tardiva di NetInfo; confinamento di `ERROR_NETWORK` / `ERROR_DATA`; localizzazione dei messaggi bootstrap.
+
+- **Documenti di pianificazione 012 — Export nativo debiti e guard concorrente**
+  - Design di riferimento: `docs/2-projects/012-DESIGN_export-nativo-debiti_v0.1.0.md` — stato REVIEWED (2026-05-27).
+  - File: `docs/3-coding-plans/012-PLAN_export-nativo-debiti_v0.1.0.md` — stato iniziale APERTO.
+  - File: `docs/4-todo-lists/012-TODO_export-nativo-debiti_v0.1.0.md` — stato iniziale APERTO.
+  - Task principali: aggiunta reason `ALREADY_IN_PROGRESS`; guard sincrona `inProgress`; struttura `try/catch/finally` obbligatoria; allineamento chiamante export con messaggi localizzati; copertura completa dei 13 test; tracciamento debiti PDF/XLSX subordinati a design dedicato.
+
 - **Validation Logic:** Ogni funzione di calcolo finanziario deve includere test obbligatori per la gestione dei decimali e l'arrotondamento.
 - **Credential Handling:** Mai scrivere API Key o segreti direttamente nei file sorgente. Usare esclusivamente variabili d'ambiente o il modulo `@env`.
 - **Database Transactionality:** Tutti i task che comportano la modifica di schemi o dati su Supabase devono essere eseguiti tramite transazioni isolate o script di migrazione controllati. È fatto divieto di eseguire mutazioni dirette sul database che non possano essere annullate in sicurezza dalle procedure di Rollback.

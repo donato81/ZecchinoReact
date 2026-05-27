@@ -18,7 +18,7 @@ perimetro: src/lib/export-service.ts (nuovo), src/context/AppDataContext.tsx
 - **Data:** 2026-05-20
 - **Fase:** P3
 - **Blocco:** P3.B2 (esteso)
-- **Stato:** DRAFT
+- **Stato:** IMPLEMENTED
 - **Autore:** Copilot Agent
 - **Revisore:** donny-81
 

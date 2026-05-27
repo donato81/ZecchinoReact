@@ -3,7 +3,7 @@ tipo: design
 titolo: Resilienza del bootstrap — gestione timer NetInfo e Fail-Safe
 versione: 0.1.0
 data: 2026-05-27
-stato: DRAFT
+stato: REVIEWED
 sorgente: docs/2-projects/007-DESIGN_async-cache-hydration_v0.1.0.md, docs/2-projects/008-DESIGN_network-connectivity_v0.1.0.md
 perimetro: src/context/NetworkStatusProvider.tsx, src/context/AppDataContext.tsx
 ---
@@ -16,7 +16,7 @@ perimetro: src/context/NetworkStatusProvider.tsx, src/context/AppDataContext.tsx
 - **Titolo:** Resilienza del bootstrap — timer NetInfo e fail-safe
 - **Versione:** v0.1.0
 - **Data:** 2026-05-27
-- **Stato:** DRAFT
+- **Stato:** REVIEWED
 - **Fonte primaria:** DESIGN 007, DESIGN 008
 - **Perimetro:** logica di bootstrap AppDataProvider e NetworkStatusProvider
 
