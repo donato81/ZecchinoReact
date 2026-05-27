@@ -17,7 +17,11 @@ necessari per il tuo progetto.
 
 Versione corrente progetto: `0.4.0`.
 Analisi Android completata (DUSU-ANALYZER 2025-07-25).
-Prossimo blocco da affrontare: risoluzione BC-01/BC-02/BC-03 (rimozione `@phosphor-icons/react` e `react-dom`, riscrittura `budget-templates.ts`) — Gate Android 1.
+Stato aggiornato: 2026-05-27
+Prossima azione: codifica blocco 010
+Wrapped Master Key PIN.
+Gate ingresso verificato.
+Sequenza: 010 → 011 → 012.
 
 ---
 

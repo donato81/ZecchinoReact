@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Documentazione
+- Aggiunte tre righe nel registro di stato del todo-master.md per i blocchi 010, 011, 012.
+- Aggiornato campo Blocco in Carico e Snapshot di Ripresa per codifica sequenziale 010/011/012.
+- Aggiunta colonna pin_master_key_encrypted alla tabella impostazioni_utente (file P41).
+- TODO 011 corretto: aggiunto Test 8 per verifica localizzazione messaggi bootstrap.
+
 ### DUSU-ANALYZER — Analisi statica compatibilità Android v0.4.0 (2025-07-25)
 
 #### Added

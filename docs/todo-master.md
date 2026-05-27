@@ -6,7 +6,7 @@
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
 - **Ultimo Agente Attivo:** Agent-Analyze / DUSU-ANALYZER (analisi statica Android v1.0.0 completata — 3 BC, 4 AN, 3 DD identificati; report prodotto in docs/1-reports/REPORT-compatibilita-android-v1.0.0.md)
-- **Blocco in Carico:** DUSU-ANALYZER completato — prossimo blocco: risoluzione BC-01/BC-02/BC-03 (rimozione @phosphor-icons/react, react-dom, riscrittura budget-templates.ts) per sbloccare il Gate Android 1.
+ - **Blocco in Carico:** AGENT-DOCS completato — prossimo blocco: codifica sequenziale 010, 011, 012 (Wrapped Master Key PIN → Resilienza Bootstrap → Export Nativo Guard). Gate ingresso 010: colonne pin_kdf_salt e pin_master_key_encrypted presenti in impostazioni_utente. Verificato il 2026-05-27.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
@@ -44,10 +44,7 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** DUSU-ANALYZER — Analisi statica compatibilità Android completata
-  (2025-07-25). 3 Blocchi Critici, 4 Adattamenti Necessari, 3 Discrepanze
-  Documentazione identificati. Report prodotto in
-  `docs/1-reports/REPORT-compatibilita-android-v1.0.0.md`.
+ - **Last Completed Task:** AGENT-DOCS — Aggiornamento chirurgico todo-master.md per codifica 010/011/012 (2026-05-27). Sei documenti di pianificazione creati, validati dal Consiglio AI e approvati. TODO 011 corretto con aggiunta Test 8 (localizzazione messaggi bootstrap). Colonne database pin_kdf_salt e pin_master_key_encrypted aggiunte alla tabella impostazioni_utente. Tutti i gate di ingresso per 010/011/012 verificati come PASS.
   Codebase v0.4.0 (PLAN 006 completato). PLAN 006 ha portato il
   KDF PBKDF2-SHA256 con PBKDF2_ITERATIONS=600_000.
 - **Last Validated Block:** PLAN 006 — T2-T9 PASS, golden vectors K1/K2/K3
@@ -66,16 +63,7 @@
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
-- **Next Action:** Risoluzione BC-01/BC-02/BC-03 — creare DESIGN-BLOCCO-PHOSPHOR
-  per riscrittura budget-templates.ts e pulizia package.json.
-  Documenti pronti per la review:
-  - `docs/2-projects/004-DESIGN_announcements-layer_v1_0_0.md`
-  - `docs/3-coding-plans/004-PLAN_announcements-layer_v1_0_0.md`
-  - `docs/4-todo-lists/004-TODO_announcements-layer_v1.0.0.md`
-  Procedura: identica ai cicli DESIGN 001/002/003
-  (review Consiglio AI → eventuali correzioni
-  chirurgiche → convalida finale → avvio
-  implementazione).
+ - **Next Action:** Codifica blocco 010 — Wrapped Master Key PIN. Riferimento: docs/3-coding-plans/010-PLAN_wrapped-master-key-pin_v0.1.0.md Gate ingresso confermato: schema database aggiornato. Dopo 010: codifica blocco 011 — Resilienza Bootstrap. Dopo 011: codifica blocco 012 — Export Nativo Guard. Sequenza obbligatoria: 010 → 011 → 012. Nessun blocco può partire senza gate PASSED del blocco precedente.
 
 > **Nota sessione stesura TODO 007 — 2026-05-23:** Creato
 > `docs/4-todo-lists/007-TODO_async-cache-hydration_v0.1.0.md`
@@ -491,6 +479,9 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | BC-01-FIX | Rimozione @phosphor-icons/react da budget-templates.ts | [ ] TODO | [ ] OPEN |
 | BC-02-FIX | Rimozione @phosphor-icons/react da package.json | [ ] TODO | [ ] OPEN |
 | BC-03-FIX | Rimozione react-dom da package.json | [ ] TODO | [ ] OPEN |
+| P3.B3-DOCS-010 | Documenti 010 approvati — Wrapped Master Key PIN — schema DB aggiornato | [x] DONE | [x] PASSED |
+| P3.B3-DOCS-011 | Documenti 011 approvati — Resilienza Bootstrap — TODO 011 corretto Test 8 | [x] DONE | [x] PASSED |
+| P3.B3-DOCS-012 | Documenti 012 approvati — Export Nativo Guard Concorrente | [x] DONE | [x] PASSED |
 
 ### Log di Validazione
 
