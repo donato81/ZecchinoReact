@@ -49,6 +49,18 @@ Decisioni incorporate:
 
 - Decisione 11: i test di `ExportService` devono coprire tredici casi via mock di `react-native-share` e non invocare la share sheet reale. I casi elencati (successo, CANCELLED, PERMISSION_DENIED, FILESYSTEM_ERROR, UNSUPPORTED_PLATFORM, INVALID_PATH, INSUFFICIENT_SPACE, UNKNOWN, ALREADY_IN_PROGRESS, test concorrente, cleanup finally, errore non Error, reset flag) sono obbligatori.
 
+Nota obbligatoria sul Test 13:
+Il Test 13 deve verificare esplicitamente il
+seguente ciclo completo: export A parte ed esegue
+fino al termine con successo; il flag inProgress
+viene rilasciato correttamente tramite il blocco
+finally; export C parte normalmente dopo
+la conclusione di A senza ricevere
+ALREADY_IN_PROGRESS.
+Questa verifica del reset definitivo del flag
+è obbligatoria e non può essere sostituita
+da una verifica parziale.
+
 - Decisione 12: aggiunta esplicita in Sezione 8 di DESIGN 009: ogni nuovo formato richiede DESIGN dedicato prima dell'implementazione. Debito: creare DESIGN per PDF/XLSX.
 
 Implementazione proposta del flag sincrono:
@@ -91,3 +103,12 @@ Tutti i messaggi esposti a UI e screen reader (esiti di export, errori utente, c
 - CA-1: `ExportService` è singleton e `inProgress` previene doppie invocazioni documentate tramite unit test (incl. test concorrente descritto).
 - CA-2: `ExportResult` contiene il nuovo reason `ALREADY_IN_PROGRESS` e i test associano il comportamento corretto alle chiamate sovrapposte.
 - CA-3: I test non aprono la share sheet reale; tutte le dipendenze native sono mockate in test.
+ - CA-4: Qualunque eccezione o fallimento durante
+l'esecuzione dell'export, inclusi gli errori
+interni al tentativo di share e gli errori
+del layer di cleanup, deve sempre rilasciare
+il flag interno inProgress tramite il blocco
+finally, consentendo nuove esportazioni successive
+senza necessità di riavvio. Questo criterio è
+classificato come obbligatorio di sicurezza
+dal Consiglio AI.

@@ -56,15 +56,16 @@
   è read-only per src/). Documenti aggiornati: REPORT-compatibilita-android-v1.0.0.md
   (CREATO), docs/todo-master.md (aggiornato), CHANGELOG.md (aggiornato),
   SPARK-START.md (aggiornato).
-- **Open Threads:**
-  BC-01: `src/lib/budget-templates.ts` — import `@phosphor-icons/react` (BLOCCO BUILD ANDROID)
-  BC-02: `package.json` — `@phosphor-icons/react` da rimuovere (BLOCCO BUILD ANDROID)
-  BC-03: `package.json` — `react-dom` da rimuovere (BLOCCO BUILD ANDROID)
-  AN-01: `src/lib/haptic-system.ts` — riscrittura con Vibration RN (P1.B1 TODO)
-  AN-02: `src/lib/sound-system.ts` — riscrittura con expo-av/react-native-sound (P1.B2 TODO)
-  AN-03: `src/lib/constants.ts` — 5 colori oklch→hex (ADATTAMENTO MINORE)
-  DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
-  DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
+ - **Open Threads:**
+  - BC-01: `src/lib/budget-templates.ts` — import `@phosphor-icons/react` (BLOCCO BUILD ANDROID)
+  - BC-02: `package.json` — `@phosphor-icons/react` da rimuovere (BLOCCO BUILD ANDROID)
+  - BC-03: `package.json` — `react-dom` da rimuovere (BLOCCO BUILD ANDROID)
+  - AN-01: `src/lib/haptic-system.ts` — riscrittura con Vibration RN (P1.B1 TODO)
+  - AN-02: `src/lib/sound-system.ts` — riscrittura con expo-av/react-native-sound (P1.B2 TODO)
+  - AN-03: `src/lib/constants.ts` — 5 colori oklch→hex (ADATTAMENTO MINORE)
+  - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
+  - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
+ - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
 - **Next Action:** Risoluzione BC-01/BC-02/BC-03 — creare DESIGN-BLOCCO-PHOSPHOR
   per riscrittura budget-templates.ts e pulizia package.json.
   Documenti pronti per la review:

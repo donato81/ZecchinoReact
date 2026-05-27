@@ -315,6 +315,27 @@ implementa l'integrazione del formato CSV come prima istanza.
 
 ---
 
+### Presidio architetturale — Nuovi formati
+
+Ogni nuovo formato export richiede un documento
+DESIGN dedicato, approvato dal Consiglio AI,
+prima dell'inizio di qualsiasi implementazione.
+Questo presidio è obbligatorio e non derogabile.
+
+Formati attualmente coperti da questo design: CSV.
+
+Formati non autorizzati all'implementazione
+senza un nuovo DESIGN dedicato approvato:
+PDF, XLSX, DOCX, XML e qualsiasi altro formato
+non elencato come coperto.
+
+La struttura tecnica del servizio è predisposta
+per accogliere nuovi formati (Sezione 8),
+ma la predisposizione tecnica non autorizza
+l'implementazione. L'autorizzazione richiede
+sempre un DESIGN dedicato.
+
+
 ## Sezione 9 — Nuove Dipendenze da Aggiungere
 
 ### `react-native-share`

@@ -38,6 +38,15 @@
 
 ---
 
+### Documentation
+
+- **Corretti quattro documenti DESIGN**:
+  - `docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md`: aggiunta sezione di presidio architetturale per nuovi formati (CSV coperto; PDF/XLSX/DOCX/XML non autorizzati senza DESIGN dedicato).
+  - `docs/2-projects/010-DESIGN_wrapped-master-key-PIN_v0.1.0.md`: rafforzamento prerequisiti migration (applicazione congiunta) e criterio di accettazione CA-2 esteso per la verifica di atomicità e comportamento su errori di Supabase.
+  - `docs/2-projects/011-DESIGN_resilienza-bootstrap_v0.1.0.md`: vincolo timeout bootstrap a 10s, sottosezione per gestione NetInfo tardivo e chiarimento scope dei codici ERROR_NETWORK/ERROR_DATA.
+  - `docs/2-projects/012-DESIGN_export-nativo-debiti_v0.1.0.md`: aggiunta criterio CA-4 sul rilascio di `inProgress` tramite `finally` e nota obbligatoria sul Test 13 che verifica il reset definitivo del flag.
+
+
 ### PLAN 009-native — WinRT Save Picker bridge (2026-05-25)
 
 #### Added

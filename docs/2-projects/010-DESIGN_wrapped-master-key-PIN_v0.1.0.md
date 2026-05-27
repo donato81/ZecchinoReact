@@ -61,6 +61,14 @@ Decisioni incorporate (obbligatorie):
 
 - Decisione 6: mancano due colonne in `impostazioni_utente`. `pin_kdf_salt` (P40 già pronta) e `pin_master_key_encrypted` (nuova migration SQL da creare). Entrambe le migration vanno eseguite insieme prima di qualsiasi codice. Regola: Schema First, Code Second.
 
+Le due migration costituiscono un unico prerequisito
+architetturale. Devono essere applicate insieme,
+nello stesso intervento coordinato, prima di
+qualsiasi deployment applicativo. Non è consentito
+applicarne una sola in attesa dell'altra: lo stato
+parziale con una sola colonna presente è uno stato
+non valido per il sistema.
+
 Flusso operativo sintetico:
 
 1. All'atto di creazione del conto privato: generare una Master Key AES-256 casuale locale (32 byte); derivare KEK con PBKDF2 dal PIN; cifrare Master Key con AES-GCM usando KEK; costruire payload JSON {version, iv, ciphertext, tag}; persistirlo in `pin_master_key_encrypted` insieme a `pin_kdf_salt` e `pin_privato_hash` in singola update atomica.
@@ -89,7 +97,20 @@ Nessuna stringa hardcoded è consentita nelle funzionalità coperte da questo de
 ## Sezione 8 — Criteri di accettazione
 
 - CA-1: `pin_master_key_encrypted` è presente nello schema e accetta payload JSON serializzato come definito.
-- CA-2: Operazione di impostazione PIN scrive `pin_kdf_salt`, `pin_master_key_encrypted`, `pin_privato_hash` con singola operazione `UPDATE` su Supabase (verificata su ambiente di test mediante mock repository che simula failure parziale).
-- CA-3: Cambio PIN ricifra solo la Master Key; i dati reali rimangono invariati.
+ - CA-2: Operazione di impostazione PIN scrive
+`pin_kdf_salt`, `pin_master_key_encrypted`,
+`pin_privato_hash` con singola operazione UPDATE
+su Supabase (verificata su ambiente di test
+mediante mock repository che simula failure
+parziale).
+Comportamento atteso in caso di errore restituito
+da Supabase: nessuna delle tre informazioni viene
+considerata aggiornata dal sistema. Il codice
+deve verificare esplicitamente response.error
+e trattare qualsiasi errore come operazione
+interamente fallita, senza stato parziale.
+Questo criterio è classificato come obbligatorio
+di sicurezza dal Consiglio AI.
+ - CA-3: Cambio PIN ricifra solo la Master Key; i dati reali rimangono invariati.
 - CA-4: Reset PIN cancella i materiali crittografici e causa logout globale.
 - CA-5: Tutti i messaggi utente usano `src/locales/` e non contengono stringhe hardcoded.

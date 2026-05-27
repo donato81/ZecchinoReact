@@ -47,11 +47,35 @@ Decisioni incorporate:
 
   - Caso 2 — rete presente confermata da NetInfo: timer parte; se entro 10 secondi il caricamento non si conclude, transizione verso `ERROR`. Valore fisso: 10 secondi.
 
+  Nota vincolante: il timeout di bootstrap è fissato
+  a 10 secondi per decisione architetturale approvata
+  dal Consiglio AI nella sessione del 27 maggio 2026.
+  Modifiche future a questo valore richiedono
+  una nuova revisione architetturale formale.
+  Non è consentito aumentare questo valore
+  senza approvazione del Consiglio.
+
   - Caso 3 — NetInfo ancora in inizializzazione: timer parte con valore di 3 secondi. Allo scadere si applica il Fail-Safe Online-First già definito in DESIGN 008 e si procede come Caso 2.
 
-- Decisione 7-bis: se NetInfo risponde dopo i 3 secondi mentre la hydration è già partita, non si interrompe la hydration in corso e non se ne avvia una seconda. Se NetInfo dice rete assente in quel momento, si gestisce tramite il timeout normale dei 10 secondi. Se dice rete presente, nessuna azione.
+  ### Gestione risposta tardiva di NetInfo
 
-- Decisione 7-ter: il sistema distingue internamente `ERROR_NETWORK` da `ERROR_DATA`. Questa distinzione è usata per telemetria e debugging ma non cambia lo stato pubblico `ERROR` esposto alla UI.
+  - Decisione 7-bis: se NetInfo risponde dopo i 3 secondi mentre la hydration è già partita, non si interrompe la hydration in corso e non se ne avvia una seconda. Se NetInfo dice rete assente in quel momento, si gestisce tramite il timeout normale dei 10 secondi. Se dice rete presente, nessuna azione.
+
+  - Decisione 7-ter: il sistema distingue internamente `ERROR_NETWORK` da `ERROR_DATA`. Questa distinzione è usata per telemetria e debugging ma non cambia lo stato pubblico `ERROR` esposto alla UI.
+
+  Scope di applicazione — dichiarazione vincolante:
+  ERROR_NETWORK ed ERROR_DATA esistono esclusivamente
+  nei seguenti contesti: all'interno del provider,
+  nella futura infrastruttura di telemetria (DT-011-01),
+  nei log diagnostici.
+  Questi valori non devono mai essere esposti alla UI,
+  alla navigazione, ai componenti visivi o a qualsiasi
+  layer esterno al provider.
+  La state machine pubblica espone esclusivamente
+  lo stato ERROR verso tutti i consumatori esterni.
+  Qualsiasi utilizzo di ERROR_NETWORK o ERROR_DATA
+  al di fuori dei contesti dichiarati è una violazione
+  architetturale.
 
 - Decisione 8: timer di inizializzazione NetInfo è 3 secondi.
 
