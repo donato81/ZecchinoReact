@@ -16,7 +16,23 @@ necessari per il tuo progetto.
 *Per domande sull'architettura SPARK, usa l'agente `spark-guide`.*
 
 Versione corrente progetto: `0.4.0`.
-Prossimo PLAN da affrontare: `007`.
+Analisi Android completata (DUSU-ANALYZER 2025-07-25).
+Prossimo blocco da affrontare: risoluzione BC-01/BC-02/BC-03 (rimozione `@phosphor-icons/react` e `react-dom`, riscrittura `budget-templates.ts`) — Gate Android 1.
+
+---
+
+## Stato Compatibilità Android
+
+**Report:** [REPORT-compatibilita-android-v1.0.0.md](docs/1-reports/REPORT-compatibilita-android-v1.0.0.md)
+
+| Gate | Stato | Blocchi aperti |
+|------|-------|---------------|
+| Gate 1 — Build Android | ❌ BLOCCATO | BC-01, BC-02, BC-03 |
+| Gate 2 — Runtime Core | ✅ PRONTO | — (crypto, export, NetInfo, Supabase ✅) |
+| Gate 3 — Runtime UI | ⏳ IN ATTESA | AN-01 (haptic), AN-02 (sound), AN-03 (oklch) |
+| Gate 4 — Documentazione | ⏳ IN ATTESA | DD-01 (patch orfana), DD-02 (architettura.md stale) |
+
+**Target platform:** iOS ✅ (non testato) · Android ❌ (build bloccata da BC-01) · Windows ❄️ (DT-009-N-01 aperto)
 
 ---
 

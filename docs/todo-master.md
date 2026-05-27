@@ -1,12 +1,12 @@
 ## 1. Metadata e Context Header
 
 - **Project Name:** ZecchinoReact
-- **Version:** 0.3.0
+- **Version:** 0.4.0
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
-- **Ultimo Agente Attivo:** Agent-Orchestrator (PLAN 009 padre completato — T1-bis, T4, T5, T6, T7, T8 PASS; 009-native resta aperto solo per validazioni runtime T3-N5)
-- **Blocco in Carico:** Follow-up 009-native — DT-009-N-01 e DT-009-N-02 aperti per validazioni runtime Windows/Android; release 0.3.0 promossa per i piani 001–005, 007, 008, 009.
+- **Ultimo Agente Attivo:** Agent-Analyze / DUSU-ANALYZER (analisi statica Android v1.0.0 completata — 3 BC, 4 AN, 3 DD identificati; report prodotto in docs/1-reports/REPORT-compatibilita-android-v1.0.0.md)
+- **Blocco in Carico:** DUSU-ANALYZER completato — prossimo blocco: risoluzione BC-01/BC-02/BC-03 (rimozione @phosphor-icons/react, react-dom, riscrittura budget-templates.ts) per sbloccare il Gate Android 1.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
@@ -44,40 +44,29 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** PLAN 007 v0.2.0 — risoluzione bug N9
-  (false-positive hydration) + state machine bootstrap esplicita
-  + generation counter + writeCache fail-soft + estrazione modulo
-  `src/context/app-data-cache.ts` con `readCachedDomainSnapshotPure`
-  testabile. 7 test Jest verdi per INV1/INV2/INV5.
-- **Last Validated Block:** PLAN 007 — gate F1-F6 + G4 PASS.
-  TSC baseline preservata (3 errori preesistenti: downloadFile,
-  @phosphor-icons/react x2). Jest baseline preservata (5/6 suite
-  PASS; App.test.tsx fallisce per problema AsyncStorage preesistente).
-- **Files Modified But Not Validated:** `babel.config.js`, `package.json`,
-  `src/lib/supabase/client.ts`, `src/env.d.ts` (CREATO),
-  `src/context/AuthContext.tsx`,
-  `src/context/AppDataContext.tsx`,
-  `src/components/ui/button.tsx` (CREATO),
-  `src/hooks/use-inactivity-timer.ts` (RISCRITTO),
-  `src/components/ActivityDetectorView.tsx` (CREATO),
-  `src/accessibility/types.ts` (CREATO),
-  `src/accessibility/engine.ts` (CREATO),
-  `src/accessibility/detection.ts` (CREATO),
-  `src/locales/it.ts` (CREATO),
-  `src/locales/index.ts` (CREATO),
-  `src/hooks/use-talkback.ts` (ELIMINATO),
-  `tsconfig.json` (rimossa riga "types": ["node"])
-- **Open Threads:** ~47 errori TypeScript attesi e documentati (NOTA 2)
-  dopo rimozione di "types": ["node"] in DESIGN 002.
-  Non intervenire fuori dal perimetro dei DESIGN
-  che li coprono. File coinvolti: AppDataContext.tsx,
-  AuthContext.tsx, use-online-status.ts,
-  budget-templates.ts, crypto.ts, haptic-system.ts,
-  sound-system.ts.
-  NOTA 1 attiva: non testare path PIN e sblocco privato
-  finché screen-reader.ts non è verificato senza
-  guard DOM.
-- **Next Action:** Avviare validazione DESIGN 004 con il Consiglio AI.
+- **Last Completed Task:** DUSU-ANALYZER — Analisi statica compatibilità Android completata
+  (2025-07-25). 3 Blocchi Critici, 4 Adattamenti Necessari, 3 Discrepanze
+  Documentazione identificati. Report prodotto in
+  `docs/1-reports/REPORT-compatibilita-android-v1.0.0.md`.
+  Codebase v0.4.0 (PLAN 006 completato). PLAN 006 ha portato il
+  KDF PBKDF2-SHA256 con PBKDF2_ITERATIONS=600_000.
+- **Last Validated Block:** PLAN 006 — T2-T9 PASS, golden vectors K1/K2/K3
+  verificati. Suite npm test EXIT:0, tsc EXIT:0, npm install EXIT:0.
+- **Files Modified But Not Validated:** Nessuno (sessione DUSU-ANALYZER
+  è read-only per src/). Documenti aggiornati: REPORT-compatibilita-android-v1.0.0.md
+  (CREATO), docs/todo-master.md (aggiornato), CHANGELOG.md (aggiornato),
+  SPARK-START.md (aggiornato).
+- **Open Threads:**
+  BC-01: `src/lib/budget-templates.ts` — import `@phosphor-icons/react` (BLOCCO BUILD ANDROID)
+  BC-02: `package.json` — `@phosphor-icons/react` da rimuovere (BLOCCO BUILD ANDROID)
+  BC-03: `package.json` — `react-dom` da rimuovere (BLOCCO BUILD ANDROID)
+  AN-01: `src/lib/haptic-system.ts` — riscrittura con Vibration RN (P1.B1 TODO)
+  AN-02: `src/lib/sound-system.ts` — riscrittura con expo-av/react-native-sound (P1.B2 TODO)
+  AN-03: `src/lib/constants.ts` — 5 colori oklch→hex (ADATTAMENTO MINORE)
+  DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
+  DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
+- **Next Action:** Risoluzione BC-01/BC-02/BC-03 — creare DESIGN-BLOCCO-PHOSPHOR
+  per riscrittura budget-templates.ts e pulizia package.json.
   Documenti pronti per la review:
   - `docs/2-projects/004-DESIGN_announcements-layer_v1_0_0.md`
   - `docs/3-coding-plans/004-PLAN_announcements-layer_v1_0_0.md`
@@ -409,6 +398,19 @@ Verificare che src/context/AppDataContext.tsx esista e sia accessibile in scritt
 ### Security & Privacy Constraints
 
 - **Data Privacy:** Mai inserire valori numerici reali, nomi utente o dati sensibili nei log di debug o nei commenti del codice.
+
+---
+
+## Nuovi debiti tecnici aggiunti 2026-05-27
+
+- **DT-010-01**: Funzioni PostgreSQL per operazioni crittografiche del PIN — valutare l'introduzione di funzioni server-side per auditing e centralizzazione delle operazioni crittografiche relative al PIN. Priorità: bassa. Riferimento: `docs/2-projects/010-DESIGN_wrapped-master-key-PIN_v0.1.0.md`.
+
+- **DT-011-01 (DT-008-02)**: Telemetria centralizzata per errori di bootstrap e differenziazione `ERROR_NETWORK`/`ERROR_DATA` — progettare servizio di raccolta e mapping degli errori di bootstrap. Priorità: bassa. Riferimento: `docs/2-projects/011-DESIGN_resilienza-bootstrap_v0.1.0.md`.
+
+- **DT-012-01**: DESIGN per esportazione PDF — creare design dedicato prima di implementare supporto PDF in `ExportService`. Priorità: bassa. Riferimento: `docs/2-projects/012-DESIGN_export-nativo-debiti_v0.1.0.md`.
+
+- **DT-012-02**: DESIGN per esportazione XLSX — creare design dedicato prima di implementare supporto XLSX in `ExportService`. Priorità: bassa. Riferimento: `docs/2-projects/012-DESIGN_export-nativo-debiti_v0.1.0.md`.
+
 - **Validation Logic:** Ogni funzione di calcolo finanziario deve includere test obbligatori per la gestione dei decimali e l'arrotondamento.
 - **Credential Handling:** Mai scrivere API Key o segreti direttamente nei file sorgente. Usare esclusivamente variabili d'ambiente o il modulo `@env`.
 - **Database Transactionality:** Tutti i task che comportano la modifica di schemi o dati su Supabase devono essere eseguiti tramite transazioni isolate o script di migrazione controllati. È fatto divieto di eseguire mutazioni dirette sul database che non possano essere annullate in sicurezza dalle procedure di Rollback.
@@ -450,7 +452,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P1.B2 | Riscrittura sound-system.ts per RN | [ ] TODO | [ ] OPEN |
 | P1.B3 | Riscrittura screen-reader.ts per RN | [ ] TODO | [ ] OPEN |
 | P2.B1 | Riscrittura use-inactivity-timer.ts per RN | [x] DONE | [x] PASSED |
-| P2.B2 | Riscrittura use-online-status.ts per RN (rif. DESIGN 008) | [ ] TODO | [ ] OPEN |
+| P2.B2 | Riscrittura use-online-status.ts per RN (rif. DESIGN 008) | [x] DONE — ELIMINATO e sostituito da src/hooks/use-network-status.ts (DESIGN 008) | [x] PASSED |
 | P2.B3 | Riscrittura use-talkback.ts per RN | [x] DONE — ELIMINATO e sostituito da src/accessibility/detection.ts | [x] PASSED |
 | P1.B3-PARZIALE | Avvio fix accessibility engine (DESIGN 003) — creati types.ts, engine.ts, detection.ts | [x] DONE (parziale — screen-reader.ts ancora da coprire in DESIGN specifico) | [~] DEFERRED |
 | P3.B1 | Pulizia AuthContext — rimozione residui DOM | [ ] TODO | [ ] OPEN |
@@ -466,6 +468,10 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P1.B5-IMPL | Implementazione PLAN 005 — `@noble/ciphers` (T1–T8, 11/11 PASS, Gate §9 superato) | [x] DONE | [x] PASSED |
 | P1.B6 | Documentazione DESIGN 006 — TODO 006 creato (PLAN 006 v1.1.0 pronto per implementazione a valle di PLAN 005) | [x] DONE | [x] DONE |
 | P1.B6-IMPL | Implementazione PLAN 006 — KDF PIN PBKDF2-SHA256 (T2–T9 PASS, gate chiusura superato) | [x] DONE | [x] PASSED |
+| DUSU-ANALYZER | Analisi statica compatibilità Android v0.4.0 — 3 BC, 4 AN, 3 DD, report prodotto | [x] DONE | [x] PASSED |
+| BC-01-FIX | Rimozione @phosphor-icons/react da budget-templates.ts | [ ] TODO | [ ] OPEN |
+| BC-02-FIX | Rimozione @phosphor-icons/react da package.json | [ ] TODO | [ ] OPEN |
+| BC-03-FIX | Rimozione react-dom da package.json | [ ] TODO | [ ] OPEN |
 
 ### Log di Validazione
 
@@ -483,6 +489,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-22 | P1.B5-DOC | Agent-Orchestrator | DONE | PLAN 005 — TODO 005 creato. TODO operativo 8 task T1–T8 con gate bash. PLAN pronto per implementazione. |
 | 2026-05-22 | P1.B6-DOC | Agent-Orchestrator | DONE | PLAN 006 v1.1.0 — TODO 006 creato. TODO operativo 9 task T1–T9 con gate bash. Note critiche: divieto commit Fase 0 con placeholder, sequenza calcolo offline vettori K1/K2/K3 (6 passi), contratto errore updateFields (no swallow), serializzazione KDF_VERSION UInt8, posizioni buffer 0/1-16/17-28/29+. Gate bloccante: dipendenza da PLAN 005 implementato e mergiato. Checklist chiusura 12 punti da PLAN §10. |
 | 2026-05-26 | P1.B6-IMPL | GitHub Copilot | DONE | PLAN 006 completato su `main`: `react-native-quick-crypto` pinnata a 1.1.5, migration P40 aggiunta, `pin_kdf_salt` propagato ai tipi e al repository, Strategia A (`derivePinKey`, `encryptDataPin`, `decryptDataPin`) implementata con `PBKDF2_ITERATIONS = 600_000`, update multi-colonna `updatePinHashAndSalt`, suite K1/K2/K3 aggiunta, G1/G2/G3 e `npx tsc --noEmit` verdi. |
+| 2025-07-25 | DUSU-ANALYZER | Agent-Analyze | DONE | Analisi statica Android completata (read-only). 3 blocchi critici (BC-01/02/03: @phosphor-icons/react + react-dom), 4 adattamenti necessari (AN-01/02/03/04: haptic-system, sound-system, oklch colors), 3 discrepanze doc (DD-01/02/03). Report: docs/1-reports/REPORT-compatibilita-android-v1.0.0.md. P2.B2 risolta (use-online-status.ts → use-network-status.ts). |
 
 ---
 

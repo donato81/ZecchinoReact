@@ -2,6 +2,42 @@
 
 ## [Unreleased]
 
+### DUSU-ANALYZER — Analisi statica compatibilità Android v0.4.0 (2025-07-25)
+
+#### Added
+
+- **Report compatibilità Android**
+  ([docs/1-reports/REPORT-compatibilita-android-v1.0.0.md](docs/1-reports/REPORT-compatibilita-android-v1.0.0.md)).
+  Analisi statica completa del codebase v0.4.0. 5 fasi (FASE 0:
+  documentazione, FASE 1: scansione sorgente, FASE 2: classificazione,
+  FASE 3: test review, FASE 4: report). Identifica:
+  — 3 Blocchi Critici BC-01/02/03: `@phosphor-icons/react` e `react-dom`
+    in `budget-templates.ts` e `package.json` (impediscono build Android);
+  — 4 Adattamenti Necessari AN-01/02/03/04: `haptic-system.ts` (Web
+    Vibration API), `sound-system.ts` (Web Audio API), colori `oklch(...)`
+    in `constants.ts` e `budget-templates.ts` (non supportati da RN);
+  — 3 Discrepanze DD-01/02/03: patch netinfo 12.0.1 orfana, stale
+    reference a `use-online-status.ts` in architettura.md, descrizione
+    errata della cache in CLAUDE.md.
+
+#### Verified Compatible (FASE 1)
+
+- Layer crittografico PLAN 006: `crypto.ts` + `kdf-provider.ts` —
+  `PBKDF2_ITERATIONS=600_000`, `KDF_VERSION=0x01`, `@noble/ciphers`,
+  `bcryptjs`, lazy-require `react-native-quick-crypto`. ✅
+- Layer connettività DESIGN 008: `NetworkStatusContext.tsx` +
+  `use-network-status.ts` — NetInfo, debounce, fail-safe. ✅
+- Layer export DESIGN 009: `export-service.ts` — ramo Android via
+  `react-native-share`, stub `PICKER_UNAVAILABLE` per Windows. ✅
+- Layer accessibilità DESIGN 003/004: `accessibility/engine.ts`,
+  `detection.ts`, `src/announcements/` — solo `AccessibilityInfo` RN. ✅
+- Cache Supabase: `supabase/cache.ts` — usa `AsyncStorage` (non
+  localStorage). ✅
+- `AuthContext.tsx`, `AppDataContext.tsx` — sonner rimosso, shim
+  locale; `navigator.onLine` rimosso, `useNetworkStatus()` attivo. ✅
+
+---
+
 ### PLAN 009-native — WinRT Save Picker bridge (2026-05-25)
 
 #### Added
