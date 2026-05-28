@@ -17,15 +17,15 @@ necessari per il tuo progetto.
 
 Versione corrente progetto: `0.4.0`.
 Analisi Android completata (DUSU-ANALYZER 2025-07-25).
-Stato aggiornato: 2026-05-27.
+Stato aggiornato: 2026-05-28.
 Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
 012 Export Nativo Guard Concorrente.
 Suite di test: PASS (`11/11` suite, `75` test passati, `13` `it.todo`
 documentati).
 Decisione release: nessun minor bump automatico; prima vanno chiusi i debiti
 Android/Windows gia' aperti nel master TODO.
-Prossima azione: review architetturale finale e prioritizzazione dei blocchi
-BC-01/02/03, AN-01/02/03, DD-01/02.
+Prossima azione: review dei coding plan 013–016-ter e autorizzazione
+all'implementazione in ordine 013, 014, 015, 016, 016-bis, 016-ter.
 
 ---
 
@@ -62,6 +62,21 @@ BC-01/02/03, AN-01/02/03, DD-01/02.
 - [TODO 009 — Export File Nativo](docs/4-todo-lists/009-TODO_export-nativo_v0.1.0.md) — v0.1.0 — DONE
 - [PLAN 009-native — Bridge C++/WinRT WinRT Save Picker](docs/3-coding-plans/009-native-PLAN_winrt-save-picker_v0.1.0.md) — v0.1.0 — DRAFT
 - [TODO 009-native — Bridge C++/WinRT WinRT Save Picker](docs/4-todo-lists/009-native-TODO_winrt-save-picker_v0.1.0.md) — v0.1.0 — PENDING
+- [PLAN 013 — Repository Ricorrenze](docs/3-coding-plans/013-PLAN_repository-ricorrenze_v0.1.0.md) — v0.1.0 — DRAFT
+- [TODO 013 — Repository Ricorrenze](docs/4-todo-lists/013-TODO_repository-ricorrenze_v0.1.0.md) — v0.1.0 — PENDING
+- [PLAN 014 — Repository Tag e Transazioni-Tag](docs/3-coding-plans/014-PLAN_repository-tag-transazioni-tag_v0.1.0.md) — v0.1.0 — DRAFT
+- [TODO 014 — Repository Tag e Transazioni-Tag](docs/4-todo-lists/014-TODO_repository-tag-transazioni-tag_v0.1.0.md) — v0.1.0 — PENDING
+- [PLAN 015 — Repository Notifiche e Notification Service](docs/3-coding-plans/015-PLAN_repository-notifiche-notification-service_v0.1.0.md) — v0.1.0 — DRAFT
+- [TODO 015 — Repository Notifiche e Notification Service](docs/4-todo-lists/015-TODO_repository-notifiche-notification-service_v0.1.0.md) — v0.1.0 — PENDING
+- [PLAN 016 — Allegati Transazioni](docs/3-coding-plans/016-PLAN_allegati-transazioni_v0.1.0.md) — v0.1.0 — DRAFT
+- [TODO 016 — Allegati Transazioni](docs/4-todo-lists/016-TODO_allegati-transazioni_v0.1.0.md) — v0.1.0 — PENDING
+- [PLAN 016-bis — Cleanup Orfani Storage](docs/3-coding-plans/016-bis-PLAN_cleanup-orfani-storage_v0.1.0.md) — v0.1.0 — DRAFT
+- [TODO 016-bis — Cleanup Orfani Storage](docs/4-todo-lists/016-bis-TODO_cleanup-orfani-storage_v0.1.0.md) — v0.1.0 — PENDING
+- [PLAN 016-ter — Magic Bytes Validation](docs/3-coding-plans/016-ter-PLAN_magic-bytes-validation_v0.1.0.md) — v0.1.0 — DRAFT
+- [TODO 016-ter — Magic Bytes Validation](docs/4-todo-lists/016-ter-TODO_magic-bytes-validation_v0.1.0.md) — v0.1.0 — PENDING
+
+I dodici nuovi file di pianificazione per DESIGN 013–016-ter sono pronti
+per review e successiva implementazione sequenziale.
 
 Blocco residuo: `009-native` resta aperto solo per le validazioni runtime
 T3-N5 su Windows e Android. Non sblocca da solo una nuova release: il progetto

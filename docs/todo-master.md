@@ -5,8 +5,8 @@
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
- - **Ultimo Agente Attivo:** Agent-Docs — aggiornamento todo-master con riferimenti DESIGN 013–016-ter (2026-05-28).
- - **Blocco in Carico:** AGENT-CODE completato — blocchi 010, 011, 012 chiusi e validati il 2026-05-27.
+ - **Ultimo Agente Attivo:** Agent-Orchestrator — creazione coding plan e todo list DESIGN 013–016-ter (2026-05-28)
+ - **Blocco in Carico:** AGENT-ORCHESTRATOR completato — piani 013–016-ter pronti per review. Nessun blocco di codifica attivo.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
@@ -44,7 +44,7 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
- - **Last Completed Task:** AGENT-DOCS — Aggiornamento todo-master con registrazione DESIGN 013, 014, 015, 016, 016-bis, 016-ter. Tutti in stato APPROVATO E VALIDATO (2026-05-28). Prossimo passo: creazione coding plan e todo per i sei design.
+ - **Last Completed Task:** AGENT-ORCHESTRATOR — Creazione coding plan e todo list per DESIGN 013, 014, 015, 016, 016-bis, 016-ter. Dodici file creati su main in docs/3-coding-plans/ e docs/4-todo-lists/. Tutti in stato DRAFT/PENDING (2026-05-28). Prossimo passo: review e autorizzazione implementazione da parte di donny-81.
   Codebase v0.4.0 (PLAN 006 completato). PLAN 006 ha portato il
   KDF PBKDF2-SHA256 con PBKDF2_ITERATIONS=600_000.
 - **Last Validated Block:** PLAN 012 — Export Nativo Guard Concorrente — gate G-012-1..G-012-5 PASSED (2026-05-27, Agent-Code)
@@ -63,10 +63,19 @@
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
- - **Next Action:** Creare i coding plan (docs/3-coding-plans/) e i todo (docs/4-todo-lists/) per i DESIGN 013, 014, 015, 016, 016-bis, 016-ter, in questo ordine di precedenza rispettando le dipendenze dichiarate nei design.
+ - **Next Action:** Review dei coding plan 013–016-ter da parte di donny-81. Dopo autorizzazione: implementazione in ordine 013, 014, 015, 016, 016-bis, 016-ter rispettando le dipendenze dichiarate nei piani.
 
 > Nota sessione aggiornamento docs 2026-05-28:
 > Registrati nel registro di stato i sei nuovi design approvati (013–016-ter). Aggiunti otto debiti tecnici nella sezione 7.1 (DT-016-01, DT-016-02, DT-016-bis-01, DT-016-bis-02, DT-016-bis-03, DT-016-ter-01, DT-016-ter-02, DT-016-ter-03). Snapshot di ripresa allineato. CHANGELOG e SPARK-START aggiornati. Prossimo passo: coding plan e todo 013–016-ter.
+
+> Nota sessione orchestrazione 2026-05-28:
+> Creati 12 file di pianificazione (6 coding plan
+> + 6 todo list) per i DESIGN 013–016-ter.
+> Tutti in stato DRAFT/PENDING su main.
+> Ciclo di revisione globale CICLO-G superato.
+> CHANGELOG e SPARK-START aggiornati.
+> Prossimo passo: review donny-81 e
+> autorizzazione implementazione.
 
 > **Nota sessione stesura TODO 007 — 2026-05-23:** Creato
 > `docs/4-todo-lists/007-TODO_async-cache-hydration_v0.1.0.md`
@@ -494,6 +503,18 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B5-DOCS-016 | DESIGN 016 approvato — Repository Allegati Transazioni | [x] DONE — 2026-05-28 Agent-Docs | [x] PASSED |
 | P3.B5-DOCS-016-bis | DESIGN 016-bis approvato — Cleanup Orfani Storage (dipende da 016) | [x] DONE — 2026-05-28 Agent-Docs | [x] PASSED |
 | P3.B5-DOCS-016-ter | DESIGN 016-ter approvato — Magic Bytes Validation (dipende da 016) | [x] DONE — 2026-05-28 Agent-Docs | [x] PASSED |
+| P3.B6-PLAN-013 | Coding plan 013 — Repository Ricorrenze | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
+| P3.B6-TODO-013 | Todo list 013 — Repository Ricorrenze | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
+| P3.B6-PLAN-014 | Coding plan 014 — Repository Tag e Transazioni-Tag | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
+| P3.B6-TODO-014 | Todo list 014 — Repository Tag e Transazioni-Tag | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
+| P3.B6-PLAN-015 | Coding plan 015 — Repository Notifiche e Notification Service | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
+| P3.B6-TODO-015 | Todo list 015 — Repository Notifiche e Notification Service | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
+| P3.B6-PLAN-016 | Coding plan 016 — Allegati Transazioni | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
+| P3.B6-TODO-016 | Todo list 016 — Allegati Transazioni | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
+| P3.B6-PLAN-016-bis | Coding plan 016-bis — Cleanup Orfani Storage | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
+| P3.B6-TODO-016-bis | Todo list 016-bis — Cleanup Orfani Storage | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
+| P3.B6-PLAN-016-ter | Coding plan 016-ter — Magic Bytes Validation | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
+| P3.B6-TODO-016-ter | Todo list 016-ter — Magic Bytes Validation | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
 
 ### Log di Validazione
 
@@ -519,6 +540,18 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-28 | P3.B5-DOCS-016 | Agent-Docs | DONE | DESIGN 016 — Repository Allegati Transazioni, stato APPROVATO E VALIDATO, DT-016-01 e DT-016-02 aperti |
 | 2026-05-28 | P3.B5-DOCS-016-bis | Agent-Docs | DONE | DESIGN 016-bis — Cleanup Orfani Storage, stato APPROVATO E VALIDATO, DT-016-bis-01/02/03 aperti |
 | 2026-05-28 | P3.B5-DOCS-016-ter | Agent-Docs | DONE | DESIGN 016-ter — Magic Bytes Validation, stato APPROVATO E VALIDATO, DT-016-ter-01/02/03 aperti |
+| 2026-05-28 | P3.B6-PLAN-013 | Agent-Orchestrator | DONE | Coding plan 013 — Repository Ricorrenze, stato DRAFT |
+| 2026-05-28 | P3.B6-TODO-013 | Agent-Orchestrator | DONE | Todo list 013 — Repository Ricorrenze, stato PENDING |
+| 2026-05-28 | P3.B6-PLAN-014 | Agent-Orchestrator | DONE | Coding plan 014 — Repository Tag e Transazioni-Tag, stato DRAFT |
+| 2026-05-28 | P3.B6-TODO-014 | Agent-Orchestrator | DONE | Todo list 014 — Repository Tag e Transazioni-Tag, stato PENDING |
+| 2026-05-28 | P3.B6-PLAN-015 | Agent-Orchestrator | DONE | Coding plan 015 — Repository Notifiche e Notification Service, stato DRAFT |
+| 2026-05-28 | P3.B6-TODO-015 | Agent-Orchestrator | DONE | Todo list 015 — Repository Notifiche e Notification Service, stato PENDING |
+| 2026-05-28 | P3.B6-PLAN-016 | Agent-Orchestrator | DONE | Coding plan 016 — Allegati Transazioni, stato DRAFT |
+| 2026-05-28 | P3.B6-TODO-016 | Agent-Orchestrator | DONE | Todo list 016 — Allegati Transazioni, stato PENDING |
+| 2026-05-28 | P3.B6-PLAN-016-bis | Agent-Orchestrator | DONE | Coding plan 016-bis — Cleanup Orfani Storage, stato DRAFT |
+| 2026-05-28 | P3.B6-TODO-016-bis | Agent-Orchestrator | DONE | Todo list 016-bis — Cleanup Orfani Storage, stato PENDING |
+| 2026-05-28 | P3.B6-PLAN-016-ter | Agent-Orchestrator | DONE | Coding plan 016-ter — Magic Bytes Validation, stato DRAFT |
+| 2026-05-28 | P3.B6-TODO-016-ter | Agent-Orchestrator | DONE | Todo list 016-ter — Magic Bytes Validation, stato PENDING |
 | 2026-05-26 | P1.B6-IMPL | GitHub Copilot | DONE | PLAN 006 completato su `main`: `react-native-quick-crypto` pinnata a 1.1.5, migration P40 aggiunta, `pin_kdf_salt` propagato ai tipi e al repository, Strategia A (`derivePinKey`, `encryptDataPin`, `decryptDataPin`) implementata con `PBKDF2_ITERATIONS = 600_000`, update multi-colonna `updatePinHashAndSalt`, suite K1/K2/K3 aggiunta, G1/G2/G3 e `npx tsc --noEmit` verdi. |
 | 2025-07-25 | DUSU-ANALYZER | Agent-Analyze | DONE | Analisi statica Android completata (read-only). 3 blocchi critici (BC-01/02/03: @phosphor-icons/react + react-dom), 4 adattamenti necessari (AN-01/02/03/04: haptic-system, sound-system, oklch colors), 3 discrepanze doc (DD-01/02/03). Report: docs/1-reports/REPORT-compatibilita-android-v1.0.0.md. P2.B2 risolta (use-online-status.ts → use-network-status.ts). |
 

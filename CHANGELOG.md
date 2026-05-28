@@ -54,6 +54,22 @@
 - DESIGN 016-ter: espanso elenco test da abbreviato a completo (13 test), aggiunta invariante firma parziale, aggiunta invariante stringhe hardcoded.
 - Serie 013-016-ter promossa a: REVIEWED (dopo correzioni).
 
+## [0.4.0-docs.2] — 2026-05-28 — Pianificazione
+
+### Added
+- PLAN 013: coding plan Repository Ricorrenze (stato DRAFT) — docs/3-coding-plans/013-PLAN_repository-ricorrenze_v0.1.0.md
+- TODO 013: todo list Repository Ricorrenze (stato PENDING) — docs/4-todo-lists/013-TODO_repository-ricorrenze_v0.1.0.md
+- PLAN 014: coding plan Repository Tag e Transazioni-Tag (stato DRAFT, prereq: PLAN 013) — docs/3-coding-plans/014-PLAN_repository-tag-transazioni-tag_v0.1.0.md
+- TODO 014: todo list Repository Tag e Transazioni-Tag (stato PENDING) — docs/4-todo-lists/014-TODO_repository-tag-transazioni-tag_v0.1.0.md
+- PLAN 015: coding plan Repository Notifiche e Notification Service (stato DRAFT, prereq: PLAN 013, 014) — docs/3-coding-plans/015-PLAN_repository-notifiche-notification-service_v0.1.0.md
+- TODO 015: todo list Repository Notifiche e Notification Service (stato PENDING) — docs/4-todo-lists/015-TODO_repository-notifiche-notification-service_v0.1.0.md
+- PLAN 016: coding plan Allegati Transazioni (stato DRAFT) — docs/3-coding-plans/016-PLAN_allegati-transazioni_v0.1.0.md
+- TODO 016: todo list Allegati Transazioni (stato PENDING) — docs/4-todo-lists/016-TODO_allegati-transazioni_v0.1.0.md
+- PLAN 016-bis: coding plan Cleanup Orfani Storage (stato DRAFT, prereq: PLAN 016) — docs/3-coding-plans/016-bis-PLAN_cleanup-orfani-storage_v0.1.0.md
+- TODO 016-bis: todo list Cleanup Orfani Storage (stato PENDING) — docs/4-todo-lists/016-bis-TODO_cleanup-orfani-storage_v0.1.0.md
+- PLAN 016-ter: coding plan Magic Bytes Validation (stato DRAFT, prereq: PLAN 016) — docs/3-coding-plans/016-ter-PLAN_magic-bytes-validation_v0.1.0.md
+- TODO 016-ter: todo list Magic Bytes Validation (stato PENDING) — docs/4-todo-lists/016-ter-TODO_magic-bytes-validation_v0.1.0.md
+
 ## [0.4.0] — 2026-05-28 — Documentazione
 
 ### Added
