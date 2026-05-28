@@ -54,6 +54,41 @@
 - DESIGN 016-ter: espanso elenco test da abbreviato a completo (13 test), aggiunta invariante firma parziale, aggiunta invariante stringhe hardcoded.
 - Serie 013-016-ter promossa a: REVIEWED (dopo correzioni).
 
+## [0.4.0] — 2026-05-28 — Documentazione
+
+### Added
+- DESIGN 013: Repository Ricorrenze — approvato
+  e validato. Introduce il repository per
+  transazioni programmate ricorrenti con
+  operazioni CRUD e deactivate (no delete fisico).
+- DESIGN 014: Repository Tag e Transazioni-Tag —
+  approvato e validato. Introduce gestione etichette
+  e associazione tag-transazioni con RPC atomiche.
+- DESIGN 015: Repository Notifiche e Notification
+  Service — approvato e validato. Estrae e potenzia
+  la logica di notifica budget esistente introducendo
+  persistenza e service dedicato.
+- DESIGN 016: Repository Allegati Transazioni —
+  approvato e validato. Primo dominio con storage
+  cloud Supabase, strategia compensating transaction
+  e 17 decisioni architetturali.
+- DESIGN 016-bis: Cleanup Orfani Storage — approvato
+  e validato. Utility automatica fire-and-forget con
+  4 trigger, guardia concorrente e throttle temporale.
+- DESIGN 016-ter: Magic Bytes Validation — approvato
+  e validato. Validazione fisica dei file allegati
+  per JPEG, PNG, PDF su Android e Windows.
+
+### Technical Debt Registered
+- DT-016-01: magic bytes validation (soluzione in 016-ter)
+- DT-016-02: cleanup orfani storage (soluzione in 016-bis)
+- DT-016-bis-01: script CLI manutenzione
+- DT-016-bis-02: Edge Functions server-side cleanup
+- DT-016-bis-03: log opt-in utenti avanzati
+- DT-016-ter-01: supporto HEIC e WEBP
+- DT-016-ter-02: supporto iOS magic bytes
+- DT-016-ter-03: bridge nativo Windows magic bytes
+
 ### DUSU-ANALYZER — Analisi statica compatibilità Android v0.4.0 (2025-07-25)
 
 #### Added

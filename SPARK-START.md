@@ -49,6 +49,13 @@ BC-01/02/03, AN-01/02/03, DD-01/02.
 - [DESIGN 009 — Export File Nativo](docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 009-native — Modulo nativo WinRT Save Picker](docs/2-projects/009-native-DESIGN_winrt-save-picker_v0.1.0.md) — v0.1.0 — DRAFT (approvato Consiglio AI 2026-05-25)
 
+- [DESIGN 013 — Repository Ricorrenze](docs/2-projects/013-DESIGN_repository-ricorrenze_v0.1.0.md) — v0.1.0 — REVIEWED
+- [DESIGN 014 — Repository Tag e Transazioni-Tag](docs/2-projects/014-DESIGN_repository-tag-transazioni-tag_v0.1.0.md) — v0.1.0 — REVIEWED
+- [DESIGN 015 — Repository Notifiche e Notification Service](docs/2-projects/015-DESIGN_repository-notifiche-notification-service_v0.1.0.md) — v0.1.0 — REVIEWED
+- [DESIGN 016 — Repository Allegati Transazioni](docs/2-projects/016-DESIGN_allegati-transazioni_v0.1.0.md) — v0.1.0 — REVIEWED
+- [DESIGN 016-bis — Cleanup Orfani Storage](docs/2-projects/016-bis-DESIGN_cleanup-orfani-storage_v0.1.0.md) — v0.1.0 — REVIEWED
+- [DESIGN 016-ter — Magic Bytes Validation](docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md) — v0.1.0 — REVIEWED
+
 ## Stato PLAN / TODO
 
 - [PLAN 009 — Export File Nativo](docs/3-coding-plans/009-PLAN_export-nativo_v0.1.0.md) — v0.1.0 — COMPLETATO lato piano padre

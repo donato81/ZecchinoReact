@@ -5,7 +5,7 @@
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
-- **Ultimo Agente Attivo:** Agent-Analyze / DUSU-ANALYZER (analisi statica Android v1.0.0 completata — 3 BC, 4 AN, 3 DD identificati; report prodotto in docs/1-reports/REPORT-compatibilita-android-v1.0.0.md)
+ - **Ultimo Agente Attivo:** Agent-Docs — aggiornamento todo-master con riferimenti DESIGN 013–016-ter (2026-05-28).
  - **Blocco in Carico:** AGENT-CODE completato — blocchi 010, 011, 012 chiusi e validati il 2026-05-27.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
@@ -16,7 +16,7 @@
   `use-screen-reader.ts` e `screen-reader.ts` eliminati;
   TSC baseline ridotta da 89 a 47 errori.
 - **Active Block:** Nessuno — implementazione DESIGN 004 completata.
-- **Last Updated:** 2026-05-26
+ - **Last Updated:** 2026-05-28
 - **Pending Plans:**
   - **PLAN 007 COMPLETATO** (release 0.2.0) —
     `docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md`
@@ -44,7 +44,7 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
- - **Last Completed Task:** AGENT-CODE — Blocco 012 Export Nativo Guard Concorrente implementato e validato (2026-05-27). `export-service.ts` aggiornato con guardia sincrona `inProgress`, nuovo reason `ALREADY_IN_PROGRESS` e rilascio del flag in `finally`; `AppDataContext.tsx` gestisce il nuovo esito con messaggi localizzati. Suite export a 13 casi verde.
+ - **Last Completed Task:** AGENT-DOCS — Aggiornamento todo-master con registrazione DESIGN 013, 014, 015, 016, 016-bis, 016-ter. Tutti in stato APPROVATO E VALIDATO (2026-05-28). Prossimo passo: creazione coding plan e todo per i sei design.
   Codebase v0.4.0 (PLAN 006 completato). PLAN 006 ha portato il
   KDF PBKDF2-SHA256 con PBKDF2_ITERATIONS=600_000.
 - **Last Validated Block:** PLAN 012 — Export Nativo Guard Concorrente — gate G-012-1..G-012-5 PASSED (2026-05-27, Agent-Code)
@@ -63,7 +63,10 @@
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
- - **Next Action:** Eseguire review finale architetturale e pianificare la chiusura dei debiti Android/Windows residui; minor release non promossa, versione confermata a 0.4.0 dopo i blocchi 010/011/012.
+ - **Next Action:** Creare i coding plan (docs/3-coding-plans/) e i todo (docs/4-todo-lists/) per i DESIGN 013, 014, 015, 016, 016-bis, 016-ter, in questo ordine di precedenza rispettando le dipendenze dichiarate nei design.
+
+> Nota sessione aggiornamento docs 2026-05-28:
+> Registrati nel registro di stato i sei nuovi design approvati (013–016-ter). Aggiunti otto debiti tecnici nella sezione 7.1 (DT-016-01, DT-016-02, DT-016-bis-01, DT-016-bis-02, DT-016-bis-03, DT-016-ter-01, DT-016-ter-02, DT-016-ter-03). Snapshot di ripresa allineato. CHANGELOG e SPARK-START aggiornati. Prossimo passo: coding plan e todo 013–016-ter.
 
 > **Nota sessione stesura TODO 007 — 2026-05-23:** Creato
 > `docs/4-todo-lists/007-TODO_async-cache-hydration_v0.1.0.md`
@@ -485,6 +488,12 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B4-IMPL-010 | Codifica blocco 010 — Wrapped Master Key PIN | [x] DONE — 2026-05-27 Agent-Code | [x] PASSED |
 | P3.B4-IMPL-011 | Codifica blocco 011 — Resilienza Bootstrap | [x] DONE — 2026-05-27 Agent-Code | [x] PASSED |
 | P3.B4-IMPL-012 | Codifica blocco 012 — Export Nativo Guard Concorrente | [x] DONE — 2026-05-27 Agent-Code | [x] PASSED |
+| P3.B5-DOCS-013 | DESIGN 013 approvato — Repository Ricorrenze | [x] DONE — 2026-05-28 Agent-Docs | [x] PASSED |
+| P3.B5-DOCS-014 | DESIGN 014 approvato — Repository Tag e Transazioni-Tag (prereq: 013) | [x] DONE — 2026-05-28 Agent-Docs | [x] PASSED |
+| P3.B5-DOCS-015 | DESIGN 015 approvato — Repository Notifiche e Notification Service (prereq: 013, 014) | [x] DONE — 2026-05-28 Agent-Docs | [x] PASSED |
+| P3.B5-DOCS-016 | DESIGN 016 approvato — Repository Allegati Transazioni | [x] DONE — 2026-05-28 Agent-Docs | [x] PASSED |
+| P3.B5-DOCS-016-bis | DESIGN 016-bis approvato — Cleanup Orfani Storage (dipende da 016) | [x] DONE — 2026-05-28 Agent-Docs | [x] PASSED |
+| P3.B5-DOCS-016-ter | DESIGN 016-ter approvato — Magic Bytes Validation (dipende da 016) | [x] DONE — 2026-05-28 Agent-Docs | [x] PASSED |
 
 ### Log di Validazione
 
@@ -504,6 +513,12 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-27 | P3.B4-IMPL-010 | Agent-Code | DONE | PLAN 010 — wrapped master key versionata, update atomico `pin_privato_hash`/`pin_kdf_salt`/`pin_master_key_encrypted`, reset PIN distruttivo con logout globale, messaggi PIN localizzati. Gate G-010-1..G-010-5 PASS. |
 | 2026-05-27 | P3.B4-IMPL-011 | Agent-Code | DONE | PLAN 011 — `NetworkStatusProvider` fail-safe a 3000 ms, `App.tsx` con provider rete primo nella catena, `AppDataContext` con bootstrap offline/online/init, timeout remoto 10000 ms e codici interni `ERROR_NETWORK`/`ERROR_DATA` non esposti alla UI. Gate G-011-1..G-011-5 PASS. |
 | 2026-05-27 | P3.B4-IMPL-012 | Agent-Code | DONE | PLAN 012 — `export-service.ts` con guardia sincrona `inProgress`, nuovo reason `ALREADY_IN_PROGRESS`, rilascio del flag in `finally` e suite export riallineata a 13 casi. Gate G-012-1..G-012-5 PASS. |
+| 2026-05-28 | P3.B5-DOCS-013 | Agent-Docs | DONE | DESIGN 013 — Repository Ricorrenze, stato APPROVATO E VALIDATO |
+| 2026-05-28 | P3.B5-DOCS-014 | Agent-Docs | DONE | DESIGN 014 — Repository Tag e Transazioni-Tag, stato APPROVATO E VALIDATO |
+| 2026-05-28 | P3.B5-DOCS-015 | Agent-Docs | DONE | DESIGN 015 — Repository Notifiche e Notification Service, stato APPROVATO E VALIDATO |
+| 2026-05-28 | P3.B5-DOCS-016 | Agent-Docs | DONE | DESIGN 016 — Repository Allegati Transazioni, stato APPROVATO E VALIDATO, DT-016-01 e DT-016-02 aperti |
+| 2026-05-28 | P3.B5-DOCS-016-bis | Agent-Docs | DONE | DESIGN 016-bis — Cleanup Orfani Storage, stato APPROVATO E VALIDATO, DT-016-bis-01/02/03 aperti |
+| 2026-05-28 | P3.B5-DOCS-016-ter | Agent-Docs | DONE | DESIGN 016-ter — Magic Bytes Validation, stato APPROVATO E VALIDATO, DT-016-ter-01/02/03 aperti |
 | 2026-05-26 | P1.B6-IMPL | GitHub Copilot | DONE | PLAN 006 completato su `main`: `react-native-quick-crypto` pinnata a 1.1.5, migration P40 aggiunta, `pin_kdf_salt` propagato ai tipi e al repository, Strategia A (`derivePinKey`, `encryptDataPin`, `decryptDataPin`) implementata con `PBKDF2_ITERATIONS = 600_000`, update multi-colonna `updatePinHashAndSalt`, suite K1/K2/K3 aggiunta, G1/G2/G3 e `npx tsc --noEmit` verdi. |
 | 2025-07-25 | DUSU-ANALYZER | Agent-Analyze | DONE | Analisi statica Android completata (read-only). 3 blocchi critici (BC-01/02/03: @phosphor-icons/react + react-dom), 4 adattamenti necessari (AN-01/02/03/04: haptic-system, sound-system, oklch colors), 3 discrepanze doc (DD-01/02/03). Report: docs/1-reports/REPORT-compatibilita-android-v1.0.0.md. P2.B2 risolta (use-online-status.ts → use-network-status.ts). |
 
@@ -605,6 +620,88 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
      finché Android non diventa target primario.
 - **Owner:** maintainer (donny-81)
 - **Stato:** APERTO — non bloccante per release Windows.
+
+### DT-016-01 — Magic bytes validation allegati
+
+- **Data apertura:** 2026-05-28
+- **Origine:** DESIGN 016, Decisione 8, debito DT-016-01
+- **Descrizione:** La validazione del tipo di file allegato si ferma al controllo del MIME dichiarato e dell'estensione. Non legge i byte fisici del file per verificare che il contenuto corrisponda al tipo dichiarato. La soluzione è già progettata nel DESIGN 016-ter approvato.
+- **Impatto:** rischio minimo di spoofing banale del tipo di file. Non blocca nessuna funzionalità.
+- **Riferimento:** docs/2-projects/016-DESIGN_allegati-transazioni_v0.1.0.md
+- **Design risolutivo:** docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md
+- **Priorità:** media
+- **Stato:** APERTO — soluzione progettata, da codificare
+
+### DT-016-02 — Cleanup automatico file orfani Storage
+
+- **Data apertura:** 2026-05-28
+- **Origine:** DESIGN 016, Decisione 10, debito DT-016-02
+- **Descrizione:** Il rollback best-effort dell'upload allegati può lasciare file nel bucket Storage di Supabase senza il record corrispondente nel database. La soluzione automatica è già progettata nel DESIGN 016-bis approvato.
+- **Impatto:** accumulo di file orfani nello storage nel tempo. Non blocca funzionalità.
+- **Riferimento:** docs/2-projects/016-DESIGN_allegati-transazioni_v0.1.0.md
+- **Design risolutivo:** docs/2-projects/016-bis-DESIGN_cleanup-orfani-storage_v0.1.0.md
+- **Priorità:** media
+- **Stato:** APERTO — soluzione progettata, da codificare
+
+### DT-016-bis-01 — Script CLI manutenzione storage
+
+- **Data apertura:** 2026-05-28
+- **Origine:** DESIGN 016-bis, sezione 15
+- **Descrizione:** Il cleanup automatico è fire-and-forget dall'app. Non esiste uno strumento a riga di comando per eseguire una pulizia manuale controllata dallo sviluppatore o dal maintainer in autonomia.
+- **Impatto:** nessuno sulla funzionalità utente. Limite operativo per manutenzione avanzata.
+- **Riferimento:** docs/2-projects/016-bis-DESIGN_cleanup-orfani-storage_v0.1.0.md
+- **Priorità:** bassa
+- **Stato:** APERTO — espansione futura, non urgente
+
+### DT-016-bis-02 — Edge Functions server-side cleanup
+
+- **Data apertura:** 2026-05-28
+- **Origine:** DESIGN 016-bis, sezione 15
+- **Descrizione:** Il cleanup attuale è eseguito dal dispositivo dell'utente e funziona solo quando l'app è aperta. Una soluzione server-side tramite Supabase Edge Functions pulirebbe gli orfani in modo indipendente dal dispositivo.
+- **Impatto:** nessuno sulla funzionalità utente corrente. Miglioria di robustezza infrastrutturale.
+- **Riferimento:** docs/2-projects/016-bis-DESIGN_cleanup-orfani-storage_v0.1.0.md
+- **Priorità:** bassa
+- **Stato:** APERTO — espansione futura, non urgente
+
+### DT-016-bis-03 — Log opt-in per utenti avanzati
+
+- **Data apertura:** 2026-05-28
+- **Origine:** DESIGN 016-bis, sezione 15
+- **Descrizione:** Il servizio di cleanup scrive note tecniche solo nella console di sviluppo, invisibili all'utente. Questo debito prevede un registro consultabile attivabile volontariamente dagli utenti esperti.
+- **Impatto:** nessuno sulla funzionalità base. Feature opzionale di trasparenza.
+- **Riferimento:** docs/2-projects/016-bis-DESIGN_cleanup-orfani-storage_v0.1.0.md
+- **Priorità:** bassa
+- **Stato:** APERTO — espansione futura, non urgente
+
+### DT-016-ter-01 — Supporto HEIC e WEBP magic bytes
+
+- **Data apertura:** 2026-05-28
+- **Origine:** DESIGN 016-ter, sezione 4, Decisione 11
+- **Descrizione:** La validazione magic bytes copre solo JPEG, PNG e PDF. I formati HEIC (default iPhone) e WEBP (molto diffuso sul web) non sono riconosciuti e vengono rifiutati. Va aggiunta la loro firma fisica nella lista di riconoscimento.
+- **Impatto:** utenti con foto iPhone o WEBP non possono allegare questi formati. Limitazione funzionale per la base utenti mobile.
+- **Riferimento:** docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md
+- **Priorità:** media
+- **Stato:** APERTO — espansione futura, alta utilità
+
+### DT-016-ter-02 — Supporto iOS magic bytes validation
+
+- **Data apertura:** 2026-05-28
+- **Origine:** DESIGN 016-ter, sezione 4, Decisione 10
+- **Descrizione:** La lettura dei byte fisici del file è implementata per Android (expo-file-system) e Windows (JS-first). iOS è dichiarato fuori perimetro in questo design e usa lo stub che ritorna Uint8Array(0), rifiutando tutti i file.
+- **Impatto:** su iOS la validazione magic bytes non funziona. Gli allegati vengono rifiutati al controllo fisico. Richiede un approccio nativo iOS dedicato.
+- **Riferimento:** docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md
+- **Priorità:** alta (iOS è target primario)
+- **Stato:** APERTO — da progettare prima del rilascio iOS
+
+### DT-016-ter-03 — Bridge nativo Windows per magic bytes
+
+- **Data apertura:** 2026-05-28
+- **Origine:** DESIGN 016-ter, sezione 4, Decisione 11
+- **Descrizione:** Su Windows la lettura dei byte usa JavaScript puro. Per scenari di file complessi o molto grandi potrebbe servire un bridge nativo scritto in C++ o WinRT per performance e affidabilità.
+- **Impatto:** nessuno nelle condizioni normali di utilizzo. Rischio teorico su file limite.
+- **Riferimento:** docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md
+- **Priorità:** bassa
+- **Stato:** APERTO — miglioramento opzionale
 
 ---
 
