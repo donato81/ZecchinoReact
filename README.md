@@ -25,6 +25,9 @@ tracciati in `docs/todo-master.md` e nel report compatibilita'. Il sotto-piano
 - Blocco 013 completato: repository `ricorrenze` con tipi dedicati, query `getDue`, integrazione in `AppDataContext` e cache offline del nuovo slice.
 - Blocco 014 completato: repository `tag` e `transazioni-tag`, bootstrap bulk delle associazioni, fallback cache offline per `transactionTagMap` e trigger SQL per mantenere coerente `usato_n_volte`.
 - Blocco 015 completato: repository `notifiche`, `notification-service`, hydration secondaria delle notifiche dopo `READY` e deduplicazione/escalation per periodo reale del budget.
+- Blocco 016 completato: repository `allegati`, storage Supabase privato con validazione file lato client, path sicuro per upload e rollback best-effort su fallimento DB.
+- Blocco 016-bis completato: cleanup automatico e silenzioso dei file orfani Storage con trigger su login, logout, delete transazione e rollback allegati.
+- Blocco 016-ter completato: hardening allegati con magic bytes validation su JPEG, PNG e PDF prima dell'upload.
 
 ---
 

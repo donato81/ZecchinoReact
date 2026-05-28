@@ -1,4 +1,5 @@
 import { strings } from '@/locales'
+import { storageCleanupService } from '@/lib/storage-cleanup-service'
 import type { Allegato, AttachmentFileInput } from '../../types'
 import { deleteAttachment, uploadAttachment } from '../storage'
 import { supabase } from '../client'
@@ -34,6 +35,10 @@ async function getUid(errorMessage: string): Promise<string> {
 }
 
 export async function getAll(transazioneId: string): Promise<Allegato[]> {
+  if (!transazioneId.trim()) {
+    throw new RepositoryError(strings['errors.allegati.loadFailed'])
+  }
+
   const { data, error } = await supabase
     .from('allegati_transazioni')
     .select('*')
@@ -63,7 +68,12 @@ export async function getById(id: string): Promise<Allegato> {
 
 export async function create(input: AllegatoCreateInput): Promise<Allegato> {
   const userId = await getUid(strings['errors.allegati.uploadFailed'])
-  const uploaded = await uploadAttachment(userId, input.transazioneId, input.file)
+  let uploaded
+  try {
+    uploaded = await uploadAttachment(userId, input.transazioneId, input.file)
+  } catch (error) {
+    throw new RepositoryError(error instanceof Error ? error.message : strings['errors.allegati.uploadFailed'])
+  }
 
   const { data, error } = await supabase
     .from('allegati_transazioni')
@@ -81,11 +91,7 @@ export async function create(input: AllegatoCreateInput): Promise<Allegato> {
     .single()
 
   if (error) {
-    try {
-      await deleteAttachment(uploaded.storagePath)
-    } catch {
-      // Best-effort compensating transaction: il rollback storage non deve mascherare il fail DB.
-    }
+    void storageCleanupService.cleanupSpecificOrphan(userId, uploaded.storagePath).catch(() => undefined)
 
     throw new RepositoryError(strings['errors.allegati.uploadFailed'])
   }

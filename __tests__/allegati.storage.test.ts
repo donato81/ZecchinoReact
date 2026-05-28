@@ -10,10 +10,19 @@ jest.mock('@/lib/supabase/client', () => ({
   },
 }))
 
+jest.mock('react-native-fs', () => ({
+  read: jest.fn(),
+  readFile: jest.fn(),
+}))
+
 import { deleteAttachment, getAttachmentSignedUrl, uploadAttachment, validateAttachmentFile } from '@/lib/supabase/storage'
 import { supabase } from '@/lib/supabase/client'
+import RNFS from 'react-native-fs'
+import * as magicBytesReader from '@/lib/file-system/magic-bytes-reader'
 
 const mockFrom = supabase.storage.from as jest.Mock
+const mockRead = RNFS.read as jest.Mock
+const mockReadFile = RNFS.readFile as jest.Mock
 
 function buildStorageBucket() {
   return {
@@ -32,6 +41,13 @@ beforeEach(() => {
     },
     configurable: true,
   })
+  Object.defineProperty(globalThis, 'Buffer', {
+    value: require('buffer').Buffer,
+    configurable: true,
+  })
+  mockRead.mockResolvedValue('cGRm')
+  mockReadFile.mockResolvedValue('cGRm')
+  jest.spyOn(magicBytesReader, 'readFileHeader').mockResolvedValue(Uint8Array.from([0x25, 0x50, 0x44, 0x46]))
 })
 
 describe('allegati.storage', () => {
@@ -39,9 +55,6 @@ describe('allegati.storage', () => {
     const bucket = buildStorageBucket()
     bucket.upload.mockResolvedValue({ error: null })
     mockFrom.mockReturnValue(bucket)
-    globalThis.fetch = jest.fn().mockResolvedValue({
-      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
-    }) as unknown as typeof fetch
 
     const result = await uploadAttachment('user-016', 'tx-016', {
       uri: 'file:///dangerous.pdf',
@@ -58,25 +71,49 @@ describe('allegati.storage', () => {
     )
   })
 
+  it('validateAttachmentFile rifiuta MIME non in whitelist', () => {
+    return expect(validateAttachmentFile({
+      uri: 'file:///script.svg',
+      name: 'script.svg',
+      type: 'image/svg+xml',
+      size: 512,
+    })).resolves.toEqual({
+      code: 'MIME_NOT_ALLOWED',
+      message: 'Tipo di file non consentito.',
+    })
+  })
+
+  it('validateAttachmentFile rifiuta nomi file invalidi', () => {
+    return expect(validateAttachmentFile({
+      uri: 'file:///senza-estensione',
+      name: '   ',
+      type: 'application/pdf',
+      size: 512,
+    })).resolves.toEqual({
+      code: 'FILE_NAME_INVALID',
+      message: 'Nome file non valido.',
+    })
+  })
+
   it('validateAttachmentFile rifiuta MIME spoofing quando estensione e MIME sono incoerenti', () => {
-    expect(validateAttachmentFile({
+    return expect(validateAttachmentFile({
       uri: 'file:///report.pdf',
       name: 'report.pdf',
       type: 'image/png',
       size: 1200,
-    })).toEqual({
+    })).resolves.toEqual({
       code: 'MIME_EXTENSION_MISMATCH',
       message: 'Estensione e tipo file non sono coerenti.',
     })
   })
 
   it('validateAttachmentFile rifiuta file oltre MAX_ATTACHMENT_SIZE_BYTES', () => {
-    expect(validateAttachmentFile({
+    return expect(validateAttachmentFile({
       uri: 'file:///large.pdf',
       name: 'large.pdf',
       type: 'application/pdf',
       size: 10 * 1024 * 1024 + 1,
-    })).toEqual({
+    })).resolves.toEqual({
       code: 'SIZE_LIMIT_EXCEEDED',
       message: 'Il file supera il limite massimo di 10 MB.',
     })
@@ -88,9 +125,7 @@ describe('allegati.storage', () => {
     bucket.createSignedUrl.mockResolvedValue({ data: { signedUrl: 'https://signed.local/file' }, error: null })
     bucket.remove.mockResolvedValue({ error: null })
     mockFrom.mockReturnValue(bucket)
-    globalThis.fetch = jest.fn().mockResolvedValue({
-      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(16)),
-    }) as unknown as typeof fetch
+    jest.spyOn(magicBytesReader, 'readFileHeader').mockResolvedValue(Uint8Array.from([0xff, 0xd8, 0xff]))
 
     const uploadResult = await uploadAttachment('user-016', 'tx-016', {
       uri: 'file:///foto.jpg',
@@ -102,5 +137,15 @@ describe('allegati.storage', () => {
     await expect(getAttachmentSignedUrl(uploadResult.storagePath)).resolves.toBe('https://signed.local/file')
     await expect(deleteAttachment(uploadResult.storagePath)).resolves.toBeUndefined()
     expect(uploadResult.storagePath).toBe('user-016/tx-016/uuid-016-foto-vacanze.jpg')
+  })
+
+  it('getAttachmentSignedUrl ritorna errore localizzato quando Supabase fallisce la signed URL', async () => {
+    const bucket = buildStorageBucket()
+    bucket.createSignedUrl.mockResolvedValue({ data: null, error: { message: 'forbidden' } })
+    mockFrom.mockReturnValue(bucket)
+
+    await expect(getAttachmentSignedUrl('user-016/tx-016/uuid-016-file.pdf')).rejects.toThrow(
+      'Impossibile generare il link temporaneo dell\'allegato.',
+    )
   })
 })

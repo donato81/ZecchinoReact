@@ -37,6 +37,11 @@ Tipi di dominio client-side. Nessuna dipendenza esterna.
 | `NotificationChannel` | `type` | `'inapp' \| 'email' \| 'push'` |
 | `NotificationEntityType` | `type` | `'budget' \| 'obiettivo' \| 'conto' \| 'transazione'` |
 | `AppNotification` | `interface` | Notifica app: `id`, `tipo`, `titolo`, `messaggio?`, `letta`, `canale`, `schedulataPer?`, `entitaTipo?`, `entitaId?`, `metadata?`, `createdAt` |
+| `AttachmentMimeType` | `type` | `'image/jpeg' \| 'image/png' \| 'application/pdf'` |
+| `AttachmentFileInput` | `interface` | File allegato in input: `uri`, `name`, `type`, `size` |
+| `AttachmentValidationError` | `interface` | Esito validazione allegato: `code`, `message` |
+| `AttachmentUploadResult` | `interface` | Esito upload storage: `storagePath`, `fileName`, `mimeType`, `sizeBytes` |
+| `Allegato` | `interface` | Allegato transazione: `id`, `transazioneId`, `nomeFile`, `storagePath`, `mimeType?`, `dimensioneBytes?`, `descrizione?`, `miniaturaPath?`, `createdAt` |
 | `Category` | `interface` | Categoria: `id`, `nome`, `tipo`, `predefinita` |
 | `Budget` | `interface` | Budget: `id`, `nome`, `importoTarget`, `periodo`, `categoriaId?`, `contoId?`, `dataInizio`, `dataFine`, `attivo` |
 | `SavingsGoal` | `interface` | Obiettivo risparmio: `id`, `nome`, `descrizione`, `importoTarget`, `importoCorrente`, `dataInizio`, `dataScadenza?`, `contoAssociato?`, `colore`, `icona`, `completato`, `dataCompletamento?` |
@@ -388,7 +393,7 @@ Tipi DB e di settings. Uso interno al layer `src/lib/supabase/`.
 | `TalkBackAdaptations` | `interface` | 8 flag booleani per adattamenti TalkBack |
 | `UserPreferences` | `interface` | 32 chiavi JSONB: display (12), sr (12), audio (2), talkback (2), session (2), onboarding (1), alert (1) |
 | `UserSettings` | `interface` | `nomeVisualizzato`, `valutaDefault`, `pinPrivatoHash`, `pinKdfSalt`, `pinMasterKeyEncrypted`, `preferences: UserPreferences` |
-| `DbAccount`, `DbTransaction`, `DbCategory`, `DbBudget`, `DbSavingsGoal`, `DbSavingsGoalProgress`, `DbRecurrence`, `DbTag`, `DbTransactionTag`, `DbNotification`, `DbUserSettings` | `interface` | Row types snake_case — **uso interno** al layer supabase |
+| `DbAccount`, `DbTransaction`, `DbCategory`, `DbBudget`, `DbSavingsGoal`, `DbSavingsGoalProgress`, `DbRecurrence`, `DbTag`, `DbTransactionTag`, `DbNotification`, `DbAllegato`, `DbUserSettings` | `interface` | Row types snake_case — **uso interno** al layer supabase |
 
 ---
 
@@ -585,6 +590,62 @@ Repository delle notifiche persistite. Dipendenze: `@supabase/supabase-js`, `../
 | `remove(id)` | `string` | `Promise<void>` |
 | `removeExpired(referenceDate?)` | `string?` | `Promise<void>` |
 | `cleanupReadExpiredBefore(cutoffDate)` | `string` | `Promise<void>` |
+
+---
+
+## `src/lib/supabase/storage.ts` ✅
+
+Boundary storage per allegati transazioni. Valida MIME/estensione, genera path fisico sicuro, carica su bucket privato e produce signed URL temporanee.
+
+| Funzione | Parametri | Ritorna |
+|----------|-----------|---------|
+| `validateAttachmentFile(file)` | `AttachmentFileInput` | `AttachmentValidationError \| null` |
+| `uploadAttachment(userId, transazioneId, file)` | `string`, `string`, `AttachmentFileInput` | `Promise<AttachmentUploadResult>` |
+| `deleteAttachment(storagePath)` | `string` | `Promise<void>` |
+| `getAttachmentSignedUrl(storagePath)` | `string` | `Promise<string>` |
+
+---
+
+## `src/lib/supabase/repositories/allegati.ts` ✅
+
+Repository cross-system per allegati transazioni. Coordina upload Storage e record DB con rollback best-effort.
+
+| Funzione | Parametri | Ritorna |
+|----------|-----------|---------|
+| `getAll(transazioneId)` | `string` | `Promise<Allegato[]>` |
+| `getById(id)` | `string` | `Promise<Allegato>` |
+| `create(input)` | `AllegatoCreateInput` | `Promise<Allegato>` |
+| `remove(id)` | `string` | `Promise<void>` |
+
+---
+
+## `src/lib/storage-cleanup-service.ts` ✅
+
+Service di cleanup automatico dei file orfani nello storage allegati. Nessun side effect UI; logging solo tecnico.
+
+| Nome | Tipo | Descrizione |
+|------|------|-------------|
+| `CLEANUP_RECENCY_HOURS` | `const` | `48` |
+| `MAX_FILES_PER_SCAN` | `const` | `100` |
+| `MIN_CLEANUP_INTERVAL_MS` | `const` | `900000` |
+| `CLEANUP_SAFETY_WINDOW_MS` | `const` | `180000` |
+| `CLEANUP_LOGOUT_TIMEOUT_MS` | `const` | `1500` |
+| `CleanupResult` | `type` | `{ scanned, orphanFound, deleted, failed }` |
+
+| Funzione | Parametri | Ritorna |
+|----------|-----------|---------|
+| `createStorageCleanupService(customDeps?)` | `Partial<StorageCleanupDeps>?` | service con `cleanupSpecificOrphan`, `cleanupRecentOrphans`, `cleanupTransactionOrphans`, `cleanupOnLogout` |
+
+---
+
+## `src/lib/file-system/magic-bytes-reader.ts` ✅
+
+Reader base fail-closed per piattaforme non supportate e helper di confronto firme.
+
+| Funzione | Parametri | Ritorna |
+|----------|-----------|---------|
+| `matchesSignature(header, signature)` | `Uint8Array`, `number[]` | `boolean` |
+| `readFileHeader(uri)` | `string` | `Promise<Uint8Array>` |
 
 ---
 

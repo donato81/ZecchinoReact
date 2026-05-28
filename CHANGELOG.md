@@ -32,6 +32,25 @@
 - File principali: `src/lib/supabase/repositories/notifiche.ts`, `src/lib/notification-service.ts`, `src/context/AppDataContext.tsx`, `src/lib/budget-alerts.ts`, `docs/6-sql/P51-notifiche-metadata-jsonb.sql`, `__tests__/notifiche.repository.test.ts`, `__tests__/notification-service.test.ts`, `__tests__/AppDataContext.spec.ts`.
 - Gate validazione e review: PASSED.
 
+### Aggiunto — Repository Allegati e Storage Validato
+- Introdotti `DbAllegato`, `Allegato`, `AttachmentFileInput`, `AttachmentUploadResult` e `AttachmentValidationError` per modellare il dominio allegati transazioni tra layer client e layer Supabase.
+- Creati `src/lib/supabase/storage.ts` e `src/lib/supabase/repositories/allegati.ts` con validazione file lato client, path sicuro `{user_id}/{transazione_id}/{uuid}-{safe_filename}`, signed URL privata, upload con compensating transaction best-effort e delete in ordine Storage poi DB.
+- Aggiunte le 12 chiavi di localizzazione obbligatorie per gli allegati e coperti i casi di rollback, isolamento utente, signed URL fail, MIME mismatch, MIME non consentito e nome file invalido.
+- File principali: `src/lib/supabase/storage.ts`, `src/lib/supabase/repositories/allegati.ts`, `src/lib/types.ts`, `src/lib/supabase/types.ts`, `src/locales/it.ts`, `__tests__/allegati.storage.test.ts`, `__tests__/allegati.repository.test.ts`.
+- Gate validazione e review: PASSED.
+
+### Aggiunto — Cleanup Orfani Storage
+- Creato `src/lib/storage-cleanup-service.ts` con `CleanupResult`, guardia concorrente per utente, throttle per utente, safety window, scan ultime 48 ore, trigger dedicati e logging tecnico `console.warn('[storage-cleanup]', ...)`.
+- Integrati i trigger non bloccanti su login/logout in `AuthContext`, post-cancellazione transazione in `AppDataContext` e trigger specifico post-upload fallito nel repository allegati.
+- File principali: `src/lib/storage-cleanup-service.ts`, `src/context/AuthContext.tsx`, `src/context/AppDataContext.tsx`, `src/lib/supabase/repositories/allegati.ts`, `__tests__/storage-cleanup-service.test.ts`.
+- Gate validazione e review: PASSED.
+
+### Aggiunto — Magic Bytes Validation Allegati
+- Creati i reader `src/lib/file-system/magic-bytes-reader.ts`, `.android.ts`, `.windows.ts` con lettura header limitata a 8 byte, fallback fail-closed e helper `matchesSignature`.
+- Estesa `validateAttachmentFile` con ordine di validazione MIME whitelist → estensione fonte primaria → magic bytes per firme JPEG/PNG/PDF.
+- File principali: `src/lib/file-system/magic-bytes-reader.ts`, `src/lib/file-system/magic-bytes-reader.android.ts`, `src/lib/file-system/magic-bytes-reader.windows.ts`, `src/lib/supabase/storage.ts`, `__tests__/magic-bytes-validation.test.ts`, `__tests__/allegati.storage.test.ts`.
+- Gate validazione e review: PASSED.
+
 ### Security
 - Introdotta la Wrapped Master Key Architecture per il PIN privato con payload versionato `{version, iv, ciphertext, tag}` e rewrap della sola master key durante `changePin`.
   Riferimento: [PLAN-010]

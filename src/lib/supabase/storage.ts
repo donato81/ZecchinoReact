@@ -6,6 +6,7 @@ import type {
   AttachmentValidationError,
 } from '../types'
 import { strings } from '@/locales'
+import { matchesSignature, readFileHeader } from '@/lib/file-system/magic-bytes-reader'
 
 const ATTACHMENTS_BUCKET = 'allegati-transazioni'
 const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024
@@ -14,6 +15,16 @@ const MIME_TO_EXTENSIONS: Record<AttachmentMimeType, string[]> = {
   'image/jpeg': ['jpg', 'jpeg'],
   'image/png': ['png'],
   'application/pdf': ['pdf'],
+}
+const EXTENSION_TO_SIGNATURE: Record<string, number[]> = {
+  jpg: [0xff, 0xd8, 0xff],
+  jpeg: [0xff, 0xd8, 0xff],
+  png: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+  pdf: [0x25, 0x50, 0x44, 0x46],
+}
+
+type FsModule = {
+  readFile: (path: string, encoding: 'base64') => Promise<string>
 }
 
 function getFileNameError(): AttachmentValidationError {
@@ -69,13 +80,23 @@ function getMimeExtensions(mimeType: string): string[] {
   return MIME_TO_EXTENSIONS[mimeType as AttachmentMimeType] ?? []
 }
 
+function getExpectedMimeFromExtension(extension: string): AttachmentMimeType | null {
+  return (Object.entries(MIME_TO_EXTENSIONS).find(([, extensions]) => extensions.includes(extension))?.[0] as AttachmentMimeType | undefined) ?? null
+}
+
 function buildUuid(): string {
   if (typeof globalThis.crypto?.randomUUID === 'function') {
     return globalThis.crypto.randomUUID()
   }
 
   const bytes = new Uint8Array(16)
-  globalThis.crypto.getRandomValues(bytes)
+  if (typeof globalThis.crypto?.getRandomValues === 'function') {
+    globalThis.crypto.getRandomValues(bytes)
+  } else {
+    for (let index = 0; index < bytes.length; index += 1) {
+      bytes[index] = Math.floor(Math.random() * 256)
+    }
+  }
   bytes[6] = (bytes[6] & 0x0f) | 0x40
   bytes[8] = (bytes[8] & 0x3f) | 0x80
 
@@ -89,12 +110,44 @@ function buildUuid(): string {
   ].join('-')
 }
 
-async function readFileAsArrayBuffer(uri: string): Promise<ArrayBuffer> {
-  const response = await fetch(uri)
-  return response.arrayBuffer()
+function loadFsModule(): FsModule | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+    return require('react-native-fs') as FsModule
+  } catch {
+    return null
+  }
 }
 
-export function validateAttachmentFile(file: AttachmentFileInput): AttachmentValidationError | null {
+function normalizeFileUri(uri: string): string {
+  return uri.startsWith('file://') ? uri.slice('file://'.length) : uri
+}
+
+function base64ToArrayBuffer(input: string): ArrayBuffer {
+  const g = globalThis as typeof globalThis & {
+    Buffer?: { from(str: string, enc: string): { buffer: ArrayBuffer; byteOffset: number; byteLength: number } }
+  }
+  if (g.Buffer) {
+    const buffer = g.Buffer.from(input, 'base64')
+    return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+  }
+
+  const binary = atob(input)
+  const bytes = Uint8Array.from(binary, char => char.charCodeAt(0))
+  return bytes.buffer
+}
+
+async function readFileAsArrayBuffer(uri: string): Promise<ArrayBuffer> {
+  const fsModule = loadFsModule()
+  if (!fsModule) {
+    throw new Error(strings['errors.allegati.uploadFailed'])
+  }
+
+  const base64 = await fsModule.readFile(normalizeFileUri(uri), 'base64')
+  return base64ToArrayBuffer(base64)
+}
+
+export async function validateAttachmentFile(file: AttachmentFileInput): Promise<AttachmentValidationError | null> {
   if (!file.name.trim()) {
     return getFileNameError()
   }
@@ -119,7 +172,8 @@ export function validateAttachmentFile(file: AttachmentFileInput): AttachmentVal
     return getFileNameError()
   }
 
-  if (!allowedExtensions.includes(extension)) {
+  const expectedMime = getExpectedMimeFromExtension(extension)
+  if (!expectedMime || !allowedExtensions.includes(extension) || expectedMime !== file.type) {
     return {
       code: 'MIME_EXTENSION_MISMATCH',
       message: strings['errors.allegati.mimeExtensionMismatch'],
@@ -132,6 +186,15 @@ export function validateAttachmentFile(file: AttachmentFileInput): AttachmentVal
     return getFileNameError()
   }
 
+  const header = await readFileHeader(file.uri)
+  const expectedSignature = EXTENSION_TO_SIGNATURE[extension]
+  if (!matchesSignature(header, expectedSignature)) {
+    return {
+      code: 'MIME_EXTENSION_MISMATCH',
+      message: strings['errors.allegati.mimeExtensionMismatch'],
+    }
+  }
+
   return null
 }
 
@@ -140,14 +203,19 @@ export async function uploadAttachment(
   transazioneId: string,
   file: AttachmentFileInput,
 ): Promise<AttachmentUploadResult> {
-  const validationError = validateAttachmentFile(file)
+  const validationError = await validateAttachmentFile(file)
   if (validationError) {
     throw new Error(validationError.message)
   }
 
   const safeFilename = sanitizeFilename(file.name)
   const storagePath = `${userId}/${transazioneId}/${buildUuid()}-${safeFilename}`
-  const fileBuffer = await readFileAsArrayBuffer(file.uri)
+  let fileBuffer: ArrayBuffer
+  try {
+    fileBuffer = await readFileAsArrayBuffer(file.uri)
+  } catch {
+    throw new Error(strings['errors.allegati.uploadFailed'])
+  }
 
   const { error } = await supabase
     .storage
@@ -186,8 +254,11 @@ export async function getAttachmentSignedUrl(storagePath: string): Promise<strin
     .from(ATTACHMENTS_BUCKET)
     .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS)
 
-  if (error || !data?.signedUrl) {
-    throw new Error(error ? strings['allegati.upload.signedUrlFailed'] : strings['errors.allegati.accessFailed'])
+  if (error) {
+    throw new Error(strings['allegati.upload.signedUrlFailed'])
+  }
+  if (!data?.signedUrl) {
+    throw new Error(strings['errors.allegati.accessFailed'])
   }
 
   return data.signedUrl

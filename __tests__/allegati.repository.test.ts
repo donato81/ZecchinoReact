@@ -18,14 +18,22 @@ jest.mock('@/lib/supabase/storage', () => ({
   validateAttachmentFile: jest.fn(),
 }))
 
+jest.mock('@/lib/storage-cleanup-service', () => ({
+  storageCleanupService: {
+    cleanupSpecificOrphan: jest.fn(),
+  },
+}))
+
 import { create, getAll, getById, remove } from '@/lib/supabase/repositories/allegati'
 import { supabase } from '@/lib/supabase/client'
 import { deleteAttachment, uploadAttachment } from '@/lib/supabase/storage'
+import { storageCleanupService } from '@/lib/storage-cleanup-service'
 
 const mockGetUser = supabase.auth.getUser as jest.Mock
 const mockFrom = supabase.from as jest.Mock
 const mockUploadAttachment = uploadAttachment as jest.Mock
 const mockDeleteAttachment = deleteAttachment as jest.Mock
+const mockCleanupSpecificOrphan = storageCleanupService.cleanupSpecificOrphan as jest.Mock
 
 const ROW = {
   id: 'all-1',
@@ -87,6 +95,7 @@ beforeEach(() => {
     sizeBytes: ROW.dimensione_bytes,
   })
   mockDeleteAttachment.mockResolvedValue(undefined)
+  mockCleanupSpecificOrphan.mockResolvedValue({ scanned: 1, orphanFound: 1, deleted: 1, failed: 0 })
 })
 
 describe('allegati.repository', () => {
@@ -109,7 +118,22 @@ describe('allegati.repository', () => {
       user_id: 'user-016',
       storage_path: ROW.storage_path,
     }))
-    expect(mockDeleteAttachment).toHaveBeenCalledWith(ROW.storage_path)
+    expect(mockCleanupSpecificOrphan).toHaveBeenCalledWith('user-016', ROW.storage_path)
+  })
+
+  it('rollback upload continua a restituire il fail DB originario anche se il cleanup storage fallisce', async () => {
+    buildInsertChain({ data: null, error: { message: 'insert fail', code: '500', details: '', hint: '' } })
+    mockCleanupSpecificOrphan.mockRejectedValue(new Error('cleanup fail'))
+
+    await expect(create({
+      transazioneId: 'tx-016',
+      file: {
+        uri: 'file:///documento.pdf',
+        name: 'documento.pdf',
+        type: 'application/pdf',
+        size: 2048,
+      },
+    })).rejects.toThrow('Impossibile caricare l\'allegato.')
   })
 
   it('ordine cancellazione con Storage FAIL e DB non toccato', async () => {
@@ -141,6 +165,18 @@ describe('allegati.repository', () => {
 
     await expect(getById('foreign-attachment')).rejects.toThrow('Impossibile caricare gli allegati.')
     expect(chain.eq).toHaveBeenCalledWith('id', 'foreign-attachment')
+  })
+
+  it('remove propaga deleteFailed se la delete DB fallisce dopo la rimozione storage riuscita', async () => {
+    const selectChain = buildSelectChain({ data: ROW, error: null })
+    const deleteChain = buildDeleteChain({ error: { message: 'db delete fail', code: '500', details: '', hint: '' } })
+    mockFrom
+      .mockReturnValueOnce({ select: selectChain.select })
+      .mockReturnValueOnce({ delete: deleteChain.deleteFn })
+
+    await expect(remove('all-1')).rejects.toThrow('Impossibile eliminare l\'allegato.')
+    expect(mockDeleteAttachment).toHaveBeenCalledWith(ROW.storage_path)
+    expect(deleteChain.eq).toHaveBeenCalledWith('id', 'all-1')
   })
 
   it('getAll richiede il filtro obbligatorio per transazione e ordina gli allegati più recenti', async () => {

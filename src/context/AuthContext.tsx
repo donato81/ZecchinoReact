@@ -26,6 +26,7 @@ import { useInactivityTimer } from '@/hooks/use-inactivity-timer'
 import { useAccessibilityDetection } from '@/accessibility/detection'
 import { announce, auth } from '@/announcements'
 import { t } from '@/announcements/_utils/t'
+import { storageCleanupService } from '@/lib/storage-cleanup-service'
 
 // Shim temporaneo — rimpiazzare con react-native-toast-message nella fase UI
 const sonnerNotify = {
@@ -112,6 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const performSignOut = useCallback(async (scope: 'local' | 'global' = 'local') => {
     if (user?.id) {
+      await storageCleanupService.cleanupOnLogout(user.id)
       invalidateCache(user.id)
     }
     const { error } = await supabase.auth.signOut(scope === 'global' ? { scope: 'global' } : undefined)
@@ -163,13 +165,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAuthReady(true)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
       setSession(currentSession)
       setUser(currentSession?.user ?? null)
       setIsAuthenticated(!!currentSession)
       setIsAuthReady(true)
 
       if (currentSession) {
+        if (event === 'SIGNED_IN') {
+          void storageCleanupService.cleanupRecentOrphans(currentSession.user.id).catch(() => undefined)
+        }
         void loadUserSettings()
       } else {
         setIsPrivateUnlocked(false)

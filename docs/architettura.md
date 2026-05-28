@@ -43,6 +43,7 @@
 │  types  constants  helpers  budget-alerts  budget-forecasting  │
 │  budget-history  budget-templates  crypto  kdf-provider        │
 │  haptic-system  sound-system  notification-service             │
+│  supabase/storage  storage-cleanup-service  file-system/*      │
 ├─────────────────────────────────────────────────────────────┤
 │                    accessibility/                              │  ← Accessibility engine (DESIGN 003)
 │  types  engine  detection                                      │
@@ -58,7 +59,8 @@
 │  client  cache  types                                          │
 │  repositories: conti  transazioni  categorie  budget          │
 │               obiettivi-risparmio  ricorrenze  tag            │
-│               transazioni-tag  notifiche  impostazioni-utente │
+│               transazioni-tag  notifiche  allegati            │
+│               impostazioni-utente                             │
 ├────────────────────────────────────────────────────────────────┤
 │                       native/                                  │  ← Native modules (TurboModules)
 │  WinRTSavePicker (windows/macos/stub) + index                  │  ← DESIGN 009-native
@@ -151,6 +153,7 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `impostazioni_utente` | P25 + P40 + P41 | JSONB `preferences` (32 chiavi), hash PIN, `pin_kdf_salt` e `pin_master_key_encrypted` |
 | `tag`, `transazioni_tag` | schema + P50 | Associazioni tag-transazione con RPC dedicate e trigger `sync_tag_usage_count` |
 | `notifiche` | schema + P51 | Notifiche persistite con metadata JSONB, query unread e cleanup lifecycle |
+| `allegati_transazioni` | schema | Allegati persistiti con path storage privato, metadata file e delete coordinata Storage/DB |
 
 ### RPC Supabase
 
@@ -193,10 +196,14 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `lib/supabase/repositories/tag.ts` | supabase | ✅ Compatibile | No | CRUD tag utente con campi opzionali `colore`/`icona` e contatore `usatoNVolte` read-only lato client |
 | `lib/supabase/repositories/transazioni-tag.ts` | supabase | ✅ Compatibile | No | Query bulk associazioni e delega RPC per add/set/remove tag su transazioni |
 | `lib/supabase/repositories/notifiche.ts` | supabase | ✅ Compatibile | No | Query unread, deduplicazione per entità/livello e API di mark-read/cleanup notifiche |
+| `lib/supabase/repositories/allegati.ts` | supabase | ✅ Compatibile | No | Repository cross-system per allegati con rollback best-effort su insert DB fallita e delete Storage→DB |
+| `lib/supabase/storage.ts` | supabase | ✅ Compatibile | No | Validazione file allegati, path sicuro per bucket privato, signed URL temporanee e upload/delete storage |
+| `lib/storage-cleanup-service.ts` | lib | ✅ Compatibile | No | Cleanup automatico e fail-soft dei file orfani storage con trigger login/logout/delete transazione e rollback allegati |
+| `lib/file-system/magic-bytes-reader*.ts` | lib | ✅ Compatibile | No | Lettura header a 8 byte e confronto firme JPEG/PNG/PDF per hardening pre-upload |
 | `lib/supabase/repositories/impostazioni-utente.ts` | supabase | ✅ Compatibile | No | `updatePinSecurityMaterial` garantisce update atomico di `pin_privato_hash`, `pin_kdf_salt` e `pin_master_key_encrypted`; il repository rifiuta stati parziali del materiale PIN. |
 | `lib/notification-service.ts` | lib | ✅ Compatibile | No | Orchestrazione notifiche budget con deduplicazione, escalation replace, hydration unread e cleanup post-READY |
-| `context/AuthContext.tsx` | context | ⚠️ Rottura residua | **Sì (B4)** | PLAN 010 completato: set/change/remove PIN ora gestiscono wrapped master key, reset distruttivo e localizzazione dei messaggi PIN. Resta il placeholder UI `Button` nel perimetro migrazione RN. |
-| `context/AppDataContext.tsx` | context | ⚠️ Rottura residua (B3 shim) | **Sì (B3)** | `sonner` shim attivo; bug N9 RISOLTO (PLAN 007), bootstrap resiliente RISOLTO (PLAN 011: casi offline/online/init, timeout 10 s, errori interni confinati), export nativo padre RISOLTO (PLAN 009): `handleExportCSV` ora usa `exportFile` e firma `Promise<void>`. Blocchi 013-015: nuovi slice `ricorrenze`, `tags`, `transactionTagMap` e `notifications`; hydration secondaria fail-soft delle notifiche dopo `READY`, refresh notifiche su `refreshAll` e merge locale coerente sulle escalation budget. |
+| `context/AuthContext.tsx` | context | ⚠️ Rottura residua | **Sì (B4)** | PLAN 010 completato: set/change/remove PIN ora gestiscono wrapped master key, reset distruttivo e localizzazione dei messaggi PIN. Blocco 016-bis: trigger cleanup orfani su SIGNED_IN e logout con timeout protetto. Resta il placeholder UI `Button` nel perimetro migrazione RN. |
+| `context/AppDataContext.tsx` | context | ⚠️ Rottura residua (B3 shim) | **Sì (B3)** | `sonner` shim attivo; bug N9 RISOLTO (PLAN 007), bootstrap resiliente RISOLTO (PLAN 011: casi offline/online/init, timeout 10 s, errori interni confinati), export nativo padre RISOLTO (PLAN 009): `handleExportCSV` ora usa `exportFile` e firma `Promise<void>`. Blocchi 013-016-ter: nuovi slice `ricorrenze`, `tags`, `transactionTagMap` e `notifications`; hydration secondaria fail-soft delle notifiche dopo `READY`, refresh notifiche su `refreshAll`, merge locale coerente sulle escalation budget e trigger cleanup orfani post-removeTransaction. |
 | `context/NetworkStatusContext.tsx` | context | ✅ Compatibile | No | `NetworkStatusProvider` con debounce offline e fail-safe Online-First a 3000 ms; primo provider della catena applicativa |
 | `context/app-data-cache.ts` | context | ✅ Compatibile | No | Modulo isolato (PLAN 007 T7): `readCachedDomainSnapshotPure` testabile direttamente; dai blocchi 013-014 include `ricorrenze`, `tags` e `transactionTagMap` |
 | `context/UserSettingsContext.tsx` | context | ✅ Compatibile | No | — |

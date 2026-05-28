@@ -7,6 +7,7 @@ import { hapticSystem } from '@/lib/haptic-system'
 import { announce, accounts as accountsAnn, budgets as budgetsAnn } from '@/announcements'
 import { exportFile, type ExportResult } from '@/lib/export-service'
 import { createNotificationService } from '@/lib/notification-service'
+import { storageCleanupService } from '@/lib/storage-cleanup-service'
 
 // Shim temporaneo — rimpiazzare con react-native-toast-message nella fase UI.
 // Lo shim e' callable: i call site usano sia `toast(title, opts)` (in
@@ -738,6 +739,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     tagsRef.current = applyTagUsageDelta(tagsRef.current, removedTagIds, -1)
     setTransactionTagMap(nextMap)
     setTags(tagsRef.current)
+    if (user?.id) {
+      void storageCleanupService.cleanupTransactionOrphans(user.id, id).catch(() => undefined)
+    }
   }
 
   const addCategory = async (data: Omit<Category, 'id'>): Promise<void> => {
