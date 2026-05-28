@@ -1,8 +1,18 @@
 # CHANGELOG
 
+## [0.13.9] — 2026-05-28 — Reallineamento versione
+
+### Versioning
+- Versione riallineata da 0.4.0 a 0.13.9 per coerenza con lo stato reale del progetto. La versione precedente rifletteva i passi tecnici della migrazione da web a React Native, non la maturita funzionale effettiva.
+- Criteri applicati: primo numero fermo a 0 per assenza di UI completa e navigabile su una piattaforma reale; secondo numero portato a 13 per le aree funzionali implementate e validate; terzo numero portato a 9 per i blocchi tecnici validati aggiuntivi non gia contati come aree funzionali.
+- Aree funzionali conteggiate: autenticazione e sessione Supabase, sicurezza PIN e crittografia avanzata, gestione conti, gestione transazioni, gestione categorie, gestione budget con soglie di allerta, gestione obiettivi di risparmio, export, ricorrenze, tag, notifiche, allegati, accessibilita e layer annunci per screen reader.
+
 ## [Unreleased]
 
 ### Added
+- DESIGN 017: aggiunto il documento di design per il motore ricorrenze automatico in stato DRAFT.
+- DESIGN 018: aggiunto il documento di design per la schermata Ricorrenze UI in stato DRAFT.
+- DESIGN 019: aggiunto il documento di design per la gestione prestiti e mutui in stato DRAFT.
 - Aggiunti i documenti di design:
   - `docs/2-projects/013-DESIGN_repository-ricorrenze_v0.1.0.md`
   - `docs/2-projects/014-DESIGN_repository-tag-transazioni-tag_v0.1.0.md`

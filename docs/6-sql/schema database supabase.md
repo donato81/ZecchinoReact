@@ -226,6 +226,47 @@
 
 ***
 
+## Tabella 12 — `prestiti_mutui`
+
+| Campo | Tipo | Obbligatorio | Default | Note |
+|---|---|---|---|---|
+| `id` | UUID | ✅ | auto-generato | Chiave primaria |
+| `user_id` | UUID | ✅ | — | Riferimento a `auth.users` |
+| `tipo` | TEXT | ✅ | — | mutuo_finanziamento, prestito_personale |
+| `stato` | TEXT | ✅ | simulazione | simulazione, attivo, chiuso |
+| `direzione` | TEXT | ✅ | — | devo, mi_devono |
+| `controparte_nome` | TEXT | ✅ | — | Nome libero: banca, finanziaria, persona |
+| `importo_iniziale` | NUMERIC(14,2) | ✅ | — | Cifra originale, non cambia mai |
+| `valuta` | TEXT | ✅ | EUR | Autonomo, non ereditato da nessun conto |
+| `tasso_annuo` | NUMERIC(8,4) | ❌ | — | Solo per mutuo_finanziamento, in percentuale |
+| `durata_mesi` | INTEGER | ❌ | — | Solo per mutuo_finanziamento |
+| `rata_mensile` | NUMERIC(14,2) | ❌ | — | Calcolata e salvata al momento della creazione |
+| `totale_interessi` | NUMERIC(14,2) | ❌ | — | Calcolato e salvato al momento della creazione |
+| `data_inizio` | DATE | ✅ | — | Data di partenza del prestito o finanziamento |
+| `data_fine_prevista` | DATE | ❌ | — | Ricalcolata obbligatoriamente ad ogni modifica di data_inizio o durata_mesi |
+| `saldo_residuo` | NUMERIC(14,2) | ✅ | — | Uguale a importo_iniziale alla creazione. Aggiornato solo da RPC atomiche |
+| `note` | TEXT | ❌ | — | Testo libero |
+| `created_at` | TIMESTAMPTZ | ✅ | ora attuale | — |
+| `updated_at` | TIMESTAMPTZ | ✅ | ora attuale | — |
+
+***
+
+## Tabella 13 — `prestiti_rimborsi`
+
+| Campo | Tipo | Obbligatorio | Default | Note |
+|---|---|---|---|---|
+| `id` | UUID | ✅ | auto-generato | Chiave primaria |
+| `prestito_id` | UUID | ✅ | — | Riferimento a `prestiti_mutui`, eliminazione a cascata |
+| `user_id` | UUID | ✅ | — | Riferimento a `auth.users` |
+| `importo` | NUMERIC(14,2) | ✅ | — | Cifra pagata o ricevuta in questa occasione |
+| `data_rimborso` | DATE | ✅ | — | Data in cui il pagamento è avvenuto |
+| `quota_capitale` | NUMERIC(14,2) | ❌ | — | Parte che riduce il debito. Usata per mutui bancari |
+| `quota_interessi` | NUMERIC(14,2) | ❌ | — | Parte andata agli interessi. Usata per mutui bancari |
+| `note` | TEXT | ❌ | — | Descrizione libera del singolo pagamento |
+| `created_at` | TIMESTAMPTZ | ✅ | ora attuale | — |
+
+***
+
 ## Indici creati
 
 | Nome indice | Tabella | Campo/i | Scopo |
@@ -246,6 +287,10 @@
 | `idx_notifiche_schedulata` | notifiche | schedulata_per | Solo notifiche con data programmata |
 | `idx_storico_user` | storico_accessi | user_id + accesso_at DESC | Accessi recenti per utente |
 | `idx_allegati_transazione` | allegati_transazioni | transazione_id | Allegati di una transazione |
+| `idx_prestiti_user` | prestiti_mutui | user_id | Tutti i prestiti di un utente |
+| `idx_prestiti_user_stato` | prestiti_mutui | user_id + stato | Filtro prestiti attivi per utente |
+| `idx_rimborsi_prestito` | prestiti_rimborsi | prestito_id | Rimborsi di un determinato prestito |
+| `idx_rimborsi_data` | prestiti_rimborsi | data_rimborso DESC | Rimborsi più recenti per primi |
 
 ***
 

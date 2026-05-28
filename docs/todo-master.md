@@ -1,12 +1,12 @@
 ## 1. Metadata e Context Header
 
 - **Project Name:** ZecchinoReact
-- **Version:** 0.4.0
+- **Version:** 0.13.9
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
- - **Ultimo Agente Attivo:** Agent-Orchestrator — implementazione, validazione e review blocchi 016-bis / 016-ter (2026-05-28)
- - **Blocco in Carico:** RELEASE FINALE 013-016-ter. Blocchi 013-016-ter completati, validati e documentati.
+ - **Ultimo Agente Attivo:** Agent-Docs — stesura e sincronizzazione design 017 / 018 / 019 (2026-05-28)
+ - **Blocco in Carico:** DOCS 017-019. Nuovi design pronti per review e successiva pianificazione.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
@@ -44,8 +44,8 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
- - **Last Completed Task:** BLOCCO 016-ter — Magic Bytes Validation completato. Aggiunti reader header a 8 byte per piattaforme supportate, helper `matchesSignature`, integrazione pre-upload in `validateAttachmentFile` e suite dedicata sui 13 scenari di spoofing/short header/fail-closed (2026-05-28).
-- **Last Validated Block:** PLAN 016-ter — Magic Bytes Validation — gate locali verdi + review finale PASS (2026-05-28, Agent-Orchestrator).
+- **Last Completed Task:** BLOCCO DOCS 017-019 — creati i design per motore ricorrenze automatico, schermata ricorrenze UI e dominio prestiti/mutui (2026-05-28).
+- **Last Validated Block:** DOCS 017-019 — review documentale interna completata, tracking aggiornato (2026-05-28, Agent-Docs).
 - **Files Modified But Not Validated:** Nessuno (sessione DUSU-ANALYZER
   è read-only per src/). Documenti aggiornati: REPORT-compatibilita-android-v1.0.0.md
   (CREATO), docs/todo-master.md (aggiornato), CHANGELOG.md (aggiornato),
@@ -60,7 +60,13 @@
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
- - **Next Action:** Nessun blocco operativo residuo nella sequenza 013-016-ter. Eventuali step successivi sono manuali fuori policy agente: commit/tag/release git se desiderati.
+ - **Next Action:** Review dei design 017-019 e, se approvati, creazione sequenziale dei coding plan e delle todo list collegate.
+
+> Nota sessione docs 2026-05-28:
+> Creati i nuovi documenti `docs/2-projects/017-DESIGN_motore-ricorrenze-automatico_v0.1.0.md`,
+> `docs/2-projects/018-DESIGN_schermata-ricorrenze-UI_v0.1.0.md` e
+> `docs/2-projects/019-DESIGN_prestiti-mutui_v0.1.0.md`.
+> CHANGELOG e SPARK-START sincronizzati. Prossimo passo: review e pianificazione 017-019.
 
 > Nota sessione coding 2026-05-28:
 > Completato il blocco 013 — Repository Ricorrenze. Gate eseguiti con esito PASSED: `npm test -- __tests__/ricorrenze.repository.test.ts --runInBand`, `npm test -- __tests__/AppDataContext.spec.ts --runInBand`, `npx tsc --noEmit`. Aggiornati CHANGELOG, README, architettura e API. Prossimo passo: blocco 014.
@@ -530,6 +536,9 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B6-TODO-016-bis | Todo list 016-bis — Cleanup Orfani Storage | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
 | P3.B6-PLAN-016-ter | Coding plan 016-ter — Magic Bytes Validation | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
 | P3.B6-TODO-016-ter | Todo list 016-ter — Magic Bytes Validation | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
+| P3.B7-DOCS-017 | DESIGN 017 — Motore Ricorrenze Automatico | [x] DONE — 2026-05-28 Agent-Docs | Stato: DRAFT |
+| P3.B7-DOCS-018 | DESIGN 018 — Schermata Ricorrenze UI | [x] DONE — 2026-05-28 Agent-Docs | Stato: DRAFT |
+| P3.B7-DOCS-019 | DESIGN 019 — Prestiti e Mutui | [x] DONE — 2026-05-28 Agent-Docs | Stato: DRAFT |
 
 ### Log di Validazione
 
@@ -567,6 +576,9 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-28 | P3.B6-TODO-016-bis | Agent-Orchestrator | DONE | Todo list 016-bis — Cleanup Orfani Storage, stato PENDING |
 | 2026-05-28 | P3.B6-PLAN-016-ter | Agent-Orchestrator | DONE | Coding plan 016-ter — Magic Bytes Validation, stato DRAFT |
 | 2026-05-28 | P3.B6-TODO-016-ter | Agent-Orchestrator | DONE | Todo list 016-ter — Magic Bytes Validation, stato PENDING |
+| 2026-05-28 | P3.B7-DOCS-017 | Agent-Docs | DONE | DESIGN 017 — Motore Ricorrenze Automatico, stato DRAFT |
+| 2026-05-28 | P3.B7-DOCS-018 | Agent-Docs | DONE | DESIGN 018 — Schermata Ricorrenze UI, stato DRAFT |
+| 2026-05-28 | P3.B7-DOCS-019 | Agent-Docs | DONE | DESIGN 019 — Prestiti e Mutui, stato DRAFT; il file SQL canonico è stato rimosso |
 | 2026-05-26 | P1.B6-IMPL | GitHub Copilot | DONE | PLAN 006 completato su `main`: `react-native-quick-crypto` pinnata a 1.1.5, migration P40 aggiunta, `pin_kdf_salt` propagato ai tipi e al repository, Strategia A (`derivePinKey`, `encryptDataPin`, `decryptDataPin`) implementata con `PBKDF2_ITERATIONS = 600_000`, update multi-colonna `updatePinHashAndSalt`, suite K1/K2/K3 aggiunta, G1/G2/G3 e `npx tsc --noEmit` verdi. |
 | 2025-07-25 | DUSU-ANALYZER | Agent-Analyze | DONE | Analisi statica Android completata (read-only). 3 blocchi critici (BC-01/02/03: @phosphor-icons/react + react-dom), 4 adattamenti necessari (AN-01/02/03/04: haptic-system, sound-system, oklch colors), 3 discrepanze doc (DD-01/02/03). Report: docs/1-reports/REPORT-compatibilita-android-v1.0.0.md. P2.B2 risolta (use-online-status.ts → use-network-status.ts). |
 
@@ -842,4 +854,22 @@ Confermare con: "PROCEDI [Task ID]"
 | **Context Refresh** | Reset tecnico della memoria dell'agente definito nella sezione 1. Non equivale a una nuova sessione di lavoro umana e non attiva il protocollo Session Open. |
 
 ---
+
+## 10. Pending DOCS 017-019
+
+- `DESIGN 017 — Motore Ricorrenze Automatico` — docs/2-projects/017-DESIGN_motore-ricorrenze-automatico_v0.1.0.md
+  - Stato: DRAFT
+  - Prerequisiti: DESIGN 013
+  - Azione successiva: review documentale e creazione coding plan + todo list.
+
+- `DESIGN 018 — Schermata Ricorrenze UI` — docs/2-projects/018-DESIGN_schermata-ricorrenze-UI_v0.1.0.md
+  - Stato: DRAFT
+  - Prerequisiti: DESIGN 013, DESIGN 017
+  - Azione successiva: review documentale e creazione coding plan + todo list.
+
+- `DESIGN 019 — Prestiti e Mutui` — docs/2-projects/019-DESIGN_prestiti-mutui_v0.1.0.md
+  - Stato: DRAFT
+  - Prerequisiti: nessuno
+  - Azione successiva: review documentale e creazione coding plan + todo list.
+
 

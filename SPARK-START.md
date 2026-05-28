@@ -15,7 +15,7 @@ necessari per il tuo progetto.
 *Puoi eliminare questo file dopo il primo avvio.*
 *Per domande sull'architettura SPARK, usa l'agente `spark-guide`.*
 
-Versione corrente progetto: `0.4.0`.
+Versione corrente progetto: `0.13.9`.
 Analisi Android completata (DUSU-ANALYZER 2025-07-25).
 Stato aggiornato: 2026-05-28.
 Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
@@ -24,8 +24,8 @@ Suite di test: PASS (`11/11` suite, `75` test passati, `13` `it.todo`
 documentati).
 Decisione release: nessun minor bump automatico; prima vanno chiusi i debiti
 Android/Windows gia' aperti nel master TODO.
-Prossima azione: review dei coding plan 013–016-ter e autorizzazione
-all'implementazione in ordine 013, 014, 015, 016, 016-bis, 016-ter.
+Prossima azione: review dei nuovi design 017–019 e stesura dei relativi
+coding plan / todo list.
 
 ---
 
@@ -55,6 +55,9 @@ all'implementazione in ordine 013, 014, 015, 016, 016-bis, 016-ter.
 - [DESIGN 016 — Repository Allegati Transazioni](docs/2-projects/016-DESIGN_allegati-transazioni_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 016-bis — Cleanup Orfani Storage](docs/2-projects/016-bis-DESIGN_cleanup-orfani-storage_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 016-ter — Magic Bytes Validation](docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md) — v0.1.0 — REVIEWED
+- [DESIGN 017 — Motore Ricorrenze Automatico](docs/2-projects/017-DESIGN_motore-ricorrenze-automatico_v0.1.0.md) — v0.1.0 — DRAFT
+- [DESIGN 018 — Schermata Ricorrenze UI](docs/2-projects/018-DESIGN_schermata-ricorrenze-UI_v0.1.0.md) — v0.1.0 — DRAFT
+- [DESIGN 019 — Prestiti e Mutui](docs/2-projects/019-DESIGN_prestiti-mutui_v0.1.0.md) — v0.1.0 — DRAFT
 
 ## Stato PLAN / TODO
 
