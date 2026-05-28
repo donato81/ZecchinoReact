@@ -25,6 +25,12 @@ introduce un sistema di cleanup automatico, silenzioso e invisibile, attivato
 in quattro trigger strategici del ciclo di vita dell'app.
 
 Sezione 3 — Invarianti architetturali
+- Nessuna stringa visibile all'utente o annunciata dallo
+	screen reader può essere scritta nel codice.
+	Nota specifica: questo service usa esclusivamente
+	console.warn per logging tecnico interno. Nessun testo
+	viene mai mostrato all'utente. L'invariante è rispettata
+	per costruzione.
 - Cleanup non bloccante per bootstrap/login/logout/operazioni utente.
 - Database è fonte di verità: non eliminare record DB se manca il file.
 - Best effort: non propagare errori all'utente; ritentare silenziosamente.
@@ -78,4 +84,27 @@ DT-016-bis-02 — Edge Functions server-side
 DT-016-bis-03 — Log opt-in per utenti avanzati
 
 Sezione 16 — Test architetturali obbligatori (11 test)
-- TEST 1..11 (visti nel design): coprire trigger, throttle, safety window, isolamento, guardia concorrente.
+- TEST 1 — Trigger 1: cleanupSpecificOrphan elimina il file
+	orfano corretto e nessun altro.
+- TEST 2 — Trigger 2 al login: scan limitato a 48 ore
+	e MAX_FILES_PER_SCAN file, non oltre.
+- TEST 3 — Trigger 3 dopo cancellazione transazione:
+	scan limitato al path user_id/transazione_id.
+- TEST 4 — Trigger 4 al logout: la promise rispetta il
+	timeout CLEANUP_LOGOUT_TIMEOUT_MS e non blocca il logout.
+- TEST 5 — Guardia concorrente: secondo avvio bloccato
+	se cleanupInProgress è true (Trigger 1 esentato).
+- TEST 6 — Throttle temporale: cleanup non parte se
+	l'ultimo è avvenuto da meno di MIN_CLEANUP_INTERVAL_MS
+	(Trigger 1 esentato).
+- TEST 7 — Safety window: file creati da meno di
+	CLEANUP_SAFETY_WINDOW_MS non vengono eliminati.
+- TEST 8 — Isolamento utenti: cleanup non tocca mai
+	file con path che non iniziano per user_id dell'utente.
+- TEST 9 — Database fonte di verità: se manca il file
+	storage ma esiste il record DB, nessuna azione.
+- TEST 10 — CleanupResult corretto: i campi scanned,
+	orphanFound, deleted, failed riflettono esattamente
+	l'esito reale dell'operazione.
+- TEST 11 — Fail soft: un errore su un singolo file
+	non blocca l'elaborazione degli altri file orfani.

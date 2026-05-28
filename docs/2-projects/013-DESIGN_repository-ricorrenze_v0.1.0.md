@@ -25,6 +25,10 @@ Il repository espone le operazioni CRUD necessarie per creare, leggere,
 aggiornare e disattivare le ricorrenze dell'utente autenticato.
 
 Sezione 3 — Invarianti architetturali specifiche di questo design
+- Nessuna stringa visibile all'utente o annunciata dallo
+  screen reader può essere scritta direttamente nel codice.
+  Ogni testo passa obbligatoriamente da src/locales/it.ts.
+  Senza eccezioni.
 - `RecurrenceType` è `'entrata' | 'uscita'` e non include `'trasferimento'`.
 - Il repository non espone mai la funzione `remove()` con cancellazione fisica.
   L'unica operazione di eliminazione consentita è `deactivate(id)` che imposta `attiva = false`.
@@ -34,7 +38,7 @@ Sezione 3 — Invarianti architetturali specifiche di questo design
   nella query Supabase, non lato JavaScript dopo il caricamento.
 
 Sezione 4 — Struttura della tabella
-Rimandare a `docs/6-sql/schema database supabase.md` per lo schema completo della tabella `ricorrenze`.
+Rimandare a `docs/6-sql/schema-database-supabase.md` per lo schema completo della tabella `ricorrenze`.
 Campi presenti (come nel file schema):
 - `id`, `user_id`, `conto_id`, `categoria_id`, `tipo`, `importo`, `descrizione`, `frequenza`,
   `data_inizio`, `data_fine`, `ultima_generazione`, `prossima_generazione`, `attiva`, `created_at`, `updated_at`.
@@ -56,7 +60,15 @@ Sezione 5 — File da modificare
   - Aggiungere `ricorrenze` alla pipeline `writeCache`.
 
 - `src/locales/it.ts`
-  - Aggiungere stringhe per errori di caricamento, conferme di creazione e disattivazione delle ricorrenze.
+- Aggiungere le seguenti chiavi:
+  - errors.ricorrenze.loadFailed
+  - errors.ricorrenze.createFailed
+  - errors.ricorrenze.updateFailed
+  - errors.ricorrenze.deactivateFailed
+  - errors.ricorrenze.notFound
+  - confirm.ricorrenze.created
+  - confirm.ricorrenze.updated
+  - confirm.ricorrenze.deactivated
 
 Sezione 6 — File da creare
 - `src/lib/supabase/repositories/ricorrenze.ts`

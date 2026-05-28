@@ -45,6 +45,15 @@
 - Aggiunta colonna pin_master_key_encrypted alla tabella impostazioni_utente (file P41).
 - TODO 011 corretto: aggiunto Test 8 per verifica localizzazione messaggi bootstrap.
 
+### [DOCS] Correzioni editoriali batch design 013-016-ter (2026-05-28)
+- DESIGN 013: corretto path schema SQL, aggiunta invariante stringhe hardcoded, espanse chiavi locales.
+- DESIGN 014: aggiunta RPC remove_tag_from_transaction (obbligatoria), aggiunta invariante stringhe hardcoded, espanse chiavi locales e nota su `removeTag`.
+- DESIGN 015: aggiunta funzione `cleanupReadExpiredBefore` nell'elenco API pubbliche (documentato), aggiunta invariante stringhe hardcoded.
+- DESIGN 016: aggiunta Sezione 3 "Invarianti architetturali" con invariante stringhe hardcoded.
+- DESIGN 016-bis: espanso elenco test da abbreviato a completo (11 test), aggiunta invariante stringhe hardcoded e nota console.warn.
+- DESIGN 016-ter: espanso elenco test da abbreviato a completo (13 test), aggiunta invariante firma parziale, aggiunta invariante stringhe hardcoded.
+- Serie 013-016-ter promossa a: REVIEWED (dopo correzioni).
+
 ### DUSU-ANALYZER — Analisi statica compatibilità Android v0.4.0 (2025-07-25)
 
 #### Added

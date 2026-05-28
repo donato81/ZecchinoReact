@@ -21,8 +21,13 @@ Sezione 2 — Premessa architetturale
 Primo dominio che coinvolge simultaneamente database relazionale e Storage cloud Supabase.
 I due sistemi non condividono una transazione atomica nativa; la strategia di orchestrazione
 e gestione dei fallimenti parziali è il cuore di questo design.
+Sezione 3 — Invarianti architetturali
+- Nessuna stringa visibile all'utente o annunciata dallo
+	screen reader può essere scritta direttamente nel codice.
+	Ogni testo passa obbligatoriamente da src/locales/it.ts.
+	Le 12 chiavi obbligatorie sono elencate nella sezione File da modificare.
 
-Sezione 3 — Decisioni architetturali (17 decisioni)
+Sezione 4 — Decisioni architetturali (17 decisioni)
 Decisione 1 — Perimetro: repository allegati, modulo storage, tipi TS, localizzazioni, validazioni core, orchestrazione cross-system.
 Decisione 2 — Struttura DB: la tabella `allegati_transazioni` esiste già (verificare in `docs/6-sql/schema database supabase.md`).
 Decisione 3 — Bucket Storage: `allegati-transazioni` (private).
@@ -41,11 +46,10 @@ Decisione 15 — `getAll` richiede `transazione_id` obbligatorio.
 Decisione 16 — Chiavi di localizzazione obbligatorie (12 chiavi da aggiungere a `src/locales/it.ts`).
 Decisione 17 — File da creare: `src/lib/supabase/repositories/allegati.ts`, `src/lib/supabase/storage.ts`, aggiornamento `src/lib/supabase/types.ts`, aggiornamento `src/locales/it.ts`.
 
-Sezione 4 — Debiti tecnici aperti
+Sezione 5 — Debiti tecnici aperti
 DT-016-01 — Magic bytes validation (design 016-ter dedicato)
 DT-016-02 — Utility cleanup file orfani Storage (design 016-bis dedicato)
-
-Sezione 5 — Test architetturali obbligatori
+Sezione 6 — Test architetturali obbligatori
 TEST 1 — Rollback upload: Storage OK, DB FAIL, delete tentato.
 TEST 2 — Ordine cancellazione: Storage FAIL, DB NON toccato.
 TEST 3 — Sanitizzazione path sicuro per nomi pericolosi.

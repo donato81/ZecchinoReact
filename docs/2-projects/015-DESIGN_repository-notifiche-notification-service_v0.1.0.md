@@ -27,6 +27,11 @@ service dedicato e aggiungendo persistenza nel database.
 
 Sezione 3 — Architettura a tre layer
 
+- Nessuna stringa visibile all'utente o annunciata dallo
+  screen reader può essere scritta direttamente nel codice.
+  Ogni testo passa obbligatoriamente da src/locales/it.ts.
+  Senza eccezioni.
+
 Layer 1 — Calcolo puro: `src/lib/budget-alerts.ts` (esistente)
 - Responsabile solo del calcolo dei livelli di gravità e valutazione soglie.
 
