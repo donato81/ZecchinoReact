@@ -37,7 +37,7 @@ autore: Agent-Orchestrator
 - Dipende da: nessuno
 - Metrica di successo: npx tsc --noEmit compila DbNotification senza errori di tipo.
 - Task Status: [ ] TODO
- - Note operative: DbNotification deve mappare tutti i campi della tabella notifiche dello schema reale Supabase, inclusi canale (valori: inapp, email, push) e schedulata_per (TIMESTAMPTZ nullable).
+- Note operative: DbNotification deve mappare tutti i campi della tabella notifiche dello schema reale Supabase, inclusi canale (valori: inapp, email, push) e schedulata_per (TIMESTAMPTZ nullable).
 
 ### T2
 - Azione: Aggiungere NotificationType, AppNotification, notifications in AppState e flag notificationsHydrated.
@@ -66,7 +66,7 @@ autore: Agent-Orchestrator
 - Dipende da: nessuno
 - Metrica di successo: npx tsc --noEmit non segnala chiavi mancanti per notifiche budget e lifecycle.
 - Task Status: [ ] TODO
- - Note operative: le chiavi da definire in src/locales/it.ts includono come minimo: errors.notifiche.loadFailed, errors.notifiche.createFailed, errors.notifiche.markReadFailed, errors.notifiche.markAllReadFailed, errors.notifiche.removeFailed, errors.notifiche.cleanupFailed, confirm.notifiche.marked, confirm.notifiche.allMarked, confirm.notifiche.removed, notifiche.budget.soglia, notifiche.budget.superato, notifiche.budget.titolo. I nomi esatti devono rispettare il namespace i18n gia usato nel progetto in src/locales/it.ts.
+- Note operative: le chiavi da definire in src/locales/it.ts includono come minimo: errors.notifiche.loadFailed, errors.notifiche.createFailed, errors.notifiche.markReadFailed, errors.notifiche.markAllReadFailed, errors.notifiche.removeFailed, errors.notifiche.cleanupFailed, confirm.notifiche.marked, confirm.notifiche.allMarked, confirm.notifiche.removed, notifiche.budget.soglia, notifiche.budget.superato, notifiche.budget.titolo. I nomi esatti devono rispettare il namespace i18n gia usato nel progetto in src/locales/it.ts.
 
 ### T6
 - Azione: Creare il repository notifiche con query, mark-read e cleanup expiration.

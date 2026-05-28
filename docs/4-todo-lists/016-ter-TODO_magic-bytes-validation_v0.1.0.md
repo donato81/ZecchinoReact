@@ -47,7 +47,7 @@ autore: Agent-Orchestrator
 - Dipende da: T1
 - Metrica di successo: i test dimostrano che un file con firme JPEG, PNG e PDF valide viene accettato sul reader Windows.
 - Task Status: [ ] TODO
- - Note operative: il bridge nativo Windows è escluso da questo piano; preferire implementazione JS-first senza dipendenze native.
+- Note operative: il bridge nativo Windows è escluso da questo piano; preferire implementazione JS-first senza dipendenze native.
 
 ### T4
 - Azione: Integrare la validazione magic bytes in validateAttachmentFile rispettando l'ordine MIME whitelist, estensione whitelist e controllo firme.

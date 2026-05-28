@@ -33,13 +33,12 @@ Fuori perimetro:
 - eseguire DELETE diretto in transazioni-tag.removeTag
 - invalidare l'intera cache dopo modifica di un'associazione tag-transazione
 - UI dedicate per CRUD tag o selezione tag nelle schermate [DA VERIFICARE]
- - migrazioni SQL o implementazione delle RPC PostgreSQL: PRECONDIZIONE BLOCCANTE — i file SQL per add_tag_to_transaction, set_transaction_tags e remove_tag_from_transaction devono essere creati in docs/6-sql e applicati su Supabase prima di avviare la codifica del T6.
 
 ## 3. Prerequisiti Bloccanti
 
- - PLAN 013 completato e convalidato, come dipendenza dichiarata dal design 014.
- - Verifica infrastrutturale obbligatoria: i file SQL per le tre RPC (add_tag_to_transaction, set_transaction_tags, remove_tag_from_transaction) devono esistere in docs/6-sql ed essere stati applicati su Supabase prima che il T6 possa essere avviato.
- - Le funzioni PostgreSQL add_tag_to_transaction, set_transaction_tags e remove_tag_from_transaction devono esistere ed essere idempotenti.
+- PLAN 013 completato e convalidato, come dipendenza dichiarata dal design 014.
+- Verifica infrastrutturale obbligatoria: i file SQL per le tre RPC (`add_tag_to_transaction`, `set_transaction_tags`, `remove_tag_from_transaction`) devono essere creati in `docs/6-sql` e applicati sull'istanza Supabase di destinazione *prima* di avviare la codifica del T6. L'assenza o la mancata applicazione delle migrazioni è un blocco operativo per T6.
+- Le funzioni PostgreSQL `add_tag_to_transaction`, `set_transaction_tags` e `remove_tag_from_transaction` devono esistere ed essere idempotenti; verificare accesso e permessi necessari per l'utente CI/developer che eseguirà i test di integrazione.
 
 ## 4. Architettura e Decisioni Chiave
 

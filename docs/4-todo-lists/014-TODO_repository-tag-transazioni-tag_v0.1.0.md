@@ -89,6 +89,7 @@ autore: Agent-Orchestrator
 - Metrica di successo: npx tsc --noEmit e i test del context confermano che tags e transactionTagMap sono caricati, azzerati al logout e serializzati nella cache.
 - Task Status: [ ] TODO
 - Note operative aggiuntive: transactionTagMap deve essere incluso nella pipeline writeCache per garantire la simmetria con readCachedDomainSnapshotPure.
+- Note verifica infrastrutturale: prima di avviare T6 verificare che i file SQL per le RPC siano presenti in `docs/6-sql` e applicati sull'istanza Supabase di destinazione; questa verifica è obbligatoria e blocca l'avvio di T6 se non soddisfatta.
 
 ### T9
 - Azione: Creare la suite di test del repository tag.

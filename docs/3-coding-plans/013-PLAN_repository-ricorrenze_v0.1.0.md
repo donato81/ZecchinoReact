@@ -29,7 +29,7 @@ Fuori perimetro:
 - cancellazione fisica delle ricorrenze tramite remove()
 - supporto a RecurrenceType = trasferimento
 - filtri post-query in JavaScript per data_fine dentro getDue
-- UI dedicate per gestione ricorrenze [DA VERIFICARE]
+- UI dedicate per gestione ricorrenze
 
 ## 3. Prerequisiti Bloccanti
 
@@ -38,13 +38,13 @@ Fuori perimetro:
 
 ## 4. Architettura e Decisioni Chiave
 
- - Decisione - DESIGN 013, sezione 3: tutte le stringhe utente o screen reader devono passare da src/locales/it.ts. Conseguenza pratica: nessun messaggio inline nel repository o nel context.
- - Decisione - DESIGN 013, sezione 3: RecurrenceType e limitato a entrata | uscita. Conseguenza pratica: i tipi client non devono ammettere trasferimento.
- - Decisione - DESIGN 013, sezione 3: il repository non espone remove() e l'unica eliminazione consentita e deactivate(id) con attiva = false. Conseguenza pratica: CRUD limitato a create/get/update/deactivate.
- - Decisione - DESIGN 013, sezione 3: il repository non calcola la prossima_generazione. Conseguenza pratica: update/create persistono valori ricevuti dal layer superiore senza logica calendario.
- - Decisione - DESIGN 013, sezione 3: il filtro data_fine di getDue deve stare nella query Supabase lato database. Conseguenza pratica: la funzione getDue non puo caricare record extra e filtrare dopo in JavaScript.
- - Decisione - DESIGN 013, sezione 7: mapping approvato categoriaId in toClient usa row.categoria_id ?? undefined e in toDb usa null quando categoriaId e presente ma nullo. Conseguenza pratica: il repository deve allinearsi ai mapping espliciti del design.
- - Decisione - DESIGN 013, sezione 7: la data locale per getDue usa formato YYYY-MM-DD derivato da getFullYear(), getMonth()+1 e getDate() con padding a due cifre. Conseguenza pratica: il repository deve costruire la data di riferimento con questo formato.
+- Decisione - DESIGN 013, sezione 3: tutte le stringhe utente o screen reader devono passare da src/locales/it.ts. Conseguenza pratica: nessun messaggio inline nel repository o nel context.
+- Decisione - DESIGN 013, sezione 3: RecurrenceType e limitato a entrata | uscita. Conseguenza pratica: i tipi client non devono ammettere trasferimento.
+- Decisione - DESIGN 013, sezione 3: il repository non espone remove() e l'unica eliminazione consentita e deactivate(id) con attiva = false. Conseguenza pratica: CRUD limitato a create/get/update/deactivate.
+- Decisione - DESIGN 013, sezione 3: il repository non calcola la prossima_generazione. Conseguenza pratica: update/create persistono valori ricevuti dal layer superiore senza logica calendario.
+- Decisione - DESIGN 013, sezione 3: il filtro data_fine di getDue deve stare nella query Supabase lato database. Conseguenza pratica: la funzione getDue non puo caricare record extra e filtrare dopo in JavaScript.
+- Decisione - DESIGN 013, sezione 7: mapping approvato categoriaId in toClient usa row.categoria_id ?? undefined e in toDb usa null quando categoriaId e presente ma nullo. Conseguenza pratica: il repository deve allinearsi ai mapping espliciti del design.
+- Decisione - DESIGN 013, sezione 7: la data locale per getDue usa formato YYYY-MM-DD derivato da getFullYear(), getMonth()+1 e getDate() con padding a due cifre. Conseguenza pratica: il repository deve costruire la data di riferimento con questo formato.
 
 ## 5. Task Atomici
 
