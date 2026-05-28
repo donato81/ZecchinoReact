@@ -60,13 +60,13 @@
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
- - **Next Action:** Review dei design 017-019 e, se approvati, creazione sequenziale dei coding plan e delle todo list collegate.
+ - **Next Action:** Creazione sequenziale dei coding plan e delle todo list collegate ai design 017-019 dopo la review documentale completata.
 
 > Nota sessione docs 2026-05-28:
-> Creati i nuovi documenti `docs/2-projects/017-DESIGN_motore-ricorrenze-automatico_v0.1.0.md`,
-> `docs/2-projects/018-DESIGN_schermata-ricorrenze-UI_v0.1.0.md` e
-> `docs/2-projects/019-DESIGN_prestiti-mutui_v0.1.0.md`.
-> CHANGELOG e SPARK-START sincronizzati. Prossimo passo: review e pianificazione 017-019.
+> Creati i nuovi documenti `docs/2-projects/017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`,
+> `docs/2-projects/018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md` e
+> `docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md`.
+> CHANGELOG e SPARK-START sincronizzati. Prossimo passo: coding plan e todo list per 017-019.
 
 > Nota sessione coding 2026-05-28:
 > Completato il blocco 013 — Repository Ricorrenze. Gate eseguiti con esito PASSED: `npm test -- __tests__/ricorrenze.repository.test.ts --runInBand`, `npm test -- __tests__/AppDataContext.spec.ts --runInBand`, `npx tsc --noEmit`. Aggiornati CHANGELOG, README, architettura e API. Prossimo passo: blocco 014.
@@ -857,19 +857,19 @@ Confermare con: "PROCEDI [Task ID]"
 
 ## 10. Pending DOCS 017-019
 
-- `DESIGN 017 — Motore Ricorrenze Automatico` — docs/2-projects/017-DESIGN_motore-ricorrenze-automatico_v0.1.0.md
+- `DESIGN 017 — Prestiti, Mutui e Simulazione Finanziaria` — docs/2-projects/017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md
   - Stato: DRAFT
-  - Prerequisiti: DESIGN 013
-  - Azione successiva: review documentale e creazione coding plan + todo list.
+  - Prerequisiti: nessuno bloccante dichiarato; confine esplicito con DESIGN 015.
+  - Azione successiva: review finale condivisa e creazione coding plan + todo list.
 
-- `DESIGN 018 — Schermata Ricorrenze UI` — docs/2-projects/018-DESIGN_schermata-ricorrenze-UI_v0.1.0.md
+- `DESIGN 018 — Confronto mese su mese per categoria` — docs/2-projects/018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md
   - Stato: DRAFT
-  - Prerequisiti: DESIGN 013, DESIGN 017
-  - Azione successiva: review documentale e creazione coding plan + todo list.
+  - Prerequisiti: nessuno bloccante dichiarato; riuso dei dati gia' caricati in memoria.
+  - Azione successiva: review finale condivisa e creazione coding plan + todo list.
 
-- `DESIGN 019 — Prestiti e Mutui` — docs/2-projects/019-DESIGN_prestiti-mutui_v0.1.0.md
+- `DESIGN 019 — Notifiche Budget e Orchestrazione` — docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md
   - Stato: DRAFT
-  - Prerequisiti: nessuno
-  - Azione successiva: review documentale e creazione coding plan + todo list.
+  - Prerequisiti: coerenza con DESIGN 015 e con il codice reale di `notification-service.ts` e `repositories/notifiche.ts`.
+  - Azione successiva: review finale condivisa e creazione coding plan + todo list.
 
 

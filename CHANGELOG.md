@@ -10,9 +10,6 @@
 ## [Unreleased]
 
 ### Added
-- DESIGN 017: aggiunto il documento di design per il motore ricorrenze automatico in stato DRAFT.
-- DESIGN 018: aggiunto il documento di design per la schermata Ricorrenze UI in stato DRAFT.
-- DESIGN 019: aggiunto il documento di design per la gestione prestiti e mutui in stato DRAFT.
 - Aggiunti i documenti di design:
   - `docs/2-projects/013-DESIGN_repository-ricorrenze_v0.1.0.md`
   - `docs/2-projects/014-DESIGN_repository-tag-transazioni-tag_v0.1.0.md`
@@ -20,6 +17,12 @@
   - `docs/2-projects/016-DESIGN_allegati-transazioni_v0.1.0.md`
   - `docs/2-projects/016-bis-DESIGN_cleanup-orfani-storage_v0.1.0.md`
   - `docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md`
+
+### Docs
+- Aggiunti 2026-05-28:
+  - DESIGN 017 `017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`: definisce l'architettura del dominio prestiti, mutui e simulazione finanziaria. Motore di calcolo puro (`loan-calculator.ts`), due nuove tabelle (`prestiti_mutui`, `prestiti_rimborsi`), RPC atomiche per la gestione del saldo residuo, conversione da simulazione a contratto attivo.
+  - DESIGN 018 `018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md`: definisce il modulo di confronto mese su mese per categoria (`monthly-comparison.ts`). Modulo puro senza effetti collaterali, timezone-safe, con regole ufficiali per i casi percentuali e 17 scenari di test obbligatori.
+  - DESIGN 019 `019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md`: definisce l'architettura a tre layer per le notifiche budget. Estrae `checkBudgetNotifications` da `AppDataContext`, introduce `notification-service.ts` come orchestratore, `repositories/notifiche.ts` come layer di persistenza. Deduplicazione ibrida, escalation replace, secondary hydration.
 
 ### Aggiunto — Repository Ricorrenze
 - Introdotti `DbRecurrence`, `RecurrenceType`, `Recurrence` e il repository Supabase `src/lib/supabase/repositories/ricorrenze.ts` con `getAll`, `getById`, `getDue`, `create`, `update` e `deactivate`.

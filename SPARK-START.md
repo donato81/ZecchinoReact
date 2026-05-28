@@ -24,8 +24,8 @@ Suite di test: PASS (`11/11` suite, `75` test passati, `13` `it.todo`
 documentati).
 Decisione release: nessun minor bump automatico; prima vanno chiusi i debiti
 Android/Windows gia' aperti nel master TODO.
-Prossima azione: review dei nuovi design 017–019 e stesura dei relativi
-coding plan / todo list.
+Prossima azione: creazione dei coding plan e delle todo list per i nuovi
+DESIGN 017–019 dopo la review documentale completata.
 
 ---
 
@@ -55,9 +55,9 @@ coding plan / todo list.
 - [DESIGN 016 — Repository Allegati Transazioni](docs/2-projects/016-DESIGN_allegati-transazioni_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 016-bis — Cleanup Orfani Storage](docs/2-projects/016-bis-DESIGN_cleanup-orfani-storage_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 016-ter — Magic Bytes Validation](docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md) — v0.1.0 — REVIEWED
-- [DESIGN 017 — Motore Ricorrenze Automatico](docs/2-projects/017-DESIGN_motore-ricorrenze-automatico_v0.1.0.md) — v0.1.0 — DRAFT
-- [DESIGN 018 — Schermata Ricorrenze UI](docs/2-projects/018-DESIGN_schermata-ricorrenze-UI_v0.1.0.md) — v0.1.0 — DRAFT
-- [DESIGN 019 — Prestiti e Mutui](docs/2-projects/019-DESIGN_prestiti-mutui_v0.1.0.md) — v0.1.0 — DRAFT
+- [DESIGN 017 — Prestiti, Mutui e Simulazione Finanziaria](docs/2-projects/017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md) — v0.1.0 — DRAFT
+- [DESIGN 018 — Confronto mese su mese per categoria](docs/2-projects/018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md) — v0.1.0 — DRAFT
+- [DESIGN 019 — Notifiche Budget e Orchestrazione](docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — DRAFT
 
 ## Stato PLAN / TODO
 
