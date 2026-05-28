@@ -1,6 +1,6 @@
 # Architettura — ZecchinoReact
 
-> Aggiornato al: 2026-05-26  
+> Aggiornato al: 2026-05-28  
 > Stato: Migrazione Web → React Native in corso — app non avviabile fino alla risoluzione dei 6 blocchi (vedi [REPORT_diagnosi-compatibilita-RN_v0.1.0.md](1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md))
 
 ---
@@ -42,7 +42,7 @@
 │                      lib/ (dominio)                            │  ← Logica pura + utility
 │  types  constants  helpers  budget-alerts  budget-forecasting  │
 │  budget-history  budget-templates  crypto  kdf-provider        │
-│  haptic-system  sound-system                                   │
+│  haptic-system  sound-system  notification-service             │
 ├─────────────────────────────────────────────────────────────┤
 │                    accessibility/                              │  ← Accessibility engine (DESIGN 003)
 │  types  engine  detection                                      │
@@ -57,7 +57,8 @@
 │                   lib/supabase/                                │  ← Data access layer
 │  client  cache  types                                          │
 │  repositories: conti  transazioni  categorie  budget          │
-│               obiettivi-risparmio  impostazioni-utente         │
+│               obiettivi-risparmio  ricorrenze  tag            │
+│               transazioni-tag  notifiche  impostazioni-utente │
 ├────────────────────────────────────────────────────────────────┤
 │                       native/                                  │  ← Native modules (TurboModules)
 │  WinRTSavePicker (windows/macos/stub) + index                  │  ← DESIGN 009-native
@@ -148,12 +149,18 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `budget` | schema P25 | |
 | `obiettivi_risparmio` | schema P25 | |
 | `impostazioni_utente` | P25 + P40 + P41 | JSONB `preferences` (32 chiavi), hash PIN, `pin_kdf_salt` e `pin_master_key_encrypted` |
+| `tag`, `transazioni_tag` | schema + P50 | Associazioni tag-transazione con RPC dedicate e trigger `sync_tag_usage_count` |
+| `notifiche` | schema + P51 | Notifiche persistite con metadata JSONB, query unread e cleanup lifecycle |
 
 ### RPC Supabase
 
 | Funzione | Firma | Uso |
 |----------|-------|-----|
 | `update_impostazioni_preference` | `(p_chiave text, p_valore jsonb) → impostazioni_utente` | Merge atomico JSONB singola chiave |
+| `add_tag_to_transaction` | `(p_transaction_id uuid, p_tag_id uuid) → void` | Associa un tag a una transazione |
+| `set_transaction_tags` | `(p_transaction_id uuid, p_tag_ids uuid[]) → void` | Sostituisce l'intero set di tag di una transazione |
+| `remove_tag_from_transaction` | `(p_transaction_id uuid, p_tag_id uuid) → void` | Rimuove un tag da una transazione |
+| `notifiche.metadata` | `JSONB` | Metadata obbligatori per dedup/escalation notifiche budget |
 
 ---
 
@@ -175,18 +182,23 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `lib/sound-system.ts` | lib | ❌ Incompatibile | No | Web Audio API — da riscrivere |
 | `lib/screen-reader.ts` | lib | **ELIMINATO (DESIGN 004)** | — | Sostituito da `src/announcements/` |
 | `lib/supabase/client.ts` | supabase | ⚠️ Richiede config | **Sì (B2/B6)** | OK struttura; bloccato senza `react-native-dotenv` in Babel |
-| `lib/supabase/cache.ts` | supabase | ✅ Compatibile | No | Già su AsyncStorage |
+| `lib/supabase/cache.ts` | supabase | ✅ Compatibile | No | AsyncStorage 24h TTL con slice `ricorrenze`, `tag` e `transazioni_tag` inclusi dai blocchi 013-014 |
 | `lib/supabase/types.ts` | supabase | ✅ Compatibile | No | — |
 | `lib/supabase/repositories/conti.ts` | supabase | ✅ Compatibile | No | — |
 | `lib/supabase/repositories/transazioni.ts` | supabase | ✅ Compatibile | No | — |
 | `lib/supabase/repositories/categorie.ts` | supabase | ✅ Compatibile | No | — |
 | `lib/supabase/repositories/budget.ts` | supabase | ✅ Compatibile | No | — |
 | `lib/supabase/repositories/obiettivi-risparmio.ts` | supabase | ✅ Compatibile | No | — |
+| `lib/supabase/repositories/ricorrenze.ts` | supabase | ✅ Compatibile | No | CRUD logico ricorrenze con `getDue` e `deactivate`, senza delete fisico |
+| `lib/supabase/repositories/tag.ts` | supabase | ✅ Compatibile | No | CRUD tag utente con campi opzionali `colore`/`icona` e contatore `usatoNVolte` read-only lato client |
+| `lib/supabase/repositories/transazioni-tag.ts` | supabase | ✅ Compatibile | No | Query bulk associazioni e delega RPC per add/set/remove tag su transazioni |
+| `lib/supabase/repositories/notifiche.ts` | supabase | ✅ Compatibile | No | Query unread, deduplicazione per entità/livello e API di mark-read/cleanup notifiche |
 | `lib/supabase/repositories/impostazioni-utente.ts` | supabase | ✅ Compatibile | No | `updatePinSecurityMaterial` garantisce update atomico di `pin_privato_hash`, `pin_kdf_salt` e `pin_master_key_encrypted`; il repository rifiuta stati parziali del materiale PIN. |
+| `lib/notification-service.ts` | lib | ✅ Compatibile | No | Orchestrazione notifiche budget con deduplicazione, escalation replace, hydration unread e cleanup post-READY |
 | `context/AuthContext.tsx` | context | ⚠️ Rottura residua | **Sì (B4)** | PLAN 010 completato: set/change/remove PIN ora gestiscono wrapped master key, reset distruttivo e localizzazione dei messaggi PIN. Resta il placeholder UI `Button` nel perimetro migrazione RN. |
-| `context/AppDataContext.tsx` | context | ⚠️ Rottura residua (B3 shim) | **Sì (B3)** | `sonner` shim attivo; bug N9 RISOLTO (PLAN 007), bootstrap resiliente RISOLTO (PLAN 011: casi offline/online/init, timeout 10 s, errori interni confinati), export nativo padre RISOLTO (PLAN 009): `handleExportCSV` ora usa `exportFile` e firma `Promise<void>` |
+| `context/AppDataContext.tsx` | context | ⚠️ Rottura residua (B3 shim) | **Sì (B3)** | `sonner` shim attivo; bug N9 RISOLTO (PLAN 007), bootstrap resiliente RISOLTO (PLAN 011: casi offline/online/init, timeout 10 s, errori interni confinati), export nativo padre RISOLTO (PLAN 009): `handleExportCSV` ora usa `exportFile` e firma `Promise<void>`. Blocchi 013-015: nuovi slice `ricorrenze`, `tags`, `transactionTagMap` e `notifications`; hydration secondaria fail-soft delle notifiche dopo `READY`, refresh notifiche su `refreshAll` e merge locale coerente sulle escalation budget. |
 | `context/NetworkStatusContext.tsx` | context | ✅ Compatibile | No | `NetworkStatusProvider` con debounce offline e fail-safe Online-First a 3000 ms; primo provider della catena applicativa |
-| `context/app-data-cache.ts` | context | ✅ Compatibile | No | Modulo isolato (PLAN 007 T7): `readCachedDomainSnapshotPure` testabile direttamente |
+| `context/app-data-cache.ts` | context | ✅ Compatibile | No | Modulo isolato (PLAN 007 T7): `readCachedDomainSnapshotPure` testabile direttamente; dai blocchi 013-014 include `ricorrenze`, `tags` e `transactionTagMap` |
 | `context/UserSettingsContext.tsx` | context | ✅ Compatibile | No | — |
 | `context/VisibleDataContext.tsx` | context | ✅ Compatibile | No | — |
 | `hooks/use-user-settings.ts` | hooks | ✅ Compatibile | No | — |

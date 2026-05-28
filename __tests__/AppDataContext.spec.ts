@@ -22,6 +22,10 @@ import TestRenderer, { act } from 'react-test-renderer'
 
 const mockScreenReaderSuccess = jest.fn()
 const mockScreenReaderError = jest.fn()
+const mockHydrateUnreadNotifications = jest.fn()
+const mockCleanupReadyNotifications = jest.fn()
+const mockProcessBudgetNotifications = jest.fn()
+const mockResetNotificationService = jest.fn()
 
 jest.mock('@/lib/supabase/cache', () => ({
   CACHE_TTL_MS: 1000 * 60 * 60 * 24,
@@ -43,6 +47,14 @@ jest.mock('@/lib/helpers', () => ({
 jest.mock('@/lib/budget-alerts', () => ({
   shouldShowBudgetNotification: jest.fn(() => ({ shouldShow: false, level: null })),
   getBudgetNotificationTitle: jest.fn(() => 'Budget'),
+}))
+jest.mock('@/lib/notification-service', () => ({
+  createNotificationService: jest.fn(() => ({
+    hydrateUnreadNotifications: mockHydrateUnreadNotifications,
+    cleanupReadyNotifications: mockCleanupReadyNotifications,
+    processBudgetNotifications: mockProcessBudgetNotifications,
+    reset: mockResetNotificationService,
+  })),
 }))
 jest.mock('@/lib/sound-system', () => ({
   soundSystem: {
@@ -123,6 +135,22 @@ jest.mock('@/lib/supabase/repositories/obiettivi-risparmio', () => ({
   remove: jest.fn(),
   updateProgress: jest.fn(),
 }))
+jest.mock('@/lib/supabase/repositories/ricorrenze', () => ({
+  getAll: jest.fn(),
+}))
+jest.mock('@/lib/supabase/repositories/tag', () => ({
+  getAll: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  remove: jest.fn(),
+}))
+jest.mock('@/lib/supabase/repositories/transazioni-tag', () => ({
+  getTagsForTransaction: jest.fn(),
+  getTagMapForTransactions: jest.fn(),
+  setTagsForTransaction: jest.fn(),
+  addTag: jest.fn(),
+  removeTag: jest.fn(),
+}))
 jest.mock(
   '@/lib/screen-reader',
   () => ({
@@ -143,16 +171,20 @@ import { exportFile } from '@/lib/export-service'
 import { exportToCSV } from '@/lib/helpers'
 import { soundSystem } from '@/lib/sound-system'
 import { hapticSystem } from '@/lib/haptic-system'
-import { readCache, isCacheStale } from '@/lib/supabase/cache'
+import { readCache, isCacheStale, writeCache } from '@/lib/supabase/cache'
 import { getAll as getAllConti } from '@/lib/supabase/repositories/conti'
 import { getAll as getAllTransazioni } from '@/lib/supabase/repositories/transazioni'
 import { getAll as getAllCategorie } from '@/lib/supabase/repositories/categorie'
 import { getAll as getAllBudget } from '@/lib/supabase/repositories/budget'
 import { getAll as getAllObiettivi } from '@/lib/supabase/repositories/obiettivi-risparmio'
+import { getAll as getAllRicorrenze } from '@/lib/supabase/repositories/ricorrenze'
+import { getAll as getAllTag } from '@/lib/supabase/repositories/tag'
+import { getTagMapForTransactions } from '@/lib/supabase/repositories/transazioni-tag'
 import { strings } from '@/locales'
 
 const mockReadCache = readCache as jest.MockedFunction<typeof readCache>
 const mockIsCacheStale = isCacheStale as jest.MockedFunction<typeof isCacheStale>
+const mockWriteCache = writeCache as jest.MockedFunction<typeof writeCache>
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
 const mockUseNetworkStatus = useNetworkStatus as jest.MockedFunction<typeof useNetworkStatus>
 const mockExportFile = exportFile as jest.MockedFunction<typeof exportFile>
@@ -167,6 +199,9 @@ const mockGetAllTransazioni = getAllTransazioni as jest.MockedFunction<typeof ge
 const mockGetAllCategorie = getAllCategorie as jest.MockedFunction<typeof getAllCategorie>
 const mockGetAllBudget = getAllBudget as jest.MockedFunction<typeof getAllBudget>
 const mockGetAllObiettivi = getAllObiettivi as jest.MockedFunction<typeof getAllObiettivi>
+const mockGetAllRicorrenze = getAllRicorrenze as jest.MockedFunction<typeof getAllRicorrenze>
+const mockGetAllTag = getAllTag as jest.MockedFunction<typeof getAllTag>
+const mockGetTagMapForTransactions = getTagMapForTransactions as jest.MockedFunction<typeof getTagMapForTransactions>
 
 const USER = 'user-test-007'
 
@@ -227,6 +262,7 @@ function renderAppDataProvider(): {
 
 beforeEach(() => {
   jest.clearAllMocks()
+  mockReadCache.mockResolvedValue(null)
   mockIsCacheStale.mockResolvedValue(false)
   mockUseAuth.mockReturnValue({ isAuthenticated: false, user: null } as never)
   mockUseNetworkStatus.mockReturnValue({
@@ -241,25 +277,38 @@ beforeEach(() => {
   mockGetAllCategorie.mockResolvedValue([] as never)
   mockGetAllBudget.mockResolvedValue([] as never)
   mockGetAllObiettivi.mockResolvedValue([] as never)
+  mockGetAllRicorrenze.mockResolvedValue([] as never)
+  mockGetAllTag.mockResolvedValue([] as never)
+  mockGetTagMapForTransactions.mockResolvedValue({})
+  mockHydrateUnreadNotifications.mockResolvedValue([])
+  mockCleanupReadyNotifications.mockResolvedValue(undefined)
+  mockProcessBudgetNotifications.mockResolvedValue([])
+  mockResetNotificationService.mockImplementation(() => undefined)
+  mockWriteCache.mockResolvedValue(undefined)
   mockExportFile.mockResolvedValue({ success: true })
   mockExportToCSV.mockReturnValue('csv-content')
 })
 
 describe('AppDataContext — PLAN 007', () => {
   describe('Bug N9 — readCachedDomainSnapshotPure (INV1, INV2)', () => {
-    it('await su tutte e 5 le readCache (Promise.all)', async () => {
+    it('await su tutte le 8 readCache (Promise.all)', async () => {
       mockReadCache.mockResolvedValue(null)
       await readCachedDomainSnapshotPure(USER)
-      expect(mockReadCache).toHaveBeenCalledTimes(5)
+      expect(mockReadCache).toHaveBeenCalledTimes(8)
       expect(mockReadCache).toHaveBeenCalledWith(USER, 'conti')
       expect(mockReadCache).toHaveBeenCalledWith(USER, 'transazioni')
       expect(mockReadCache).toHaveBeenCalledWith(USER, 'categorie')
       expect(mockReadCache).toHaveBeenCalledWith(USER, 'budget')
       expect(mockReadCache).toHaveBeenCalledWith(USER, 'obiettivi_risparmio')
+      expect(mockReadCache).toHaveBeenCalledWith(USER, 'ricorrenze')
+      expect(mockReadCache).toHaveBeenCalledWith(USER, 'tag')
+      expect(mockReadCache).toHaveBeenCalledWith(USER, 'transazioni_tag')
     })
 
-    it('Caso A — cache valida con 5 array vuoti → snapshot con array vuoti (INV5 vuoto legittimo)', async () => {
-      mockReadCache.mockImplementation(async () => entry([] as never))
+    it('Caso A — cache valida con array vuoti e mappa vuota → snapshot coerente (INV5 vuoto legittimo)', async () => {
+      mockReadCache.mockImplementation(async (_u, table) =>
+        table === 'transazioni_tag' ? entry({} as never) : entry([] as never),
+      )
       const out = await readCachedDomainSnapshotPure(USER)
       expect(out).not.toBeNull()
       expect(out?.snapshot.accounts).toEqual([])
@@ -267,6 +316,9 @@ describe('AppDataContext — PLAN 007', () => {
       expect(out?.snapshot.categories).toEqual([])
       expect(out?.snapshot.budgets).toEqual([])
       expect(out?.snapshot.savingsGoals).toEqual([])
+      expect(out?.snapshot.ricorrenze).toEqual([])
+      expect(out?.snapshot.tags).toEqual([])
+      expect(out?.snapshot.transactionTagMap).toEqual({})
       expect(out?.isStale).toBe(false)
     })
 
@@ -350,6 +402,105 @@ describe('AppDataContext — PLAN 007', () => {
       expect(harness.getValue().error).toBeNull()
       harness.unmount()
     })
+    it('READY → hydration secondaria notifiche con fail-soft e flag notificationsHydrated', async () => {
+      const notifications = [{ id: 'notif-1', tipo: 'budget_soglia', titolo: 'Budget', letta: false, canale: 'inapp', createdAt: '2026-05-28T10:00:00.000Z' }]
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      mockHydrateUnreadNotifications.mockResolvedValueOnce(notifications)
+
+      const harness = renderAppDataProvider()
+
+      await act(async () => {
+        await Promise.resolve()
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+
+      expect(harness.getValue().isDataReady).toBe(true)
+      expect(mockHydrateUnreadNotifications).toHaveBeenCalledTimes(1)
+      expect(mockCleanupReadyNotifications).toHaveBeenCalledTimes(1)
+      expect(harness.getValue().notificationsHydrated).toBe(true)
+      expect(harness.getValue().notifications).toEqual(notifications)
+      expect(harness.getValue().safeNotifications).toEqual(notifications)
+      harness.unmount()
+    })
+    it('refreshAll riattiva la hydration secondaria notifiche dopo il primo READY', async () => {
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      mockHydrateUnreadNotifications.mockResolvedValue([])
+
+      const harness = renderAppDataProvider()
+
+      await act(async () => {
+        await Promise.resolve()
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+
+      expect(mockHydrateUnreadNotifications).toHaveBeenCalledTimes(1)
+
+      await act(async () => {
+        harness.getValue().refreshAll()
+        await Promise.resolve()
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+
+      expect(mockHydrateUnreadNotifications).toHaveBeenCalledTimes(2)
+      expect(harness.getValue().notificationsHydrated).toBe(true)
+      harness.unmount()
+    })
+    it('HYDRATING → READY include il fetch remoto delle ricorrenze', async () => {
+      const ricorrenze = [
+        {
+          id: 'ric-1',
+          contoId: 'conto-1',
+          tipo: 'uscita',
+          importo: 50,
+          descrizione: 'Abbonamento',
+          frequenza: 'mensile',
+          dataInizio: '2026-05-01',
+          prossimaGenerazione: '2026-06-01',
+          attiva: true,
+        },
+      ]
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      mockGetAllRicorrenze.mockResolvedValueOnce(ricorrenze as never)
+
+      const harness = renderAppDataProvider()
+
+      await act(async () => {
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+
+      expect(mockGetAllRicorrenze).toHaveBeenCalledTimes(1)
+      expect(harness.getValue().ricorrenze).toEqual(ricorrenze)
+      expect(harness.getValue().safeRicorrenze).toEqual(ricorrenze)
+      expect(harness.getValue().isDataReady).toBe(true)
+      harness.unmount()
+    })
+    it('HYDRATING → READY include il fetch remoto dei tag e della mappa transazioni-tag', async () => {
+      const transactions = [{ id: 'tx-1' }]
+      const tags = [{ id: 'tag-1', nome: 'Casa', colore: '#112233', icona: 'home', usatoNVolte: 2 }]
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      mockGetAllTransazioni.mockResolvedValueOnce(transactions as never)
+      mockGetAllTag.mockResolvedValueOnce(tags as never)
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': ['tag-1'] })
+
+      const harness = renderAppDataProvider()
+
+      await act(async () => {
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+
+      expect(mockGetAllTag).toHaveBeenCalledTimes(1)
+      expect(mockGetTagMapForTransactions).toHaveBeenCalledWith(['tx-1'])
+      expect(harness.getValue().tags).toEqual(tags)
+      expect(harness.getValue().safeTags).toEqual(tags)
+      expect(harness.getValue().transactionTagMap).toEqual({ 'tx-1': ['tag-1'] })
+      expect(harness.getValue().safeTransactionTagMap).toEqual({ 'tx-1': ['tag-1'] })
+      harness.unmount()
+    })
     it('HYDRATING → ERROR con rete offline confermata e senza timer bootstrap', async () => {
       jest.useFakeTimers()
       mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
@@ -375,10 +526,141 @@ describe('AppDataContext — PLAN 007', () => {
       harness.unmount()
       jest.useRealTimers()
     })
+    it('HYDRATING → CACHE-READY con cache valida quando la rete e offline', async () => {
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      mockUseNetworkStatus.mockReturnValue({
+        isOffline: true,
+        isInitialized: true,
+        isConnected: false,
+        isInternetReachable: false,
+        connectionType: 'wifi',
+      } as never)
+      mockReadCache.mockImplementation(async (_u, table) =>
+        table === 'transazioni_tag' ? entry({} as never) : entry([] as never),
+      )
+
+      const harness = renderAppDataProvider()
+
+      await act(async () => {
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+
+      expect(harness.getValue().isLoading).toBe(false)
+      expect(harness.getValue().isDataReady).toBe(true)
+      expect(harness.getValue().error).toBe(strings.bootstrap_offline_error)
+      expect(mockGetAllConti).not.toHaveBeenCalled()
+      expect(harness.getValue().transactionTagMap).toEqual({})
+      harness.unmount()
+    })
     it.todo('CACHE-READY → REMOTE-SYNC al completamento refresh background')
     it.todo('REMOTE-SYNC → READY come stato di quiete')
     it.todo('IDLE → READY diretto vietato (deve attraversare HYDRATING)')
-    it.todo('* → IDLE al logout da qualsiasi stato autenticato')
+    it('* → IDLE al logout da qualsiasi stato autenticato', async () => {
+      const ricorrenze = [
+        {
+          id: 'ric-1',
+          contoId: 'conto-1',
+          tipo: 'uscita',
+          importo: 50,
+          descrizione: 'Abbonamento',
+          frequenza: 'mensile',
+          dataInizio: '2026-05-01',
+          prossimaGenerazione: '2026-06-01',
+          attiva: true,
+        },
+      ]
+      const tags = [{ id: 'tag-1', nome: 'Casa', colore: '#112233', icona: 'home', usatoNVolte: 2 }]
+      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as never)
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      mockGetAllRicorrenze.mockResolvedValueOnce(ricorrenze as never)
+      mockGetAllTag.mockResolvedValueOnce(tags as never)
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': ['tag-1'] })
+
+      const harness = renderAppDataProvider()
+
+      await act(async () => {
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+
+      expect(harness.getValue().isDataReady).toBe(true)
+
+      mockUseAuth.mockReturnValue({ isAuthenticated: false, user: null } as never)
+      harness.rerender()
+
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      expect(harness.getValue().isDataReady).toBe(false)
+      expect(harness.getValue().accounts).toEqual([])
+      expect(harness.getValue().transactions).toEqual([])
+      expect(harness.getValue().categories).toEqual([])
+      expect(harness.getValue().budgets).toEqual([])
+      expect(harness.getValue().savingsGoals).toEqual([])
+      expect(harness.getValue().ricorrenze).toEqual([])
+      expect(harness.getValue().tags).toEqual([])
+      expect(harness.getValue().transactionTagMap).toEqual({})
+      expect(harness.getValue().safeRicorrenze).toEqual([])
+      expect(harness.getValue().safeTags).toEqual([])
+      expect(harness.getValue().safeTransactionTagMap).toEqual({})
+      harness.unmount()
+    })
+
+    it('removeAccount ripulisce anche transactionTagMap delle transazioni eliminate', async () => {
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      mockGetAllConti.mockResolvedValueOnce([{ id: 'conto-1', nome: 'Conto' }] as never)
+      mockGetAllTransazioni.mockResolvedValueOnce([
+        { id: 'tx-1', contoId: 'conto-1', contoDestinazioneId: undefined },
+        { id: 'tx-2', contoId: 'altro-conto', contoDestinazioneId: undefined },
+      ] as never)
+      mockGetAllTag.mockResolvedValueOnce([{ id: 'tag-1', nome: 'Casa', usatoNVolte: 1 }] as never)
+      mockGetTagMapForTransactions.mockResolvedValueOnce({
+        'tx-1': ['tag-1'],
+        'tx-2': ['tag-1'],
+      })
+
+      const harness = renderAppDataProvider()
+
+      await act(async () => {
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+
+      await act(async () => {
+        await harness.getValue().removeAccount('conto-1')
+      })
+
+      expect(harness.getValue().transactions).toEqual([
+        { id: 'tx-2', contoId: 'altro-conto', contoDestinazioneId: undefined },
+      ])
+      expect(harness.getValue().transactionTagMap).toEqual({ 'tx-2': ['tag-1'] })
+      expect(harness.getValue().tags).toEqual([{ id: 'tag-1', nome: 'Casa', usatoNVolte: 0 }])
+      harness.unmount()
+    })
+
+    it('removeTransaction decrementa usatoNVolte dei tag associati rimossi', async () => {
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as never)
+      mockGetAllTag.mockResolvedValueOnce([{ id: 'tag-1', nome: 'Casa', usatoNVolte: 1 }] as never)
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': ['tag-1'] })
+
+      const harness = renderAppDataProvider()
+
+      await act(async () => {
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+
+      await act(async () => {
+        await harness.getValue().removeTransaction('tx-1')
+      })
+
+      expect(harness.getValue().transactionTagMap).toEqual({})
+      expect(harness.getValue().tags).toEqual([{ id: 'tag-1', nome: 'Casa', usatoNVolte: 0 }])
+      harness.unmount()
+    })
   })
 
   describe('PLAN 011 — bootstrap resiliente', () => {
@@ -544,21 +826,109 @@ describe('AppDataContext — PLAN 007', () => {
     it.todo('errore writeCache: no unhandled promise rejection')
     it.todo('errore writeCache: no alterazione stato React in memoria')
     it.todo('errore su una tabella: altre tabelle vengono comunque scritte')
+    it('writeCache include i nuovi slice ricorrenze, tag e transazioni_tag quando il bootstrap e READY', async () => {
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      const ricorrenze = [
+        {
+          id: 'ric-1',
+          contoId: 'conto-1',
+          tipo: 'uscita',
+          importo: 50,
+          descrizione: 'Abbonamento',
+          frequenza: 'mensile',
+          dataInizio: '2026-05-01',
+          prossimaGenerazione: '2026-06-01',
+          attiva: true,
+        },
+      ]
+      const transactions = [{ id: 'tx-1' }]
+      const tags = [{ id: 'tag-1', nome: 'Casa', colore: '#112233', icona: 'home', usatoNVolte: 2 }]
+      const transactionTagMap = { 'tx-1': ['tag-1'] }
+      mockGetAllTransazioni.mockResolvedValueOnce(transactions as never)
+      mockGetAllRicorrenze.mockResolvedValueOnce(ricorrenze as never)
+      mockGetAllTag.mockResolvedValueOnce(tags as never)
+      mockGetTagMapForTransactions.mockResolvedValueOnce(transactionTagMap)
+
+      const harness = renderAppDataProvider()
+
+      await act(async () => {
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+
+      expect(mockWriteCache).toHaveBeenCalledWith(USER, 'ricorrenze', ricorrenze)
+      expect(mockWriteCache).toHaveBeenCalledWith(USER, 'tag', tags)
+      expect(mockWriteCache).toHaveBeenCalledWith(USER, 'transazioni_tag', transactionTagMap)
+      harness.unmount()
+    })
+
+    it('addTagToTransaction aggiorna transactionTagMap e usatoNVolte in memoria', async () => {
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as never)
+      mockGetAllTag.mockResolvedValueOnce([{ id: 'tag-1', nome: 'Casa', usatoNVolte: 2 }] as never)
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': [] })
+
+      const harness = renderAppDataProvider()
+
+      await act(async () => {
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+
+      await act(async () => {
+        await harness.getValue().addTagToTransaction('tx-1', 'tag-1')
+      })
+
+      expect(harness.getValue().transactionTagMap).toEqual({ 'tx-1': ['tag-1'] })
+      expect(harness.getValue().tags).toEqual([{ id: 'tag-1', nome: 'Casa', usatoNVolte: 3 }])
+      harness.unmount()
+    })
+
+    it('mutazioni concorrenti addTagToTransaction sulla stessa transazione non perdono aggiornamenti', async () => {
+      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as never)
+      mockGetAllTag.mockResolvedValueOnce([
+        { id: 'tag-1', nome: 'Casa', usatoNVolte: 0 },
+        { id: 'tag-2', nome: 'Lavoro', usatoNVolte: 0 },
+      ] as never)
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': [] })
+
+      const harness = renderAppDataProvider()
+
+      await act(async () => {
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+
+      await act(async () => {
+        await Promise.all([
+          harness.getValue().addTagToTransaction('tx-1', 'tag-1'),
+          harness.getValue().addTagToTransaction('tx-1', 'tag-2'),
+        ])
+      })
+
+      expect(harness.getValue().transactionTagMap).toEqual({ 'tx-1': ['tag-1', 'tag-2'] })
+      expect(harness.getValue().tags).toEqual([
+        { id: 'tag-1', nome: 'Casa', usatoNVolte: 1 },
+        { id: 'tag-2', nome: 'Lavoro', usatoNVolte: 1 },
+      ])
+      harness.unmount()
+    })
   })
 
   describe('PLAN 009 — handleExportCSV async branching', () => {
-    let logSpy: jest.SpyInstance
+    let infoSpy: jest.SpyInstance
     let errorSpy: jest.SpyInstance
     let warnSpy: jest.SpyInstance
 
     beforeEach(() => {
-      logSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined)
+      infoSpy = jest.spyOn(console, 'info').mockImplementation(() => undefined)
       errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined)
       warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
     })
 
     afterEach(() => {
-      logSpy.mockRestore()
+      infoSpy.mockRestore()
       errorSpy.mockRestore()
       warnSpy.mockRestore()
     })
@@ -592,7 +962,7 @@ describe('AppDataContext — PLAN 007', () => {
       )
       expect(mockSoundPlay).toHaveBeenCalledWith('export')
       expect(mockHapticExport).toHaveBeenCalled()
-      expect(logSpy).toHaveBeenCalledWith('[toast:success]', 'Export completato', '')
+      expect(infoSpy).toHaveBeenCalledWith('[toast:success]', 'Export completato', '')
       harness.unmount()
     })
 

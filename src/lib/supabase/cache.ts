@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-export type CacheTable = 'conti' | 'transazioni' | 'categorie' | 'budget' | 'obiettivi_risparmio'
+export type CacheTable = 'conti' | 'transazioni' | 'categorie' | 'budget' | 'obiettivi_risparmio' | 'ricorrenze' | 'tag' | 'transazioni_tag' | 'notifiche'
 
 export type CacheEntry<T> = {
   data: T
@@ -13,10 +13,18 @@ const CACHE_VERSION = 1
 
 export const CACHE_TTL_MS = 24 * 60 * 60 * 1000
 
-const CACHE_TABLES: CacheTable[] = ['conti', 'transazioni', 'categorie', 'budget', 'obiettivi_risparmio']
+const CACHE_TTL_BY_TABLE: Partial<Record<CacheTable, number>> = {
+  notifiche: 60 * 60 * 1000,
+}
+
+const CACHE_TABLES: CacheTable[] = ['conti', 'transazioni', 'categorie', 'budget', 'obiettivi_risparmio', 'ricorrenze', 'tag', 'transazioni_tag', 'notifiche']
 
 function getCacheKey(userId: string, table: CacheTable): string {
   return `${CACHE_PREFIX}_${userId}_${table}`
+}
+
+export function getCacheTtlMs(table: CacheTable): number {
+  return CACHE_TTL_BY_TABLE[table] ?? CACHE_TTL_MS
 }
 
 export async function writeCache<T>(userId: string, table: CacheTable, data: T): Promise<void> {

@@ -15,7 +15,7 @@
 // risultava undefined. La validazione strutturale aggiunta blocca
 // definitivamente questa classe di regressioni.
 
-import type { Account, Transaction, Category, Budget, SavingsGoal } from '@/lib/types'
+import type { Account, Transaction, Category, Budget, SavingsGoal, Recurrence, Tag } from '@/lib/types'
 import { CACHE_TTL_MS, isCacheStale, readCache } from '@/lib/supabase/cache'
 
 export type DomainSnapshot = {
@@ -24,21 +24,27 @@ export type DomainSnapshot = {
   categories: Category[]
   budgets: Budget[]
   savingsGoals: SavingsGoal[]
+  ricorrenze: Recurrence[]
+  tags: Tag[]
+  transactionTagMap: Record<string, string[]>
 }
 
 export async function readCachedDomainSnapshotPure(
   userId: string,
 ): Promise<{ snapshot: DomainSnapshot; isStale: boolean } | null> {
-  const [accounts, transactions, categories, budgets, savingsGoals] =
+  const [accounts, transactions, categories, budgets, savingsGoals, ricorrenze, tags, transactionTagMap] =
     await Promise.all([
       readCache<Account[]>(userId, 'conti'),
       readCache<Transaction[]>(userId, 'transazioni'),
       readCache<Category[]>(userId, 'categorie'),
       readCache<Budget[]>(userId, 'budget'),
       readCache<SavingsGoal[]>(userId, 'obiettivi_risparmio'),
+      readCache<Recurrence[]>(userId, 'ricorrenze'),
+      readCache<Tag[]>(userId, 'tag'),
+      readCache<Record<string, string[]>>(userId, 'transazioni_tag'),
     ])
 
-  if (!accounts || !transactions || !categories || !budgets || !savingsGoals) {
+  if (!accounts || !transactions || !categories || !budgets || !savingsGoals || !ricorrenze || !tags || !transactionTagMap) {
     return null
   }
 
@@ -48,6 +54,8 @@ export async function readCachedDomainSnapshotPure(
     categories.data,
     budgets.data,
     savingsGoals.data,
+    ricorrenze.data,
+    tags.data,
   ]
   for (const val of candidate) {
     const isArray = Array.isArray(val)
@@ -62,6 +70,9 @@ export async function readCachedDomainSnapshotPure(
     isCacheStale(userId, 'categorie', CACHE_TTL_MS),
     isCacheStale(userId, 'budget', CACHE_TTL_MS),
     isCacheStale(userId, 'obiettivi_risparmio', CACHE_TTL_MS),
+    isCacheStale(userId, 'ricorrenze', CACHE_TTL_MS),
+    isCacheStale(userId, 'tag', CACHE_TTL_MS),
+    isCacheStale(userId, 'transazioni_tag', CACHE_TTL_MS),
   ])
 
   return {
@@ -71,6 +82,9 @@ export async function readCachedDomainSnapshotPure(
       categories: categories.data,
       budgets: budgets.data,
       savingsGoals: savingsGoals.data,
+      ricorrenze: ricorrenze.data,
+      tags: tags.data,
+      transactionTagMap: transactionTagMap.data,
     },
     isStale: staleFlags.some(Boolean),
   }

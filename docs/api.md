@@ -1,6 +1,6 @@
 # API Reference — ZecchinoReact
 
-> Aggiornato al: 2026-05-13  
+> Aggiornato al: 2026-05-28  
 > Branch: main  
 > Copertura: tutti i file pubblici in `src/` presenti nel branch corrente.
 
@@ -24,18 +24,25 @@ Tipi di dominio client-side. Nessuna dipendenza esterna.
 |------|------|-------------|
 | `AccountType` | `type` | Unione: `'bancario' \| 'prepagata' \| 'contanti' \| 'salvadanaio' \| 'privato' \| 'investimenti' \| 'credito' \| 'paypal' \| 'crypto' \| 'pensione'` |
 | `TransactionType` | `type` | `'entrata' \| 'uscita' \| 'trasferimento'` |
+| `RecurrenceType` | `type` | `'entrata' \| 'uscita'` |
 | `RecurrenceFrequency` | `type` | `'giornaliero' \| 'settimanale' \| 'mensile' \| 'annuale'` |
 | `CategoryType` | `type` | `'entrata' \| 'uscita'` |
 | `BudgetPeriod` | `type` | `'mensile' \| 'trimestrale' \| 'annuale'` |
 | `Account` | `interface` | Conto finanziario: `id`, `nome`, `tipo`, `saldoIniziale`, `valuta`, `isPrivato`, `dataCreazione`, `archiviato` |
 | `Transaction` | `interface` | Transazione: `id`, `data`, `importo`, `tipo`, `contoId`, `contoDestinazioneId?`, `categoriaId`, `descrizione`, `ricorrente`, `frequenzaRicorrenza?`, `cifrato` |
 | `TransactionInput` | `type` | `Omit<Transaction, 'id' \| 'cifrato'> & { id?: string }` — input per create/update |
+| `Recurrence` | `interface` | Ricorrenza: `id`, `contoId`, `categoriaId?`, `tipo`, `importo`, `descrizione`, `frequenza`, `dataInizio`, `dataFine?`, `ultimaGenerazione?`, `prossimaGenerazione`, `attiva` |
+| `Tag` | `interface` | Tag utente: `id`, `nome`, `colore?`, `icona?`, `usatoNVolte` |
+| `NotificationType` | `type` | `'budget_soglia' \| 'budget_superato' \| 'obiettivo_raggiunto' \| 'sistema'` |
+| `NotificationChannel` | `type` | `'inapp' \| 'email' \| 'push'` |
+| `NotificationEntityType` | `type` | `'budget' \| 'obiettivo' \| 'conto' \| 'transazione'` |
+| `AppNotification` | `interface` | Notifica app: `id`, `tipo`, `titolo`, `messaggio?`, `letta`, `canale`, `schedulataPer?`, `entitaTipo?`, `entitaId?`, `metadata?`, `createdAt` |
 | `Category` | `interface` | Categoria: `id`, `nome`, `tipo`, `predefinita` |
 | `Budget` | `interface` | Budget: `id`, `nome`, `importoTarget`, `periodo`, `categoriaId?`, `contoId?`, `dataInizio`, `dataFine`, `attivo` |
 | `SavingsGoal` | `interface` | Obiettivo risparmio: `id`, `nome`, `descrizione`, `importoTarget`, `importoCorrente`, `dataInizio`, `dataScadenza?`, `contoAssociato?`, `colore`, `icona`, `completato`, `dataCompletamento?` |
 | `AccountGroup` | `type` | `{ id, label, accounts: Account[] }` |
 | `FullAccountGroup` | `type` | `AccountCategoryInfo & { accounts: Account[] }` |
-| `AppState` | `interface` | Snapshot globale dell'app (auth + dati di dominio) |
+| `AppState` | `interface` | Snapshot globale dell'app (auth + dati di dominio, inclusi `ricorrenze`, `tags`, `transactionTagMap`, `notifications`, `notificationsHydrated`) |
 
 ---
 
@@ -381,7 +388,7 @@ Tipi DB e di settings. Uso interno al layer `src/lib/supabase/`.
 | `TalkBackAdaptations` | `interface` | 8 flag booleani per adattamenti TalkBack |
 | `UserPreferences` | `interface` | 32 chiavi JSONB: display (12), sr (12), audio (2), talkback (2), session (2), onboarding (1), alert (1) |
 | `UserSettings` | `interface` | `nomeVisualizzato`, `valutaDefault`, `pinPrivatoHash`, `pinKdfSalt`, `pinMasterKeyEncrypted`, `preferences: UserPreferences` |
-| `DbAccount`, `DbTransaction`, `DbCategory`, `DbBudget`, `DbSavingsGoal`, `DbSavingsGoalProgress`, `DbUserSettings` | `interface` | Row types snake_case — **uso interno** al layer supabase |
+| `DbAccount`, `DbTransaction`, `DbCategory`, `DbBudget`, `DbSavingsGoal`, `DbSavingsGoalProgress`, `DbRecurrence`, `DbTag`, `DbTransactionTag`, `DbNotification`, `DbUserSettings` | `interface` | Row types snake_case — **uso interno** al layer supabase |
 
 ---
 
@@ -407,7 +414,7 @@ Cache locale basata su `AsyncStorage`. Dipendenza esterna: `@react-native-async-
 
 | Nome | Tipo |
 |------|------|
-| `CacheTable` | `'conti' \| 'transazioni' \| 'categorie' \| 'budget' \| 'obiettivi_risparmio'` |
+| `CacheTable` | `'conti' \| 'transazioni' \| 'categorie' \| 'budget' \| 'obiettivi_risparmio' \| 'ricorrenze' \| 'tag' \| 'transazioni_tag' \| 'notifiche'` |
 | `CacheEntry<T>` | `{ data: T, cachedAt: string, version: number }` |
 
 ### Costanti
@@ -423,6 +430,7 @@ Cache locale basata su `AsyncStorage`. Dipendenza esterna: `@react-native-async-
 | `writeCache<T>(userId, table, data)` | `string`, `CacheTable`, `T` | `Promise<void>` | ✅ |
 | `readCache<T>(userId, table)` | `string`, `CacheTable` | `Promise<CacheEntry<T> \| null>` | ✅ |
 | `isCacheStale(userId, table, ttlMs?)` | `string`, `CacheTable`, `number?` | `Promise<boolean>` | ✅ |
+| `getCacheTtlMs(table)` | `CacheTable` | `number` | ✅ |
 | `invalidateCache(userId)` | `string` | `Promise<void>` | ✅ |
 
 ---
@@ -516,6 +524,78 @@ Lettura/scrittura preferenze utente. Dipendenza: `@supabase/supabase-js`.
 
 ---
 
+## `src/lib/supabase/repositories/ricorrenze.ts` ✅
+
+Repository delle ricorrenze pianificate. Dipendenze: `@supabase/supabase-js`, `../client`, `../types`, `@/locales`.
+
+> Espone solo delete logico tramite `deactivate(id)`. `getDue()` applica i filtri su `prossima_generazione`, `attiva` e `data_fine` direttamente nella query Supabase.
+
+| Funzione | Parametri | Ritorna |
+|----------|-----------|---------|
+| `getAll(filters?)` | `RecurrenceFilters?` | `Promise<Recurrence[]>` |
+| `getById(id)` | `string` | `Promise<Recurrence>` |
+| `getDue(dataRiferimento?)` | `string?` | `Promise<Recurrence[]>` |
+| `create(input)` | `Omit<Recurrence, 'id'>` | `Promise<Recurrence>` |
+| `update(id, input)` | `string`, `Partial<Omit<Recurrence, 'id'>>` | `Promise<Recurrence>` |
+| `deactivate(id)` | `string` | `Promise<Recurrence>` |
+
+---
+
+## `src/lib/supabase/repositories/tag.ts` ✅
+
+Repository CRUD dei tag utente. Dipendenze: `@supabase/supabase-js`, `../client`, `../types`, `@/locales`.
+
+| Funzione | Parametri | Ritorna |
+|----------|-----------|---------|
+| `getAll()` | — | `Promise<Tag[]>` |
+| `getById(id)` | `string` | `Promise<Tag>` |
+| `create(input)` | `Omit<Tag, 'id' \| 'usatoNVolte'>` | `Promise<Tag>` |
+| `update(id, input)` | `string`, `Partial<Omit<Tag, 'id' \| 'usatoNVolte'>>` | `Promise<Tag>` |
+| `remove(id)` | `string` | `Promise<void>` |
+
+---
+
+## `src/lib/supabase/repositories/transazioni-tag.ts` ✅
+
+Repository delle associazioni tag-transazione. Dipendenze: `@supabase/supabase-js`, `../client`, `../types`, `@/locales`.
+
+| Funzione | Parametri | Ritorna |
+|----------|-----------|---------|
+| `getTagsForTransaction(transactionId)` | `string` | `Promise<string[]>` |
+| `getTagMapForTransactions(transactionIds)` | `string[]` | `Promise<Record<string, string[]>>` |
+| `setTagsForTransaction(transactionId, tagIds)` | `string`, `string[]` | `Promise<void>` |
+| `addTag(transactionId, tagId)` | `string`, `string` | `Promise<void>` |
+| `removeTag(transactionId, tagId)` | `string`, `string` | `Promise<void>` |
+
+---
+
+## `src/lib/supabase/repositories/notifiche.ts` ✅
+
+Repository delle notifiche persistite. Dipendenze: `@supabase/supabase-js`, `../client`, `../types`, `@/locales`.
+
+| Funzione | Parametri | Ritorna |
+|----------|-----------|---------|
+| `getAll()` | — | `Promise<AppNotification[]>` |
+| `getUnreadCount()` | — | `Promise<number>` |
+| `getUnreadByEntity(filters)` | `NotificationEntityFilters` | `Promise<AppNotification[]>` |
+| `existsUnreadForEntityLevel(filters)` | `NotificationEntityFilters & { level }` | `Promise<boolean>` |
+| `markAsRead(id)` | `string` | `Promise<AppNotification>` |
+| `markAllAsRead(filters?)` | `Partial<NotificationEntityFilters>` | `Promise<void>` |
+| `create(input)` | `NotificationCreateInput` | `Promise<AppNotification>` |
+| `remove(id)` | `string` | `Promise<void>` |
+| `removeExpired(referenceDate?)` | `string?` | `Promise<void>` |
+| `cleanupReadExpiredBefore(cutoffDate)` | `string` | `Promise<void>` |
+
+---
+
+## `src/lib/notification-service.ts` ✅
+
+Layer di orchestrazione notifiche. Coordina deduplicazione, escalation replace, hydration unread e cleanup post-READY.
+
+| Funzione | Parametri | Ritorna |
+|----------|-----------|---------|
+| `createNotificationService()` | — | oggetto service con `reset`, `hydrateUnreadNotifications`, `cleanupReadyNotifications`, `processBudgetNotifications` |
+
 ## `src/context/AuthContext.tsx` ⚠️
 
 Provider auth + gestione PIN privato.  
@@ -576,14 +656,18 @@ concorrenti, `writeCache` fail-soft per-tabella.
 
 | Campo | Tipo | RN |
 |-------|------|----|
-| `accounts`, `transactions`, `categories`, `budgets`, `savingsGoals` | array di dominio | ✅ |
-| `safeAccounts`, `safeTransactions`, `safeCategories`, `safeBudgets`, `safeSavingsGoals` | memo delle stesse | ✅ |
+| `accounts`, `transactions`, `categories`, `budgets`, `savingsGoals`, `ricorrenze`, `tags` | array di dominio | ✅ |
+| `transactionTagMap` | `Record<string, string[]>` | ✅ |
+| `safeAccounts`, `safeTransactions`, `safeCategories`, `safeBudgets`, `safeSavingsGoals`, `safeRicorrenze`, `safeTags` | memo delle stesse | ✅ |
+| `safeTransactionTagMap` | `Record<string, string[]>` | ✅ |
 | `isLoading`, `error`, `isDataReady` | `boolean`, `string\|null`, `boolean` | ✅ (PLAN 007: aggiornati atomicamente da `transitionTo()`) |
 | `addAccount`, `updateAccount`, `removeAccount` | `async` | ✅ |
 | `addTransaction`, `updateTransaction`, `removeTransaction` | `async` | ✅ |
 | `addCategory`, `updateCategory`, `removeCategory` | `async` | ✅ |
 | `addBudget`, `updateBudget`, `removeBudget` | `async` | ✅ |
 | `addSavingsGoal`, `updateSavingsGoal`, `updateSavingsGoalProgress`, `removeSavingsGoal` | `async` | ✅ |
+| `addTag`, `updateTag`, `removeTag` | `async` | ✅ |
+| `addTagToTransaction`, `removeTagFromTransaction`, `setTagsForTransaction` | `async` | ✅ |
 | `refreshAll()` | `void` (no-op se `HYDRATING`/`REMOTE-SYNC` in corso) | ✅ |
 | `handleExportCSV(visibleTransactions, visibleAccounts)` | `Promise<void>` | ✅ (usa `exportToCSV` + `exportFile`, branching su `ExportResult`) |
 | Dialog state/setters (`editingTransaction`, `showTransactionDialog`, ecc.) | vari | ✅ |

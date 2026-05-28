@@ -5,8 +5,8 @@
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
- - **Ultimo Agente Attivo:** Agent-Orchestrator — creazione coding plan e todo list DESIGN 013–016-ter (2026-05-28)
- - **Blocco in Carico:** AGENT-ORCHESTRATOR completato — piani 013–016-ter pronti per review. Nessun blocco di codifica attivo.
+ - **Ultimo Agente Attivo:** Agent-Orchestrator — implementazione, validazione e review blocco 015 Repository Notifiche e Notification Service (2026-05-28)
+ - **Blocco in Carico:** BLOCCO 016 — Allegati Transazioni. Blocchi 013-015 completati e documentati.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
@@ -44,11 +44,8 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
- - **Last Completed Task:** AGENT-ORCHESTRATOR — Creazione coding plan e todo list per DESIGN 013, 014, 015, 016, 016-bis, 016-ter. Dodici file creati su main in docs/3-coding-plans/ e docs/4-todo-lists/. Tutti in stato DRAFT/PENDING (2026-05-28). Prossimo passo: review e autorizzazione implementazione da parte di donny-81.
-  Codebase v0.4.0 (PLAN 006 completato). PLAN 006 ha portato il
-  KDF PBKDF2-SHA256 con PBKDF2_ITERATIONS=600_000.
-- **Last Validated Block:** PLAN 012 — Export Nativo Guard Concorrente — gate G-012-1..G-012-5 PASSED (2026-05-27, Agent-Code)
-  verificati. Suite npm test EXIT:0, tsc EXIT:0, npm install EXIT:0.
+ - **Last Completed Task:** BLOCCO 015 — Repository Notifiche e Notification Service completato. Aggiunti tipi `DbNotification` e `AppNotification`, repository `src/lib/supabase/repositories/notifiche.ts`, service `src/lib/notification-service.ts`, hydration secondaria notifiche in `AppDataContext`, migrazione stringhe budget-alerts e migration SQL `P51-notifiche-metadata-jsonb.sql` (2026-05-28).
+- **Last Validated Block:** PLAN 015 — Repository Notifiche e Notification Service — gate locali verdi + review finale PASS (2026-05-28, Agent-Orchestrator).
 - **Files Modified But Not Validated:** Nessuno (sessione DUSU-ANALYZER
   è read-only per src/). Documenti aggiornati: REPORT-compatibilita-android-v1.0.0.md
   (CREATO), docs/todo-master.md (aggiornato), CHANGELOG.md (aggiornato),
@@ -63,7 +60,16 @@
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
- - **Next Action:** Review dei coding plan 013–016-ter da parte di donny-81. Dopo autorizzazione: implementazione in ordine 013, 014, 015, 016, 016-bis, 016-ter rispettando le dipendenze dichiarate nei piani.
+ - **Next Action:** Avviare il blocco 016 leggendo DESIGN e PLAN dedicati, verificando schema SQL e boundary storage/allegati prima del primo edit.
+
+> Nota sessione coding 2026-05-28:
+> Completato il blocco 013 — Repository Ricorrenze. Gate eseguiti con esito PASSED: `npm test -- __tests__/ricorrenze.repository.test.ts --runInBand`, `npm test -- __tests__/AppDataContext.spec.ts --runInBand`, `npx tsc --noEmit`. Aggiornati CHANGELOG, README, architettura e API. Prossimo passo: blocco 014.
+
+> Nota sessione coding 2026-05-28:
+> Completato il blocco 014 — Repository Tag e Transazioni-Tag. Gate eseguiti con esito PASSED: `npm test -- __tests__/tag.repository.test.ts --runInBand`, `npm test -- __tests__/transazioni-tag.repository.test.ts --runInBand`, `npm test -- __tests__/AppDataContext.spec.ts --runInBand`, `npx tsc --noEmit`. Review finale PASS. Aggiornati CHANGELOG, README, architettura, API e SQL P50. Prossimo passo: blocco 015.
+
+> Nota sessione coding 2026-05-28:
+> Completato il blocco 015 — Repository Notifiche e Notification Service. Gate eseguiti con esito PASSED: `npm test -- __tests__/notifiche.repository.test.ts --runInBand`, `npm test -- __tests__/notification-service.test.ts --runInBand`, `npm test -- __tests__/AppDataContext.spec.ts --runInBand`, `npx tsc --noEmit`. Review finale PASS. Aggiornati CHANGELOG, README, architettura, API e SQL P51. Prossimo passo: blocco 016.
 
 > Nota sessione aggiornamento docs 2026-05-28:
 > Registrati nel registro di stato i sei nuovi design approvati (013–016-ter). Aggiunti otto debiti tecnici nella sezione 7.1 (DT-016-01, DT-016-02, DT-016-bis-01, DT-016-bis-02, DT-016-bis-03, DT-016-ter-01, DT-016-ter-02, DT-016-ter-03). Snapshot di ripresa allineato. CHANGELOG e SPARK-START aggiornati. Prossimo passo: coding plan e todo 013–016-ter.

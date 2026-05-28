@@ -173,6 +173,74 @@ export interface DbSavingsGoal {
   updated_at: string
 }
 
+export interface DbRecurrence {
+  id: string
+  user_id: string
+  conto_id: string
+  categoria_id: string | null
+  tipo: string
+  importo: number
+  descrizione: string
+  frequenza: string
+  data_inizio: string
+  data_fine: string | null
+  ultima_generazione: string | null
+  prossima_generazione: string
+  attiva: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface DbTag {
+  id: string
+  user_id: string
+  nome: string
+  colore: string | null
+  icona: string | null
+  usato_n_volte: number
+  created_at: string
+}
+
+export interface DbTransactionTag {
+  transazione_id: string
+  tag_id: string
+}
+
+export interface DbNotificationMetadata {
+  level?: 'warning' | 'critical' | 'exceeded'
+  percentage?: number
+  threshold?: number
+  budgetPeriodKey?: string
+}
+
+export interface DbNotification {
+  id: string
+  user_id: string
+  tipo: string
+  titolo: string
+  messaggio: string | null
+  letta: boolean
+  canale: string
+  schedulata_per: string | null
+  entita_tipo: string | null
+  entita_id: string | null
+  metadata: DbNotificationMetadata | null
+  created_at: string
+}
+
+export interface DbAllegato {
+  id: string
+  user_id: string
+  transazione_id: string
+  nome_file: string
+  storage_path: string
+  mime_type: string | null
+  dimensione_bytes: number | null
+  descrizione: string | null
+  miniatura_path: string | null
+  created_at: string
+}
+
 export interface DbUserSettings {
   id: string
   user_id: string

@@ -20,6 +20,12 @@ versione resta `0.4.0` finche' non vengono chiusi i debiti Android/Windows gia'
 tracciati in `docs/todo-master.md` e nel report compatibilita'. Il sotto-piano
 `009-native` resta quindi fuori dalla release corrente.
 
+## Funzionalità implementate
+
+- Blocco 013 completato: repository `ricorrenze` con tipi dedicati, query `getDue`, integrazione in `AppDataContext` e cache offline del nuovo slice.
+- Blocco 014 completato: repository `tag` e `transazioni-tag`, bootstrap bulk delle associazioni, fallback cache offline per `transactionTagMap` e trigger SQL per mantenere coerente `usato_n_volte`.
+- Blocco 015 completato: repository `notifiche`, `notification-service`, hydration secondaria delle notifiche dopo `READY` e deduplicazione/escalation per periodo reale del budget.
+
 ---
 
 ## Stack tecnologico

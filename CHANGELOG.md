@@ -11,6 +11,27 @@
   - `docs/2-projects/016-bis-DESIGN_cleanup-orfani-storage_v0.1.0.md`
   - `docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md`
 
+### Aggiunto — Repository Ricorrenze
+- Introdotti `DbRecurrence`, `RecurrenceType`, `Recurrence` e il repository Supabase `src/lib/supabase/repositories/ricorrenze.ts` con `getAll`, `getById`, `getDue`, `create`, `update` e `deactivate`.
+- Integrate le ricorrenze nel bootstrap dati, nel reset logout, nella cache offline e nel context value di `AppDataContext`.
+- File principali: `src/lib/supabase/repositories/ricorrenze.ts`, `src/context/AppDataContext.tsx`, `src/context/app-data-cache.ts`, `src/lib/supabase/cache.ts`, `__tests__/ricorrenze.repository.test.ts`.
+- Gate validazione: PASSED.
+
+### Aggiunto — Repository Tag e Transazioni-Tag
+- Introdotti `DbTag`, `DbTransactionTag`, `Tag` e i repository Supabase `src/lib/supabase/repositories/tag.ts` e `src/lib/supabase/repositories/transazioni-tag.ts` con CRUD tag, query bulk `getTagMapForTransactions` e RPC `add_tag_to_transaction`, `set_transaction_tags`, `remove_tag_from_transaction`.
+- Estesi bootstrap remoto, fallback cache offline, reset logout e persistenza cache di `AppDataContext` con i nuovi slice `tags` e `transazioni_tag`, inclusa la sincronizzazione locale di `usatoNVolte` sulle associazioni.
+- Allineato `docs/6-sql/P50-rpc-tag-transazioni.sql` con i parametri `p_transaction_id` e con il trigger `sync_tag_usage_count` per mantenere coerente `usato_n_volte` anche sulle delete a cascata.
+- File principali: `src/lib/supabase/repositories/tag.ts`, `src/lib/supabase/repositories/transazioni-tag.ts`, `src/context/AppDataContext.tsx`, `src/context/app-data-cache.ts`, `docs/6-sql/P50-rpc-tag-transazioni.sql`, `__tests__/tag.repository.test.ts`, `__tests__/transazioni-tag.repository.test.ts`, `__tests__/AppDataContext.spec.ts`.
+- Gate validazione e review: PASSED.
+
+### Aggiunto — Repository Notifiche e Notification Service
+- Introdotti `DbNotification`, `AppNotification`, `NotificationType`, cache `notifiche` con TTL dedicato a 1 ora e il repository Supabase `src/lib/supabase/repositories/notifiche.ts` con query unread, deduplicazione per entità/livello e API di cleanup lifecycle.
+- Creato `src/lib/notification-service.ts` come layer di orchestrazione per deduplicazione, escalation replace, hydration secondaria e cleanup post-READY delle notifiche budget.
+- Rifattorizzato `AppDataContext` con stato `notifications`, flag `notificationsHydrated`, hydration secondaria fail-soft dopo `READY`, refresh delle notifiche dopo `refreshAll` e merge locale coerente sulle escalation.
+- Aggiunta la migration `docs/6-sql/P51-notifiche-metadata-jsonb.sql` per il campo `metadata` JSONB della tabella `notifiche`.
+- File principali: `src/lib/supabase/repositories/notifiche.ts`, `src/lib/notification-service.ts`, `src/context/AppDataContext.tsx`, `src/lib/budget-alerts.ts`, `docs/6-sql/P51-notifiche-metadata-jsonb.sql`, `__tests__/notifiche.repository.test.ts`, `__tests__/notification-service.test.ts`, `__tests__/AppDataContext.spec.ts`.
+- Gate validazione e review: PASSED.
+
 ### Security
 - Introdotta la Wrapped Master Key Architecture per il PIN privato con payload versionato `{version, iv, ciphertext, tag}` e rewrap della sola master key durante `changePin`.
   Riferimento: [PLAN-010]

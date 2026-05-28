@@ -1,5 +1,6 @@
 import { Budget, Transaction } from './types'
-import { getBudgetProgress } from './helpers'
+import { formatCurrency, getBudgetProgress } from './helpers'
+import { t } from '@/announcements/_utils/t'
 
 export type BudgetAlertLevel = 'info' | 'warning' | 'critical' | 'exceeded'
 
@@ -31,17 +32,30 @@ export function getBudgetAlertMessage(
   target: number
 ): string {
   const percentageRounded = Math.round(percentage)
-  const overAmount = spent - target
-  
+
   switch (level) {
     case 'exceeded':
-      return `Budget "${budgetName}" superato! Hai speso ${Math.abs(Math.round((overAmount / target) * 100))}% oltre il limite.`
+      return t('notifiche.budget.superato', {
+        name: budgetName,
+        spent: formatCurrency(spent),
+        target: formatCurrency(target),
+      })
     case 'critical':
-      return `Attenzione! Il budget "${budgetName}" è al ${percentageRounded}%. Rimangono solo pochi euro disponibili.`
+      return t('budget_critico', {
+        name: budgetName,
+        percent: percentageRounded,
+        remaining: formatCurrency(remaining),
+      })
     case 'warning':
-      return `Il budget "${budgetName}" ha raggiunto il ${percentageRounded}%. Controlla le tue spese.`
+      return t('notifiche.budget.soglia', {
+        name: budgetName,
+        percent: percentageRounded,
+      })
     case 'info':
-      return `Budget "${budgetName}": ${percentageRounded}% utilizzato.`
+      return t('budget_normale', {
+        name: budgetName,
+        percent: percentageRounded,
+      })
   }
 }
 
@@ -106,13 +120,13 @@ export function shouldShowBudgetNotification(
 export function getBudgetNotificationTitle(level: BudgetAlertLevel): string {
   switch (level) {
     case 'exceeded':
-      return '🚨 Budget Superato!'
+      return t('notifiche.budget.titolo.exceeded')
     case 'critical':
-      return '⚠️ Budget Critico'
+      return t('notifiche.budget.titolo.critical')
     case 'warning':
-      return '⚡ Attenzione Budget'
+      return t('notifiche.budget.titolo.warning')
     case 'info':
-      return 'ℹ️ Aggiornamento Budget'
+      return t('notifiche.budget.titolo.warning')
   }
 }
 

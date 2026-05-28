@@ -1,12 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { Account, Transaction, TransactionInput, Category, Budget, SavingsGoal } from '@/lib/types'
-import { formatCurrency, exportToCSV, getActiveBudgets, getBudgetProgress } from '@/lib/helpers'
-import { shouldShowBudgetNotification, getBudgetNotificationTitle } from '@/lib/budget-alerts'
+import { Account, Transaction, TransactionInput, Category, Budget, SavingsGoal, Recurrence, Tag, AppNotification } from '@/lib/types'
+import { formatCurrency, exportToCSV } from '@/lib/helpers'
 import { t } from '@/announcements/_utils/t'
 import { soundSystem } from '@/lib/sound-system'
 import { hapticSystem } from '@/lib/haptic-system'
 import { announce, accounts as accountsAnn, budgets as budgetsAnn } from '@/announcements'
 import { exportFile, type ExportResult } from '@/lib/export-service'
+import { createNotificationService } from '@/lib/notification-service'
 
 // Shim temporaneo — rimpiazzare con react-native-toast-message nella fase UI.
 // Lo shim e' callable: i call site usano sia `toast(title, opts)` (in
@@ -18,10 +18,10 @@ type ToastFn = ((message: string, opts?: ToastOpts) => void) & {
   warning: (message: string, opts?: ToastOpts) => void
 }
 const toastBase: (message: string, opts?: ToastOpts) => void = (message, opts) =>
-  console.log('[toast]', message, opts?.description ?? '')
+  console.info('[toast]', message, opts?.description ?? '')
 const toast = toastBase as ToastFn
 toast.success = (message, opts) =>
-  console.log('[toast:success]', message, opts?.description ?? '')
+  console.info('[toast:success]', message, opts?.description ?? '')
 toast.error = (message, opts) =>
   console.error('[toast:error]', message, opts?.description ?? '')
 toast.warning = (message, opts) =>
@@ -47,7 +47,20 @@ import {
   update as updateObiettivo, remove as removeObiettivo,
   updateProgress as updateObiettivoProgress,
 } from '@/lib/supabase/repositories/obiettivi-risparmio'
-import { CACHE_TTL_MS, isCacheStale, readCache, writeCache, type CacheTable } from '@/lib/supabase/cache'
+import { getAll as getAllRicorrenze } from '@/lib/supabase/repositories/ricorrenze'
+import {
+  getAll as getAllTag,
+  create as createTagRepository,
+  update as updateTagRepository,
+  remove as removeTagRepository,
+} from '@/lib/supabase/repositories/tag'
+import {
+  getTagMapForTransactions,
+  setTagsForTransaction as setTransactionTagsRepository,
+  addTag as addTagToTransactionRepository,
+  removeTag as removeTagFromTransactionRepository,
+} from '@/lib/supabase/repositories/transazioni-tag'
+import { CACHE_TTL_MS, getCacheTtlMs, isCacheStale, readCache, writeCache, type CacheTable } from '@/lib/supabase/cache'
 import { readCachedDomainSnapshotPure, type DomainSnapshot } from '@/context/app-data-cache'
 import { useAuth } from '@/context/AuthContext'
 import { useNetworkStatus } from '@/hooks/use-network-status'
@@ -59,6 +72,11 @@ type AppDataContextValue = {
   categories: Category[]
   budgets: Budget[]
   savingsGoals: SavingsGoal[]
+  ricorrenze: Recurrence[]
+  tags: Tag[]
+  transactionTagMap: Record<string, string[]>
+  notifications: AppNotification[]
+  notificationsHydrated: boolean
   isLoading: boolean
   error: string | null
   isDataReady: boolean
@@ -67,6 +85,10 @@ type AppDataContextValue = {
   safeCategories: Category[]
   safeBudgets: Budget[]
   safeSavingsGoals: SavingsGoal[]
+  safeRicorrenze: Recurrence[]
+  safeTags: Tag[]
+  safeTransactionTagMap: Record<string, string[]>
+  safeNotifications: AppNotification[]
   // Repository actions
   addAccount: (data: Omit<Account, 'id'>) => Promise<void>
   updateAccount: (id: string, data: Partial<Omit<Account, 'id'>>) => Promise<void>
@@ -84,6 +106,12 @@ type AppDataContextValue = {
   updateSavingsGoal: (id: string, data: Partial<Omit<SavingsGoal, 'id'>>) => Promise<void>
   updateSavingsGoalProgress: (id: string, importoCorrente: number) => Promise<void>
   removeSavingsGoal: (id: string) => Promise<void>
+  addTag: (data: Omit<Tag, 'id' | 'usatoNVolte'>) => Promise<void>
+  updateTag: (id: string, data: Partial<Omit<Tag, 'id' | 'usatoNVolte'>>) => Promise<void>
+  removeTag: (id: string) => Promise<void>
+  addTagToTransaction: (transactionId: string, tagId: string) => Promise<void>
+  removeTagFromTransaction: (transactionId: string, tagId: string) => Promise<void>
+  setTagsForTransaction: (transactionId: string, tagIds: string[]) => Promise<void>
   refreshAll: () => void
   // Legacy handlers used by DialogsOverlay and other existing consumers
   handleSaveAccount: (account: Account) => void
@@ -186,13 +214,74 @@ function isTransitionAllowed(from: BootstrapState, to: BootstrapState): boolean 
   return ALLOWED_TRANSITIONS[from].includes(to)
 }
 
+function updateTagUsageCounts(
+  currentTags: Tag[],
+  previousTagIds: string[],
+  nextTagIds: string[],
+): Tag[] {
+  const deltas = new Map<string, number>()
+
+  for (const tagId of nextTagIds) {
+    if (!previousTagIds.includes(tagId)) {
+      deltas.set(tagId, (deltas.get(tagId) ?? 0) + 1)
+    }
+  }
+
+  for (const tagId of previousTagIds) {
+    if (!nextTagIds.includes(tagId)) {
+      deltas.set(tagId, (deltas.get(tagId) ?? 0) - 1)
+    }
+  }
+
+  if (deltas.size === 0) {
+    return currentTags
+  }
+
+  return currentTags.map((tag) => {
+    const delta = deltas.get(tag.id)
+    if (!delta) {
+      return tag
+    }
+
+    return {
+      ...tag,
+      usatoNVolte: Math.max(0, tag.usatoNVolte + delta),
+    }
+  })
+}
+
+function applyTagUsageDelta(currentTags: Tag[], tagIds: string[], delta: number): Tag[] {
+  if (tagIds.length === 0 || delta === 0) {
+    return currentTags
+  }
+
+  const deltas = new Map<string, number>()
+  for (const tagId of tagIds) {
+    deltas.set(tagId, (deltas.get(tagId) ?? 0) + delta)
+  }
+
+  return currentTags.map((tag) => {
+    const tagDelta = deltas.get(tag.id)
+    if (!tagDelta) {
+      return tag
+    }
+
+    return {
+      ...tag,
+      usatoNVolte: Math.max(0, tag.usatoNVolte + tagDelta),
+    }
+  })
+}
+
 async function loadDomainSnapshot(): Promise<DomainSnapshot> {
-  const [accounts, transactions, categories, budgets, savingsGoals] = await Promise.all([
+  const [accounts, transactions, categories, budgets, savingsGoals, ricorrenze, tags] = await Promise.all([
     getAllConti(),
     getAllTransazioni(),
     getAllCategorie(),
     getAllBudget(),
     getAllObiettivi(),
+    getAllRicorrenze(),
+    getAllTag(),
   ])
 
   return {
@@ -201,6 +290,9 @@ async function loadDomainSnapshot(): Promise<DomainSnapshot> {
     categories,
     budgets,
     savingsGoals,
+    ricorrenze,
+    tags,
+    transactionTagMap: await getTagMapForTransactions(transactions.map((transaction) => transaction.id)),
   }
 }
 
@@ -221,6 +313,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([])
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([])
+  const [ricorrenze, setRicorrenze] = useState<Recurrence[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
+  const [transactionTagMap, setTransactionTagMap] = useState<Record<string, string[]>>({})
+  const [notifications, setNotifications] = useState<AppNotification[]>([])
+  const [notificationsHydrated, setNotificationsHydrated] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isDataReady, setIsDataReady] = useState(false)
@@ -234,6 +331,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   // refreshAll lanciato mentre il bootstrap è in volo, logout + relogin).
   const hydrationGen = useRef(0)
   const networkInitFallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const tagsRef = useRef<Tag[]>([])
+  const transactionTagMapRef = useRef<Record<string, string[]>>({})
+  const notificationServiceRef = useRef(createNotificationService())
 
   // T3: transitionTo aggiorna in modo atomico bootstrapState + flag derivati
   // (isLoading, isDataReady, error). Le transizioni vietate dalla matrice
@@ -290,8 +390,6 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [],
   )
 
-  const [budgetPercentages, setBudgetPercentages] = useState<Record<string, number>>({})
-
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined)
   const [showTransactionDialog, setShowTransactionDialog] = useState(false)
   const [deletingItem, setDeletingItem] = useState<{
@@ -327,6 +425,10 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const safeCategories = useMemo(() => categories, [categories])
   const safeBudgets = useMemo(() => budgets, [budgets])
   const safeSavingsGoals = useMemo(() => savingsGoals, [savingsGoals])
+  const safeRicorrenze = useMemo(() => ricorrenze, [ricorrenze])
+  const safeTags = useMemo(() => tags, [tags])
+  const safeTransactionTagMap = useMemo(() => transactionTagMap, [transactionTagMap])
+  const safeNotifications = useMemo(() => notifications, [notifications])
 
   const applyDomainSnapshot = useCallback((snapshot: DomainSnapshot) => {
     setAccounts(snapshot.accounts)
@@ -334,7 +436,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setCategories(snapshot.categories)
     setBudgets(snapshot.budgets)
     setSavingsGoals(snapshot.savingsGoals)
-    setBudgetPercentages({})
+    setRicorrenze(snapshot.ricorrenze)
+    tagsRef.current = snapshot.tags
+    transactionTagMapRef.current = snapshot.transactionTagMap
+    setTags(snapshot.tags)
+    setTransactionTagMap(snapshot.transactionTagMap)
+    notificationServiceRef.current.reset()
   }, [])
 
   const readCachedDomainSnapshot = useCallback(
@@ -410,7 +517,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       setCategories([])
       setBudgets([])
       setSavingsGoals([])
-      setBudgetPercentages({})
+      setRicorrenze([])
+      tagsRef.current = []
+      transactionTagMapRef.current = {}
+      notificationServiceRef.current.reset()
+      setTags([])
+      setTransactionTagMap({})
+      setNotifications([])
+      setNotificationsHydrated(false)
       transitionTo('IDLE')
       return
     }
@@ -441,7 +555,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     transitionTo('HYDRATING')
 
     if (isOffline) {
-      reportBootstrapFailure('ERROR_NETWORK', t('bootstrap_offline_error'), myGen)
+      void hydrateFromCache(user.id, myGen)
       return
     }
 
@@ -450,7 +564,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     return () => {
       clearNetworkInitFallbackTimer()
     }
-  }, [clearNetworkInitFallbackTimer, isAuthenticated, isNetworkInitialized, isOffline, reportBootstrapFailure, runOnlineBootstrap, transitionTo, user?.id])
+  }, [clearNetworkInitFallbackTimer, hydrateFromCache, isAuthenticated, isNetworkInitialized, isOffline, runOnlineBootstrap, transitionTo, user?.id])
 
   // T5 (PLAN 007): persistenza cache fail-soft. Ogni writeCache è isolato
   // in try/catch: un errore su una tabella non blocca le altre né propaga
@@ -458,12 +572,16 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isAuthenticated || !user?.id || !isDataReady) return
     const userId = user.id
-    const targets: Array<[CacheTable, unknown[]]> = [
+    const targets: Array<[CacheTable, unknown]> = [
       ['conti', accounts],
       ['transazioni', transactions],
       ['categorie', categories],
       ['budget', budgets],
       ['obiettivi_risparmio', savingsGoals],
+      ['ricorrenze', ricorrenze],
+      ['tag', tags],
+      ['transazioni_tag', transactionTagMap],
+      ['notifiche', notifications.filter((notification) => !notification.letta)],
     ]
     void (async () => {
       for (const [table, data] of targets) {
@@ -474,7 +592,48 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         }
       }
     })()
-  }, [accounts, budgets, categories, isAuthenticated, isDataReady, savingsGoals, transactions, user?.id])
+  }, [accounts, budgets, categories, isAuthenticated, isDataReady, notifications, ricorrenze, savingsGoals, tags, transactionTagMap, transactions, user?.id])
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id || bootstrapState !== 'READY' || notificationsHydrated) return
+
+    let cancelled = false
+
+    void (async () => {
+      try {
+        const cached = await readCache<AppNotification[]>(user.id, 'notifiche')
+        const stale = await isCacheStale(user.id, 'notifiche', getCacheTtlMs('notifiche'))
+        if (!cancelled && cached?.data && Array.isArray(cached.data) && !stale) {
+          setNotifications(cached.data.filter((notification) => !notification.letta))
+        }
+      } catch {
+        // fail-soft: la cache notifiche non deve interrompere il bootstrap principale
+      }
+
+      try {
+        const unreadNotifications = await notificationServiceRef.current.hydrateUnreadNotifications()
+        if (!cancelled) {
+          setNotifications(unreadNotifications)
+        }
+      } catch {
+        // fail-soft: manteniamo eventuale cache valida o stato vuoto
+      } finally {
+        if (!cancelled) {
+          setNotificationsHydrated(true)
+        }
+      }
+
+      try {
+        await notificationServiceRef.current.cleanupReadyNotifications()
+      } catch {
+        // cleanup post-hydration best effort
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [bootstrapState, isAuthenticated, notificationsHydrated, user?.id])
 
   const refreshAll = () => {
     if (!user?.id) return
@@ -491,6 +650,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     } else {
       transitionTo('HYDRATING')
     }
+
+    setNotificationsHydrated(false)
 
     const userId = user.id
     const reloadData = async () => {
@@ -537,9 +698,23 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }
 
   const removeAccount = async (id: string): Promise<void> => {
+    const removedTransactions = transactions.filter(
+      transaction => transaction.contoId === id || transaction.contoDestinazioneId === id,
+    )
+    const removedTransactionIds = new Set(removedTransactions.map(transaction => transaction.id))
+    const removedTagIds = removedTransactions.flatMap(
+      transaction => transactionTagMapRef.current[transaction.id] ?? [],
+    )
+
     await removeConto(id)
     setAccounts(prev => prev.filter(a => a.id !== id))
     setTransactions(prev => prev.filter(t => t.contoId !== id && t.contoDestinazioneId !== id))
+    transactionTagMapRef.current = Object.fromEntries(
+      Object.entries(transactionTagMapRef.current).filter(([transactionId]) => !removedTransactionIds.has(transactionId)),
+    )
+    tagsRef.current = applyTagUsageDelta(tagsRef.current, removedTagIds, -1)
+    setTransactionTagMap(transactionTagMapRef.current)
+    setTags(tagsRef.current)
   }
 
   const addTransaction = async (data: Omit<Transaction, 'id' | 'cifrato'>): Promise<void> => {
@@ -553,8 +728,16 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }
 
   const removeTransaction = async (id: string): Promise<void> => {
+    const removedTagIds = transactionTagMapRef.current[id] ?? []
+
     await removeTransazione(id)
     setTransactions(prev => prev.filter(t => t.id !== id))
+    const nextMap = { ...transactionTagMapRef.current }
+    delete nextMap[id]
+    transactionTagMapRef.current = nextMap
+    tagsRef.current = applyTagUsageDelta(tagsRef.current, removedTagIds, -1)
+    setTransactionTagMap(nextMap)
+    setTags(tagsRef.current)
   }
 
   const addCategory = async (data: Omit<Category, 'id'>): Promise<void> => {
@@ -616,50 +799,125 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setSavingsGoals(prev => prev.filter(g => g.id !== id))
   }
 
-  const checkBudgetNotifications = (updatedTransactions: Transaction[]) => {
-    const activeBudgets = getActiveBudgets(safeBudgets)
-    const currentPercentages = budgetPercentages || {}
-
-    activeBudgets.forEach(budget => {
-      const { percentage: newPercentage } = getBudgetProgress(budget, updatedTransactions)
-      const previousPercentage = currentPercentages[budget.id] || 0
-
-      const { shouldShow, level } = shouldShowBudgetNotification(budget, previousPercentage, newPercentage)
-
-      if (shouldShow && level) {
-        const title = getBudgetNotificationTitle(level)
-        const { spent, remaining } = getBudgetProgress(budget, updatedTransactions)
-
-        let message = ''
-        if (level === 'exceeded') {
-          message = `Budget "${budget.nome}" superato! Hai speso ${formatCurrency(spent)} su ${formatCurrency(budget.importoTarget)}.`
-          soundSystem.play('budget-exceeded')
-          hapticSystem.budgetExceeded()
-        } else if (level === 'critical') {
-          message = `Attenzione! Il budget "${budget.nome}" è al ${Math.round(newPercentage)}%. Rimangono ${formatCurrency(remaining)}.`
-          soundSystem.play('budget-critical')
-          hapticSystem.budgetCritical()
-        } else if (level === 'warning') {
-          message = `Il budget "${budget.nome}" ha raggiunto il ${Math.round(newPercentage)}%.`
-          soundSystem.play('budget-warning')
-          hapticSystem.budgetWarning()
-        }
-
-        if (level === 'exceeded') {
-          toast.error(title, { description: message, duration: 6000 })
-        } else if (level === 'critical') {
-          toast.warning(title, { description: message, duration: 5000 })
-        } else {
-          toast(title, { description: message, duration: 4000 })
-        }
-      }
-
-      setBudgetPercentages((current) => ({
-        ...(current || {}),
-        [budget.id]: newPercentage,
-      }))
-    })
+  const addTag = async (data: Omit<Tag, 'id' | 'usatoNVolte'>): Promise<void> => {
+    const saved = await createTagRepository(data)
+    tagsRef.current = [...tagsRef.current, saved]
+    setTags(tagsRef.current)
   }
+
+  const updateTag = async (id: string, data: Partial<Omit<Tag, 'id' | 'usatoNVolte'>>): Promise<void> => {
+    const saved = await updateTagRepository(id, data)
+    tagsRef.current = tagsRef.current.map(tag => tag.id === id ? saved : tag)
+    setTags(tagsRef.current)
+  }
+
+  const removeTag = async (id: string): Promise<void> => {
+    await removeTagRepository(id)
+    tagsRef.current = tagsRef.current.filter(tag => tag.id !== id)
+    transactionTagMapRef.current = Object.fromEntries(
+      Object.entries(transactionTagMapRef.current).map(([transactionId, tagIds]) => [
+        transactionId,
+        tagIds.filter(tagId => tagId !== id),
+      ]),
+    )
+    setTags(tagsRef.current)
+    setTransactionTagMap(transactionTagMapRef.current)
+  }
+
+  const addTagToTransaction = async (transactionId: string, tagId: string): Promise<void> => {
+    await addTagToTransactionRepository(transactionId, tagId)
+    const previousTagIds = transactionTagMapRef.current[transactionId] ?? []
+    const nextTagIds = previousTagIds.includes(tagId)
+      ? previousTagIds
+      : [...previousTagIds, tagId]
+    transactionTagMapRef.current = {
+      ...transactionTagMapRef.current,
+      [transactionId]: nextTagIds,
+    }
+    tagsRef.current = updateTagUsageCounts(tagsRef.current, previousTagIds, nextTagIds)
+    setTransactionTagMap(transactionTagMapRef.current)
+    setTags(tagsRef.current)
+  }
+
+  const removeTagFromTransaction = async (transactionId: string, tagId: string): Promise<void> => {
+    await removeTagFromTransactionRepository(transactionId, tagId)
+    const previousTagIds = transactionTagMapRef.current[transactionId] ?? []
+    const nextTagIds = previousTagIds.filter(currentTagId => currentTagId !== tagId)
+    transactionTagMapRef.current = {
+      ...transactionTagMapRef.current,
+      [transactionId]: nextTagIds,
+    }
+    tagsRef.current = updateTagUsageCounts(tagsRef.current, previousTagIds, nextTagIds)
+    setTransactionTagMap(transactionTagMapRef.current)
+    setTags(tagsRef.current)
+  }
+
+  const setTagsForTransaction = async (transactionId: string, tagIds: string[]): Promise<void> => {
+    await setTransactionTagsRepository(transactionId, tagIds)
+    const previousTagIds = transactionTagMapRef.current[transactionId] ?? []
+    const nextTagIds = [...new Set(tagIds)]
+    transactionTagMapRef.current = {
+      ...transactionTagMapRef.current,
+      [transactionId]: nextTagIds,
+    }
+    tagsRef.current = updateTagUsageCounts(tagsRef.current, previousTagIds, nextTagIds)
+    setTransactionTagMap(transactionTagMapRef.current)
+    setTags(tagsRef.current)
+  }
+
+  const showBudgetNotification = useCallback((notification: AppNotification) => {
+    const level = notification.metadata?.level
+    const title = notification.titolo
+    const message = notification.messaggio ?? ''
+
+    if (level === 'exceeded') {
+      soundSystem.play('budget-exceeded')
+      hapticSystem.budgetExceeded()
+      toast.error(title, { description: message, duration: 6000 })
+      return
+    }
+
+    if (level === 'critical') {
+      soundSystem.play('budget-critical')
+      hapticSystem.budgetCritical()
+      toast.warning(title, { description: message, duration: 5000 })
+      return
+    }
+
+    soundSystem.play('budget-warning')
+    hapticSystem.budgetWarning()
+    toast(title, { description: message, duration: 4000 })
+  }, [])
+
+  const processBudgetNotifications = useCallback(async (updatedTransactions: Transaction[]) => {
+    const createdNotifications = await notificationServiceRef.current.processBudgetNotifications({
+      budgets: safeBudgets,
+      transactions: updatedTransactions,
+    })
+
+    if (createdNotifications.length === 0) {
+      return
+    }
+
+    setNotifications((prev) => {
+      const next = [
+        ...createdNotifications,
+        ...prev.filter((notification) => {
+          if (createdNotifications.some((created) => created.id === notification.id)) {
+            return false
+          }
+
+          return !createdNotifications.some((created) => (
+            notification.entitaId === created.entitaId
+            && notification.metadata?.budgetPeriodKey === created.metadata?.budgetPeriodKey
+          ))
+        }),
+      ]
+      return next.filter((notification) => !notification.letta)
+    })
+
+    createdNotifications.forEach(showBudgetNotification)
+  }, [safeBudgets, showBudgetNotification])
 
   // --- Legacy handlers (thin wrappers, kept for DialogsOverlay compatibility) ---
 
@@ -725,7 +983,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
           ),
         )
         if (transaction.tipo === 'uscita') {
-          checkBudgetNotifications([...transactions, { ...transaction, cifrato: false, id: transaction.id ?? '' }])
+          await processBudgetNotifications([...transactions, { ...transaction, cifrato: false, id: transaction.id ?? '' }])
         }
       }
     } catch (err) {
@@ -888,72 +1146,90 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const contextValue = useMemo(() => ({
+    accounts: safeAccounts,
+    transactions: safeTransactions,
+    categories: safeCategories,
+    budgets: safeBudgets,
+    savingsGoals: safeSavingsGoals,
+    ricorrenze: safeRicorrenze,
+    tags: safeTags,
+    transactionTagMap: safeTransactionTagMap,
+    notifications: safeNotifications,
+    notificationsHydrated,
+    isLoading,
+    error,
+    isDataReady,
+    safeAccounts,
+    safeTransactions,
+    safeCategories,
+    safeBudgets,
+    safeSavingsGoals,
+    safeRicorrenze,
+    safeTags,
+    safeTransactionTagMap,
+    safeNotifications,
+    addAccount,
+    updateAccount,
+    removeAccount,
+    addTransaction,
+    updateTransaction,
+    removeTransaction,
+    addCategory,
+    updateCategory,
+    removeCategory,
+    addBudget,
+    updateBudget,
+    removeBudget,
+    addSavingsGoal,
+    updateSavingsGoal,
+    updateSavingsGoalProgress,
+    removeSavingsGoal,
+    addTag,
+    updateTag,
+    removeTag,
+    addTagToTransaction,
+    removeTagFromTransaction,
+    setTagsForTransaction,
+    refreshAll,
+    handleSaveAccount,
+    handleSaveTransaction,
+    handleSaveBudget,
+    handleSaveSavingsGoal,
+    handleDeleteConfirm,
+    handleExportCSV,
+    handleViewBudget,
+    editingTransaction,
+    setEditingTransaction,
+    showTransactionDialog,
+    setShowTransactionDialog,
+    openNewTransactionDialog,
+    openEditTransactionDialog,
+    deletingItem,
+    setDeletingItem,
+    showDeleteDialog,
+    setShowDeleteDialog,
+    editingAccount,
+    setEditingAccount,
+    showAccountDialog,
+    setShowAccountDialog,
+    showBudgetDialog,
+    setShowBudgetDialog,
+    editingBudget,
+    setEditingBudget,
+    showSavingsGoalDialog,
+    setShowSavingsGoalDialog,
+    editingSavingsGoal,
+    setEditingSavingsGoal,
+    handleAddFundsToGoal,
+    showKeyboardHelp,
+    setShowKeyboardHelp,
+  }),
+  [accounts, addAccount, addBudget, addSavingsGoal, addTag, addTagToTransaction, budgets, categories, deletingItem, editingAccount, editingBudget, editingSavingsGoal, editingTransaction, error, handleAddFundsToGoal, handleDeleteConfirm, handleExportCSV, handleSaveAccount, handleSaveBudget, handleSaveSavingsGoal, handleSaveTransaction, handleViewBudget, isDataReady, isLoading, notifications, notificationsHydrated, openEditTransactionDialog, openNewTransactionDialog, refreshAll, removeAccount, removeBudget, removeCategory, removeSavingsGoal, removeTag, removeTagFromTransaction, removeTransaction, ricorrenze, safeAccounts, safeBudgets, safeCategories, safeNotifications, safeRicorrenze, safeSavingsGoals, safeTags, safeTransactionTagMap, safeTransactions, savingsGoals, setDeletingItem, setEditingAccount, setEditingBudget, setEditingSavingsGoal, setEditingTransaction, setShowAccountDialog, setShowBudgetDialog, setShowDeleteDialog, setShowKeyboardHelp, setShowSavingsGoalDialog, setShowTransactionDialog, setTagsForTransaction, showAccountDialog, showBudgetDialog, showDeleteDialog, showKeyboardHelp, showSavingsGoalDialog, showTransactionDialog, tags, transactionTagMap, transactions, updateAccount, updateBudget, updateCategory, updateSavingsGoal, updateSavingsGoalProgress, updateTag, updateTransaction])
+
   return (
     <AppDataContext.Provider
-      value={{
-        accounts: safeAccounts,
-        transactions: safeTransactions,
-        categories: safeCategories,
-        budgets: safeBudgets,
-        savingsGoals: safeSavingsGoals,
-        isLoading,
-        error,
-        isDataReady,
-        safeAccounts,
-        safeTransactions,
-        safeCategories,
-        safeBudgets,
-        safeSavingsGoals,
-        addAccount,
-        updateAccount,
-        removeAccount,
-        addTransaction,
-        updateTransaction,
-        removeTransaction,
-        addCategory,
-        updateCategory,
-        removeCategory,
-        addBudget,
-        updateBudget,
-        removeBudget,
-        addSavingsGoal,
-        updateSavingsGoal,
-        updateSavingsGoalProgress,
-        removeSavingsGoal,
-        refreshAll,
-        handleSaveAccount,
-        handleSaveTransaction,
-        handleSaveBudget,
-        handleSaveSavingsGoal,
-        handleDeleteConfirm,
-        handleExportCSV,
-        handleViewBudget,
-        editingTransaction,
-        setEditingTransaction,
-        showTransactionDialog,
-        setShowTransactionDialog,
-        openNewTransactionDialog,
-        openEditTransactionDialog,
-        deletingItem,
-        setDeletingItem,
-        showDeleteDialog,
-        setShowDeleteDialog,
-        editingAccount,
-        setEditingAccount,
-        showAccountDialog,
-        setShowAccountDialog,
-        showBudgetDialog,
-        setShowBudgetDialog,
-        editingBudget,
-        setEditingBudget,
-        showSavingsGoalDialog,
-        setShowSavingsGoalDialog,
-        editingSavingsGoal,
-        setEditingSavingsGoal,
-        handleAddFundsToGoal,
-        showKeyboardHelp,
-        setShowKeyboardHelp,
-      }}
+      value={contextValue}
     >
       {children}
     </AppDataContext.Provider>
