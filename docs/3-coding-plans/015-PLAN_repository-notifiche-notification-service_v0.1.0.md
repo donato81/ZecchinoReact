@@ -28,16 +28,15 @@ File sorgente da creare o modificare:
 - __tests__/notifiche.repository.test.ts
 
 Fuori perimetro:
-- modificare la responsabilita di calcolo puro di src/lib/budget-alerts.ts oltre la migrazione stringhe
-- introdurre canali push o notifiche native [DA VERIFICARE]
-- formattazione UI avanzata dei valori numerici nelle notifiche
-- notifiche ricorrenza dipendenti da implementazioni successive al PLAN 013 [DA VERIFICARE]
+ - modificare la responsabilita di calcolo puro di src/lib/budget-alerts.ts oltre la migrazione stringhe
+ - introdurre canali push o notifiche native
+ - formattazione UI avanzata dei valori numerici nelle notifiche
 
 ## 3. Prerequisiti Bloccanti
 
-- PLAN 013 completato e convalidato.
-- PLAN 014 completato e convalidato.
-- Il bootstrap del provider deve poter raggiungere lo stato READY prima della hydration secondaria delle notifiche.
+ - PLAN 013 completato e convalidato.
+ - PLAN 014 completato e convalidato.
+ - Il bootstrap del provider deve poter raggiungere lo stato READY prima della hydration secondaria delle notifiche.
 
 ## 4. Architettura e Decisioni Chiave
 
@@ -58,6 +57,7 @@ Fuori perimetro:
 - Dipende da: nessuno
 - Metrica di successo: npx tsc --noEmit compila DbNotification senza errori di tipo.
 - Note operative: mantenere il naming in snake_case e la separazione dei tipi Db*.
+ - Note operative: DbNotification deve mappare tutti i campi della tabella notifiche dello schema reale Supabase, inclusi canale (valori: inapp, email, push) e schedulata_per (TIMESTAMPTZ nullable).
 
 ### T2
 - Azione: Aggiungere NotificationType, AppNotification, notifications in AppState e flag notificationsHydrated.
@@ -86,6 +86,7 @@ Fuori perimetro:
 - Dipende da: nessuno
 - Metrica di successo: npx tsc --noEmit non segnala chiavi mancanti per notifiche budget e lifecycle.
 - Note operative: includere le stringhe migrate da budget-alerts.ts e quelle necessarie al nuovo service.
+- Note operative: le chiavi da definire in src/locales/it.ts includono come minimo: errors.notifiche.loadFailed, errors.notifiche.createFailed, errors.notifiche.markReadFailed, errors.notifiche.markAllReadFailed, errors.notifiche.removeFailed, errors.notifiche.cleanupFailed, confirm.notifiche.marked, confirm.notifiche.allMarked, confirm.notifiche.removed, notifiche.budget.soglia, notifiche.budget.superato, notifiche.budget.titolo. I nomi esatti devono rispettare il namespace i18n già usato nel progetto in src/locales/it.ts.
 
 ### T6
 - Azione: Creare il repository notifiche con query, mark-read e cleanup expiration.

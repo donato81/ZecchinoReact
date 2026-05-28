@@ -69,6 +69,7 @@ autore: Agent-Orchestrator
 - Dipende da: T1, T2, T3
 - Metrica di successo: npx jest __tests__/ricorrenze.repository.test.ts --runInBand termina con exit code 0 quando il repository e implementato.
 - Task Status: [ ] TODO
+- Note operative: la suite deve coprire almeno 8 scenari unitari sul repository e almeno 2 scenari di integrazione su AppDataContext per uniformità con i moduli successivi.
 
 ## 4. Note Operative
 

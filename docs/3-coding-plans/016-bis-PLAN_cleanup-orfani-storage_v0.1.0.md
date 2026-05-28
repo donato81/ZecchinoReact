@@ -102,12 +102,14 @@ Fuori perimetro:
 
 ## 7. Gate di Chiusura
 
-- G-016-bis-1 | Verifica: service e trigger compilano senza errori. | Comando: npx tsc --noEmit | Stato iniziale: OPEN
-- G-016-bis-2 | Verifica: la suite architetturale del cleanup copre tutti gli 11 scenari obbligatori. | Comando: npx jest __tests__/storage-cleanup-service.test.ts --runInBand | Stato iniziale: OPEN
-- G-016-bis-3 | Verifica: login, logout e operazioni utente non vengono bloccati dal cleanup. | Comando: verifica manuale su src/context/AuthContext.tsx e src/context/AppDataContext.tsx | Stato iniziale: OPEN
-- G-016-bis-4 | Verifica: guardia concorrente, throttle globale e safety window sono applicati correttamente, con esenzione del Trigger 1. | Comando: verifica manuale su src/lib/storage-cleanup-service.ts | Stato iniziale: OPEN
-- G-016-bis-5 | Verifica: il cleanup opera solo su path che iniziano per {user_id}/ e non elimina mai record DB in assenza del file. | Comando: verifica manuale su src/lib/storage-cleanup-service.ts | Stato iniziale: OPEN
-- G-016-bis-6 | Verifica: il service emette solo console.warn tecnico e non introduce stringhe UI. | Comando: verifica manuale su src/lib/storage-cleanup-service.ts | Stato iniziale: OPEN
+G-016-bis-1 | Verifica: service e trigger compilano senza errori. | Comando: npx tsc --noEmit | Stato iniziale: OPEN
+G-016-bis-2 | Verifica: la suite architetturale del cleanup copre tutti gli 11 scenari obbligatori. | Comando: npx jest __tests__/storage-cleanup-service.test.ts --runInBand | Stato iniziale: OPEN
+G-016-bis-3a | Verifica: login e logout non vengono bloccati dal cleanup. | Comando: verifica manuale su src/context/AuthContext.tsx | Stato iniziale: OPEN
+G-016-bis-3b | Verifica: operazioni utente (es. removeTransaction) non vengono bloccate dal cleanup. | Comando: verifica manuale su src/context/AppDataContext.tsx | Stato iniziale: OPEN
+G-016-bis-4 | Verifica: guardia concorrente, throttle globale e safety window sono applicati correttamente, con esenzione del Trigger 1. | Comando: verifica manuale su src/lib/storage-cleanup-service.ts | Stato iniziale: OPEN
+G-016-bis-5 | Verifica: il cleanup opera solo su path che iniziano per {user_id}/ e non elimina mai record DB in assenza del file. | Comando: verifica manuale su src/lib/storage-cleanup-service.ts | Stato iniziale: OPEN
+G-016-bis-6 | Verifica: il service emette solo console.warn tecnico e non introduce stringhe UI. | Comando: verifica manuale su src/lib/storage-cleanup-service.ts | Stato iniziale: OPEN
+G-016-bis-7 | Verifica: CleanupResult riflette scanned, orphanFound, deleted e failed e viene loggato correttamente. | Comando: npx jest __tests__/storage-cleanup-service.test.ts --runInBand | Stato iniziale: OPEN
 
 ## 8. Rollback
 

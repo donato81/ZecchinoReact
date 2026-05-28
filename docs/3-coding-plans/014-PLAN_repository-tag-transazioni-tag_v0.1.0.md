@@ -33,12 +33,13 @@ Fuori perimetro:
 - eseguire DELETE diretto in transazioni-tag.removeTag
 - invalidare l'intera cache dopo modifica di un'associazione tag-transazione
 - UI dedicate per CRUD tag o selezione tag nelle schermate [DA VERIFICARE]
-- migrazioni SQL o implementazione delle RPC PostgreSQL [DA VERIFICARE]
+ - migrazioni SQL o implementazione delle RPC PostgreSQL: PRECONDIZIONE BLOCCANTE — i file SQL per add_tag_to_transaction, set_transaction_tags e remove_tag_from_transaction devono essere creati in docs/6-sql e applicati su Supabase prima di avviare la codifica del T6.
 
 ## 3. Prerequisiti Bloccanti
 
-- PLAN 013 completato e convalidato, come dipendenza dichiarata dal design 014.
-- Le funzioni PostgreSQL add_tag_to_transaction, set_transaction_tags e remove_tag_from_transaction devono esistere ed essere idempotenti.
+ - PLAN 013 completato e convalidato, come dipendenza dichiarata dal design 014.
+ - Verifica infrastrutturale obbligatoria: i file SQL per le tre RPC (add_tag_to_transaction, set_transaction_tags, remove_tag_from_transaction) devono esistere in docs/6-sql ed essere stati applicati su Supabase prima che il T6 possa essere avviato.
+ - Le funzioni PostgreSQL add_tag_to_transaction, set_transaction_tags e remove_tag_from_transaction devono esistere ed essere idempotenti.
 
 ## 4. Architettura e Decisioni Chiave
 
@@ -107,6 +108,7 @@ Fuori perimetro:
 - Dipende da: T2, T4, T5, T6, T7
 - Metrica di successo: npx tsc --noEmit e i test del context confermano che tags e transactionTagMap sono caricati, azzerati al logout e serializzati nella cache.
 - Note operative: invalidare selettivamente transazioni_tag quando cambiano le associazioni.
+- Note operative aggiuntive: transactionTagMap deve essere incluso nella pipeline writeCache per garantire la simmetria con readCachedDomainSnapshotPure. La serializzazione nella cache è obbligatoria, non opzionale.
 
 ### T9
 - Azione: Creare la suite di test del repository tag.

@@ -47,6 +47,7 @@ autore: Agent-Orchestrator
 - Dipende da: T1
 - Metrica di successo: i test dimostrano che un file con firme JPEG, PNG e PDF valide viene accettato sul reader Windows.
 - Task Status: [ ] TODO
+ - Note operative: il bridge nativo Windows è escluso da questo piano; preferire implementazione JS-first senza dipendenze native.
 
 ### T4
 - Azione: Integrare la validazione magic bytes in validateAttachmentFile rispettando l'ordine MIME whitelist, estensione whitelist e controllo firme.
@@ -68,7 +69,7 @@ autore: Agent-Orchestrator
 - L'estensione determina la firma attesa; il MIME e controllo secondario.
 - Se readFileHeader non e disponibile o fallisce, il comportamento deve essere fail-closed e throw-safe.
 - I file con firma parziale non sono mai validi.
-- iOS, HEIC/WEBP e bridge nativo Windows restano fuori dal perimetro.
+- iOS, HEIC/WEBP e, in particolare, il bridge nativo Windows sono esclusi da questo piano; l'implementazione Windows deve essere JS-first.
 
 ## 5. Log di Validazione
 
@@ -81,7 +82,7 @@ autore: Agent-Orchestrator
 - G-016-ter-2 | Verifica: la suite magic bytes copre tutti i 13 scenari obbligatori. | Comando: npx jest __tests__/magic-bytes-validation.test.ts --runInBand | Gate Status: [ ] OPEN
 - G-016-ter-3 | Verifica: validateAttachmentFile rispetta l'ordine MIME whitelist, estensione whitelist, magic bytes. | Comando: verifica manuale su src/lib/supabase/storage.ts | Gate Status: [ ] OPEN
 - G-016-ter-4 | Verifica: le piattaforme non supportate falliscono in modo chiuso e throw-safe. | Comando: verifica manuale su src/lib/file-system/magic-bytes-reader.ts | Gate Status: [ ] OPEN
-- G-016-ter-5 | Verifica: supporto iOS, HEIC/WEBP e bridge nativo Windows restano fuori perimetro. | Comando: verifica manuale su src/lib/file-system/ e src/lib/supabase/storage.ts | Gate Status: [ ] OPEN
+- G-016-ter-5 | Verifica: supporto iOS, HEIC/WEBP e bridge nativo Windows sono esclusi da questo piano. | Comando: verifica manuale su src/lib/file-system/ e src/lib/supabase/storage.ts | Gate Status: [ ] OPEN
 
 ## 7. Riferimenti
 

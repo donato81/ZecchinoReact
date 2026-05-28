@@ -13,6 +13,7 @@ autore: Agent-Orchestrator
 ## 1. Stato e Gate Bloccante
 
 - Gate bloccante: PLAN 013 completato e convalidato.
+- Verifica infrastrutturale obbligatoria: prima del T6 verificare che i file SQL per add_tag_to_transaction, set_transaction_tags e remove_tag_from_transaction esistano in docs/6-sql e siano stati applicati su Supabase.
 - Stato corrente: PENDING
 
 ## 2. Stato Task (panoramica)
@@ -87,6 +88,7 @@ autore: Agent-Orchestrator
 - Dipende da: T2, T4, T5, T6, T7
 - Metrica di successo: npx tsc --noEmit e i test del context confermano che tags e transactionTagMap sono caricati, azzerati al logout e serializzati nella cache.
 - Task Status: [ ] TODO
+- Note operative aggiuntive: transactionTagMap deve essere incluso nella pipeline writeCache per garantire la simmetria con readCachedDomainSnapshotPure.
 
 ### T9
 - Azione: Creare la suite di test del repository tag.

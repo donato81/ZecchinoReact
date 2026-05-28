@@ -26,7 +26,7 @@ File sorgente da creare o modificare:
 Fuori perimetro:
 - supporto iOS
 - supporto firme HEIC e WEBP
-- bridge nativo Windows se non strettamente necessario
+- il bridge nativo Windows è escluso da questo piano
 - antivirus o scansioni oltre l'hardening euristico contro spoofing banale
 
 ## 3. Prerequisiti Bloccanti
@@ -69,7 +69,7 @@ Fuori perimetro:
 - File target: src/lib/file-system/magic-bytes-reader.windows.ts
 - Dipende da: T1
 - Metrica di successo: i test dimostrano che un file con firme JPEG, PNG e PDF valide viene accettato sul reader Windows.
-- Note operative: il bridge nativo resta fuori perimetro se non necessario.
+- Note operative: il bridge nativo Windows è escluso da questo piano; l'implementazione Windows deve essere JS-first senza dipendenze native.
 
 ### T4
 - Azione: Integrare la validazione magic bytes in validateAttachmentFile rispettando l'ordine MIME whitelist, estensione whitelist e controllo firme.
@@ -107,7 +107,7 @@ Fuori perimetro:
 - G-016-ter-2 | Verifica: la suite magic bytes copre tutti i 13 scenari obbligatori. | Comando: npx jest __tests__/magic-bytes-validation.test.ts --runInBand | Stato iniziale: OPEN
 - G-016-ter-3 | Verifica: validateAttachmentFile rispetta l'ordine MIME whitelist, estensione whitelist, magic bytes. | Comando: verifica manuale su src/lib/supabase/storage.ts | Stato iniziale: OPEN
 - G-016-ter-4 | Verifica: le piattaforme non supportate falliscono in modo chiuso e throw-safe. | Comando: verifica manuale su src/lib/file-system/magic-bytes-reader.ts | Stato iniziale: OPEN
-- G-016-ter-5 | Verifica: supporto iOS, HEIC/WEBP e bridge nativo Windows restano fuori perimetro. | Comando: verifica manuale su src/lib/file-system/ e src/lib/supabase/storage.ts | Stato iniziale: OPEN
+G-016-ter-5 | Verifica: supporto iOS, HEIC/WEBP e bridge nativo Windows sono esclusi da questo piano. | Comando: verifica manuale su src/lib/file-system/ e src/lib/supabase/storage.ts | Stato iniziale: OPEN
 
 ## 8. Rollback
 

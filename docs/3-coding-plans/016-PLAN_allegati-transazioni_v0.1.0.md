@@ -18,7 +18,7 @@ Introdurre il dominio allegati transazioni con repository e storage Supabase coo
 
 File sorgente da creare o modificare:
 - src/lib/supabase/types.ts
-- src/lib/types.ts [DA VERIFICARE]
+- src/lib/types.ts
 - src/lib/supabase/storage.ts
 - src/lib/supabase/repositories/allegati.ts
 - src/locales/it.ts
@@ -60,10 +60,11 @@ Fuori perimetro:
 - Dipende da: nessuno
 - Metrica di successo: npx tsc --noEmit compila DbAllegato senza errori di tipo.
 - Note operative: mantenere DbAllegato interno al layer src/lib/supabase/.
+- Note operative: DbAllegato deve mappare tutti i campi della tabella allegati_transazioni dello schema reale Supabase, incluso miniatura_path (TEXT nullable). La logica di generazione delle miniature è fuori perimetro, ma il campo deve essere presente nel tipo DbAllegato per corrispondenza con lo schema database.
 
 ### T2
 - Azione: Aggiungere i tipi client Allegato, AttachmentUploadResult e AttachmentValidationError. Percorso client types da confermare con convenzione esistente.
-- File target: src/lib/types.ts [DA VERIFICARE]
+- File target: src/lib/types.ts
 - Dipende da: T1
 - Metrica di successo: npx tsc --noEmit accetta i nuovi tipi client senza violare la separazione tra layer DB e client.
 - Note operative: il design definisce i tipi ma non esplicita il path client; usare la convenzione progetto e confermarla in implementazione.
@@ -80,14 +81,14 @@ Fuori perimetro:
 - File target: src/lib/supabase/repositories/allegati.ts
 - Dipende da: T1, T2, T3
 - Metrica di successo: i test repository dimostrano rollback best-effort su DB fail e ordine di cancellazione Storage prima di DB.
-- Note operative: la superficie pubblica completa del repository oltre getAll richiede conferma in implementazione [DA VERIFICARE].
+- Note operative: la superficie pubblica del repository allegati espone obbligatoriamente: getAll(transazione_id: string), create(payload), getById(id: string), remove(id: string). Nessun getAll globale senza transazione_id è consentito come da Decisione 15.
 
 ### T5
 - Azione: Aggiungere le 12 chiavi di localizzazione obbligatorie per allegati transazioni.
 - File target: src/locales/it.ts
 - Dipende da: nessuno
 - Metrica di successo: npx tsc --noEmit non segnala chiavi mancanti per validazioni, upload, delete e accesso allegati.
-- Note operative: il design impone 12 chiavi ma non le enumera nel testo disponibile; i nomi esatti vanno confermati in implementazione [DA VERIFICARE].
+- Note operative: le 12 chiavi obbligatorie da definire in src/locales/it.ts sono: errors.allegati.uploadFailed, errors.allegati.deleteFailed, errors.allegati.loadFailed, errors.allegati.accessFailed, errors.allegati.sizeLimitExceeded, errors.allegati.mimeNotAllowed, errors.allegati.mimeExtensionMismatch, errors.allegati.fileNameInvalid, confirm.allegati.uploaded, confirm.allegati.deleted, allegati.upload.inProgress, allegati.upload.signedUrlFailed. I nomi devono rispettare il namespace i18n del progetto.
 
 ### T6
 - Azione: Creare la suite di test del repository allegati sui flussi cross-system e isolamento utente.

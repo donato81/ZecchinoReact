@@ -35,16 +35,17 @@ autore: Agent-Orchestrator
 - Dipende da: nessuno
 - Metrica di successo: npx tsc --noEmit compila DbAllegato senza errori di tipo.
 - Task Status: [ ] TODO
+- Note operative: DbAllegato deve mappare tutti i campi della tabella allegati_transazioni, incluso miniatura_path (TEXT nullable). Il campo deve essere presente anche se la generazione della miniatura è out-of-scope.
 
 ### T2
-- Azione: Aggiungere i tipi client Allegato, AttachmentUploadResult e AttachmentValidationError. Percorso client types da confermare con convenzione esistente.
-- File target: src/lib/types.ts [DA VERIFICARE]
+- Azione: Aggiungere i tipi client Allegato, AttachmentUploadResult e AttachmentValidationError.
+- File target: src/lib/types.ts
 - Dipende da: T1
 - Metrica di successo: npx tsc --noEmit accetta i nuovi tipi client senza violare la separazione tra layer DB e client.
 - Task Status: [ ] TODO
 
 ### T3
-- Azione: Creare il modulo storage con validateAttachmentFile, sanitizeFilename, uploadAttachment, deleteAttachment e getAttachmentSignedUrl nel perimetro API consentito.
+- Azione: Creare il modulo storage con validateAttachmentFile, sanitizeFilename, uploadAttachment, deleteAttachment e getAttachmentSignedUrl.
 - File target: src/lib/supabase/storage.ts
 - Dipende da: T1, T2
 - Metrica di successo: i test storage verificano size limit 10 MB, whitelist MIME, sanitizzazione e path {user_id}/{transazione_id}/{uuid}-{safe_filename}.
@@ -56,6 +57,7 @@ autore: Agent-Orchestrator
 - Dipende da: T1, T2, T3
 - Metrica di successo: i test repository dimostrano rollback best-effort su DB fail e ordine di cancellazione Storage prima di DB.
 - Task Status: [ ] TODO
+- Note operative: superficie pubblica obbligatoria: getAll(transazione_id: string), create(payload), getById(id: string), remove(id: string). Non esporre getAll globale.
 
 ### T5
 - Azione: Aggiungere le 12 chiavi di localizzazione obbligatorie per allegati transazioni.
@@ -63,6 +65,7 @@ autore: Agent-Orchestrator
 - Dipende da: nessuno
 - Metrica di successo: npx tsc --noEmit non segnala chiavi mancanti per validazioni, upload, delete e accesso allegati.
 - Task Status: [ ] TODO
+- Note operative: definire le chiavi: errors.allegati.uploadFailed, errors.allegati.deleteFailed, errors.allegati.loadFailed, errors.allegati.accessFailed, errors.allegati.sizeLimitExceeded, errors.allegati.mimeNotAllowed, errors.allegati.mimeExtensionMismatch, errors.allegati.fileNameInvalid, confirm.allegati.uploaded, confirm.allegati.deleted, allegati.upload.inProgress, allegati.upload.signedUrlFailed.
 
 ### T6
 - Azione: Creare la suite di test del repository allegati sui flussi cross-system e isolamento utente.
