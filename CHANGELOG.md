@@ -33,6 +33,23 @@
   - `docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md`: rinumerata la migrazione notifiche a `P55`; aggiunta la motivazione architetturale per l'assenza di `updated_at` e la specifica di fallback per `metadata` assenti o parziali.
 - [DATA 2026-05-29] — DESIGN 017, 018, 019 — Correzioni chirurgiche pre-revisione: risolte anomalie di allineamento inter-documento, aggiunte specifiche mancanti su roundCurrency, extractDatePart, deduplicazione notifiche, gestione edge case. Stato: REVIEWED PENDING — in attesa di approvazione finale.
 
+### [2026-05-29] — Correzioni chirurgiche applicate (PLAN 017, 018, 019)
+
+- PLAN 017 (`docs/3-coding-plans/017-PLAN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`):
+  - Dichiarata proprietà delle funzioni `roundCurrency` ed `extractDatePart` in `src/lib/helpers.ts` come introdotte da PLAN 017.
+  - Aggiunto scenario di test obbligatorio per la non-persistenza delle simulazioni temporanee.
+
+- PLAN 018 (`docs/3-coding-plans/018-PLAN_confronto-mese-su-mese-categoria_v0.1.0.md`):
+  - Risolto l'errore numerico: la suite di test ora richiede 12 scenari obbligatori (sostituzione di 17 → 12).
+  - Chiarita la provenienza di `extractDatePart`: ora dichiarata come introdotta in PLAN 017 e non ridefinibile in 018.
+  - Aggiornato il dodicesimo scenario di test: controllo performance e stabilita per dataset di 1000 righe (≤100ms).
+
+- PLAN 019 (`docs/3-coding-plans/019-PLAN_notifiche-budget-orchestrazione_v0.1.0.md`):
+  - Inserito meccanismo di deduplicazione runtime per la sessione attiva (registro indicizzato per tipo_notifica + id_budget + YYYY-MM).
+  - Confermato che le soglie sono esposte come costanti nominate e documentata la politica di scarto silenzioso per budget mancanti.
+
+Note: le modifiche documentali sono presenti in workspace. I commit su `main` non sono stati eseguiti da questo agente (policy Agent-Git). Eseguire i commit manualmente con i comandi consigliati nel report diagnostico.
+
 ### Aggiunto — Repository Ricorrenze
 - Introdotti `DbRecurrence`, `RecurrenceType`, `Recurrence` e il repository Supabase `src/lib/supabase/repositories/ricorrenze.ts` con `getAll`, `getById`, `getDue`, `create`, `update` e `deactivate`.
 - Integrate le ricorrenze nel bootstrap dati, nel reset logout, nella cache offline e nel context value di `AppDataContext`.

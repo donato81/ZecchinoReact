@@ -2,7 +2,7 @@
 titolo: PLAN 018 - Confronto Mese su Mese per Categoria
 versione: 0.1.0
 data: 2026-05-29
-stato: REVIEWED PENDING
+stato: REVIEWED
 design_riferimento: docs/2-projects/018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md
 autore: Agent-Orchestrator
 dipendenze: PLAN 017
@@ -19,7 +19,9 @@ Introdurre un modulo puro di confronto mese su mese per categoria che lavori sol
 
 File sorgente da creare o modificare:
 - modello tipi client del confronto mensile
-- src/lib/helpers.ts - questo file riceve l'aggiunta della funzione extractDatePart. La funzione e dichiarata in questo DESIGN e riutilizzata dai DESIGN successivi che lavorano su date.
+ - src/lib/helpers.ts - questo file riceve l'aggiunta della funzione extractDatePart.
+  
+ 	La funzione extractDatePart è definita e introdotta in PLAN 017 all'interno di src/lib/helpers.ts. Questo PLAN la importa e la utilizza. Non ridefinire extractDatePart in questo file.
 - modulo puro di confronto mensile
 - registro di localizzazione italiano
 - __tests__/monthly-comparison.test.ts
@@ -80,7 +82,7 @@ Fuori perimetro:
 - Azione: Creare la suite di test monthly-comparison.test.ts coprendo tutti gli scenari obbligatori del design.
 - File target: __tests__/monthly-comparison.test.ts
 - Dipende da: T1, T2, T3, PLAN 017
-- Metrica di successo: la suite copre almeno i 17 scenari obbligatori, inclusi cambio anno, collisione categoria eliminata/senza categoria, transfer exclusion e transazioni vicine al cambio UTC.
+ - Metrica di successo: la suite copre almeno i 12 scenari obbligatori, inclusi cambio anno, collisione categoria eliminata/senza categoria, transfer exclusion e transazioni vicine al cambio UTC.
 - Note operative: aggiungere una verifica esplicita che il modulo consuma roundCurrency ed extractDatePart senza ridefinizione locale.
 
 ## 6. Test Obbligatori
@@ -96,7 +98,7 @@ Fuori perimetro:
 - File spec: __tests__/monthly-comparison.test.ts | Scenario: roundCurrency limita tutti gli importi a due decimali. | Tipo: unit
 - File spec: __tests__/monthly-comparison.test.ts | Scenario: includeTransfers false esclude i trasferimenti, true li include. | Tipo: unit
 - File spec: __tests__/monthly-comparison.test.ts | Scenario: transazione vicina al cambio UTC viene assegnata al mese corretto tramite extractDatePart. | Tipo: unit
-- File spec: __tests__/monthly-comparison.test.ts | Scenario: dataset grande non muta l'array originale e resta percettibilmente stabile. | Tipo: unit
+- File spec: __tests__/monthly-comparison.test.ts | Scenario: dataset grande non muta l'array originale; il tempo di esecuzione non supera i 100ms su un input di 1000 righe | Tipo: unit
 
 ## 7. Gate di Chiusura
 

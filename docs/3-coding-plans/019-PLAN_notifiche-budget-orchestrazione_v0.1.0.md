@@ -2,7 +2,7 @@
 titolo: PLAN 019 - Notifiche Budget e Orchestrazione
 versione: 0.1.0
 data: 2026-05-29
-stato: REVIEWED PENDING
+stato: REVIEWED
 design_riferimento: docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md
 autore: Agent-Orchestrator
 dipendenze: PLAN 015, PLAN 017
@@ -47,6 +47,20 @@ Fuori perimetro:
 - Decisione 1 - AppDataContext conserva solo invocazione e hydration secondaria. Conseguenza pratica: la logica di orchestrazione budget esce definitivamente dal context.
 - Decisione 2 - Le soglie warning e critical vivono in costanti nominate. Conseguenza pratica: nessun task puo introdurre letterali numerici sparsi nel service o nei test; BUDGET_ALERT_THRESHOLD_WARNING [SOGLIA CONFIGURABILE - valore default: 75% - definire come costante nominata in src/lib/budget-notification-config.ts o equivalente. Non hardcodare nel corpo della funzione.] e BUDGET_ALERT_THRESHOLD_CRITICAL [SOGLIA CONFIGURABILE - valore default: 90% - definire come costante nominata in src/lib/budget-notification-config.ts o equivalente. Non hardcodare nel corpo della funzione.] sono l'unico punto ammesso di definizione.
 - Decisione 3 - La deduplicazione e un blocco dedicato a due livelli. Conseguenza pratica: runtime state e repository devono cooperare e avere test separati.
+  
+	Deduplicazione notifiche:
+	il sistema deve tenere in memoria locale,
+	per la durata della sessione attiva,
+	un registro degli eventi di notifica già emessi.
+	Il registro è indicizzato per tipo di notifica
+	e identificatore del budget o della categoria.
+	Prima di emettere una notifica, l'orchestratore
+	verifica se un evento identico è già presente
+	nel registro della sessione corrente.
+	Se presente, la notifica non viene emessa nuovamente.
+	Il registro si azzera alla chiusura dell'app.
+	Questo meccanismo vale per le notifiche di soglia
+	budget. Non si applica alle notifiche di errore.
 - Decisione 4 - budgetPeriodKey e una chiave mensile persistita localmente. Conseguenza pratica: il service deve invalidare il mese precedente e scartare duplicati locali.
 - Decisione 5 - Metadata obbligatori e fallback robusto. Conseguenza pratica: renderer e orchestratore non devono crashare se metadata e null o parziale.
 - Decisione 6 - Cleanup solo in READY. Conseguenza pratica: removeExpired e cleanupReadExpiredBefore non possono partire durante HYDRATING o CACHE-READY.

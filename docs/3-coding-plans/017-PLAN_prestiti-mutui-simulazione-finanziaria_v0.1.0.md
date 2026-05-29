@@ -2,7 +2,7 @@
 titolo: PLAN 017 - Prestiti, Mutui e Simulazione Finanziaria
 versione: 0.1.0
 data: 2026-05-29
-stato: REVIEWED PENDING
+stato: REVIEWED
 design_riferimento: docs/2-projects/017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md
 autore: Agent-Orchestrator
 dipendenze: nessuna
@@ -20,6 +20,8 @@ File sorgente da creare o modificare:
 - modello tipi client del dominio prestiti
 - modello tipi Supabase del dominio prestiti
 - src/lib/helpers.ts - questo file riceve l'aggiunta della funzione roundCurrency. DESIGN 017 e il documento proprietario di questa funzione. I DESIGN 018 e futuri la riutilizzeranno senza ridefinirla.
+  
+	PLAN 017 è il documento proprietario delle funzioni roundCurrency ed extractDatePart. Entrambe vengono introdotte in src/lib/helpers.ts da questo PLAN. I PLAN 018, 019 e successivi le riutilizzano senza ridefinirle.
 - motore di simulazione finanziaria puro
 - repository prestiti
 - repository rimborsi prestiti
@@ -152,6 +154,7 @@ Fuori perimetro:
 - File spec: __tests__/prestiti-rimborsi.repository.test.ts | Scenario: rollback RPC su errore senza persistenza parziale. | Tipo: integration
 - File spec: __tests__/AppDataContext.spec.ts | Scenario: una simulazione locale non salvata non genera alcuna write Supabase. | Tipo: integration
 - File spec: __tests__/AppDataContext.spec.ts | Scenario: una simulazione temporanea creata nello stato locale React non viene mai scritta nel database e una query diretta a Supabase conferma che nessun record con flag di simulazione attivo e stato inserito nelle tabelle prestiti o rimborsi dopo il tempo di attesa previsto. | Tipo: integration
+- Scenario aggiuntivo — Non-persistenza simulazioni: verificare che l'esecuzione del flusso di simulazione temporanea non produca alcuna scrittura nel database. Il test deve chiamare il simulatore con parametri validi e poi interrogare le tabelle prestiti e transazioni verificando che il conteggio dei record non sia aumentato rispetto allo stato iniziale.
 
 ## 7. Gate di Chiusura
 
