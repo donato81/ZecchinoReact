@@ -6,6 +6,7 @@ data: "2026-05-28"
 stato: DRAFT
 sorgente:
   - docs/2-projects/015-DESIGN_repository-notifiche-notification-service_v0.1.0.md
+  - "docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md (nota: i dati aggregati prodotti da questo motore di confronto possono essere consumati dal motore notifiche definito in DESIGN 019)"
   - src/lib/supabase/repositories/budget.ts
   - src/lib/supabase/repositories/transazioni.ts
   - src/lib/types.ts
@@ -24,7 +25,7 @@ perimetro: "Modulo puro di confronto mese su mese per categoria costruito esclus
 
 Questo documento definisce il modulo che risponde alla domanda: quanto è cambiata la spesa o l'entrata per categoria tra due mesi arbitrari già presenti nei dati caricati in memoria. La motivazione architetturale è isolare un motore puro e deterministico, separato da AppDataContext e da qualsiasi repository Supabase, così da renderlo testabile in isolamento e riusabile da dashboard, analisi e notifiche future.
 
-La lettura di src/lib/helpers.ts conferma che esistono già formatCurrency e getTransactionsInPeriod, ma non esistono roundCurrency ed extractDatePart. Il design formalizza quindi un'estensione del layer helpers per i calcoli monetari centralizzati e per il filtraggio date timezone-safe.
+La lettura di src/lib/helpers.ts conferma che esistono già formatCurrency e getTransactionsInPeriod; inoltre extractDatePart appartiene a src/lib/helpers.ts ed è introdotta da DESIGN 017, mentre roundCurrency non esiste ancora. DESIGN 018 formalizza quindi un'estensione del layer helpers per i calcoli monetari centralizzati e consuma extractDatePart per il filtraggio date timezone-safe senza ridefinirla.
 
 ## Sezione 3 — Perimetro
 
@@ -61,7 +62,7 @@ Testo: prima si selezionano le transazioni del tipo richiesto, uscita o entrata,
 Motivazione: il repository transazioni non impone segno uniforme lato dominio. Applicare il valore assoluto solo dopo il filtro mantiene coerente la lettura economica del dato senza mescolare tipi diversi.
 
 ### Decisione 4 — Filtro mese timezone-safe
-Testo: il filtraggio per mese è sicuro rispetto ai fusi orari. È vietato usare new Date(stringa).getMonth() senza normalizzazione. Il modulo lavora sempre sui primi dieci caratteri della stringa data nel formato YYYY-MM-DD tramite extractDatePart.
+Testo: il filtraggio per mese è sicuro rispetto ai fusi orari. È vietato usare new Date(stringa).getMonth() senza normalizzazione. Il modulo lavora sempre sui primi dieci caratteri della stringa data nel formato YYYY-MM-DD tramite extractDatePart. Nota: extractDatePart appartiene a src/lib/helpers.ts, è introdotta da DESIGN 017 e DESIGN 018 la consuma senza ridefinirla.
 
 Motivazione: src/lib/helpers.ts usa ancora new Date nei filtri periodali. Il confronto mensile deve evitare slittamenti UTC e classificazioni errate a cavallo di mezzanotte.
 
@@ -99,6 +100,11 @@ Motivazione: il briefing richiede compatibilità in avanti senza aggiungere comp
 Testo: le categorie con valore zero in entrambi i mesi non compaiono nel risultato per impostazione predefinita. L'opzione excludeZeroRows, con default true, governa questo comportamento.
 
 Motivazione: le righe prive di variazione e prive di importi utili aumentano rumore visivo e computazionale. L'opzione conserva comunque la possibilità di debugging o analisi completa.
+
+### Decisione 12 — Delta percentuale nullo senza base storica comparabile
+Testo: se importoPeriodoBase è zero o assente, differenzaPercentuale deve essere null. Il motore non deve mai restituire Infinity, -Infinity, NaN o altri valori non finiti. La localizzazione e i consumer UI gestiscono null con testo esplicativo, ad esempio Nessun dato storico comparabile.
+
+Motivazione: senza una base storica diversa da zero non esiste una percentuale significativa. Rendere questo caso esplicito produce un contratto stabile per dashboard, analisi e motori downstream, evitando ambiguità o rendering numerici invalidi.
 
 ## Sezione 5 — Invariante: nessuna stringa hardcoded
 
@@ -145,7 +151,7 @@ Funzioni da creare in src/lib/monthly-comparison.ts:
 Estensioni a src/lib/helpers.ts:
 
 - roundCurrency
-- extractDatePart che restituisce i primi dieci caratteri della stringa data
+- extractDatePart già presente in src/lib/helpers.ts, introdotta da DESIGN 017 e consumata da DESIGN 018 senza ridefinizione; restituisce i primi dieci caratteri della stringa data
 
 ## Sezione 7 — Schema database
 
@@ -160,7 +166,8 @@ File da creare:
 
 File da modificare:
 
-- src/lib/helpers.ts — aggiunta di roundCurrency e extractDatePart.
+- src/lib/helpers.ts — aggiunta di roundCurrency.
+- Nota esplicita: extractDatePart appartiene a src/lib/helpers.ts, è introdotta da DESIGN 017 e DESIGN 018 la consuma senza ridefinirla.
 - src/lib/types.ts — aggiunta di MonthlyComparisonRow, MonthlyComparisonOptions e TendenzaComparazione.
 - src/locales/it.ts — aggiunta di chiavi per mese corrente, mese precedente, variazione, nuova categoria, categoria assente, nessuna transazione in questo periodo, aumento, riduzione, stabile, confronta con, seleziona mese, senza categoria e categoria eliminata.
 
@@ -172,7 +179,7 @@ File da modificare:
 4. Categoria solo nel mese base: isScomparsa true e differenzaPercentuale pari a -100.
 5. Categoria solo nel mese di confronto: isNuova true e differenzaPercentuale pari a null.
 6. Categoria identica nei due mesi: tendenza stabile e differenzaAssoluta pari a zero.
-7. Caso zero verso zero: differenzaPercentuale pari a 0, tendenza stabile, valore non null e non NaN.
+7. Caso zero verso zero con excludeZeroRows false: differenzaPercentuale pari a null, tendenza stabile e nessun valore non finito restituito.
 8. Cambio anno: dicembre e gennaio di anni diversi non vengono mescolati.
 9. Categoria eliminata: categoriaId conservato, fallback categoria eliminata applicato senza errori.
 10. Ordinamento: righe ordinate per valore assoluto della differenza in ordine decrescente.
@@ -186,11 +193,12 @@ File da modificare:
 
 Tabella ufficiale dei casi percentuali:
 
-- Caso 1: base zero, confronto zero. differenzaPercentuale uguale a 0, tendenza stabile, isNuova false, isScomparsa false.
-- Caso 2: base zero, confronto maggiore di zero. differenzaPercentuale uguale a null, tendenza aumento, isNuova true, isScomparsa false.
+- Caso 1: base zero o assente, confronto zero. differenzaPercentuale uguale a null, tendenza stabile, isNuova false, isScomparsa false.
+- Caso 2: base zero o assente, confronto maggiore di zero. differenzaPercentuale uguale a null, tendenza aumento, isNuova true, isScomparsa false.
 - Caso 3: base maggiore di zero, confronto zero. differenzaPercentuale uguale a -100, tendenza riduzione, isNuova false, isScomparsa true.
 - Caso 4: base maggiore di zero, confronto maggiore di zero. differenzaPercentuale calcolata con formula standard, tendenza derivata dal segno della differenza, isNuova false, isScomparsa false.
 - Formula standard del Caso 4: confronto meno base diviso base, moltiplicato per 100.
+- Regola invariabile: differenzaPercentuale non può mai essere Infinity, -Infinity, NaN o qualsiasi altro valore non finito.
 
 ## Sezione 10 — Dipendenze da altri design
 

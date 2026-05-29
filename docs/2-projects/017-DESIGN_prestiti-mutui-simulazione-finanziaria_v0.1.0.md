@@ -86,9 +86,9 @@ Testo: il calcolo per mutuo_finanziamento usa il metodo francese. La rata mensil
 Motivazione: il briefing impone lo standard bancario italiano ed europeo. Il motore di calcolo puro deve quindi produrre un piano deterministico, testabile e coerente con gli output persistiti nel repository.
 
 ### Decisione 9 — Arrotondamento monetario centralizzato e deterministico
-Testo: ogni arrotondamento monetario usa la formula parseFloat(value.toFixed(2)) con persistenza su NUMERIC(14,2). Il dominio introduce una utility roundCurrency centralizzata in src/lib/helpers.ts e il motore loan-calculator.ts la usa in tutti i punti di calcolo monetario.
+Testo: ogni arrotondamento monetario usa la formula parseFloat(value.toFixed(2)) con persistenza su NUMERIC(14,2). DESIGN 017 introduce esplicitamente la utility roundCurrency in src/lib/helpers.ts e il motore loan-calculator.ts la usa in tutti i punti di calcolo monetario. DESIGN 018 e DESIGN 020 riusano la stessa utility senza ridefinirla.
 
-Motivazione: src/lib/helpers.ts non espone ancora roundCurrency. Formalizzare una sola regola evita divergenze tra rata, totale interessi, piano e saldo residuo, e allinea il motore con i vincoli di colonna database.
+Motivazione: formalizzare DESIGN 017 come punto di introduzione di roundCurrency elimina la contraddizione interna con gli scenari di test che la trattano come utility già disponibile e impedisce ridefinizioni divergenti nei design successivi. Una sola regola evita divergenze tra rata, totale interessi, piano e saldo residuo, e allinea il motore con i vincoli di colonna database.
 
 ### Decisione 10 — Simulazioni temporanee solo in stato locale React
 Testo: le simulazioni temporanee non salvate esplicitamente vivono solo nello stato locale React e non vengono mai scritte nel database.
@@ -251,7 +251,9 @@ File da creare:
 - src/lib/loan-calculator.ts — nuovo motore di calcolo puro senza effetti collaterali per rata mensile, piano di ammortamento, totale interessi e saldo residuo a data.
 - src/lib/supabase/repositories/prestiti.ts — nuovo repository per prestiti_mutui, modellato sul pattern reale visto in src/lib/supabase/repositories/budget.ts.
 - src/lib/supabase/repositories/prestiti-rimborsi.ts — nuovo repository per prestiti_rimborsi con passaggio obbligatorio attraverso RPC atomiche per le mutazioni.
-- docs/6-sql/P52-prestiti-mutui.sql — nuova migrazione SQL per tabelle, indici, trigger, policy RLS e RPC.
+- docs/6-sql/P52-prestiti-mutui.sql — placeholder provvisorio per la migrazione SQL della tabella prestiti_mutui con indici, trigger updated_at e policy RLS.
+- docs/6-sql/P53-rpc-rimborsi-prestiti.sql — placeholder provvisorio per la migrazione SQL delle RPC atomiche rpc_aggiungi_rimborso e rpc_elimina_rimborso.
+- docs/6-sql/P54-prestiti-rimborsi.sql — placeholder provvisorio per la migrazione SQL della tabella prestiti_rimborsi con indici e policy RLS.
 - __tests__/loan-calculator.test.ts — nuova suite per il motore di calcolo.
 - __tests__/prestiti.repository.test.ts — nuova suite per il repository prestiti.
 - __tests__/prestiti-rimborsi.repository.test.ts — nuova suite per repository rimborsi e atomicità RPC.
@@ -280,6 +282,7 @@ File da modificare:
 10. Isolamento tra utenti: un utente non vede né modifica prestiti o rimborsi di altri utenti.
 11. Promozione da simulazione ad attivo: il record mantiene lo stesso id, aggiorna stato e ricalcola i campi derivati.
 12. Ricalcolo data_fine_prevista: ogni modifica di data_inizio o durata_mesi aggiorna la scadenza prevista nel repository.
+13. Simulazione locale non persistita: una simulazione creata solo nello stato React e mai salvata esplicitamente non genera alcuna write verso Supabase; fino al salvataggio esplicito non deve partire nessuna chiamata ai repository prestiti o prestiti-rimborsi.
 
 ## Sezione 10 — Dipendenze da altri design
 
