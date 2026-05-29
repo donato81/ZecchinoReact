@@ -85,7 +85,7 @@ Fuori perimetro:
 ### T3
 - Azione: Riallineare il repository notifiche con existsUnreadForEntityLevel, query unread per entity e supporto a titolo_key, messaggio_key, livello e metadata obbligatori.
 - File target: src/lib/supabase/repositories/notifiche.ts
-Dipende da: T1, T2, T7
+- Dipende da: T1, T2, T7
 - Metrica di successo: __tests__/notifiche.repository.test.ts dimostra deduplicazione persistita, unread count, cleanup e isolamento utente sul nuovo schema.
 - Note operative: il repository deve trattare metadata parziali come caso tollerato e non come crash.
 
@@ -144,7 +144,7 @@ Caso limite - budget eliminato con notifica pendente: Se un budget viene elimina
 
 ## 7. Gate di Chiusura
 
-- G-019-1 | Verifica: soglie e costanti nominate sono centralizzate e non compaiono come letterali sparsi. | Comando: grep -RIn "0\.75\|0\.90\|0\.80\|75\|80\|90\|100" src/lib src/context __tests__ | grep -v "budget-notification-config.ts" — Esito atteso: 0 occorrenze di soglie numeriche hardcoded fuori dal file di configurazione centrale.
+- G-019-1 | Verifica: soglie e costanti nominate sono centralizzate e non compaiono come letterali sparsi. | Comando: grep -RIn "0\.75\|0\.90\|0\.80\|75\|80\|90\|100" src/lib src/context __tests__ | grep -v "budget-notification-config.ts" — Esito atteso: 0 occorrenze di soglie numeriche hardcoded fuori dal file di configurazione centrale. | Stato iniziale: OPEN
 - G-019-2 | Verifica: repository notifiche aderisce allo schema persistito finale con deduplicazione per entita/livello. | Comando: npx jest __tests__/notifiche.repository.test.ts --runInBand | Stato iniziale: OPEN
 - G-019-3 | Verifica: notification-service copre deduplicazione ibrida, escalation replace, idempotenza mensile e budget mancanti. | Comando: npx jest __tests__/notification-service.test.ts --runInBand | Stato iniziale: OPEN
 - G-019-4 | Verifica: AppDataContext mantiene secondary hydration fail-soft e cleanup solo in READY. | Comando: npx jest __tests__/AppDataContext.spec.ts --runInBand | Stato iniziale: OPEN
