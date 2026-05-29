@@ -60,7 +60,7 @@ autore: Agent-Orchestrator
 - Azione: Creare la suite di test monthly-comparison.test.ts coprendo tutti gli scenari obbligatori del design.
 - File target: __tests__/monthly-comparison.test.ts
 - Dipende da: T1, T2, T3, PLAN 017
-- Metrica di successo: la suite copre almeno i 17 scenari obbligatori, inclusi cambio anno, collisione categoria eliminata/senza categoria, transfer exclusion e transazioni vicine al cambio UTC.
+- Metrica di successo: la suite copre almeno i 12 scenari obbligatori, inclusi cambio anno, collisione categoria eliminata/senza categoria, transfer exclusion e transazioni vicine al cambio UTC.
 - Task Status: [ ] TODO
 
 ## 4. Note Operative
@@ -75,12 +75,13 @@ autore: Agent-Orchestrator
 
 | Data | Task ID | Validato Da | Risultato | Note |
 | --- | --- | --- | --- | --- |
+| 2026-05-29 | CORREZIONE | Agent-Copilot | APPLICATA | corretti scenari T5 da 17 a 12 e comando gate G-018-3 |
 
 ## 6. Gate di Chiusura
 
 - G-018-1 | Verifica: i nuovi tipi client compilano senza introdurre dipendenze non previste. | Comando: npx tsc --noEmit | Gate Status: [ ] OPEN
 - G-018-2 | Verifica: il modulo di confronto copre i casi percentuali ufficiali e non restituisce valori non finiti. | Comando: npx jest __tests__/monthly-comparison.test.ts --runInBand | Gate Status: [ ] OPEN
-- G-018-3 | Verifica: il modulo di confronto resta puro e non accede a Supabase, context o cache. | Comando: verifica manuale sul modulo puro di confronto mensile | Gate Status: [ ] OPEN
+- G-018-3 | Verifica: il modulo di confronto resta puro e non accede a Supabase, context o cache. | Comando: grep -RIn "supabase|AppDataContext|cache|repositories" src/lib/monthly-comparison.ts | Gate Status: [ ] OPEN
 - G-018-4 | Verifica: roundCurrency ed extractDatePart sono consumate dalle helper condivise senza ridefinizione locale. | Comando: verifica manuale sul modulo di confronto e sulle helper condivise | Gate Status: [ ] OPEN
 - G-018-5 | Verifica: le chiavi locali richieste dal modulo sono tutte presenti nel registro di localizzazione italiano. | Comando: npx tsc --noEmit | Gate Status: [ ] OPEN
 

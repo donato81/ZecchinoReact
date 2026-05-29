@@ -58,6 +58,7 @@ autore: Agent-Orchestrator
 - File target: src/lib/notification-service.ts
 - Dipende da: T1, T2, T3, PLAN 017
 - Metrica di successo: __tests__/notification-service.test.ts copre deduplicazione runtime, escalation, invalidazione cambio mese, missing budget e secondary hydration fail-soft.
+- Caso limite obbligatorio: il service deve gestire il caso in cui un budget venga eliminato mentre esiste gia una notifica pendente per quel budget, senza generare errori e senza tentare la persistenza su un entity_id orfano.
 - Task Status: [ ] TODO
 
 ### T5
@@ -100,10 +101,11 @@ autore: Agent-Orchestrator
 
 | Data | Task ID | Validato Da | Risultato | Note |
 | --- | --- | --- | --- | --- |
+| 2026-05-29 | CORREZIONE | Agent-Copilot | APPLICATA | ripristinato comando gate G-019-1 e aggiunto caso limite T4 |
 
 ## 6. Gate di Chiusura
 
-- G-019-1 | Verifica: soglie e costanti nominate sono centralizzate e non compaiono come letterali sparsi. | Comando: verifica manuale sulla configurazione soglie, sul servizio notifiche e sui test correlati | Gate Status: [ ] OPEN
+- G-019-1 | Verifica: soglie e costanti nominate sono centralizzate e non compaiono come letterali sparsi. | Comando: grep -RIn "0\.75\|0\.90\|0\.80\|75\|80\|90\|100" src/lib src/context __tests__ | grep -v "budget-notification-config.ts" | Gate Status: [ ] OPEN
 - G-019-2 | Verifica: repository notifiche aderisce allo schema persistito finale con deduplicazione per entita/livello. | Comando: npx jest __tests__/notifiche.repository.test.ts --runInBand | Gate Status: [ ] OPEN
 - G-019-3 | Verifica: notification-service copre deduplicazione ibrida, escalation replace, idempotenza mensile e budget mancanti. | Comando: npx jest __tests__/notification-service.test.ts --runInBand | Gate Status: [ ] OPEN
 - G-019-4 | Verifica: AppDataContext mantiene secondary hydration fail-soft e cleanup solo in READY. | Comando: npx jest __tests__/AppDataContext.spec.ts --runInBand | Gate Status: [ ] OPEN

@@ -68,6 +68,7 @@ autore: Agent-Orchestrator
 - File target: src/lib/supabase/repositories/prestiti.ts
 - Dipende da: T1, T2, T3, T4
 - Metrica di successo: __tests__/prestiti.repository.test.ts dimostra mapping coerente, promozione con stesso id e ricalcolo dataFinePrevista.
+- Vincolo Architetturale: il deposito dei prestiti deve invocare il motore di calcolo di T4 senza ridefinire alcuna formula di calcolo al suo interno.
 - Task Status: [ ] TODO
 
 ### T6
@@ -75,6 +76,7 @@ autore: Agent-Orchestrator
 - File target: src/lib/supabase/repositories/prestiti-rimborsi.ts
 - Dipende da: T2, T5
 - Metrica di successo: __tests__/prestiti-rimborsi.repository.test.ts dimostra atomicita, saldo mai negativo, rollback su errore e chiusura automatica del contratto.
+- Nota di Responsabilita: i segnaposto P_017_01 e P_017_02 devono essere sostituiti con i riferimenti reali prodotti in T10 prima che il task possa essere considerato completato.
 - Task Status: [ ] TODO
 
 ### T7
@@ -124,6 +126,7 @@ autore: Agent-Orchestrator
 
 | Data | Task ID | Validato Da | Risultato | Note |
 | --- | --- | --- | --- | --- |
+| 2026-05-29 | CORREZIONE | Agent-Copilot | APPLICATA | aggiunti vincolo architetturale T5 e nota responsabilita T6 |
 
 ## 6. Gate di Chiusura
 
