@@ -19,9 +19,7 @@ Introdurre un modulo puro di confronto mese su mese per categoria che lavori sol
 
 File sorgente da creare o modificare:
 - modello tipi client del confronto mensile
- - src/lib/helpers.ts - questo file riceve l'aggiunta della funzione extractDatePart.
-  
- 	La funzione extractDatePart è definita e introdotta in PLAN 017 all'interno di src/lib/helpers.ts. Questo PLAN la importa e la utilizza. Non ridefinire extractDatePart in questo file.
+ - src/lib/helpers.ts — Questo PLAN consuma extractDatePart e roundCurrency introdotte da PLAN 017. Il file viene utilizzato come dipendenza pura:  non riceve aggiunte né ridefinizioni di helper condivise in questo PLAN.
 - modulo puro di confronto mensile
 - registro di localizzazione italiano
 - __tests__/monthly-comparison.test.ts
@@ -104,7 +102,7 @@ Fuori perimetro:
 
 - G-018-1 | Verifica: i nuovi tipi client compilano senza introdurre dipendenze non previste. | Comando: npx tsc --noEmit | Stato iniziale: OPEN
 - G-018-2 | Verifica: il modulo di confronto copre i casi percentuali ufficiali e non restituisce valori non finiti. | Comando: npx jest __tests__/monthly-comparison.test.ts --runInBand | Stato iniziale: OPEN
-- G-018-3 | Verifica: il modulo di confronto resta puro e non accede a Supabase, context o cache. | Comando: verifica manuale sul modulo puro di confronto mensile | Stato iniziale: OPEN
+- G-018-3 | Verifica: il modulo di confronto resta puro e non accede a Supabase, context o cache. | Comando: grep -RIn "supabase\|AppDataContext\|cache\|repositories" src/lib/monthly-comparison.ts — Esito atteso: 0 occorrenze. | Stato iniziale: OPEN
 - G-018-4 | Verifica: roundCurrency ed extractDatePart sono consumate dalle helper condivise senza ridefinizione locale. | Comando: verifica manuale sul modulo di confronto e sulle helper condivise | Stato iniziale: OPEN
 - G-018-5 | Verifica: le chiavi locali richieste dal modulo sono tutte presenti nel registro di localizzazione italiano. | Comando: npx tsc --noEmit | Stato iniziale: OPEN
 

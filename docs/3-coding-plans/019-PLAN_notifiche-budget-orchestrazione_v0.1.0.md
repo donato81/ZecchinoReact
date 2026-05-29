@@ -30,7 +30,7 @@ File sorgente da creare o modificare:
 - __tests__/AppDataContext.spec.ts
 
 Fuori perimetro:
-- riscrittura completa di budget-alerts.ts
+- riscrittura completa di budget-alerts.ts. Il file esistente può essere modificato solo per importare le costanti centralizzate da budget-notification-config.ts al fine di rimuovere i valori numerici hardcoded. Tutta la logica di nuova orchestrazione delle notifiche è delegata esclusivamente a notification-service.ts.
 - nuova UI notifiche o canali push nativi
 - notifiche relative al dominio prestiti, mutui o rimborsi
 - NOTA DI ALLINEAMENTO CON DESIGN 017 (versione 1): Le notifiche per le rate dei prestiti in scadenza sono escluse dalla versione 1 di questa funzionalita, in coerenza con il perimetro dichiarato in DESIGN 017 che esclude i promemoria rate dallo scope v1. Questa voce e mantenuta come riferimento per la roadmap futura ma non deve essere implementata nella versione corrente. L'agente che implementa questo DESIGN deve ignorare questa sezione fino a esplicita revisione del perimetro.
@@ -85,7 +85,7 @@ Fuori perimetro:
 ### T3
 - Azione: Riallineare il repository notifiche con existsUnreadForEntityLevel, query unread per entity e supporto a titolo_key, messaggio_key, livello e metadata obbligatori.
 - File target: src/lib/supabase/repositories/notifiche.ts
-- Dipende da: T2, T1
+Dipende da: T1, T2, T7
 - Metrica di successo: __tests__/notifiche.repository.test.ts dimostra deduplicazione persistita, unread count, cleanup e isolamento utente sul nuovo schema.
 - Note operative: il repository deve trattare metadata parziali come caso tollerato e non come crash.
 
@@ -144,7 +144,7 @@ Caso limite - budget eliminato con notifica pendente: Se un budget viene elimina
 
 ## 7. Gate di Chiusura
 
-- G-019-1 | Verifica: soglie e costanti nominate sono centralizzate e non compaiono come letterali sparsi. | Comando: verifica manuale sulla configurazione soglie, sul servizio notifiche e sui test correlati | Stato iniziale: OPEN
+- G-019-1 | Verifica: soglie e costanti nominate sono centralizzate e non compaiono come letterali sparsi. | Comando: grep -RIn "0\.75\|0\.90\|0\.80\|75\|80\|90\|100" src/lib src/context __tests__ | grep -v "budget-notification-config.ts" — Esito atteso: 0 occorrenze di soglie numeriche hardcoded fuori dal file di configurazione centrale.
 - G-019-2 | Verifica: repository notifiche aderisce allo schema persistito finale con deduplicazione per entita/livello. | Comando: npx jest __tests__/notifiche.repository.test.ts --runInBand | Stato iniziale: OPEN
 - G-019-3 | Verifica: notification-service copre deduplicazione ibrida, escalation replace, idempotenza mensile e budget mancanti. | Comando: npx jest __tests__/notification-service.test.ts --runInBand | Stato iniziale: OPEN
 - G-019-4 | Verifica: AppDataContext mantiene secondary hydration fail-soft e cleanup solo in READY. | Comando: npx jest __tests__/AppDataContext.spec.ts --runInBand | Stato iniziale: OPEN
