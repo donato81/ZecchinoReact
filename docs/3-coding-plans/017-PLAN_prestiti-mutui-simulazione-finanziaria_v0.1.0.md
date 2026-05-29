@@ -95,9 +95,11 @@ Fuori perimetro:
 - Dipende da: T1, T2, T3, T4
 - Metrica di successo: __tests__/prestiti.repository.test.ts dimostra mapping coerente, promozione con stesso id, ricalcolo dataFinePrevista e assenza di mutazioni fuori contratto.
 - Note operative: create e update devono calcolare e persistere rataMensile, totaleInteressi e dataFinePrevista quando applicabile.
+- Vincolo Architetturale: il repository deve importare e utilizzare obbligatoriamente loan-calculator.ts per derivare rataMensile, totaleInteressi e dataFinePrevista. È vietata la reimplementazione inline o la duplicazione delle formule finanziarie all'interno del layer repository.
 
 ### T6
 - Azione: Creare il repository prestiti-rimborsi con addRimborso e deleteRimborso basati esclusivamente sulle RPC atomiche rpc_aggiungi_rimborso (file SQL di migrazione: da assegnare - placeholder P_017_01 - aggiornare con numero progressivo reale al momento dell'implementazione) e rpc_elimina_rimborso (file SQL di migrazione: da assegnare - placeholder P_017_02 - aggiornare con numero progressivo reale al momento dell'implementazione).
+- Nota di Responsabilità: l'agente implementatore di T6 ha l'obbligo esplicito di sostituire i placeholder P_017_01 e P_017_02 con i riferimenti reali generati nel file di migrazione P53, prodotto dal Task T10.
 - File target: src/lib/supabase/repositories/prestiti-rimborsi.ts
 - Dipende da: T2, T5
 - Metrica di successo: __tests__/prestiti-rimborsi.repository.test.ts dimostra atomicita, saldo mai negativo, rollback su errore e chiusura automatica del contratto.
