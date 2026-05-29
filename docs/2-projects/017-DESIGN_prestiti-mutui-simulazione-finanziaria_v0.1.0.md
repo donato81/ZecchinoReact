@@ -144,6 +144,7 @@ Tipi da aggiungere in src/lib/types.ts:
   - totaleInteressi opzionale
   - dataInizio
   - dataFinePrevista opzionale
+    - nota: campo opzionale a livello di tipo TypeScript, ma obbligatoriamente calcolato dal repository per tutti i contratti con stato attivo; viene ricalcolato automaticamente ad ogni variazione di dataInizio o durataMesi.
   - saldoResiduo
   - note opzionale
 - PrestitoRimborso:
@@ -224,6 +225,8 @@ Vincoli tabella prestiti_rimborsi:
 - check importo maggiore di zero.
 - check quota_capitale e quota_interessi non negative quando valorizzate.
 - check sulla coerenza utente tra rimborso e prestito applicato via RPC e policy.
+
+nota architetturale: la tabella prestiti_rimborsi non prevede il campo updated_at né un trigger di aggiornamento. Questa è una scelta intenzionale. I rimborsi sono record immutabili per natura: una volta registrato, un rimborso non viene mai modificato, solo eliminato tramite la RPC atomica rpc_elimina_rimborso. Il campo created_at è sufficiente per il ciclo di vita del record. Aggiungere updated_at per simmetria con le altre tabelle introdurrebbe rumore semantico e falsa l'impressione che i record siano modificabili.
 
 Indici obbligatori:
 

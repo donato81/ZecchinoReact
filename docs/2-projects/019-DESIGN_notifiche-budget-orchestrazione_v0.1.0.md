@@ -61,6 +61,8 @@ Motivazione: il service reale e il repository reale espongono già questi due me
 ### Decisione 3 — Metadata obbligatori alla creazione
 Testo: ogni notifica budget include nei metadata i campi level, percentage, threshold e budgetPeriodKey. budgetPeriodKey è obbligatorio e nel design finale usa il formato YYYY-MM per distinguere, ad esempio, un warning di maggio da uno di giugno sullo stesso budget.
 
+Comportamento di fallback per metadata assenti o parziali: se una notifica viene letta dal database con il campo metadata assente, null o privo di uno o più dei quattro campi obbligatori level, percentage, threshold e budgetPeriodKey, l'orchestratore e il renderer devono trattare quella notifica come notifica generica priva di livello semantico specifico. Non deve mai verificarsi un crash runtime, un errore UI visibile o un rendering fallito per metadata mancanti. I campi assenti vengono sostituiti con valori neutri: level viene trattato come info, percentage come null, threshold come null, budgetPeriodKey come non disponibile. Questa specifica protegge da rollback parziali, bug di scrittura e migrazioni future.
+
 Motivazione: il repository reale filtra già sui metadata con contains. Rendere obbligatori questi campi permette query di deduplicazione e cleanup semanticamente corrette senza introdurre colonne specialistiche per ogni caso.
 
 ### Decisione 4 — Escalation replace obbligatoria
@@ -175,7 +177,7 @@ Indici obbligatori:
 
 Trigger e policy:
 
-- trigger updated_at non richiesto nella versione minima, perché la tabella non prevede updated_at.
+- trigger updated_at non richiesto nella versione minima, perché la tabella non prevede updated_at. La scelta è intenzionale e motivata dall'architettura del dominio. La tabella notifiche è append-heavy: le notifiche vengono create e poi lette, con l'unica mutazione possibile rappresentata dalla marcatura come letta tramite markAsRead. Questa singola mutazione non richiede auditing storico completo. Il campo created_at è sufficiente per il ciclo di vita della notifica. Aggiungere updated_at per simmetria con le tabelle mutabili del progetto creerebbe l'impressione errata che le notifiche siano modificabili in modo generico, il che contraddirebbe il contratto architetturale del service.
 - policy RLS SELECT, INSERT, UPDATE, DELETE limitate a user_id uguale a auth.uid().
 
 ## Sezione 8 — File da creare e file da modificare
@@ -189,7 +191,7 @@ Target architetturali già esistenti nel codice reale ma da riallineare al desig
 
 File da creare:
 
-- docs/6-sql/P53-notifiche.sql — nuova migrazione SQL per tabella notifiche, indici e policy RLS.
+- docs/6-sql/P55-notifiche.sql — nuova migrazione SQL per tabella notifiche, indici e policy RLS.
 
 File da modificare:
 

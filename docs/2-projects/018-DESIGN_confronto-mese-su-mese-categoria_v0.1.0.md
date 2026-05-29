@@ -25,7 +25,7 @@ perimetro: "Modulo puro di confronto mese su mese per categoria costruito esclus
 
 Questo documento definisce il modulo che risponde alla domanda: quanto è cambiata la spesa o l'entrata per categoria tra due mesi arbitrari già presenti nei dati caricati in memoria. La motivazione architetturale è isolare un motore puro e deterministico, separato da AppDataContext e da qualsiasi repository Supabase, così da renderlo testabile in isolamento e riusabile da dashboard, analisi e notifiche future.
 
-La lettura di src/lib/helpers.ts conferma che esistono già formatCurrency e getTransactionsInPeriod; inoltre extractDatePart appartiene a src/lib/helpers.ts ed è introdotta da DESIGN 017, mentre roundCurrency non esiste ancora. DESIGN 018 formalizza quindi un'estensione del layer helpers per i calcoli monetari centralizzati e consuma extractDatePart per il filtraggio date timezone-safe senza ridefinirla.
+La lettura di src/lib/helpers.ts conferma che esistono già formatCurrency e getTransactionsInPeriod; inoltre roundCurrency ed extractDatePart appartengono a src/lib/helpers.ts e sono introdotte da DESIGN 017. DESIGN 018 consuma queste utility per i calcoli monetari centralizzati e per il filtraggio date timezone-safe senza ridefinirle.
 
 ## Sezione 3 — Perimetro
 
@@ -82,9 +82,9 @@ Testo: categoriaId viene sempre conservato, anche quando la categoria non esiste
 Motivazione: il codice di dominio usa id stabili come chiave applicativa. Separare id e label di fallback evita collisioni tra entità eliminate e righe senza categoria.
 
 ### Decisione 8 — Arrotondamento centralizzato in helpers.ts
-Testo: roundCurrency viene introdotta in src/lib/helpers.ts con formula parseFloat(value.toFixed(2)). Tutti i moduli che calcolano importi monetari la usano.
+Testo: roundCurrency è già introdotta in src/lib/helpers.ts da DESIGN 017 con formula parseFloat(value.toFixed(2)). Tutti i moduli che calcolano importi monetari la usano senza ridefinirla.
 
-Motivazione: helpers.ts non espone ancora una funzione condivisa di arrotondamento. Formalizzare una utility unica evita divergenze fra confronto mensile e altri moduli monetari.
+Motivazione: riusare una sola utility condivisa evita divergenze fra confronto mensile e altri moduli monetari e mantiene coerente l'ownership già dichiarata da DESIGN 017.
 
 ### Decisione 9 — Confronto tra qualunque coppia di mesi
 Testo: il confronto è possibile tra qualsiasi coppia di mesi presenti nelle transazioni, non solo mese corrente contro precedente.
@@ -150,7 +150,7 @@ Funzioni da creare in src/lib/monthly-comparison.ts:
 
 Estensioni a src/lib/helpers.ts:
 
-- roundCurrency
+- roundCurrency già presente in src/lib/helpers.ts, introdotta da DESIGN 017 e consumata da DESIGN 018 senza ridefinizione
 - extractDatePart già presente in src/lib/helpers.ts, introdotta da DESIGN 017 e consumata da DESIGN 018 senza ridefinizione; restituisce i primi dieci caratteri della stringa data
 
 ## Sezione 7 — Schema database
@@ -166,7 +166,7 @@ File da creare:
 
 File da modificare:
 
-- src/lib/helpers.ts — aggiunta di roundCurrency.
+- src/lib/helpers.ts — nota di dipendenza: questo file non viene modificato da DESIGN 018. DESIGN 018 consuma roundCurrency ed extractDatePart già introdotte da DESIGN 017. Nessuna ridefinizione è necessaria o ammessa.
 - Nota esplicita: extractDatePart appartiene a src/lib/helpers.ts, è introdotta da DESIGN 017 e DESIGN 018 la consuma senza ridefinirla.
 - src/lib/types.ts — aggiunta di MonthlyComparisonRow, MonthlyComparisonOptions e TendenzaComparazione.
 - src/locales/it.ts — aggiunta di chiavi per mese corrente, mese precedente, variazione, nuova categoria, categoria assente, nessuna transazione in questo periodo, aumento, riduzione, stabile, confronta con, seleziona mese, senza categoria e categoria eliminata.
@@ -194,7 +194,7 @@ File da modificare:
 Tabella ufficiale dei casi percentuali:
 
 - Caso 1: base zero o assente, confronto zero. differenzaPercentuale uguale a null, tendenza stabile, isNuova false, isScomparsa false.
-- Caso 2: base zero o assente, confronto maggiore di zero. differenzaPercentuale uguale a null, tendenza aumento, isNuova true, isScomparsa false.
+- Caso 2: base zero o assente, confronto maggiore di zero. differenzaPercentuale uguale a null, tendenza aumento, isNuova true, isScomparsa false (corrisponde allo scenario di test 5, isNuova uguale a true).
 - Caso 3: base maggiore di zero, confronto zero. differenzaPercentuale uguale a -100, tendenza riduzione, isNuova false, isScomparsa true.
 - Caso 4: base maggiore di zero, confronto maggiore di zero. differenzaPercentuale calcolata con formula standard, tendenza derivata dal segno della differenza, isNuova false, isScomparsa false.
 - Formula standard del Caso 4: confronto meno base diviso base, moltiplicato per 100.
@@ -205,6 +205,7 @@ Tabella ufficiale dei casi percentuali:
 Precondizioni obbligatorie:
 
 - Disponibilità delle transazioni già caricate in memoria da AppDataContext.
+- Disponibilità delle utility roundCurrency ed extractDatePart introdotte da DESIGN 017 in src/lib/helpers.ts. DESIGN 018 non può essere implementato senza che DESIGN 017 abbia già creato queste due funzioni.
 - Presenza dei tipi dominio base in src/lib/types.ts.
 - Disponibilità di src/locales/it.ts per tutte le stringhe utente.
 
