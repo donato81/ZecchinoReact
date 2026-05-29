@@ -2,7 +2,7 @@
 titolo: PLAN 019 - Notifiche Budget e Orchestrazione
 versione: 0.1.0
 data: 2026-05-29
-stato: DRAFT
+stato: REVIEWED PENDING
 design_riferimento: docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md
 autore: Agent-Orchestrator
 dipendenze: PLAN 015, PLAN 017
@@ -33,6 +33,7 @@ Fuori perimetro:
 - riscrittura completa di budget-alerts.ts
 - nuova UI notifiche o canali push nativi
 - notifiche relative al dominio prestiti, mutui o rimborsi
+- NOTA DI ALLINEAMENTO CON DESIGN 017 (versione 1): Le notifiche per le rate dei prestiti in scadenza sono escluse dalla versione 1 di questa funzionalita, in coerenza con il perimetro dichiarato in DESIGN 017 che esclude i promemoria rate dallo scope v1. Questa voce e mantenuta come riferimento per la roadmap futura ma non deve essere implementata nella versione corrente. L'agente che implementa questo DESIGN deve ignorare questa sezione fino a esplicita revisione del perimetro.
 - integrazione immediata con il confronto mensile come sorgente attiva di eventi
 
 ## 3. Prerequisiti Bloccanti
@@ -44,7 +45,7 @@ Fuori perimetro:
 ## 4. Architettura e Decisioni Chiave
 
 - Decisione 1 - AppDataContext conserva solo invocazione e hydration secondaria. Conseguenza pratica: la logica di orchestrazione budget esce definitivamente dal context.
-- Decisione 2 - Le soglie warning e critical vivono in costanti nominate. Conseguenza pratica: nessun task puo introdurre letterali numerici sparsi nel service o nei test.
+- Decisione 2 - Le soglie warning e critical vivono in costanti nominate. Conseguenza pratica: nessun task puo introdurre letterali numerici sparsi nel service o nei test; BUDGET_ALERT_THRESHOLD_WARNING [SOGLIA CONFIGURABILE - valore default: 75% - definire come costante nominata in src/lib/budget-notification-config.ts o equivalente. Non hardcodare nel corpo della funzione.] e BUDGET_ALERT_THRESHOLD_CRITICAL [SOGLIA CONFIGURABILE - valore default: 90% - definire come costante nominata in src/lib/budget-notification-config.ts o equivalente. Non hardcodare nel corpo della funzione.] sono l'unico punto ammesso di definizione.
 - Decisione 3 - La deduplicazione e un blocco dedicato a due livelli. Conseguenza pratica: runtime state e repository devono cooperare e avere test separati.
 - Decisione 4 - budgetPeriodKey e una chiave mensile persistita localmente. Conseguenza pratica: il service deve invalidare il mese precedente e scartare duplicati locali.
 - Decisione 5 - Metadata obbligatori e fallback robusto. Conseguenza pratica: renderer e orchestratore non devono crashare se metadata e null o parziale.
@@ -58,7 +59,7 @@ Fuori perimetro:
 - File target: src/lib/budget-notification-config.ts
 - Dipende da: nessuno
 - Metrica di successo: notification-service, budget-alerts e i test possono importare le soglie senza usare valori letterali hardcoded.
-- Note operative: il file deve essere predisposto a futura configurabilita utente ma in v1 espone costanti statiche.
+- Note operative: il file deve essere predisposto a futura configurabilita utente ma in v1 espone costanti statiche; la soglia di superamento budget [SOGLIA CONFIGURABILE - valore default: 100% - definire come costante nominata in src/lib/budget-notification-config.ts o equivalente. Non hardcodare nel corpo della funzione.] non deve essere hardcodata fuori da src/lib/budget-notification-config.ts.
 
 ### T2
 - Azione: Riallineare NotificationLevel, NotificationMetadata, BudgetNotificationMetadata, Notification e NotificationHydrationState insieme a DbNotification sullo schema finale del design.
@@ -79,7 +80,7 @@ Fuori perimetro:
 - File target: src/lib/notification-service.ts
 - Dipende da: T1, T2, T3, PLAN 017
 - Metrica di successo: __tests__/notification-service.test.ts copre deduplicazione runtime, escalation, invalidazione cambio mese, missing budget e secondary hydration fail-soft.
-- Note operative: il task deve usare roundCurrency di PLAN 017 per normalizzare percentage e extractDatePart di PLAN 017 per derivare in modo coerente il budgetPeriodKey mensile senza ridefinizioni locali.
+- Note operative: il task deve usare roundCurrency di PLAN 017 per normalizzare percentage e extractDatePart di PLAN 017 per derivare in modo coerente il budgetPeriodKey mensile senza ridefinizioni locali. Deduplicazione notifiche: prima di generare una notifica, l'orchestratore verifica se una notifica dello stesso tipo e per lo stesso budget e gia stata generata nel mese corrente. La verifica avviene tramite controllo nello stato locale, non nel database. Se una notifica identica e gia presente nello stato, la nuova generazione viene soppressa silenziosamente senza errore. La chiave di deduplicazione e composta da tipo_notifica piu id_budget piu mese_anno in formato YYYY-MM. Questa logica va implementata come funzione pura e testabile separatamente dal resto dell'orchestratore.
 
 ### T5
 - Azione: Rimuovere definitivamente la logica residua di orchestrazione budget da AppDataContext mantenendo solo invocazione del service, notificationsHydrated separato e comportamento fail-soft.
@@ -108,6 +109,10 @@ Fuori perimetro:
 - Dipende da: T1, T3, T4, T5, PLAN 017
 - Metrica di successo: le suite coprono deduplicazione ibrida, costanti nominate, budgetPeriodKey, metadata obbligatori, escalation replace e bootstrap secondario non bloccante.
 - Note operative: aggiungere una verifica esplicita che le soglie arrivino da costanti nominate e non da valori letterali nel service.
+
+### Casi limite
+
+Caso limite - budget eliminato con notifica pendente: Se un budget viene eliminato mentre e presente nello stato locale una notifica pendente riferita a quel budget, l'orchestratore deve rimuovere la notifica pendente dallo stato al momento della rilevazione dell'eliminazione del budget. Nessuna notifica riferita a un budget inesistente deve essere mostrata all'utente. La rimozione e silenziosa e non genera messaggi di errore.
 
 ## 6. Test Obbligatori
 

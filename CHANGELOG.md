@@ -31,6 +31,7 @@
   - `docs/2-projects/017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`: confermati i placeholder SQL `P52`, `P53`, `P54`; aggiunta nota su `dataFinePrevista` come campo TypeScript opzionale ma calcolato dal repository; aggiunta nota architetturale sull'assenza intenzionale di `updated_at` in `prestiti_rimborsi`.
   - `docs/2-projects/018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md`: riallineata la dipendenza da `src/lib/helpers.ts` per `roundCurrency` ed `extractDatePart`; collegato il Caso 2 della tabella percentuali allo scenario di test 5; aggiunta la precondizione formale verso DESIGN 017.
   - `docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md`: rinumerata la migrazione notifiche a `P55`; aggiunta la motivazione architetturale per l'assenza di `updated_at` e la specifica di fallback per `metadata` assenti o parziali.
+- [DATA 2026-05-29] — DESIGN 017, 018, 019 — Correzioni chirurgiche pre-revisione: risolte anomalie di allineamento inter-documento, aggiunte specifiche mancanti su roundCurrency, extractDatePart, deduplicazione notifiche, gestione edge case. Stato: REVIEWED PENDING — in attesa di approvazione finale.
 
 ### Aggiunto — Repository Ricorrenze
 - Introdotti `DbRecurrence`, `RecurrenceType`, `Recurrence` e il repository Supabase `src/lib/supabase/repositories/ricorrenze.ts` con `getAll`, `getById`, `getDue`, `create`, `update` e `deactivate`.

@@ -2,7 +2,7 @@
 titolo: PLAN 017 - Prestiti, Mutui e Simulazione Finanziaria
 versione: 0.1.0
 data: 2026-05-29
-stato: DRAFT
+stato: REVIEWED PENDING
 design_riferimento: docs/2-projects/017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md
 autore: Agent-Orchestrator
 dipendenze: nessuna
@@ -19,7 +19,7 @@ Introdurre il dominio prestiti, mutui e simulazione finanziaria con motore di ca
 File sorgente da creare o modificare:
 - modello tipi client del dominio prestiti
 - modello tipi Supabase del dominio prestiti
-- helper condivise del progetto
+- src/lib/helpers.ts - questo file riceve l'aggiunta della funzione roundCurrency. DESIGN 017 e il documento proprietario di questa funzione. I DESIGN 018 e futuri la riutilizzeranno senza ridefinirla.
 - motore di simulazione finanziaria puro
 - repository prestiti
 - repository rimborsi prestiti
@@ -95,7 +95,7 @@ Fuori perimetro:
 - Note operative: create e update devono calcolare e persistere rataMensile, totaleInteressi e dataFinePrevista quando applicabile.
 
 ### T6
-- Azione: Creare il repository prestiti-rimborsi con addRimborso e deleteRimborso basati esclusivamente sulle RPC atomiche rpc_aggiungi_rimborso e rpc_elimina_rimborso.
+- Azione: Creare il repository prestiti-rimborsi con addRimborso e deleteRimborso basati esclusivamente sulle RPC atomiche rpc_aggiungi_rimborso (file SQL di migrazione: da assegnare - placeholder P_017_01 - aggiornare con numero progressivo reale al momento dell'implementazione) e rpc_elimina_rimborso (file SQL di migrazione: da assegnare - placeholder P_017_02 - aggiornare con numero progressivo reale al momento dell'implementazione).
 - File target: src/lib/supabase/repositories/prestiti-rimborsi.ts
 - Dipende da: T2, T5
 - Metrica di successo: __tests__/prestiti-rimborsi.repository.test.ts dimostra atomicita, saldo mai negativo, rollback su errore e chiusura automatica del contratto.
@@ -151,6 +151,7 @@ Fuori perimetro:
 - File spec: __tests__/prestiti-rimborsi.repository.test.ts | Scenario: rimborsi concorrenti non producono stato incoerente. | Tipo: integration
 - File spec: __tests__/prestiti-rimborsi.repository.test.ts | Scenario: rollback RPC su errore senza persistenza parziale. | Tipo: integration
 - File spec: __tests__/AppDataContext.spec.ts | Scenario: una simulazione locale non salvata non genera alcuna write Supabase. | Tipo: integration
+- File spec: __tests__/AppDataContext.spec.ts | Scenario: una simulazione temporanea creata nello stato locale React non viene mai scritta nel database e una query diretta a Supabase conferma che nessun record con flag di simulazione attivo e stato inserito nelle tabelle prestiti o rimborsi dopo il tempo di attesa previsto. | Tipo: integration
 
 ## 7. Gate di Chiusura
 

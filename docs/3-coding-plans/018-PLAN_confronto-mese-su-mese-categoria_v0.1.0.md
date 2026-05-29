@@ -2,10 +2,11 @@
 titolo: PLAN 018 - Confronto Mese su Mese per Categoria
 versione: 0.1.0
 data: 2026-05-29
-stato: DRAFT
+stato: REVIEWED PENDING
 design_riferimento: docs/2-projects/018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md
 autore: Agent-Orchestrator
 dipendenze: PLAN 017
+dipendenti: PLAN 019
 ---
 
 # PLAN 018 - Confronto Mese su Mese per Categoria
@@ -18,6 +19,7 @@ Introdurre un modulo puro di confronto mese su mese per categoria che lavori sol
 
 File sorgente da creare o modificare:
 - modello tipi client del confronto mensile
+- src/lib/helpers.ts - questo file riceve l'aggiunta della funzione extractDatePart. La funzione e dichiarata in questo DESIGN e riutilizzata dai DESIGN successivi che lavorano su date.
 - modulo puro di confronto mensile
 - registro di localizzazione italiano
 - __tests__/monthly-comparison.test.ts
@@ -41,7 +43,7 @@ Fuori perimetro:
 - Decisione 3 - Gli importi vengono normalizzati con Math.abs dopo il filtro movementType. Conseguenza pratica: il modulo non assume il segno degli importi come vincolo a monte.
 - Decisione 4 - Il filtro mese usa extractDatePart introdotta in PLAN 017. Conseguenza pratica: i task di implementazione 018 dipendono esplicitamente da 017 e non possono ridefinire la utility.
 - Decisione 5 - Tutti i calcoli monetari usano roundCurrency introdotta in PLAN 017. Conseguenza pratica: il confronto resta coerente con il dominio prestiti e con il futuro motore notifiche 019.
-- Decisione 6 - Le righe zero-zero sono escluse di default e differenzaPercentuale e null quando la base storica e zero o assente. Conseguenza pratica: il modulo non puo restituire Infinity, -Infinity o NaN.
+- Decisione 6 - Le righe zero-zero sono escluse di default e differenzaPercentuale e null quando la base storica e zero o assente. Caso limite - mese di riferimento con valore zero: se il valore del mese di riferimento per una categoria e zero, il calcolo del delta percentuale non viene eseguito e la funzione restituisce null per quel campo. Il componente che mostra il dato deve trattare null come assenza di confronto disponibile e non come errore. Conseguenza pratica: il modulo non puo restituire Infinity, -Infinity, NaN o undefined.
 - Decisione 7 - categoriaId resta sempre conservato. Conseguenza pratica: categoria eliminata e senza categoria restano casi distinti nel risultato finale.
 
 ## 5. Task Atomici

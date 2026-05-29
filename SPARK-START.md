@@ -77,15 +77,15 @@ e autorizzazione all'implementazione.
 - [TODO 016-bis — Cleanup Orfani Storage](docs/4-todo-lists/016-bis-TODO_cleanup-orfani-storage_v0.1.0.md) — v0.1.0 — PENDING
 - [PLAN 016-ter — Magic Bytes Validation](docs/3-coding-plans/016-ter-PLAN_magic-bytes-validation_v0.1.0.md) — v0.1.0 — DRAFT
 - [TODO 016-ter — Magic Bytes Validation](docs/4-todo-lists/016-ter-TODO_magic-bytes-validation_v0.1.0.md) — v0.1.0 — PENDING
-- [PLAN 017 — Prestiti, Mutui e Simulazione Finanziaria](docs/3-coding-plans/017-PLAN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md) — v0.1.0 — DRAFT
+- [PLAN 017 — Prestiti, Mutui e Simulazione Finanziaria](docs/3-coding-plans/017-PLAN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md) — v0.1.0 — REVIEWED PENDING
 - [TODO 017 — Prestiti, Mutui e Simulazione Finanziaria](docs/4-todo-lists/017-TODO_prestiti-mutui-simulazione-finanziaria_v0.1.0.md) — v0.1.0 — PENDING
-- [PLAN 018 — Confronto Mese su Mese per Categoria](docs/3-coding-plans/018-PLAN_confronto-mese-su-mese-categoria_v0.1.0.md) — v0.1.0 — DRAFT
+- [PLAN 018 — Confronto Mese su Mese per Categoria](docs/3-coding-plans/018-PLAN_confronto-mese-su-mese-categoria_v0.1.0.md) — v0.1.0 — REVIEWED PENDING
 - [TODO 018 — Confronto Mese su Mese per Categoria](docs/4-todo-lists/018-TODO_confronto-mese-su-mese-categoria_v0.1.0.md) — v0.1.0 — PENDING
-- [PLAN 019 — Notifiche Budget e Orchestrazione](docs/3-coding-plans/019-PLAN_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — DRAFT
+- [PLAN 019 — Notifiche Budget e Orchestrazione](docs/3-coding-plans/019-PLAN_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — REVIEWED PENDING
 - [TODO 019 — Notifiche Budget e Orchestrazione](docs/4-todo-lists/019-TODO_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — PENDING
 
-I sei nuovi file di pianificazione per DESIGN 017–019 sono pronti per
-review e successiva autorizzazione all'implementazione.
+Correzioni applicate il 2026-05-29.
+Stato: REVIEWED PENDING.
 
 Blocco residuo: `009-native` resta aperto solo per le validazioni runtime
 T3-N5 su Windows e Android. Non sblocca da solo una nuova release: il progetto
