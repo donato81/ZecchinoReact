@@ -873,21 +873,3 @@ Confermare con: "PROCEDI [Task ID]"
 
 ---
 
-## 10. Pending DOCS 017-019
-
-- `DESIGN 017 — Prestiti, Mutui e Simulazione Finanziaria` — docs/2-projects/017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md
-  - Stato: DRAFT
-  - Prerequisiti: nessuno bloccante dichiarato; confine esplicito con DESIGN 015.
-  - Azione successiva: review finale condivisa e creazione coding plan + todo list.
-
-- `DESIGN 018 — Confronto mese su mese per categoria` — docs/2-projects/018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md
-  - Stato: DRAFT
-  - Prerequisiti: nessuno bloccante dichiarato; riuso dei dati gia' caricati in memoria.
-  - Azione successiva: review finale condivisa e creazione coding plan + todo list.
-
-- `DESIGN 019 — Notifiche Budget e Orchestrazione` — docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md
-  - Stato: DRAFT
-  - Prerequisiti: coerenza con DESIGN 015 e con il codice reale di `notification-service.ts` e `repositories/notifiche.ts`.
-  - Azione successiva: review finale condivisa e creazione coding plan + todo list.
-
-
