@@ -3,8 +3,9 @@ tipo: DESIGN
 titolo: "DESIGN 019 — Notifiche Budget e Orchestrazione"
 versione: "0.1.0"
 data: "2026-05-28"
-stato: DRAFT
+stato: REVIEWED
 sorgente:
+  - docs/2-projects/017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md
   - docs/2-projects/015-DESIGN_repository-notifiche-notification-service_v0.1.0.md
   - src/lib/supabase/repositories/budget.ts
   - src/lib/supabase/repositories/transazioni.ts

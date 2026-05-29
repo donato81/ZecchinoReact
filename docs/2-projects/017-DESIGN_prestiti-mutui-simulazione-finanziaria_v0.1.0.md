@@ -3,7 +3,7 @@ tipo: DESIGN
 titolo: "DESIGN 017 — Prestiti, Mutui e Simulazione Finanziaria"
 versione: "0.1.0"
 data: "2026-05-28"
-stato: DRAFT
+stato: REVIEWED
 sorgente:
   - docs/2-projects/015-DESIGN_repository-notifiche-notification-service_v0.1.0.md
   - src/lib/supabase/repositories/budget.ts

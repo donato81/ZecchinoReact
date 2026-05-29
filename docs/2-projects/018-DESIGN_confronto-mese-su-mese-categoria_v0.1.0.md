@@ -3,7 +3,7 @@ tipo: DESIGN
 titolo: "DESIGN 018 — Confronto mese su mese per categoria"
 versione: "0.1.0"
 data: "2026-05-28"
-stato: DRAFT
+stato: REVIEWED
 sorgente:
   - docs/2-projects/015-DESIGN_repository-notifiche-notification-service_v0.1.0.md
   - "docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md (nota: i dati aggregati prodotti da questo motore di confronto possono essere consumati dal motore notifiche definito in DESIGN 019)"
