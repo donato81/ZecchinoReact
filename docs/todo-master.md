@@ -5,8 +5,8 @@
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
- - **Ultimo Agente Attivo:** Agent-Docs — stesura e sincronizzazione design 017 / 018 / 019 (2026-05-28)
- - **Blocco in Carico:** DOCS 017-019. Nuovi design pronti per review e successiva pianificazione.
+ - **Ultimo Agente Attivo:** Agent-Docs — revisione e validazione design 017 / 018 / 019 — stato portato a REVIEWED (2026-05-29)
+ - **Blocco in Carico:** PLAN 017-019. Design REVIEWED. Prossimo passo: creazione coding plan e todo list per 017, 018, 019.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
@@ -60,9 +60,16 @@
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
- - **Next Action:** Creazione sequenziale dei coding plan e delle todo list collegate ai design 017-019 dopo la review documentale completata.
+ - **Next Action:** Creazione sequenziale dei coding plan e delle todo list per DESIGN 017, 018 e 019. Review documentale completata in data 2026-05-29. Tutti e tre i design in stato REVIEWED.
 
-> Nota sessione docs 2026-05-28:
+> Nota sessione review 2026-05-29:
+> Review documentale completata su DESIGN 017, 018 e 019.
+> Anomalie rilevate e corrette. Tutti e tre i documenti portati
+> in stato REVIEWED. Titoli definitivi confermati:
+> 017 = Prestiti, Mutui e Simulazione Finanziaria;
+> 018 = Confronto Mese su Mese per Categoria;
+> 019 = Notifiche Budget e Orchestrazione.
+> Prossimo passo: coding plan e todo list per 017, 018 e 019.
 > Creati i nuovi documenti `docs/2-projects/017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`,
 > `docs/2-projects/018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md` e
 > `docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md`.
@@ -536,9 +543,16 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B6-TODO-016-bis | Todo list 016-bis — Cleanup Orfani Storage | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
 | P3.B6-PLAN-016-ter | Coding plan 016-ter — Magic Bytes Validation | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
 | P3.B6-TODO-016-ter | Todo list 016-ter — Magic Bytes Validation | [x] DONE — 2026-05-28 Agent-Orchestrator | [x] PASSED |
-| P3.B7-DOCS-017 | DESIGN 017 — Motore Ricorrenze Automatico | [x] DONE — 2026-05-28 Agent-Docs | Stato: DRAFT |
-| P3.B7-DOCS-018 | DESIGN 018 — Schermata Ricorrenze UI | [x] DONE — 2026-05-28 Agent-Docs | Stato: DRAFT |
-| P3.B7-DOCS-019 | DESIGN 019 — Prestiti e Mutui | [x] DONE — 2026-05-28 Agent-Docs | Stato: DRAFT |
+| P3.B7-DOCS-017 | DESIGN 017 — Prestiti, Mutui e Simulazione Finanziaria | [x] DONE — 2026-05-28 Agent-Docs | Stato: REVIEWED 2026-05-29 |
+| P3.B7-DOCS-018 | DESIGN 018 — Confronto Mese su Mese per Categoria | [x] DONE — 2026-05-28 Agent-Docs | Stato: REVIEWED 2026-05-29 |
+| P3.B7-DOCS-019 | DESIGN 019 — Notifiche Budget e Orchestrazione | [x] DONE — 2026-05-28 Agent-Docs | Stato: REVIEWED 2026-05-29 |
+
+| P3.B8-PLAN-017 | Coding plan 017 — Prestiti, Mutui e Simulazione Finanziaria | [ ] TODO | [ ] OPEN |
+| P3.B8-TODO-017 | Todo list 017 — Prestiti, Mutui e Simulazione Finanziaria | [ ] TODO | [ ] OPEN |
+| P3.B8-PLAN-018 | Coding plan 018 — Confronto Mese su Mese per Categoria | [ ] TODO | [ ] OPEN |
+| P3.B8-TODO-018 | Todo list 018 — Confronto Mese su Mese per Categoria | [ ] TODO | [ ] OPEN |
+| P3.B8-PLAN-019 | Coding plan 019 — Notifiche Budget e Orchestrazione | [ ] TODO | [ ] OPEN |
+| P3.B8-TODO-019 | Todo list 019 — Notifiche Budget e Orchestrazione | [ ] TODO | [ ] OPEN |
 
 ### Log di Validazione
 
@@ -581,6 +595,10 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-28 | P3.B7-DOCS-019 | Agent-Docs | DONE | DESIGN 019 — Prestiti e Mutui, stato DRAFT; il file SQL canonico è stato rimosso |
 | 2026-05-26 | P1.B6-IMPL | GitHub Copilot | DONE | PLAN 006 completato su `main`: `react-native-quick-crypto` pinnata a 1.1.5, migration P40 aggiunta, `pin_kdf_salt` propagato ai tipi e al repository, Strategia A (`derivePinKey`, `encryptDataPin`, `decryptDataPin`) implementata con `PBKDF2_ITERATIONS = 600_000`, update multi-colonna `updatePinHashAndSalt`, suite K1/K2/K3 aggiunta, G1/G2/G3 e `npx tsc --noEmit` verdi. |
 | 2025-07-25 | DUSU-ANALYZER | Agent-Analyze | DONE | Analisi statica Android completata (read-only). 3 blocchi critici (BC-01/02/03: @phosphor-icons/react + react-dom), 4 adattamenti necessari (AN-01/02/03/04: haptic-system, sound-system, oklch colors), 3 discrepanze doc (DD-01/02/03). Report: docs/1-reports/REPORT-compatibilita-android-v1.0.0.md. P2.B2 risolta (use-online-status.ts → use-network-status.ts). |
+
+| 2026-05-29 | P3.B7-DOCS-017 | Agent-Docs + Consiglio AI | REVIEWED | DESIGN 017 — Prestiti, Mutui e Simulazione Finanziaria — anomalie corrette, stato REVIEWED |
+| 2026-05-29 | P3.B7-DOCS-018 | Agent-Docs + Consiglio AI | REVIEWED | DESIGN 018 — Confronto Mese su Mese per Categoria — anomalie corrette, stato REVIEWED |
+| 2026-05-29 | P3.B7-DOCS-019 | Agent-Docs + Consiglio AI | REVIEWED | DESIGN 019 — Notifiche Budget e Orchestrazione — anomalie corrette, stato REVIEWED |
 
 ---
 
