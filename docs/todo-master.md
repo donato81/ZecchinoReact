@@ -5,8 +5,8 @@
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
- - **Ultimo Agente Attivo:** Agent-Docs — revisione e validazione design 017 / 018 / 019 — stato portato a REVIEWED (2026-05-29)
- - **Blocco in Carico:** PLAN 017-019. Design REVIEWED. Prossimo passo: creazione coding plan e todo list per 017, 018, 019.
+ - **Ultimo Agente Attivo:** Agent-Orchestrator — stesura coding plan e todo list 017 / 018 / 019 — 2026-05-29
+ - **Blocco in Carico:** Coding plan e todo list 017-019 creati. Prossimo passo: review donny-81 e autorizzazione implementazione 017-019.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
@@ -16,7 +16,7 @@
   `use-screen-reader.ts` e `screen-reader.ts` eliminati;
   TSC baseline ridotta da 89 a 47 errori.
 - **Active Block:** Nessuno — implementazione DESIGN 004 completata.
- - **Last Updated:** 2026-05-28
+ - **Last Updated:** 2026-05-29
 - **Pending Plans:**
   - **PLAN 007 COMPLETATO** (release 0.2.0) —
     `docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md`
@@ -44,8 +44,8 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** BLOCCO DOCS 017-019 — creati i design per motore ricorrenze automatico, schermata ricorrenze UI e dominio prestiti/mutui (2026-05-28).
-- **Last Validated Block:** DOCS 017-019 — review documentale interna completata, tracking aggiornato (2026-05-28, Agent-Docs).
+- **Last Completed Task:** BLOCCO PIANIFICAZIONE 017-019 — creati i sei file PLAN/TODO per DESIGN 017, 018 e 019 (2026-05-29).
+- **Last Validated Block:** CICLO-G 017-019 — revisione globale completata con esito PASS, G8 incluso (2026-05-29, Agent-Orchestrator).
 - **Files Modified But Not Validated:** Nessuno (sessione DUSU-ANALYZER
   è read-only per src/). Documenti aggiornati: REPORT-compatibilita-android-v1.0.0.md
   (CREATO), docs/todo-master.md (aggiornato), CHANGELOG.md (aggiornato),
@@ -60,7 +60,19 @@
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
- - **Next Action:** Creazione sequenziale dei coding plan e delle todo list per DESIGN 017, 018 e 019. Review documentale completata in data 2026-05-29. Tutti e tre i design in stato REVIEWED.
+ - **Next Action:** Review donny-81 dei sei file di pianificazione 017-019 e autorizzazione all'implementazione.
+
+> Nota sessione orchestrazione 2026-05-29:
+> Creati i sei documenti di pianificazione richiesti:
+> `docs/3-coding-plans/017-PLAN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`,
+> `docs/4-todo-lists/017-TODO_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`,
+> `docs/3-coding-plans/018-PLAN_confronto-mese-su-mese-categoria_v0.1.0.md`,
+> `docs/4-todo-lists/018-TODO_confronto-mese-su-mese-categoria_v0.1.0.md`,
+> `docs/3-coding-plans/019-PLAN_notifiche-budget-orchestrazione_v0.1.0.md` e
+> `docs/4-todo-lists/019-TODO_notifiche-budget-orchestrazione_v0.1.0.md`.
+> Il Ciclo-G e stato superato con esito PASS; il controllo G8 e stato corretto e richiuso nello stesso ciclo.
+> Review dei test esistenti eseguita: copertura assente per 017 e 018, copertura parziale ma da riallineare per 019.
+> Prossimo passo: review donny-81 e autorizzazione implementazione 017-019.
 
 > Nota sessione review 2026-05-29:
 > Review documentale completata su DESIGN 017, 018 e 019.
@@ -547,12 +559,12 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B7-DOCS-018 | DESIGN 018 — Confronto Mese su Mese per Categoria | [x] DONE — 2026-05-28 Agent-Docs | Stato: REVIEWED 2026-05-29 |
 | P3.B7-DOCS-019 | DESIGN 019 — Notifiche Budget e Orchestrazione | [x] DONE — 2026-05-28 Agent-Docs | Stato: REVIEWED 2026-05-29 |
 
-| P3.B8-PLAN-017 | Coding plan 017 — Prestiti, Mutui e Simulazione Finanziaria | [ ] TODO | [ ] OPEN |
-| P3.B8-TODO-017 | Todo list 017 — Prestiti, Mutui e Simulazione Finanziaria | [ ] TODO | [ ] OPEN |
-| P3.B8-PLAN-018 | Coding plan 018 — Confronto Mese su Mese per Categoria | [ ] TODO | [ ] OPEN |
-| P3.B8-TODO-018 | Todo list 018 — Confronto Mese su Mese per Categoria | [ ] TODO | [ ] OPEN |
-| P3.B8-PLAN-019 | Coding plan 019 — Notifiche Budget e Orchestrazione | [ ] TODO | [ ] OPEN |
-| P3.B8-TODO-019 | Todo list 019 — Notifiche Budget e Orchestrazione | [ ] TODO | [ ] OPEN |
+| P3.B8-PLAN-017 | Coding plan 017 — Prestiti, Mutui e Simulazione Finanziaria | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
+| P3.B8-TODO-017 | Todo list 017 — Prestiti, Mutui e Simulazione Finanziaria | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
+| P3.B8-PLAN-018 | Coding plan 018 — Confronto Mese su Mese per Categoria | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
+| P3.B8-TODO-018 | Todo list 018 — Confronto Mese su Mese per Categoria | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
+| P3.B8-PLAN-019 | Coding plan 019 — Notifiche Budget e Orchestrazione | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
+| P3.B8-TODO-019 | Todo list 019 — Notifiche Budget e Orchestrazione | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
 
 ### Log di Validazione
 
@@ -599,6 +611,12 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-29 | P3.B7-DOCS-017 | Agent-Docs + Consiglio AI | REVIEWED | DESIGN 017 — Prestiti, Mutui e Simulazione Finanziaria — anomalie corrette, stato REVIEWED |
 | 2026-05-29 | P3.B7-DOCS-018 | Agent-Docs + Consiglio AI | REVIEWED | DESIGN 018 — Confronto Mese su Mese per Categoria — anomalie corrette, stato REVIEWED |
 | 2026-05-29 | P3.B7-DOCS-019 | Agent-Docs + Consiglio AI | REVIEWED | DESIGN 019 — Notifiche Budget e Orchestrazione — anomalie corrette, stato REVIEWED |
+| 2026-05-29 | P3.B8-PLAN-017 | Agent-Orchestrator | PASSED | Creato e validato `017-PLAN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`; Ciclo-G PASS |
+| 2026-05-29 | P3.B8-TODO-017 | Agent-Orchestrator | PASSED | Creata e validata `017-TODO_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`; Ciclo-G PASS |
+| 2026-05-29 | P3.B8-PLAN-018 | Agent-Orchestrator | PASSED | Creato e validato `018-PLAN_confronto-mese-su-mese-categoria_v0.1.0.md`; Ciclo-G PASS |
+| 2026-05-29 | P3.B8-TODO-018 | Agent-Orchestrator | PASSED | Creata e validata `018-TODO_confronto-mese-su-mese-categoria_v0.1.0.md`; Ciclo-G PASS |
+| 2026-05-29 | P3.B8-PLAN-019 | Agent-Orchestrator | PASSED | Creato e validato `019-PLAN_notifiche-budget-orchestrazione_v0.1.0.md`; Ciclo-G PASS |
+| 2026-05-29 | P3.B8-TODO-019 | Agent-Orchestrator | PASSED | Creata e validata `019-TODO_notifiche-budget-orchestrazione_v0.1.0.md`; Ciclo-G PASS |
 
 ---
 

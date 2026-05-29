@@ -19,6 +19,7 @@
   - `docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md`
 
 ### Docs
+- [DOCS] — Creati 017-PLAN, 017-TODO, 018-PLAN, 018-TODO, 019-PLAN, 019-TODO. Stato iniziale DRAFT/PENDING. Pronto per review architetto.
 - Aggiunti 2026-05-28:
   - DESIGN 017 `017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`: definisce l'architettura del dominio prestiti, mutui e simulazione finanziaria. Motore di calcolo puro (`loan-calculator.ts`), due nuove tabelle (`prestiti_mutui`, `prestiti_rimborsi`), RPC atomiche per la gestione del saldo residuo, conversione da simulazione a contratto attivo.
   - DESIGN 018 `018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md`: definisce il modulo di confronto mese su mese per categoria (`monthly-comparison.ts`). Modulo puro senza effetti collaterali, timezone-safe, con regole ufficiali per i casi percentuali e 17 scenari di test obbligatori.

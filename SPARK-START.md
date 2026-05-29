@@ -17,15 +17,15 @@ necessari per il tuo progetto.
 
 Versione corrente progetto: `0.13.9`.
 Analisi Android completata (DUSU-ANALYZER 2025-07-25).
-Stato aggiornato: 2026-05-28.
+Stato aggiornato: 2026-05-29.
 Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
 012 Export Nativo Guard Concorrente.
 Suite di test: PASS (`11/11` suite, `75` test passati, `13` `it.todo`
 documentati).
 Decisione release: nessun minor bump automatico; prima vanno chiusi i debiti
 Android/Windows gia' aperti nel master TODO.
-Prossima azione: creazione dei coding plan e delle todo list per i nuovi
-DESIGN 017–019 dopo la review documentale completata.
+Prossima azione: review donny-81 dei coding plan e delle todo list 017–019
+e autorizzazione all'implementazione.
 
 ---
 
@@ -55,9 +55,9 @@ DESIGN 017–019 dopo la review documentale completata.
 - [DESIGN 016 — Repository Allegati Transazioni](docs/2-projects/016-DESIGN_allegati-transazioni_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 016-bis — Cleanup Orfani Storage](docs/2-projects/016-bis-DESIGN_cleanup-orfani-storage_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 016-ter — Magic Bytes Validation](docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md) — v0.1.0 — REVIEWED
-- [DESIGN 017 — Prestiti, Mutui e Simulazione Finanziaria](docs/2-projects/017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md) — v0.1.0 — DRAFT
-- [DESIGN 018 — Confronto mese su mese per categoria](docs/2-projects/018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md) — v0.1.0 — DRAFT
-- [DESIGN 019 — Notifiche Budget e Orchestrazione](docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — DRAFT
+- [DESIGN 017 — Prestiti, Mutui e Simulazione Finanziaria](docs/2-projects/017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md) — v0.1.0 — REVIEWED
+- [DESIGN 018 — Confronto mese su mese per categoria](docs/2-projects/018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md) — v0.1.0 — REVIEWED
+- [DESIGN 019 — Notifiche Budget e Orchestrazione](docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — REVIEWED
 
 ## Stato PLAN / TODO
 
@@ -77,9 +77,15 @@ DESIGN 017–019 dopo la review documentale completata.
 - [TODO 016-bis — Cleanup Orfani Storage](docs/4-todo-lists/016-bis-TODO_cleanup-orfani-storage_v0.1.0.md) — v0.1.0 — PENDING
 - [PLAN 016-ter — Magic Bytes Validation](docs/3-coding-plans/016-ter-PLAN_magic-bytes-validation_v0.1.0.md) — v0.1.0 — DRAFT
 - [TODO 016-ter — Magic Bytes Validation](docs/4-todo-lists/016-ter-TODO_magic-bytes-validation_v0.1.0.md) — v0.1.0 — PENDING
+- [PLAN 017 — Prestiti, Mutui e Simulazione Finanziaria](docs/3-coding-plans/017-PLAN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md) — v0.1.0 — DRAFT
+- [TODO 017 — Prestiti, Mutui e Simulazione Finanziaria](docs/4-todo-lists/017-TODO_prestiti-mutui-simulazione-finanziaria_v0.1.0.md) — v0.1.0 — PENDING
+- [PLAN 018 — Confronto Mese su Mese per Categoria](docs/3-coding-plans/018-PLAN_confronto-mese-su-mese-categoria_v0.1.0.md) — v0.1.0 — DRAFT
+- [TODO 018 — Confronto Mese su Mese per Categoria](docs/4-todo-lists/018-TODO_confronto-mese-su-mese-categoria_v0.1.0.md) — v0.1.0 — PENDING
+- [PLAN 019 — Notifiche Budget e Orchestrazione](docs/3-coding-plans/019-PLAN_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — DRAFT
+- [TODO 019 — Notifiche Budget e Orchestrazione](docs/4-todo-lists/019-TODO_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — PENDING
 
-I dodici nuovi file di pianificazione per DESIGN 013–016-ter sono pronti
-per review e successiva implementazione sequenziale.
+I sei nuovi file di pianificazione per DESIGN 017–019 sono pronti per
+review e successiva autorizzazione all'implementazione.
 
 Blocco residuo: `009-native` resta aperto solo per le validazioni runtime
 T3-N5 su Windows e Android. Non sblocca da solo una nuova release: il progetto
