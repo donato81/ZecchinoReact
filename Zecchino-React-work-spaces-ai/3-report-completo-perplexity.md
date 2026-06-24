@@ -2,1581 +2,379 @@ ho fatto analizzare il tuo rapporto al consiglio delle ai. ecco il rapporto che 
 
 Rispondimi in modo semplice, logco cognitivo e senza tecnicismi, con esempi pratici.
 
+---
 
+Ecco il **rapporto finale consolidato** da restituire a Perplexity, integrando Perplexity, ChatGPT, DeepSeek e Gemini.
 
-\--
+---
 
+# RAPPORTO FINALE CONSOLIDATO — CODING PLAN 017, 018, 019
 
+## ZecchinoReact — Validazione finale dopo revisione commit `4d30cf1980fec269e0b6ea0e7be4e64933d0fa55`
 
-\# RAPPORTO FINALE CONSOLIDATO — CONSIGLIO AI
+**Data:** 29 maggio 2026
+**Oggetto:** Analisi complessiva finale dei Coding Plan 017, 018 e 019 dopo ulteriore revisione Perplexity e confronto con i rapporti ChatGPT, DeepSeek e Gemini.
+**Repository:** `github.com/donato81/ZecchinoReact`
+**Commit di riferimento dichiarato da Perplexity:** `4d30cf1980fec269e0b6ea0e7be4e64933d0fa55`
+**Esito finale:** i tre piani sono molto migliorati e quasi pronti, ma **non devono essere considerati pienamente chiusi in REVIEWED operativo finché non viene corretto almeno il blocco su PLAN 019 / P55**.
 
+---
 
+# 1. Premessa
 
-\## DESIGN 020 — Regola 50-30-20 per gruppi di spesa
+Sono stati analizzati:
 
+1. il report Perplexity di revisione tecnica sui Coding Plan 017, 018 e 019;
+2. il rapporto ChatGPT di verifica diretta sul commit `4d30cf1980fec269e0b6ea0e7be4e64933d0fa55`;
+3. il rapporto DeepSeek / Consiglio Mastro;
+4. il rapporto Gemini con patch operative;
+5. la coerenza complessiva della sequenza implementativa `PLAN 017 → PLAN 018 → PLAN 019`.
 
+Il report Perplexity riconosce correttamente un netto miglioramento dei tre documenti e dichiara i PLAN meritevoli dello stato `REVIEWED`. Perplexity segnala ancora tre raccomandazioni operative: responsabilità sui placeholder RPC in PLAN 017, voce `helpers.ts` in PLAN 018, e relazione `budget-alerts.ts` / `notification-service.ts` in PLAN 019. 
 
-\*\*Versione consolidata:\*\* 1.1.0
+Tuttavia i rapporti ChatGPT, DeepSeek e Gemini convergono su un punto più severo: **lo stato `REVIEWED` è prematuro finché PLAN 019 mantiene la migrazione P55 dopo il repository notifiche o non la dichiara come dipendenza esplicita del repository.**
 
-\*\*Data:\*\* 2026-05-29
+---
 
-\*\*Esito:\*\* APPROVATO CON MODIFICHE OBBLIGATORIE
+# 2. Valutazione del report Perplexity
 
+## 2.1 Punti corretti del report Perplexity
 
+Perplexity ha ragione nel rilevare che i documenti sono sensibilmente migliorati. In particolare:
 
-\---
+* PLAN 017 ora dichiara chiaramente la proprietà di `roundCurrency` ed `extractDatePart`;
+* PLAN 017 ha risolto il tema delle simulazioni temporanee non persistite;
+* PLAN 018 ha allineato il numero degli scenari obbligatori a 12;
+* PLAN 018 ha chiarito il comportamento con base zero e `differenzaPercentuale = null`;
+* PLAN 019 ha risolto la contraddizione sulle notifiche relative a prestiti, mutui e rimborsi;
+* PLAN 019 ha introdotto costanti nominate per le soglie;
+* PLAN 019 ha documentato la deduplicazione;
+* PLAN 019 ha specificato il caso budget eliminato con notifica pendente. 
 
+Questi sono progressi reali e vanno riconosciuti.
 
+## 2.2 Punto su cui Perplexity è troppo ottimista
 
-\# PREMESSA
+Perplexity conclude:
 
+> “Tutti e tre i PLAN sono meritevoli dello stato REVIEWED.”
 
+Il Consiglio AI non conferma pienamente questa conclusione.
 
-Il Consiglio AI ha analizzato:
+La ragione è che rimane una contraddizione operativa importante nel PLAN 019: la migrazione P55 è dichiarata necessaria prima del riallineamento repository/test, ma nella sequenza dei task resta dopo il repository notifiche, oppure comunque non è espressa come dipendenza bloccante del repository.
 
+Questo punto è più rilevante delle tre raccomandazioni editoriali elencate da Perplexity, perché può condurre un agente implementatore a lavorare su repository e test prima che lo schema SQL sia definito.
 
+---
 
-\* il report originale di Perplexity,
+# 3. Verdetto per singolo PLAN
 
-\* le delibere integrative di ChatGPT,
+---
 
-\* le osservazioni architetturali di Claude,
+# 3.1 PLAN 017 — Prestiti, Mutui e Simulazione Finanziaria
 
-\* la validazione semantica e accessibilità di Gemini.
+## Giudizio
 
+PLAN 017 è sostanzialmente valido e vicino alla chiusura.
 
+Perplexity conferma correttamente che:
 
-Il risultato complessivo è estremamente positivo.
+* proprietà di `roundCurrency` ed `extractDatePart` è risolta;
+* P52/P53/P54 sono dichiarati;
+* simulazioni temporanee non persistite sono coperte;
+* le osservazioni residue non sono bloccanti. 
 
+## Punto ancora consigliato
 
+Resta utile rafforzare T5 con un vincolo esplicito sull’uso di `loan-calculator.ts`.
 
-DESIGN 020 è considerato:
+### Problema
 
+T5 deve creare/aggiornare il repository prestiti e calcolare campi derivati. Anche se la dipendenza da T4 esiste, è opportuno impedire in modo scritto la duplicazione delle formule finanziarie nel repository.
 
+### Correzione consigliata
 
-\* coerente con l’architettura storica di ZecchinoReact,
+Aggiungere in T5:
 
-\* compatibile con i principi accessibility-first,
-
-\* scalabile,
-
-\* testabile,
-
-\* retrocompatibile,
-
-\* implementabile senza debiti strutturali immediati.
-
-
-
-Il design NON introduce un nuovo dominio autonomo, ma estende semanticamente il dominio esistente `categorie`, scelta giudicata corretta e strategicamente molto solida.
-
-
-
-\---
-
-
-
-\# VERDETTO FINALE
-
-
-
-\# DESIGN 020 APPROVATO CON MODIFICHE OBBLIGATORIE
-
-
-
-Le modifiche richieste NON invalidano l’architettura proposta da Perplexity.
-
-
-
-Correggono invece:
-
-
-
-\* ambiguità semantiche,
-
-\* edge cases reali,
-
-\* problemi di accessibilità,
-
-\* incompletezze del modello dati,
-
-\* gestione dei casi inconsistenti,
-
-\* logica del gruppo risparmio.
-
-
-
-\---
-
-
-
-\# VALIDAZIONE ARCHITETTURALE
-
-
-
-\## 1. Scelta di usare `categorie.gruppo`
-
-
-
-APPROVATA.
-
-
-
-La classificazione appartiene semanticamente alla categoria.
-
-
-
-Alternative peggiori sarebbero state:
-
-
-
-\* mapping runtime,
-
-\* tabella ponte,
-
-\* classificazione per transazione,
-
-\* configurazioni JSON isolate.
-
-
-
-La soluzione:
-
-
-
-```sql
-
-gruppo TEXT NULL
-
+```markdown
+* **Vincolo Architetturale:** Il repository deve importare e utilizzare obbligatoriamente il motore puro `loan-calculator.ts` per derivare i valori di `rataMensile`, `totaleInteressi` e `dataFinePrevista`. È vietata la reimplementazione inline o la duplicazione delle formule finanziarie all'interno del layer repository.
 ```
 
+## Altri miglioramenti consigliati
 
+Perplexity segnala correttamente che in T6 i riferimenti `P_017_01` e `P_017_02` sono ancora placeholder e che sarebbe meglio chiarire chi li aggiorna. 
 
-è la più coerente con:
+Correzione consigliata:
 
-
-
-\* semplicità,
-
-\* accessibilità,
-
-\* compatibilità,
-
-\* riduzione complessità UI.
-
-
-
-\---
-
-
-
-\# 2. Campo nullable
-
-
-
-APPROVATO.
-
-
-
-```sql
-
-gruppo TEXT NULL
-
+```markdown
+* **Nota di Responsabilità:** L'agente implementatore del Task T6 ha l'obbligo esplicito di sostituire i placeholder strutturali `P_017_01` e `P_017_02` con i riferimenti reali generati nel file di migrazione finale.
 ```
 
+Inoltre, se nei prerequisiti si dice che P52/P53/P54 devono esistere prima dei repository, va chiarito che sono prodotti dal Task T10:
 
-
-è obbligatorio per compatibilità con utenti esistenti.
-
-
-
-Il Consiglio approva anche la scelta di NON usare ENUM PostgreSQL.
-
-
-
-ZecchinoReact usa già pattern string-based:
-
-
-
-\* `tipo`
-
-\* `stato`
-
-\* `frequenza`
-
-\* ecc.
-
-
-
-Uniformità preservata.
-
-
-
-\---
-
-
-
-\# 3. Motore puro `budget-50-30-20.ts`
-
-
-
-APPROVATO.
-
-
-
-La separazione:
-
-
-
-\* repository,
-
-\* dominio,
-
-\* engine,
-
-\* UI,
-
-
-
-è eccellente.
-
-
-
-La funzione:
-
-
-
-```ts
-
-computeBudget503020()
-
+```markdown
+* Le migrazioni placeholder P52, P53 e P54 sono prodotte formalmente dal Task T10; i task operativi di persistenza e repository non possono essere considerati conclusi finché T10 non ha generato i relativi file strutturali in `docs/6-sql/`.
 ```
 
+## Esito PLAN 017
 
+**Confermabile come REVIEWED con raccomandazioni operative**, purché l’agente implementatore riceva esplicitamente il vincolo su `loan-calculator.ts`.
 
-rispetta pienamente il paradigma architetturale del progetto:
+---
 
+# 3.2 PLAN 018 — Confronto Mese su Mese per Categoria
 
+## Giudizio
 
-\* deterministica,
+PLAN 018 è sostanzialmente valido.
 
-\* senza side effects,
+Perplexity conferma che:
 
-\* completamente testabile,
+* `extractDatePart` ha ora un proprietario dichiarato in PLAN 017;
+* la gestione della base zero è completa;
+* PLAN 019 è dichiarato come dipendente;
+* il numero minimo degli scenari obbligatori è allineato a 12. 
 
-\* indipendente dal database,
+## Punto ancora aperto
 
-\* indipendente dalla UI.
+Perplexity segnala correttamente che la sezione Perimetro contiene ancora una voce fuorviante:
 
+> `src/lib/helpers.ts - questo file riceve l'aggiunta della funzione extractDatePart`.
 
+Anche se il testo successivo chiarisce che PLAN 018 non deve ridefinire la funzione, quella prima frase può ancora confondere un agente che legge la lista file target.
 
-\---
+### Correzione raccomandata
 
+Sostituire la voce con:
 
+```markdown
+* `src/lib/helpers.ts` — Il PLAN 018 consuma `extractDatePart` e `roundCurrency` introdotte da PLAN 017; il file viene letto e utilizzato come dipendenza pura, non riceve aggiunte né ridefinizioni di helper condivise in questo piano.
+```
 
-\# 4. Prestazioni
+## Gate di purezza
 
+Il gate G-018-3, se è ancora manuale, dovrebbe essere reso più riproducibile:
 
+```markdown
+* **Comando di Verifica:** `grep -RIn "supabase\|AppDataContext\|cache\|repositories" src/lib/monthly-comparison.ts`
+* **Esito Atteso:** 0 occorrenze.
+```
 
-APPROVATE.
+## Esito PLAN 018
 
+**Confermabile come REVIEWED con una correzione editoriale raccomandata.**
 
+La correzione su `helpers.ts` è piccola ma importante per evitare ambiguità di ownership.
 
-Complessità:
+---
 
+# 3.3 PLAN 019 — Notifiche Budget e Orchestrazione
 
+## Giudizio
+
+PLAN 019 è quello ancora più delicato.
+
+Perplexity ha ragione nel confermare che sono risolti:
+
+* conflitto con PLAN 017 sulle notifiche rate prestiti;
+* soglie hardcoded;
+* deduplicazione;
+* budget eliminato con notifica pendente. 
+
+Però Perplexity non dà sufficiente peso al problema P55/repository.
+
+---
+
+## Problema bloccante: P55 deve precedere repository notifiche
+
+### Problema
+
+Il piano dichiara che la migrazione P55 deve essere disponibile prima del riallineamento repository/test, ma se nella sezione Task il repository notifiche resta prima della migrazione P55, o non dipende esplicitamente da essa, l’agente implementatore può procedere in ordine errato.
+
+Questo non è un dettaglio editoriale: è una violazione della catena operativa schema → repository → service → context → test.
+
+### Correzione preferita
+
+Rinumerare i task di PLAN 019 così:
 
 ```text
-
-O(n)
-
+T1 — Configurazione soglie centralizzate
+T2 — Estensione tipi client / Supabase
+T3 — Creazione migrazione SQL P55
+T4 — Riallineamento repository notifiche
+T5 — Aggiornamento / implementazione notification-service
+T6 — Estrazione orchestrazione da AppDataContext
+T7 — Chiavi di localizzazione
+T8 — Suite di test e copertura
 ```
 
-
-
-sulle transazioni del mese.
-
-
-
-Anche con:
-
-
-
-\* 10.000 transazioni,
-
-\* multi-account,
-
-\* categorie archiviate,
-
-
-
-non esistono rischi reali di bottleneck.
-
-
-
-Nessun indice DB aggiuntivo necessario.
-
-
-
-\---
-
-
-
-\# OSSERVAZIONE ARCHITETTURALE CRITICA
-
-
-
-\# Problema “Category-Centric vs Transaction-Centric”
-
-
-
-Il modello attuale:
-
-
+Con dipendenze aggiornate:
 
 ```text
-
-Categoria -> gruppo
-
+T4 dipende da T1, T2, T3
+T5 dipende da T4
+T6 dipende da T5
 ```
 
+### Correzione minima accettabile
 
-
-non è semanticamente perfetto.
-
-
-
-Esempio:
-
-
-
-Categoria:
-
-
+Se non si vuole rinumerare:
 
 ```text
-
-Amazon
-
+T3 Dipende da: T1, T2, T7
 ```
 
+e aggiungere:
 
+```markdown
+T3 non può iniziare finché `docs/6-sql/P55-notifiche.sql` non esiste ed è allineato allo schema finale.
+```
 
-può contenere:
-
-
-
-\* bisogni,
-
-\* desideri,
-
-\* acquisti misti.
-
-
-
-Lo stesso vale per:
-
-
+### Classificazione
 
 ```text
-
-Supermercato
-
+BLOCCANTE PRIMA DEL REVIEWED OPERATIVO
 ```
 
+---
 
+## Correzione raccomandata: budget-alerts.ts / notification-service.ts
 
-che può contenere:
+Perplexity segnala correttamente che il rapporto tra `budget-alerts.ts` e `notification-service.ts` non è ancora del tutto esplicito. 
 
+Correzione raccomandata:
 
+```markdown
+* **Relazione budget-alerts / notification-service:** La riscrittura completa di `budget-alerts.ts` è fuori perimetro. Il file esistente può essere unicamente modificato per importare le costanti centralizzate dal file di configurazione (`budget-notification-config.ts`) al fine di eliminare i letterali numerici hardcoded, mentre l'intera logica di nuova orchestrazione delle notifiche è delegata esclusivamente al nuovo `notification-service.ts`.
+```
 
-\* alimentari essenziali,
+## Gate soglie
 
-\* extra,
+Se G-019-1 è ancora manuale, aggiungere:
 
-\* alcolici,
+```markdown
+* **Comando di Verifica:** `grep -RIn "0\.75\|0\.90\|0\.80\|0\.65\|0\.70\|75\|80\|90\|100" src/lib src/context __tests__ | grep -v "budget-notification-config.ts"`
+* **Esito Atteso:** 0 occorrenze di costanti numeriche di soglia budget cablate inline fuori dal file di configurazione centrale.
+```
 
-\* prodotti non necessari.
+## Esito PLAN 019
 
+**Non confermare ancora come REVIEWED operativo finché il problema P55/repository non è risolto.**
 
+---
 
-\---
+# 4. Classificazione finale delle anomalie residue
 
+## 4.1 Bloccante
 
+### B1 — PLAN 019: P55 deve precedere repository notifiche
 
-\# DELIBERA
+Correzione obbligatoria prima di considerare il piano davvero chiuso.
 
+---
 
+## 4.2 Medie / raccomandate prima dell’implementazione
 
-Per V1 il modello category-centric è APPROVATO.
+### M1 — PLAN 017: T5 deve imporre uso di `loan-calculator.ts`
 
+Non lasciare implicito il riuso del motore puro.
 
+### M2 — PLAN 018: correggere voce `helpers.ts`
 
-Motivazioni:
+PLAN 018 deve consumare helper da PLAN 017, non modificarle.
 
+### M3 — PLAN 018: rendere G-018-3 verificabile
 
+Sostituire verifica manuale con grep.
 
-\* semplicità,
+### M4 — PLAN 019: rendere G-019-1 verificabile
 
-\* rapidità classificazione,
+Sostituire verifica manuale con grep.
 
-\* accessibilità,
+### M5 — PLAN 019: chiarire rapporto `budget-alerts.ts` / `notification-service.ts`
 
-\* riduzione attrito UI,
+Evitare che l’agente scelga autonomamente se modificare, affiancare o dismettere `budget-alerts.ts`.
 
-\* zero complessità aggiuntiva.
+---
 
+## 4.3 Minori
 
+* PLAN 017: chiarire T10/P52/P53/P54;
+* PLAN 017: assegnare responsabilità esplicita sui placeholder `P_017_01` / `P_017_02`;
+* PLAN 019: sezione Casi limite e nota lunga fuori perimetro possono essere riposizionate per leggibilità.
 
-\---
+---
 
+# 5. Decisione finale del Consiglio AI
 
+Il Consiglio AI non condivide il via libera pieno di Perplexity.
 
-\# NUOVO DEBITO TECNICO OBBLIGATORIO
-
-
-
-\## DT-020-05 — Override gruppo per singola transazione
-
-
-
-Futuro supporto:
-
-
+Il verdetto corretto è:
 
 ```text
-
-transazioni.gruppo\_override
-
+APPROVABILE DOPO ULTIMO FIX CHIRURGICO
+NON ANCORA REVIEWED OPERATIVO PIENO
 ```
 
-
-
-permetterà riclassificazione opzionale della singola transazione.
-
-
-
-NON implementare nella V1.
-
-
-
-Ma il debito tecnico va registrato formalmente.
-
-
-
-\---
-
-
-
-\# DELIBERE DEFINITIVE SUI 7 PUNTI APERTI
-
-
-
-\---
-
-
-
-\# DOMANDA 1 — Target fissi o personalizzabili
-
-
-
-\# DELIBERA: PERSONALIZZABILI
-
-
-
-\## Strategia approvata
-
-
-
-\### V1
-
-
-
-\* engine supporta target custom,
-
-\* repository supporta persistence,
-
-\* UI usa sempre default 50-30-20.
-
-
-
-\### V2
-
-
-
-\* schermata configurazione target.
-
-
-
-\---
-
-
-
-\# Motivazione
-
-
-
-Costo architetturale quasi nullo:
-
-
-
-\* esiste già `impostazioni\_utente`,
-
-\* esiste già payload JSON preferences,
-
-\* nessuna nuova tabella,
-
-\* nessuna nuova relazione.
-
-
-
-Utenti reali:
-
-
-
-\* freelance,
-
-\* famiglie,
-
-\* mutui,
-
-\* città costose,
-
-
-
-non possono realisticamente usare sempre 50-30-20 fisso.
-
-
-
-\---
-
-
-
-\# Persistenza approvata
-
-
-
-```ts
-
-preferences: {
-
-&#x20; budget503020: {
-
-&#x20;   bisogni: number
-
-&#x20;   desideri: number
-
-&#x20;   risparmio: number
-
-&#x20; }
-
-}
-
-```
-
-
-
-Vincolo obbligatorio:
-
-
+Il fix minimo indispensabile è:
 
 ```text
-
-somma totale === 100
-
+PLAN 019 — rendere P55 precedente o dipendenza esplicita del repository notifiche.
 ```
 
+Dopo quel fix, i tre piani possono essere considerati idonei all’implementazione.
 
+La raccomandazione più sicura è applicare un mini-commit finale con:
 
-validata lato applicazione.
+1. riordino P55/T7/T3 in PLAN 019;
+2. nota `loan-calculator.ts` in PLAN 017;
+3. correzione `helpers.ts` in PLAN 018;
+4. grep per G-018-3 e G-019-1;
+5. chiarimento `budget-alerts.ts` in PLAN 019.
 
+---
 
+# 6. Sequenza implementativa confermata
 
-\---
-
-
-
-\# DOMANDA 2 — Base di calcolo
-
-
-
-\# DELIBERA: Entrate reali del mese (V1)
-
-
-
-\---
-
-
-
-\# Motivazione
-
-
-
-È la soluzione:
-
-
-
-\* più trasparente,
-
-\* più comprensibile,
-
-\* più verificabile mentalmente,
-
-\* migliore per screen reader,
-
-\* meno ambigua.
-
-
-
-\---
-
-
-
-\# Caso limite obbligatorio
-
-
-
-\## `entrateMese === 0`
-
-
-
-Il motore NON deve:
-
-
-
-\* crashare,
-
-\* dividere per zero,
-
-\* produrre NaN.
-
-
-
-Deve restituire:
-
-
-
-```ts
-
-avviso: 'nessuna\_entrata'
-
-```
-
-
-
-con:
-
-
-
-\* percentuali a zero,
-
-\* stato coerente,
-
-\* messaggio accessibile.
-
-
-
-\---
-
-
-
-\# NUOVO DEBITO TECNICO
-
-
-
-\## DT-020-06 — Modalità avanzate baseline
-
-
-
-Future modalità:
-
-
-
-\* media mobile,
-
-\* reddito fisso,
-
-\* esclusione entrate straordinarie.
-
-
-
-NON nella V1.
-
-
-
-\---
-
-
-
-\# DOMANDA 3 — Categorie senza gruppo
-
-
-
-\# DELIBERA: MODELLO IBRIDO
-
-
-
-Le categorie senza gruppo:
-
-
-
-\* NON entrano nei 3 gruppi,
-
-\* MA vengono mostrate esplicitamente.
-
-
-
-\---
-
-
-
-\# Motivazione
-
-
-
-\## Includerle
-
-
-
-falserebbe il 50-30-20.
-
-
-
-\## Ignorarle silenziosamente
-
-
-
-ingannerebbe l’utente.
-
-
-
-\---
-
-
-
-\# MODELLO APPROVATO
-
-
-
-```ts
-
-nonClassificato: {
-
-&#x20; totaleSpeso: number
-
-&#x20; categorieCoinvolte: number
-
-&#x20; transazioniCoinvolte: number
-
-}
-
-```
-
-
-
-Questo sostituisce completamente:
-
-
-
-```ts
-
-categorieNonAssegnate: number
-
-```
-
-
-
-proposto inizialmente da Perplexity.
-
-
-
-\---
-
-
-
-\# DOMANDA 4 — Soglie verde/giallo/rosso
-
-
-
-\# DELIBERA: RIFIUTATE le soglie 95%-105%
-
-
-
-Troppo strette.
-
-Generano falsi allarmi.
-
-
-
-\---
-
-
-
-\# LOGICA APPROVATA — BISOGNI
-
-
-
-Più spendi = peggio.
-
-
-
-\## Stati
-
-
-
-\* In equilibrio → ≤ 90%
-
-\* Vicino al limite → 90%-100%
-
-\* Oltre il limite → >100%
-
-
-
-\---
-
-
-
-\# LOGICA APPROVATA — DESIDERI
-
-
-
-Più tollerante.
-
-
-
-\## Stati
-
-
-
-\* In equilibrio → ≤ 85%
-
-\* Vicino al limite → 85%-100%
-
-\* Oltre il limite → >100%
-
-
-
-\---
-
-
-
-\# LOGICA APPROVATA — RISPARMIO
-
-
-
-\# ATTENZIONE
-
-
-
-Il report originale aveva un errore concettuale.
-
-
-
-Nel risparmio:
-
-
+Dopo il fix finale, l’implementazione deve avvenire in sequenza stretta:
 
 ```text
-
-più accumuli = meglio è
-
+PLAN 017 → PLAN 018 → PLAN 019
 ```
 
+Motivi:
 
+* PLAN 018 consuma helper introdotte da PLAN 017;
+* PLAN 019 consuma helper introdotte da PLAN 017;
+* PLAN 019 dipende dall’architettura notifiche di PLAN 015;
+* `AppDataContext.tsx` è modificato sia da PLAN 017 sia da PLAN 019;
+* l’esecuzione parallela può generare conflitti di merge e regressioni nel bootstrap.
 
-La logica è invertita.
+---
 
+# 7. Risposta sintetica da restituire a Perplexity
 
+Perplexity, il Consiglio AI riconosce il netto miglioramento dei tre Coding Plan e conferma che molte anomalie precedenti sono state risolte. Tuttavia non conferma ancora senza riserve lo stato `REVIEWED`.
 
-\---
+Il punto bloccante rimasto è nel PLAN 019: la migrazione P55 deve precedere il repository notifiche, oppure il repository deve dichiarare P55/T7 come dipendenza esplicita. Finché questa relazione resta ambigua, un agente può implementare il repository prima dello schema SQL.
 
+Le altre correzioni raccomandate sono:
 
+* PLAN 017: aggiungere in T5 il vincolo esplicito di uso di `loan-calculator.ts`;
+* PLAN 018: correggere la voce `helpers.ts` per dire che consuma helper da PLAN 017;
+* PLAN 018: rendere G-018-3 verificabile con grep;
+* PLAN 019: rendere G-019-1 verificabile con grep;
+* PLAN 019: chiarire la relazione tra `budget-alerts.ts` e `notification-service.ts`.
 
-\# Stati approvati — RISPARMIO
-
-
-
-\* Obiettivo raggiunto → reale ≥ target
-
-\* Quasi raggiunto → reale tra 90% target e 99.9%
-
-\* Risparmio insufficiente → reale <90% target
-
-
-
-\---
-
-
-
-\# CONSEGUENZA ARCHITETTURALE
-
-
-
-Il semplice:
-
-
-
-```ts
-
-stato: 'verde' | 'giallo' | 'rosso'
-
-```
-
-
-
-NON è sufficiente.
-
-
-
-\---
-
-
-
-\# MODELLO RACCOMANDATO
-
-
-
-```ts
-
-statoSemantico:
-
-&#x20; | 'in\_equilibrio'
-
-&#x20; | 'vicino\_limite'
-
-&#x20; | 'oltre\_limite'
-
-&#x20; | 'raggiunto'
-
-&#x20; | 'quasi\_raggiunto'
-
-&#x20; | 'insufficiente'
-
-```
-
-
-
-Molto più accessibile e semanticamente corretto.
-
-
-
-\---
-
-
-
-\# DOMANDA 5 — Prestiti e mutui
-
-
-
-\# DELIBERA: ESCLUSI nella V1
-
-
-
-Il dominio prestiti:
-
-
-
-\* è recente,
-
-\* è ancora giovane,
-
-\* introduce concetti complessi:
-
-
-
-&#x20; \* patrimonio netto,
-
-&#x20; \* quota interessi,
-
-&#x20; \* quota capitale,
-
-&#x20; \* mutui vs prestiti consumo.
-
-
-
-\---
-
-
-
-\# Decisione finale
-
-
-
-I movimenti prestiti:
-
-
-
-\* NON entrano automaticamente nel 50-30-20,
-
-\* salvo categorizzazione manuale utente.
-
-
-
-\---
-
-
-
-\# DOMANDA 6 — Coesistenza con sistema budget esistente
-
-
-
-\# DELIBERA: IL CONFINE VA DICHIARATO ESPLICITAMENTE
-
-
-
-\---
-
-
-
-\# Distinzione approvata
-
-
-
-\## Budget esistente
-
-
-
-Controllo operativo granulare.
-
-
-
-Esempio:
-
-
-
-> “Ristoranti massimo 150€.”
-
-
-
-\---
-
-
-
-\## Sistema 50-30-20
-
-
-
-Analisi strategica complessiva.
-
-
-
-Esempio:
-
-
-
-> “Stai spendendo troppo nei desideri.”
-
-
-
-\---
-
-
-
-\# Testo obbligatorio nel DESIGN
-
-
+Verdetto finale:
 
 ```text
-
-Il sistema Budget monitora limiti per categoria.
-
-Il sistema 50-30-20 analizza l’equilibrio finanziario complessivo.
-
-I due sistemi sono indipendenti ma complementari.
-
+APPROVABILE DOPO ULTIMO FIX CHIRURGICO
+NON ANCORA REVIEWED OPERATIVO PIENO
 ```
 
-
-
-\---
-
-
-
-\# DOMANDA 7 — Accessibilità screen reader
-
-
-
-\# DELIBERA: MODIFICHE OBBLIGATORIE
-
-
-
-\---
-
-
-
-\# DIVIETO APPROVATO
-
-
-
-NON vocalizzare:
-
-
-
-\* verde,
-
-\* giallo,
-
-\* rosso.
-
-
-
-Per screen reader sono semantiche pessime.
-
-
-
-\---
-
-
-
-\# STRUTTURA ACCESSIBILITÀ OBBLIGATORIA
-
-
-
-\## 1. Annuncio riepilogativo iniziale
-
-
-
-Esempio:
-
-
-
-> “Analisi finanziaria maggio 2026. Entrate 2.000 euro. Spese analizzate 1.600 euro. Importo non classificato 200 euro.”
-
-
-
-\---
-
-
-
-\## 2. Annunci per gruppo
-
-
-
-Formato approvato:
-
-
-
-> “Bisogni. Obiettivo 50 percento. Spesa reale 49 percento. Stato: in equilibrio.”
-
-
-
-\---
-
-
-
-\# STATI VOCALI APPROVATI
-
-
-
-\## Bisogni / Desideri
-
-
-
-\* in equilibrio
-
-\* vicino al limite
-
-\* oltre il limite
-
-
-
-\## Risparmio
-
-
-
-\* obiettivo raggiunto
-
-\* quasi raggiunto
-
-\* risparmio insufficiente
-
-
-
-\---
-
-
-
-\# MODIFICHE OBBLIGATORIE AI TIPI
-
-
-
-\# Struttura finale raccomandata
-
-
-
-```ts
-
-export type GruppoBudget =
-
-&#x20; | 'bisogni'
-
-&#x20; | 'desideri'
-
-&#x20; | 'risparmio';
-
-
-
-export interface Budget503020Options {
-
-&#x20; anno: number;
-
-&#x20; mese: number;
-
-&#x20; targetCustom?: {
-
-&#x20;   bisogni: number;
-
-&#x20;   desideri: number;
-
-&#x20;   risparmio: number;
-
-&#x20; };
-
-&#x20; includeTransfers?: boolean;
-
-}
-
-
-
-export interface RisultatoGruppo {
-
-&#x20; gruppo: GruppoBudget;
-
-&#x20; totaleSpeso: number;
-
-&#x20; percentualeReale: number;
-
-&#x20; percentualeTarget: number;
-
-&#x20; differenzaEuro: number;
-
-&#x20; differenzaPerc: number;
-
-
-
-&#x20; statoSemantico:
-
-&#x20;   | 'in\_equilibrio'
-
-&#x20;   | 'vicino\_limite'
-
-&#x20;   | 'oltre\_limite'
-
-&#x20;   | 'raggiunto'
-
-&#x20;   | 'quasi\_raggiunto'
-
-&#x20;   | 'insufficiente';
-
-}
-
-
-
-export interface Risultato5030 {
-
-&#x20; mese: number;
-
-&#x20; anno: number;
-
-
-
-&#x20; entrateMese: number;
-
-&#x20; speseTotaliAnalizzate: number;
-
-
-
-&#x20; gruppi: RisultatoGruppo\[];
-
-
-
-&#x20; nonClassificato: {
-
-&#x20;   totaleSpeso: number;
-
-&#x20;   categorieCoinvolte: number;
-
-&#x20;   transazioniCoinvolte: number;
-
-&#x20; };
-
-
-
-&#x20; categorieInconsistenti: number;
-
-
-
-&#x20; avviso?: 'nessuna\_entrata' | 'dati\_inconsistenti';
-
-}
-
-```
-
-
-
-\---
-
-
-
-\# MODIFICHE OBBLIGATORIE SQL
-
-
-
-Nel file:
-
-
+Dopo quel fix, la sequenza implementativa approvata resta:
 
 ```text
-
-docs/6-sql/P54-add-gruppo-categorie.sql
-
+PLAN 017 → PLAN 018 → PLAN 019
 ```
-
-
-
-aggiungere:
-
-
-
-```sql
-
-ALTER TABLE categorie
-
-ADD COLUMN gruppo TEXT NULL,
-
-ADD CONSTRAINT chk\_categorie\_gruppo
-
-CHECK (
-
-&#x20; gruppo IN ('bisogni', 'desideri', 'risparmio')
-
-&#x20; OR gruppo IS NULL
-
-);
-
-```
-
-
-
-\---
-
-
-
-\# TEST AGGIUNTIVO OBBLIGATORIO
-
-
-
-\## Scenario 16 — Categoria inesistente
-
-
-
-Caso reale:
-
-
-
-\* categoria eliminata,
-
-\* transazioni storiche ancora presenti.
-
-
-
-Il motore NON deve crashare.
-
-
-
-La transazione:
-
-
-
-\* viene ignorata,
-
-\* incrementa:
-
-
-
-```ts
-
-categorieInconsistenti
-
-```
-
-
-
-\---
-
-
-
-\# NOTA DI COMPORTAMENTO OBBLIGATORIA
-
-
-
-Se l’utente modifica:
-
-
-
-```text
-
-categoria.gruppo
-
-```
-
-
-
-le analisi storiche cambiano.
-
-
-
-Il motore usa SEMPRE:
-
-
-
-```text
-
-il gruppo corrente della categoria
-
-```
-
-
-
-Questo comportamento è APPROVATO per V1 ma va documentato chiaramente.
-
-
-
-\---
-
-
-
-\# DEBITI TECNICI FINALI CONSOLIDATI
-
-
-
-\## DT-020-01
-
-
-
-Classificazione massiva categorie esistenti.
-
-
-
-\## DT-020-02
-
-
-
-Storico trend 50-30-20 multi-mese.
-
-
-
-\## DT-020-03
-
-
-
-Notifiche proattive quando un gruppo supera soglia critica.
-
-
-
-\## DT-020-04
-
-
-
-Integrazione futura con dominio prestiti.
-
-
-
-\## DT-020-05
-
-
-
-Override gruppo per singola transazione.
-
-
-
-\## DT-020-06
-
-
-
-Baseline avanzate:
-
-
-
-\* media mobile,
-
-\* reddito fisso,
-
-\* esclusione bonus.
-
-
-
-\---
-
-
-
-\# ESITO FINALE DEL CONSIGLIO AI
-
-
-
-DESIGN 020 è considerato:
-
-
-
-\* maturo,
-
-\* coerente,
-
-\* implementabile,
-
-\* ben isolato,
-
-\* compatibile con l’architettura ZecchinoReact,
-
-\* accessibile,
-
-\* scalabile.
-
-
-
-Le modifiche richieste sono prevalentemente:
-
-
-
-\* semantiche,
-
-\* accessibilità,
-
-\* robustezza edge cases,
-
-\* qualità dominio.
-
-
-
-NON esistono criticità architetturali bloccanti.
-
-
-
-\---
-
-
-
-\# DELIBERA DEFINITIVA
-
-
-
-\# DESIGN 020 APPROVATO CON MODIFICHE OBBLIGATORIE
-
-
-
-Pronto per:
-
-
-
-1\. stesura definitiva del DESIGN,
-
-2\. scrittura migrazione SQL,
-
-3\. implementazione engine puro,
-
-4\. suite test isolata,
-
-5\. integrazione repository categorie.
-
-
-

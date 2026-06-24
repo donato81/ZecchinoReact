@@ -1,0 +1,10 @@
+{
+  "update_policy": {
+    "auto_update": false,
+    "default_mode": "ask",
+    "mode_per_package": {},
+    "mode_per_file_role": {},
+    "last_changed": "2026-05-30T09:08:49Z",
+    "changed_by_user": true
+  }
+}
