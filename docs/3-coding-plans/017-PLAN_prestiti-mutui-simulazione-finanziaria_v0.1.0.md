@@ -98,8 +98,8 @@ Fuori perimetro:
 - Vincolo Architetturale: il repository deve importare e utilizzare obbligatoriamente loan-calculator.ts per derivare rataMensile, totaleInteressi e dataFinePrevista. È vietata la reimplementazione inline o la duplicazione delle formule finanziarie all'interno del layer repository.
 
 ### T6
-- Azione: Creare il repository prestiti-rimborsi con addRimborso e deleteRimborso basati esclusivamente sulle RPC atomiche rpc_aggiungi_rimborso (file SQL di migrazione: da assegnare - placeholder P_017_01 - aggiornare con numero progressivo reale al momento dell'implementazione) e rpc_elimina_rimborso (file SQL di migrazione: da assegnare - placeholder P_017_02 - aggiornare con numero progressivo reale al momento dell'implementazione).
-- Nota di Responsabilità: l'agente implementatore di T6 ha l'obbligo esplicito di sostituire i placeholder P_017_01 e P_017_02 con i riferimenti reali generati nel file di migrazione P53, prodotto dal Task T10.
+- Azione: Creare il repository prestiti-rimborsi con addRimborso e deleteRimborso basati esclusivamente sulle RPC atomiche rpc_aggiungi_rimborso (file SQL di migrazione: P53-rpc-rimborsi-prestiti.sql — rpc_aggiungi_rimborso) e rpc_elimina_rimborso (file SQL di migrazione: P53-rpc-rimborsi-prestiti.sql — rpc_elimina_rimborso).
+- Nota di Responsabilità: i placeholder P_017_01 e P_017_02 sono stati risolti in data 2026-06-24 con la creazione del file P53-rpc-rimborsi-prestiti.sql dal Task T10.
 - File target: src/lib/supabase/repositories/prestiti-rimborsi.ts
 - Dipende da: T2, T5
 - Metrica di successo: __tests__/prestiti-rimborsi.repository.test.ts dimostra atomicita, saldo mai negativo, rollback su errore e chiusura automatica del contratto.
@@ -130,6 +130,7 @@ Fuori perimetro:
 - Azione: Creare i placeholder SQL P52, P53 e P54 e aggiornare la documentazione dello schema Supabase per tabelle, indici, trigger, RPC e policy RLS del dominio.
 - File target: docs/6-sql/P52-prestiti-mutui.sql, docs/6-sql/P53-rpc-rimborsi-prestiti.sql, docs/6-sql/P54-prestiti-rimborsi.sql, docs/6-sql/schema database supabase.md
 - Dipende da: T2
+- Stato: DONE — P52, P53 e P54 creati in docs/6-sql in data 2026-06-24. Schema database supabase.md aggiornato con tabelle 12 e 13, indici, enum e policy RLS.
 - Metrica di successo: i tre file SQL esistono, hanno il perimetro dichiarato dal design e la documentazione di schema riflette tutte le nuove entita.
 - Note operative: P53 deve documentare sia rpc_aggiungi_rimborso sia rpc_elimina_rimborso.
 
@@ -166,7 +167,7 @@ Fuori perimetro:
 - G-017-4 | Verifica: AppDataContext integra il dominio in modalita fail-soft e non persiste simulazioni locali. | Comando: npx jest __tests__/AppDataContext.spec.ts --runInBand | Stato iniziale: OPEN
 - G-017-5 | Verifica: saldoResiduo non viene mai aggiornato direttamente lato client fuori dalle RPC. | Comando: verifica manuale sul repository rimborsi prestiti e sul context dati applicativo | Stato iniziale: OPEN
 - G-017-6 | Verifica: roundCurrency ed extractDatePart sono esportate dalle helper condivise e riutilizzabili dai blocchi 018 e 019 senza ridefinizione. | Comando: verifica manuale sulle helper condivise e ricerca import nei moduli consumer | Stato iniziale: OPEN
-- G-017-7 | Verifica: i placeholder SQL P52, P53 e P54 e la documentazione schema risultano allineati al design. | Comando: verifica manuale su docs/6-sql e schema database supabase.md | Stato iniziale: OPEN
+- G-017-7 | Verifica: i placeholder SQL P52, P53 e P54 e la documentazione schema risultano allineati al design. | Comando: verifica manuale su docs/6-sql e schema database supabase.md | Stato: CLOSED — verificato in data 2026-06-24.
 
 ## 8. Rollback
 
