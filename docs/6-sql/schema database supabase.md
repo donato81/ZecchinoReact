@@ -232,10 +232,10 @@
 |---|---|---|---|---|
 | `id` | UUID | ✅ | auto-generato | Chiave primaria |
 | `user_id` | UUID | ✅ | — | Riferimento a `auth.users` |
-| `tipo` | TEXT | ✅ | — | mutuo_finanziamento, prestito_personale |
-| `stato` | TEXT | ✅ | simulazione | simulazione, attivo, chiuso |
-| `direzione` | TEXT | ✅ | — | devo, mi_devono |
-| `controparte_nome` | TEXT | ✅ | — | Nome libero: banca, finanziaria, persona |
+| `tipo` | ENUM loan_type | ✅ | — | mutuo_finanziamento, prestito_personale |
+| `stato` | ENUM loan_status | ✅ | simulazione | simulazione, attivo, chiuso |
+| `direzione` | ENUM loan_direction | ✅ | — | devo, mi_devono |
+| `controparte_nome` | TEXT | ❌ | — | Facoltativa per simulazioni. Obbligatoria nella validazione applicativa per contratti attivi |
 | `importo_iniziale` | NUMERIC(14,2) | ✅ | — | Cifra originale, non cambia mai |
 | `valuta` | TEXT | ✅ | EUR | Autonomo, non ereditato da nessun conto |
 | `tasso_annuo` | NUMERIC(8,4) | ❌ | — | Solo per mutuo_finanziamento, in percentuale |
@@ -291,12 +291,16 @@
 | `idx_prestiti_user_stato` | prestiti_mutui | user_id + stato | Filtro prestiti attivi per utente |
 | `idx_rimborsi_prestito` | prestiti_rimborsi | prestito_id | Rimborsi di un determinato prestito |
 | `idx_rimborsi_data` | prestiti_rimborsi | data_rimborso DESC | Rimborsi più recenti per primi |
+| `idx_prestiti_mutui_data_inizio` | prestiti_mutui | user_id + data_inizio DESC | Prestiti ordinati per data di inizio |
+| `idx_prestiti_rimborsi_user_id` | prestiti_rimborsi | user_id | Rimborsi per utente, usato dalla policy RLS |
 
 ***
 
 ## Sicurezza applicata
 
-Row Level Security attiva su tutte e 11 le tabelle. Policy applicata: ogni utente accede esclusivamente ai propri dati tramite confronto `auth.uid() = user_id`.
+Row Level Security attiva su tutte e 13 le tabelle. Policy applicata: ogni utente accede esclusivamente ai propri dati tramite confronto `auth.uid() = user_id`.
+
+Nota per `prestiti_rimborsi`: questa tabella ha solo la policy SELECT diretta. Le operazioni di inserimento ed eliminazione non hanno policy diretta e passano esclusivamente tramite le RPC atomiche `rpc_aggiungi_rimborso` e `rpc_elimina_rimborso` definite in P53. Questo garantisce che ogni modifica allo storico rimborsi aggiorni sempre in modo coerente anche il saldo residuo e lo stato del prestito in `prestiti_mutui`.
 
 ***
 
