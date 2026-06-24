@@ -77,6 +77,7 @@ autore: Agent-Orchestrator
 - Dipende da: T2, T5
 - Metrica di successo: __tests__/prestiti-rimborsi.repository.test.ts dimostra atomicita, saldo mai negativo, rollback su errore e chiusura automatica del contratto.
 - Nota di Responsabilita: i segnaposto P_017_01 e P_017_02 devono essere sostituiti con i riferimenti reali prodotti in T10 prima che il task possa essere considerato completato.
+- Blocco esplicito: non marcare T6 come completato prima che P53 e P54 siano presenti in docs/6-sql e i segnaposto P_017_01 e P_017_02 siano stati sostituiti con i riferimenti reali.
 - Task Status: [ ] TODO
 
 ### T7
@@ -101,11 +102,11 @@ autore: Agent-Orchestrator
 - Task Status: [ ] TODO
 
 ### T10
-- Azione: Creare i placeholder SQL P52, P53 e P54 e aggiornare la documentazione dello schema Supabase per tabelle, indici, trigger, RPC e policy RLS del dominio.
+- Azione: Creare i placeholder SQL P53 e P54 e aggiornare la documentazione dello schema Supabase per tabelle, indici, trigger, RPC e policy RLS del dominio. Il file P52 è già presente in docs/6-sql e non va ricreato.
 - File target: docs/6-sql/P52-prestiti-mutui.sql, docs/6-sql/P53-rpc-rimborsi-prestiti.sql, docs/6-sql/P54-prestiti-rimborsi.sql, docs/6-sql/schema database supabase.md
 - Dipende da: T2
 - Metrica di successo: i tre file SQL esistono e la documentazione di schema riflette tutte le nuove entita.
-- Task Status: [ ] TODO
+- Task Status: [ ] IN PROGRESS
 
 ### T11
 - Azione: Creare e completare le suite di test per loan-calculator, repository prestiti e repository prestiti-rimborsi.
@@ -121,6 +122,7 @@ autore: Agent-Orchestrator
 - Le simulazioni locali non salvate restano nello stato React e non chiamano repository o Supabase.
 - La cache deve distinguere prestiti reali da simulazioni persistite con TTL differenziati.
 - Nessuna stringa utente puo essere hardcoded: tutto passa dal registro di localizzazione italiano.
+- Ordine di esecuzione raccomandato: T9, T3, T1, T2, T4, T5, T6, T7, T8, T10, T11. Il T10 deve essere eseguito dopo T2 e prima che T6 sia marcato completato.
 
 ## 5. Log di Validazione
 
