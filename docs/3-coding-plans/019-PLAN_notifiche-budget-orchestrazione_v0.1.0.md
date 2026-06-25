@@ -115,7 +115,7 @@ Fuori perimetro:
 - File target: docs/6-sql/P55-notifiche.sql
 - Dipende da: T1, T2
 - Metrica di successo: P55 documenta titolo_key, messaggio_key, livello, metadata, indici richiesti e policy RLS del dominio.
-- Note operative: non introdurre updated_at; il file deve motivare la scelta append-heavy gia fissata dal design.
+- Note operative: non introdurre updated_at; il file deve motivare la scelta append-heavy gia fissata dal design. Stato completamento: P55 prodotto, committato, eseguito in Supabase con successo in data 2026-06-25. La tabella notifiche esiste nello schema del database come previsto. Il file e' disponibile in docs/6-sql/P55-notifiche.sql.
 
 ### T8
 - Azione: Aggiornare le suite notification-service, notifiche.repository e AppDataContext per coprire il contratto finale del design 019.
@@ -149,7 +149,7 @@ Caso limite - budget eliminato con notifica pendente: Se un budget viene elimina
 - G-019-3 | Verifica: notification-service copre deduplicazione ibrida, escalation replace, idempotenza mensile e budget mancanti. | Comando: npx jest __tests__/notification-service.test.ts --runInBand | Stato iniziale: OPEN
 - G-019-4 | Verifica: AppDataContext mantiene secondary hydration fail-soft e cleanup solo in READY. | Comando: npx jest __tests__/AppDataContext.spec.ts --runInBand | Stato iniziale: OPEN
 - G-019-5 | Verifica: roundCurrency ed extractDatePart di PLAN 017 sono riusate da 019 senza ridefinizione locale. | Comando: verifica manuale sul servizio notifiche e sulle helper condivise | Stato iniziale: OPEN
-- G-019-6 | Verifica: la migrazione P55 documenta correttamente tabella, indici, metadata JSONB e assenza di updated_at. | Comando: verifica manuale su docs/6-sql/P55-notifiche.sql | Stato iniziale: OPEN
+- G-019-6 | Verifica: la migrazione P55 documenta correttamente tabella, indici, metadata JSONB e assenza di updated_at. | Comando: verifica manuale su docs/6-sql/P55-notifiche.sql | Stato iniziale: CLOSED — chiuso il 2026-06-25, P55 eseguito in Supabase con successo.
 
 ## 8. Rollback
 
