@@ -254,9 +254,9 @@ File da creare:
 - src/lib/loan-calculator.ts — nuovo motore di calcolo puro senza effetti collaterali per rata mensile, piano di ammortamento, totale interessi e saldo residuo a data.
 - src/lib/supabase/repositories/prestiti.ts — nuovo repository per prestiti_mutui, modellato sul pattern reale visto in src/lib/supabase/repositories/budget.ts.
 - src/lib/supabase/repositories/prestiti-rimborsi.ts — nuovo repository per prestiti_rimborsi con passaggio obbligatorio attraverso RPC atomiche per le mutazioni.
-- docs/6-sql/P52-prestiti-mutui.sql — placeholder provvisorio per la migrazione SQL della tabella prestiti_mutui con indici, trigger updated_at e policy RLS.
-- docs/6-sql/P53-rpc-rimborsi-prestiti.sql — placeholder provvisorio per la migrazione SQL delle RPC atomiche rpc_aggiungi_rimborso e rpc_elimina_rimborso.
-- docs/6-sql/P54-prestiti-rimborsi.sql — placeholder provvisorio per la migrazione SQL della tabella prestiti_rimborsi con indici e policy RLS.
+- docs/6-sql/P52-prestiti-mutui.sql — Creato in data 2026-06-24. Contiene enumerazioni loan_type, loan_status, loan_direction, definizione completa della tabella prestiti_mutui con CHECK constraint, trigger updated_at, indici e 4 policy RLS.
+- docs/6-sql/P53-rpc-rimborsi-prestiti.sql — Creato in data 2026-06-24. Contiene le due funzioni PL/pgSQL complete: rpc_aggiungi_rimborso e rpc_elimina_rimborso, con logica atomica, anti-race-condition FOR UPDATE, chiusura automatica contratto e GRANT EXECUTE.
+- docs/6-sql/P54-prestiti-rimborsi.sql — Creato in data 2026-06-24. Contiene la tabella prestiti_rimborsi con vincolo COALESCE sulle quote, indici e policy RLS in sola lettura per design intenzionale.
 - __tests__/loan-calculator.test.ts — nuova suite per il motore di calcolo.
 - __tests__/prestiti.repository.test.ts — nuova suite per il repository prestiti.
 - __tests__/prestiti-rimborsi.repository.test.ts — nuova suite per repository rimborsi e atomicità RPC.
