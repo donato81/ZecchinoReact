@@ -1,72 +1,111 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type CacheTable = 'conti' | 'transazioni' | 'categorie' | 'budget' | 'obiettivi_risparmio' | 'ricorrenze' | 'tag' | 'transazioni_tag' | 'notifiche'
+export type CacheTable =
+  | 'conti'
+  | 'transazioni'
+  | 'categorie'
+  | 'budget'
+  | 'obiettivi_risparmio'
+  | 'ricorrenze'
+  | 'tag'
+  | 'transazioni_tag'
+  | 'notifiche'
+  | 'prestiti_attivi'
+  | 'prestiti_simulazioni'
+  | 'prestiti_rimborsi';
 
 export type CacheEntry<T> = {
-  data: T
-  cachedAt: string
-  version: number
-}
+  data: T;
+  cachedAt: string;
+  version: number;
+};
 
-const CACHE_PREFIX = 'zecchino_cache'
-const CACHE_VERSION = 1
+const CACHE_PREFIX = 'zecchino_cache';
+const CACHE_VERSION = 1;
 
-export const CACHE_TTL_MS = 24 * 60 * 60 * 1000
+export const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 const CACHE_TTL_BY_TABLE: Partial<Record<CacheTable, number>> = {
   notifiche: 60 * 60 * 1000,
-}
+  prestiti_simulazioni: 60 * 60 * 1000, // TTL più breve per simulazioni (1h)
+};
 
-const CACHE_TABLES: CacheTable[] = ['conti', 'transazioni', 'categorie', 'budget', 'obiettivi_risparmio', 'ricorrenze', 'tag', 'transazioni_tag', 'notifiche']
+const CACHE_TABLES: CacheTable[] = [
+  'conti',
+  'transazioni',
+  'categorie',
+  'budget',
+  'obiettivi_risparmio',
+  'ricorrenze',
+  'tag',
+  'transazioni_tag',
+  'notifiche',
+  'prestiti_attivi',
+  'prestiti_simulazioni',
+  'prestiti_rimborsi',
+];
 
 function getCacheKey(userId: string, table: CacheTable): string {
-  return `${CACHE_PREFIX}_${userId}_${table}`
+  return `${CACHE_PREFIX}_${userId}_${table}`;
 }
 
 export function getCacheTtlMs(table: CacheTable): number {
-  return CACHE_TTL_BY_TABLE[table] ?? CACHE_TTL_MS
+  return CACHE_TTL_BY_TABLE[table] ?? CACHE_TTL_MS;
 }
 
-export async function writeCache<T>(userId: string, table: CacheTable, data: T): Promise<void> {
+export async function writeCache<T>(
+  userId: string,
+  table: CacheTable,
+  data: T,
+): Promise<void> {
   const entry: CacheEntry<T> = {
     data,
     cachedAt: new Date().toISOString(),
     version: CACHE_VERSION,
-  }
+  };
 
-  await AsyncStorage.setItem(getCacheKey(userId, table), JSON.stringify(entry))
+  await AsyncStorage.setItem(getCacheKey(userId, table), JSON.stringify(entry));
 }
 
-export async function readCache<T>(userId: string, table: CacheTable): Promise<CacheEntry<T> | null> {
-  const raw = await AsyncStorage.getItem(getCacheKey(userId, table))
-  if (!raw) return null
+export async function readCache<T>(
+  userId: string,
+  table: CacheTable,
+): Promise<CacheEntry<T> | null> {
+  const raw = await AsyncStorage.getItem(getCacheKey(userId, table));
+  if (!raw) return null;
 
   try {
-    const parsed = JSON.parse(raw) as Partial<CacheEntry<T>>
+    const parsed = JSON.parse(raw) as Partial<CacheEntry<T>>;
     if (
       parsed.version !== CACHE_VERSION ||
       typeof parsed.cachedAt !== 'string' ||
       !('data' in parsed)
     ) {
-      await AsyncStorage.removeItem(getCacheKey(userId, table))
-      return null
+      await AsyncStorage.removeItem(getCacheKey(userId, table));
+      return null;
     }
 
-    return parsed as CacheEntry<T>
+    return parsed as CacheEntry<T>;
   } catch {
-    await AsyncStorage.removeItem(getCacheKey(userId, table))
-    return null
+    await AsyncStorage.removeItem(getCacheKey(userId, table));
+    return null;
   }
 }
 
-export async function isCacheStale(userId: string, table: CacheTable, ttlMs = CACHE_TTL_MS): Promise<boolean> {
-  const entry = await readCache(userId, table)
-  if (!entry) return true
-  return Date.now() - Date.parse(entry.cachedAt) > ttlMs
+export async function isCacheStale(
+  userId: string,
+  table: CacheTable,
+  ttlMs = CACHE_TTL_MS,
+): Promise<boolean> {
+  const entry = await readCache(userId, table);
+  if (!entry) return true;
+  return Date.now() - Date.parse(entry.cachedAt) > ttlMs;
 }
 
 export async function invalidateCache(userId: string): Promise<void> {
   await Promise.all(
-    CACHE_TABLES.map((table) => AsyncStorage.removeItem(getCacheKey(userId, table)))
-  )
+    CACHE_TABLES.map(table =>
+      AsyncStorage.removeItem(getCacheKey(userId, table)),
+    ),
+  );
 }

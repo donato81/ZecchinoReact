@@ -15,23 +15,23 @@
  * un risultato `PICKER_UNAVAILABLE` per preservare INV-CONTRACT-4.
  */
 
-import { TurboModuleRegistry, type TurboModule } from 'react-native'
+import { TurboModuleRegistry, type TurboModule } from 'react-native';
 import type {
   PickSavePathOptions,
   PickSavePathResult,
   WinRTSavePickerSpec,
-} from './WinRTSavePicker'
+} from './WinRTSavePicker';
 
 interface Spec extends TurboModule {
-  pickSavePath(options: PickSavePathOptions): Promise<PickSavePathResult>
+  pickSavePath(options: PickSavePathOptions): Promise<PickSavePathResult>;
 }
 
-const NativeModule = TurboModuleRegistry.get<Spec>('WinRTSavePickerModule')
+const NativeModule = TurboModuleRegistry.get<Spec>('WinRTSavePickerModule');
 
 export const WinRTSavePicker: WinRTSavePickerSpec = {
   pickSavePath(options: PickSavePathOptions): Promise<PickSavePathResult> {
     if (!NativeModule) {
-      return Promise.resolve({ status: 'PICKER_UNAVAILABLE' })
+      return Promise.resolve({ status: 'PICKER_UNAVAILABLE' });
     }
     // INV-CONTRACT-4: anche un eventuale reject del bridge va incapsulato
     // in un risultato conforme. Il modulo C++/WinRT non deve rigettare
@@ -41,6 +41,6 @@ export const WinRTSavePicker: WinRTSavePickerSpec = {
         status: 'INTERNAL_ERROR',
         code: 'BRIDGE_REJECT',
       }),
-    )
+    );
   },
-}
+};

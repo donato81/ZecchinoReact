@@ -21,15 +21,17 @@ describe('wrapped master key payload', () => {
   });
 
   test('caso pre-PIN con payload null', () => {
-    expect(() => unwrapMasterKeyWithPin(null, '482917', generatePinSalt())).toThrow(
-      WrappedMasterKeyPayloadError,
-    );
+    expect(() =>
+      unwrapMasterKeyWithPin(null, '482917', generatePinSalt()),
+    ).toThrow(WrappedMasterKeyPayloadError);
 
     try {
       unwrapMasterKeyWithPin(null, '482917', generatePinSalt());
     } catch (error) {
       expect(error).toBeInstanceOf(WrappedMasterKeyPayloadError);
-      expect((error as WrappedMasterKeyPayloadError).code).toBe('MASTER_KEY_NOT_CONFIGURED');
+      expect((error as WrappedMasterKeyPayloadError).code).toBe(
+        'MASTER_KEY_NOT_CONFIGURED',
+      );
     }
   });
 
@@ -42,7 +44,9 @@ describe('wrapped master key payload', () => {
       deserializeWrappedMasterKeyPayload('{"version":1}');
     } catch (error) {
       expect(error).toBeInstanceOf(WrappedMasterKeyPayloadError);
-      expect((error as WrappedMasterKeyPayloadError).code).toBe('MASTER_KEY_PAYLOAD_INVALID');
+      expect((error as WrappedMasterKeyPayloadError).code).toBe(
+        'MASTER_KEY_PAYLOAD_INVALID',
+      );
     }
   });
 
@@ -53,9 +57,9 @@ describe('wrapped master key payload', () => {
       wrapMasterKeyWithPin(masterKey, '482917', salt),
     );
 
-    expect(encodeBase64(unwrapMasterKeyWithPin(serialized, '482917', salt))).toBe(
-      encodeBase64(masterKey),
-    );
+    expect(
+      encodeBase64(unwrapMasterKeyWithPin(serialized, '482917', salt)),
+    ).toBe(encodeBase64(masterKey));
   });
 
   test('rewrap cambia il materiale cifrato ma non la master key', () => {
@@ -66,12 +70,18 @@ describe('wrapped master key payload', () => {
       wrapMasterKeyWithPin(masterKey, '111111', oldSalt),
     );
 
-    const rewrapped = rewrapMasterKeyWithPin(original, '111111', oldSalt, '222222', newSalt);
+    const rewrapped = rewrapMasterKeyWithPin(
+      original,
+      '111111',
+      oldSalt,
+      '222222',
+      newSalt,
+    );
 
     expect(rewrapped).not.toBe(original);
-    expect(encodeBase64(unwrapMasterKeyWithPin(rewrapped, '222222', newSalt))).toBe(
-      encodeBase64(masterKey),
-    );
+    expect(
+      encodeBase64(unwrapMasterKeyWithPin(rewrapped, '222222', newSalt)),
+    ).toBe(encodeBase64(masterKey));
   });
 
   test('decodeBase64 mantiene compatibilita con encodeBase64', () => {

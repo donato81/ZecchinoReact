@@ -1,6 +1,6 @@
 // src/accessibility/engine.ts
-import { AccessibilityInfo } from 'react-native'
-import type { Announcement } from './types'
+import { AccessibilityInfo } from 'react-native';
+import type { Announcement } from './types';
 
 class ScreenReaderEngine {
   /**
@@ -31,7 +31,7 @@ class ScreenReaderEngine {
    */
   announce(announcement: Announcement): void {
     if (!announcement.text.trim()) {
-      return
+      return;
     }
     if (typeof AccessibilityInfo.announceForAccessibility !== 'function') {
       // Fallback silenzioso in ambienti che non supportano l'API
@@ -39,11 +39,14 @@ class ScreenReaderEngine {
       // Coerente con il principio fire-and-forget: il fallimento è sempre
       // silenzioso e non genera eccezioni.
       if (__DEV__) {
-        console.log('[engine] announceForAccessibility non disponibile:', announcement.text)
+        console.log(
+          '[engine] announceForAccessibility non disponibile:',
+          announcement.text,
+        );
       }
-      return
+      return;
     }
-    AccessibilityInfo.announceForAccessibility(announcement.text)
+    AccessibilityInfo.announceForAccessibility(announcement.text);
   }
 }
 
@@ -55,4 +58,4 @@ class ScreenReaderEngine {
  * In questo documento nessun file chiama engine.announce() tranne il
  * componente di test temporaneo del Gate 2, che va rimosso prima del commit.
  */
-export const engine = new ScreenReaderEngine()
+export const engine = new ScreenReaderEngine();

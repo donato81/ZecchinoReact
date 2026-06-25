@@ -1,11 +1,15 @@
-import React from 'react'
-import { TouchableOpacity, Text, type TouchableOpacityProps } from 'react-native'
+import React from 'react';
+import {
+  TouchableOpacity,
+  Text,
+  type TouchableOpacityProps,
+} from 'react-native';
 
 interface ButtonProps extends TouchableOpacityProps {
-  variant?: 'default' | 'outline' | 'destructive'
-  children?: React.ReactNode
+  variant?: 'default' | 'outline' | 'destructive';
+  children?: React.ReactNode;
   /** Alias di onPress per compatibilita' con il codice web esistente. Transitorio. */
-  onClick?: () => void
+  onClick?: () => void;
 }
 
 export function Button({
@@ -19,5 +23,5 @@ export function Button({
     <TouchableOpacity onPress={onPress ?? onClick} {...props}>
       <Text>{children}</Text>
     </TouchableOpacity>
-  )
+  );
 }

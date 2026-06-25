@@ -3,17 +3,12 @@
 //
 // REGOLA: questo file non importa @/accessibility/engine. Solo @/accessibility/types
 // è ammesso (per le re-export di Announcement/AnnouncementPriority).
-import type { Announcement, AnnouncementPriority } from '@/accessibility/types'
-import type { StringKey } from '@/locales/it'
+import type { Announcement, AnnouncementPriority } from '@/accessibility/types';
+import type { StringKey } from '@/locales/it';
 
-export type { Announcement, AnnouncementPriority }
+export type { Announcement, AnnouncementPriority };
 
-export type ActionType =
-  | 'modifica'
-  | 'elimina'
-  | 'crea'
-  | 'aggiunge'
-  | 'salva'
+export type ActionType = 'modifica' | 'elimina' | 'crea' | 'aggiunge' | 'salva';
 
 export const actionKeyMap: Record<ActionType, StringKey> = {
   modifica: 'azione_modifica',
@@ -21,4 +16,4 @@ export const actionKeyMap: Record<ActionType, StringKey> = {
   crea: 'azione_crea',
   aggiunge: 'azione_aggiunge',
   salva: 'azione_salva',
-}
+};

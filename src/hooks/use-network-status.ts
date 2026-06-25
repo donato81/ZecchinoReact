@@ -1,8 +1,8 @@
-import { useContext } from 'react'
+import { useContext } from 'react';
 import {
   NetworkStatusContext,
   type NetworkStatus,
-} from '@/context/NetworkStatusContext'
+} from '@/context/NetworkStatusContext';
 
 /**
  * Hook pubblico per il connectivity contract.
@@ -12,11 +12,11 @@ import {
  * un consumer fuori contesto è un bug di wiring (NOTA 3 del TODO 008).
  */
 export function useNetworkStatus(): NetworkStatus {
-  const ctx = useContext(NetworkStatusContext)
+  const ctx = useContext(NetworkStatusContext);
   if (ctx === null) {
     throw new Error(
       'useNetworkStatus must be used within NetworkStatusProvider',
-    )
+    );
   }
-  return ctx
+  return ctx;
 }

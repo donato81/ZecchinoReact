@@ -24,7 +24,7 @@ const hexToBytes = (hex: string): Uint8Array => {
 };
 
 const bytesToHex = (bytes: Uint8Array): string =>
-  Array.from(bytes, (value) => value.toString(16).padStart(2, '0')).join('');
+  Array.from(bytes, value => value.toString(16).padStart(2, '0')).join('');
 
 const base64ToBytes = (data: string): Uint8Array =>
   Uint8Array.from(atob(data), (char: string) => char.charCodeAt(0));
@@ -71,7 +71,11 @@ describe('KDF vectors — crypto.ts (PLAN 006)', () => {
       .spyOn(crypto, 'getRandomValues')
       .mockImplementation(<T extends ArrayBufferView | null>(array: T): T => {
         if (array && ArrayBuffer.isView(array)) {
-          const target = new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
+          const target = new Uint8Array(
+            array.buffer,
+            array.byteOffset,
+            array.byteLength,
+          );
           const source = callIndex === 0 ? salt : iv;
           target.set(source.subarray(0, target.length));
           callIndex += 1;
@@ -84,9 +88,15 @@ describe('KDF vectors — crypto.ts (PLAN 006)', () => {
 
     const raw = base64ToBytes(payload);
     expect(raw[0]).toBe(0x01);
-    expect(bytesToHex(raw.slice(1, 17))).toBe('0102030405060708090a0b0c0d0e0f10');
+    expect(bytesToHex(raw.slice(1, 17))).toBe(
+      '0102030405060708090a0b0c0d0e0f10',
+    );
     expect(bytesToHex(raw.slice(17, 29))).toBe('aabbccddeeff112233445566');
-    expect(bytesToHex(raw.slice(29))).toBe('622364418bd09b95749c532515dcadc0ddc943ef8978ee9ab5f32195bb9190');
-    await expect(decryptDataPin(payload, '9876')).resolves.toBe('segreto privato');
+    expect(bytesToHex(raw.slice(29))).toBe(
+      '622364418bd09b95749c532515dcadc0ddc943ef8978ee9ab5f32195bb9190',
+    );
+    await expect(decryptDataPin(payload, '9876')).resolves.toBe(
+      'segreto privato',
+    );
   });
 });

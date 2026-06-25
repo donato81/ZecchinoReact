@@ -28,14 +28,14 @@
 // ---------------------------------------------------------------------------
 
 export interface FileTypeChoice {
-  description: string
-  extensions: string[]
+  description: string;
+  extensions: string[];
 }
 
 export interface PickSavePathOptions {
-  fileTypeChoices: FileTypeChoice[]
-  suggestedFileName?: string
-  defaultExtension?: string
+  fileTypeChoices: FileTypeChoice[];
+  suggestedFileName?: string;
+  defaultExtension?: string;
 }
 
 export type PickSavePathResult =
@@ -43,10 +43,10 @@ export type PickSavePathResult =
   | { status: 'USER_CANCELLED' }
   | { status: 'INVALID_ARGUMENT'; code: 'EMPTY_CHOICES' | 'INVALID_EXT' }
   | { status: 'PICKER_UNAVAILABLE' }
-  | { status: 'INTERNAL_ERROR'; code: string }
+  | { status: 'INTERNAL_ERROR'; code: string };
 
 export interface WinRTSavePickerSpec {
-  pickSavePath(options: PickSavePathOptions): Promise<PickSavePathResult>
+  pickSavePath(options: PickSavePathOptions): Promise<PickSavePathResult>;
 }
 
 // ---------------------------------------------------------------------------
@@ -62,6 +62,6 @@ export interface WinRTSavePickerSpec {
 
 export const WinRTSavePicker: WinRTSavePickerSpec = {
   pickSavePath(_options: PickSavePathOptions): Promise<PickSavePathResult> {
-    return Promise.resolve({ status: 'PICKER_UNAVAILABLE' })
+    return Promise.resolve({ status: 'PICKER_UNAVAILABLE' });
   },
-}
+};

@@ -14,10 +14,10 @@
  * `from '@/native'`.
  */
 
-export { WinRTSavePicker } from './WinRTSavePicker/WinRTSavePicker'
+export { WinRTSavePicker } from './WinRTSavePicker/WinRTSavePicker';
 export type {
   FileTypeChoice,
   PickSavePathOptions,
   PickSavePathResult,
   WinRTSavePickerSpec,
-} from './WinRTSavePicker/WinRTSavePicker'
+} from './WinRTSavePicker/WinRTSavePicker';

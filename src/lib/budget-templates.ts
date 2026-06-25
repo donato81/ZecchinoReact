@@ -1,16 +1,27 @@
-import { BudgetPeriod } from './types'
-import { ShoppingCart, ForkKnife, Car, House, FilmSlate, Heartbeat, GraduationCap, PawPrint, TShirt, DeviceMobile } from '@phosphor-icons/react'
-import type { Icon } from '@phosphor-icons/react'
+import { BudgetPeriod } from './types';
+import {
+  ShoppingCart,
+  ForkKnife,
+  Car,
+  House,
+  FilmSlate,
+  Heartbeat,
+  GraduationCap,
+  PawPrint,
+  TShirt,
+  DeviceMobile,
+} from '@phosphor-icons/react';
+import type { Icon } from '@phosphor-icons/react';
 
 export interface BudgetTemplate {
-  id: string
-  nome: string
-  descrizione: string
-  importoSuggerito: number
-  periodo: BudgetPeriod
-  categorieTarget: string[]
-  icon: Icon
-  color: string
+  id: string;
+  nome: string;
+  descrizione: string;
+  importoSuggerito: number;
+  periodo: BudgetPeriod;
+  categorieTarget: string[];
+  icon: Icon;
+  color: string;
 }
 
 export const BUDGET_TEMPLATES: BudgetTemplate[] = [
@@ -22,7 +33,7 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     periodo: 'mensile',
     categorieTarget: ['Spesa alimentare'],
     icon: ShoppingCart,
-    color: 'oklch(0.65 0.15 140)'
+    color: 'oklch(0.65 0.15 140)',
   },
   {
     id: 'ristoranti',
@@ -32,7 +43,7 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     periodo: 'mensile',
     categorieTarget: ['Ristorante/Bar'],
     icon: ForkKnife,
-    color: 'oklch(0.70 0.15 45)'
+    color: 'oklch(0.70 0.15 45)',
   },
   {
     id: 'trasporti',
@@ -42,7 +53,7 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     periodo: 'mensile',
     categorieTarget: ['Trasporti'],
     icon: Car,
-    color: 'oklch(0.60 0.15 230)'
+    color: 'oklch(0.60 0.15 230)',
   },
   {
     id: 'casa',
@@ -52,7 +63,7 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     periodo: 'mensile',
     categorieTarget: ['Affitto/Mutuo', 'Bollette'],
     icon: House,
-    color: 'oklch(0.55 0.12 30)'
+    color: 'oklch(0.55 0.12 30)',
   },
   {
     id: 'svago',
@@ -62,7 +73,7 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     periodo: 'mensile',
     categorieTarget: ['Svago/Intrattenimento'],
     icon: FilmSlate,
-    color: 'oklch(0.68 0.18 300)'
+    color: 'oklch(0.68 0.18 300)',
   },
   {
     id: 'salute',
@@ -72,7 +83,7 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     periodo: 'mensile',
     categorieTarget: ['Salute/Farmacia'],
     icon: Heartbeat,
-    color: 'oklch(0.65 0.15 25)'
+    color: 'oklch(0.65 0.15 25)',
   },
   {
     id: 'abbonamenti',
@@ -82,7 +93,7 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     periodo: 'mensile',
     categorieTarget: ['Abbonamenti'],
     icon: DeviceMobile,
-    color: 'oklch(0.58 0.15 280)'
+    color: 'oklch(0.58 0.15 280)',
   },
   {
     id: 'abbigliamento',
@@ -92,7 +103,7 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     periodo: 'trimestrale',
     categorieTarget: ['Abbigliamento'],
     icon: TShirt,
-    color: 'oklch(0.62 0.12 320)'
+    color: 'oklch(0.62 0.12 320)',
   },
   {
     id: 'istruzione',
@@ -102,7 +113,7 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     periodo: 'annuale',
     categorieTarget: ['Istruzione'],
     icon: GraduationCap,
-    color: 'oklch(0.55 0.15 250)'
+    color: 'oklch(0.55 0.15 250)',
   },
   {
     id: 'animali',
@@ -112,7 +123,7 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     periodo: 'mensile',
     categorieTarget: ['Animali'],
     icon: PawPrint,
-    color: 'oklch(0.70 0.14 60)'
+    color: 'oklch(0.70 0.14 60)',
   },
   {
     id: 'budget-totale',
@@ -122,12 +133,15 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     periodo: 'mensile',
     categorieTarget: [],
     icon: ShoppingCart,
-    color: 'oklch(0.35 0.08 250)'
-  }
-]
+    color: 'oklch(0.35 0.08 250)',
+  },
+];
 
-export function findTemplateCategories(template: BudgetTemplate, availableCategories: Array<{ id: string; nome: string }>): string[] {
+export function findTemplateCategories(
+  template: BudgetTemplate,
+  availableCategories: Array<{ id: string; nome: string }>,
+): string[] {
   return availableCategories
     .filter(cat => template.categorieTarget.includes(cat.nome))
-    .map(cat => cat.id)
+    .map(cat => cat.id);
 }

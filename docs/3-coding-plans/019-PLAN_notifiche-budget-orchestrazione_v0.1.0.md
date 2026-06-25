@@ -1,11 +1,12 @@
 ---
 titolo: PLAN 019 - Notifiche Budget e Orchestrazione
+id: 019
 versione: 0.1.0
-data: 2026-05-29
-stato: REVIEWED
+data: 2026-06-25
+stato: CLOSED
 design_riferimento: docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md
 autore: Agent-Orchestrator
-dipendenze: PLAN 015, PLAN 017
+dipendenze: PLAN 015, PLAN 017, PLAN 018
 ---
 
 # PLAN 019 - Notifiche Budget e Orchestrazione

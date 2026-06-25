@@ -5,8 +5,8 @@
 const formatter = new Intl.NumberFormat('it-IT', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
-})
+});
 
 export function formatCurrencyVocal(amount: number): string {
-  return `${formatter.format(amount)} euro`
+  return `${formatter.format(amount)} euro`;
 }

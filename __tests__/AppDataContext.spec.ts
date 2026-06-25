@@ -17,37 +17,42 @@
  * bootstrap di PLAN 007/008.
  */
 
-import React from 'react'
-import TestRenderer, { act } from 'react-test-renderer'
+import React from 'react';
+import TestRenderer, { act } from 'react-test-renderer';
 
-const mockScreenReaderSuccess = jest.fn()
-const mockScreenReaderError = jest.fn()
-const mockHydrateUnreadNotifications = jest.fn()
-const mockCleanupReadyNotifications = jest.fn()
-const mockProcessBudgetNotifications = jest.fn()
-const mockResetNotificationService = jest.fn()
+const mockScreenReaderSuccess = jest.fn();
+const mockScreenReaderError = jest.fn();
+const mockHydrateUnreadNotifications = jest.fn();
+const mockCleanupReadyNotifications = jest.fn();
+const mockProcessBudgetNotifications = jest.fn();
+const mockResetNotificationService = jest.fn();
 
 jest.mock('@/lib/supabase/cache', () => ({
   CACHE_TTL_MS: 1000 * 60 * 60 * 24,
   readCache: jest.fn(),
   writeCache: jest.fn(),
   isCacheStale: jest.fn(),
-}))
+}));
 
-jest.mock('@/lib/supabase/client', () => ({ supabase: {} }), { virtual: true })
-jest.mock('@/context/AuthContext', () => ({ useAuth: jest.fn() }))
-jest.mock('@/hooks/use-network-status', () => ({ useNetworkStatus: jest.fn() }))
-jest.mock('@/lib/export-service', () => ({ exportFile: jest.fn() }))
+jest.mock('@/lib/supabase/client', () => ({ supabase: {} }), { virtual: true });
+jest.mock('@/context/AuthContext', () => ({ useAuth: jest.fn() }));
+jest.mock('@/hooks/use-network-status', () => ({
+  useNetworkStatus: jest.fn(),
+}));
+jest.mock('@/lib/export-service', () => ({ exportFile: jest.fn() }));
 jest.mock('@/lib/helpers', () => ({
   formatCurrency: jest.fn((value: number) => String(value)),
   exportToCSV: jest.fn(() => 'csv-content'),
   getActiveBudgets: jest.fn(() => []),
   getBudgetProgress: jest.fn(() => ({ percentage: 0, spent: 0, remaining: 0 })),
-}))
+}));
 jest.mock('@/lib/budget-alerts', () => ({
-  shouldShowBudgetNotification: jest.fn(() => ({ shouldShow: false, level: null })),
+  shouldShowBudgetNotification: jest.fn(() => ({
+    shouldShow: false,
+    level: null,
+  })),
   getBudgetNotificationTitle: jest.fn(() => 'Budget'),
-}))
+}));
 jest.mock('@/lib/notification-service', () => ({
   createNotificationService: jest.fn(() => ({
     hydrateUnreadNotifications: mockHydrateUnreadNotifications,
@@ -55,12 +60,12 @@ jest.mock('@/lib/notification-service', () => ({
     processBudgetNotifications: mockProcessBudgetNotifications,
     reset: mockResetNotificationService,
   })),
-}))
+}));
 jest.mock('@/lib/sound-system', () => ({
   soundSystem: {
     play: jest.fn(),
   },
-}))
+}));
 jest.mock('@/lib/haptic-system', () => ({
   hapticSystem: {
     export: jest.fn(),
@@ -79,12 +84,18 @@ jest.mock('@/lib/haptic-system', () => ({
     budgetCritical: jest.fn(),
     budgetWarning: jest.fn(),
   },
-}))
+}));
 jest.mock('@/announcements', () => ({
   announce: jest.fn(),
   accounts: {
-    announceExportFile: jest.fn((count: number) => ({ text: `export:${count}`, priority: 'polite' })),
-    exportError: jest.fn((reason: string) => ({ text: `error:${reason}`, priority: 'assertive' })),
+    announceExportFile: jest.fn((count: number) => ({
+      text: `export:${count}`,
+      priority: 'polite',
+    })),
+    exportError: jest.fn((reason: string) => ({
+      text: `error:${reason}`,
+      priority: 'assertive',
+    })),
     announceAccountModified: jest.fn(),
     announceAccountCreated: jest.fn(),
     announceTransactionModified: jest.fn(),
@@ -103,54 +114,67 @@ jest.mock('@/announcements', () => ({
     announceSavingsGoalDeleted: jest.fn(),
     announceSavingsGoalDeletedGeneric: jest.fn(),
   },
-}))
+}));
 jest.mock('@/lib/supabase/repositories/conti', () => ({
   getAll: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
   remove: jest.fn(),
-}))
+}));
 jest.mock('@/lib/supabase/repositories/transazioni', () => ({
   getAll: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
   remove: jest.fn(),
-}))
+}));
 jest.mock('@/lib/supabase/repositories/categorie', () => ({
   getAll: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
   remove: jest.fn(),
-}))
+}));
 jest.mock('@/lib/supabase/repositories/budget', () => ({
   getAll: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
   remove: jest.fn(),
-}))
+}));
 jest.mock('@/lib/supabase/repositories/obiettivi-risparmio', () => ({
   getAll: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
   remove: jest.fn(),
   updateProgress: jest.fn(),
-}))
+}));
 jest.mock('@/lib/supabase/repositories/ricorrenze', () => ({
   getAll: jest.fn(),
-}))
+}));
 jest.mock('@/lib/supabase/repositories/tag', () => ({
   getAll: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
   remove: jest.fn(),
-}))
+}));
+jest.mock('@/lib/supabase/repositories/prestiti', () => ({
+  getAll: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  promote: jest.fn(),
+  close: jest.fn(),
+  deleteSimulation: jest.fn(),
+}));
+jest.mock('@/lib/supabase/repositories/prestiti-rimborsi', () => ({
+  getAll: jest.fn(),
+  addRimborso: jest.fn(),
+  deleteRimborso: jest.fn(),
+}));
 jest.mock('@/lib/supabase/repositories/transazioni-tag', () => ({
   getTagsForTransaction: jest.fn(),
   getTagMapForTransactions: jest.fn(),
   setTagsForTransaction: jest.fn(),
   addTag: jest.fn(),
   removeTag: jest.fn(),
-}))
+}));
 jest.mock(
   '@/lib/screen-reader',
   () => ({
@@ -160,68 +184,93 @@ jest.mock(
     },
   }),
   { virtual: true },
-)
+);
 
-import { AppDataProvider, useAppData } from '@/context/AppDataContext'
-import { useAuth } from '@/context/AuthContext'
-import { useNetworkStatus } from '@/hooks/use-network-status'
-import { readCachedDomainSnapshotPure } from '@/context/app-data-cache'
-import { announce, accounts as accountsAnn } from '@/announcements'
-import { exportFile } from '@/lib/export-service'
-import { exportToCSV } from '@/lib/helpers'
-import { soundSystem } from '@/lib/sound-system'
-import { hapticSystem } from '@/lib/haptic-system'
-import { readCache, isCacheStale, writeCache } from '@/lib/supabase/cache'
-import { getAll as getAllConti } from '@/lib/supabase/repositories/conti'
-import { getAll as getAllTransazioni } from '@/lib/supabase/repositories/transazioni'
-import { getAll as getAllCategorie } from '@/lib/supabase/repositories/categorie'
-import { getAll as getAllBudget } from '@/lib/supabase/repositories/budget'
-import { getAll as getAllObiettivi } from '@/lib/supabase/repositories/obiettivi-risparmio'
-import { getAll as getAllRicorrenze } from '@/lib/supabase/repositories/ricorrenze'
-import { getAll as getAllTag } from '@/lib/supabase/repositories/tag'
-import { getTagMapForTransactions } from '@/lib/supabase/repositories/transazioni-tag'
-import { strings } from '@/locales'
+import { AppDataProvider, useAppData } from '@/context/AppDataContext';
+import { useAuth } from '@/context/AuthContext';
+import { useNetworkStatus } from '@/hooks/use-network-status';
+import { readCachedDomainSnapshotPure } from '@/context/app-data-cache';
+import { announce, accounts as accountsAnn } from '@/announcements';
+import { exportFile } from '@/lib/export-service';
+import { exportToCSV } from '@/lib/helpers';
+import { soundSystem } from '@/lib/sound-system';
+import { hapticSystem } from '@/lib/haptic-system';
+import { readCache, isCacheStale, writeCache } from '@/lib/supabase/cache';
+import { getAll as getAllConti } from '@/lib/supabase/repositories/conti';
+import { getAll as getAllTransazioni } from '@/lib/supabase/repositories/transazioni';
+import { getAll as getAllCategorie } from '@/lib/supabase/repositories/categorie';
+import { getAll as getAllBudget } from '@/lib/supabase/repositories/budget';
+import { getAll as getAllObiettivi } from '@/lib/supabase/repositories/obiettivi-risparmio';
+import { getAll as getAllRicorrenze } from '@/lib/supabase/repositories/ricorrenze';
+import { getAll as getAllTag } from '@/lib/supabase/repositories/tag';
+import { getAll as getAllPrestiti } from '@/lib/supabase/repositories/prestiti';
+import { getAll as getAllRimborsi } from '@/lib/supabase/repositories/prestiti-rimborsi';
+import { getTagMapForTransactions } from '@/lib/supabase/repositories/transazioni-tag';
+import { strings } from '@/locales';
 
-const mockReadCache = readCache as jest.MockedFunction<typeof readCache>
-const mockIsCacheStale = isCacheStale as jest.MockedFunction<typeof isCacheStale>
-const mockWriteCache = writeCache as jest.MockedFunction<typeof writeCache>
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
-const mockUseNetworkStatus = useNetworkStatus as jest.MockedFunction<typeof useNetworkStatus>
-const mockExportFile = exportFile as jest.MockedFunction<typeof exportFile>
-const mockExportToCSV = exportToCSV as jest.MockedFunction<typeof exportToCSV>
-const mockAnnounce = announce as jest.MockedFunction<typeof announce>
-const mockAnnounceExportFile = accountsAnn.announceExportFile as jest.Mock
-const mockExportErrorAnnouncement = accountsAnn.exportError as jest.Mock
-const mockSoundPlay = soundSystem.play as jest.Mock
-const mockHapticExport = hapticSystem.export as jest.Mock
-const mockGetAllConti = getAllConti as jest.MockedFunction<typeof getAllConti>
-const mockGetAllTransazioni = getAllTransazioni as jest.MockedFunction<typeof getAllTransazioni>
-const mockGetAllCategorie = getAllCategorie as jest.MockedFunction<typeof getAllCategorie>
-const mockGetAllBudget = getAllBudget as jest.MockedFunction<typeof getAllBudget>
-const mockGetAllObiettivi = getAllObiettivi as jest.MockedFunction<typeof getAllObiettivi>
-const mockGetAllRicorrenze = getAllRicorrenze as jest.MockedFunction<typeof getAllRicorrenze>
-const mockGetAllTag = getAllTag as jest.MockedFunction<typeof getAllTag>
-const mockGetTagMapForTransactions = getTagMapForTransactions as jest.MockedFunction<typeof getTagMapForTransactions>
+const mockReadCache = readCache as jest.MockedFunction<typeof readCache>;
+const mockIsCacheStale = isCacheStale as jest.MockedFunction<
+  typeof isCacheStale
+>;
+const mockWriteCache = writeCache as jest.MockedFunction<typeof writeCache>;
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+const mockUseNetworkStatus = useNetworkStatus as jest.MockedFunction<
+  typeof useNetworkStatus
+>;
+const mockExportFile = exportFile as jest.MockedFunction<typeof exportFile>;
+const mockExportToCSV = exportToCSV as jest.MockedFunction<typeof exportToCSV>;
+const mockAnnounce = announce as jest.MockedFunction<typeof announce>;
+const mockAnnounceExportFile = accountsAnn.announceExportFile as jest.Mock;
+const mockExportErrorAnnouncement = accountsAnn.exportError as jest.Mock;
+const mockSoundPlay = soundSystem.play as jest.Mock;
+const mockHapticExport = hapticSystem.export as jest.Mock;
+const mockGetAllConti = getAllConti as jest.MockedFunction<typeof getAllConti>;
+const mockGetAllTransazioni = getAllTransazioni as jest.MockedFunction<
+  typeof getAllTransazioni
+>;
+const mockGetAllCategorie = getAllCategorie as jest.MockedFunction<
+  typeof getAllCategorie
+>;
+const mockGetAllBudget = getAllBudget as jest.MockedFunction<
+  typeof getAllBudget
+>;
+const mockGetAllObiettivi = getAllObiettivi as jest.MockedFunction<
+  typeof getAllObiettivi
+>;
+const mockGetAllRicorrenze = getAllRicorrenze as jest.MockedFunction<
+  typeof getAllRicorrenze
+>;
+const mockGetAllTag = getAllTag as jest.MockedFunction<typeof getAllTag>;
+const mockGetAllPrestiti = getAllPrestiti as jest.MockedFunction<
+  typeof getAllPrestiti
+>;
+const mockGetAllRimborsi = getAllRimborsi as jest.MockedFunction<
+  typeof getAllRimborsi
+>;
+const mockGetTagMapForTransactions =
+  getTagMapForTransactions as jest.MockedFunction<
+    typeof getTagMapForTransactions
+  >;
 
-const USER = 'user-test-007'
+const USER = 'user-test-007';
 
-type AppDataValue = ReturnType<typeof useAppData>
+type AppDataValue = ReturnType<typeof useAppData>;
 
 function entry<T>(data: T, cachedAt = new Date().toISOString()) {
-  return { data, cachedAt, version: 1 }
+  return { data, cachedAt, version: 1 };
 }
 
 function renderAppDataProvider(): {
-  getValue: () => AppDataValue
-  unmount: () => void
-  rerender: () => void
+  getValue: () => AppDataValue;
+  unmount: () => void;
+  rerender: () => void;
 } {
-  let captured: AppDataValue | null = null
-  let renderer: TestRenderer.ReactTestRenderer
+  let captured: AppDataValue | null = null;
+  let renderer: TestRenderer.ReactTestRenderer;
 
   function CaptureContext(): null {
-    captured = useAppData()
-    return null
+    captured = useAppData();
+    return null;
   }
 
   act(() => {
@@ -231,20 +280,20 @@ function renderAppDataProvider(): {
         null,
         React.createElement(CaptureContext),
       ),
-    )
-  })
+    );
+  });
 
   return {
     getValue: () => {
       if (!captured) {
-        throw new Error('AppDataContext non disponibile nel test')
+        throw new Error('AppDataContext non disponibile nel test');
       }
-      return captured
+      return captured;
     },
     unmount: () => {
       act(() => {
-        renderer.unmount()
-      })
+        renderer.unmount();
+      });
     },
     rerender: () => {
       act(() => {
@@ -254,109 +303,117 @@ function renderAppDataProvider(): {
             null,
             React.createElement(CaptureContext),
           ),
-        )
-      })
+        );
+      });
     },
-  }
+  };
 }
 
 beforeEach(() => {
-  jest.clearAllMocks()
-  mockReadCache.mockResolvedValue(null)
-  mockIsCacheStale.mockResolvedValue(false)
-  mockUseAuth.mockReturnValue({ isAuthenticated: false, user: null } as never)
+  jest.clearAllMocks();
+  mockReadCache.mockResolvedValue(null);
+  mockIsCacheStale.mockResolvedValue(false);
+  mockUseAuth.mockReturnValue({ isAuthenticated: false, user: null } as never);
   mockUseNetworkStatus.mockReturnValue({
     isOffline: false,
     isInitialized: true,
     isConnected: true,
     isInternetReachable: true,
     connectionType: 'wifi',
-  } as never)
-  mockGetAllConti.mockResolvedValue([] as never)
-  mockGetAllTransazioni.mockResolvedValue([] as never)
-  mockGetAllCategorie.mockResolvedValue([] as never)
-  mockGetAllBudget.mockResolvedValue([] as never)
-  mockGetAllObiettivi.mockResolvedValue([] as never)
-  mockGetAllRicorrenze.mockResolvedValue([] as never)
-  mockGetAllTag.mockResolvedValue([] as never)
-  mockGetTagMapForTransactions.mockResolvedValue({})
-  mockHydrateUnreadNotifications.mockResolvedValue([])
-  mockCleanupReadyNotifications.mockResolvedValue(undefined)
-  mockProcessBudgetNotifications.mockResolvedValue([])
-  mockResetNotificationService.mockImplementation(() => undefined)
-  mockWriteCache.mockResolvedValue(undefined)
-  mockExportFile.mockResolvedValue({ success: true })
-  mockExportToCSV.mockReturnValue('csv-content')
-})
+  } as never);
+  mockGetAllConti.mockResolvedValue([] as never);
+  mockGetAllTransazioni.mockResolvedValue([] as never);
+  mockGetAllCategorie.mockResolvedValue([] as never);
+  mockGetAllBudget.mockResolvedValue([] as never);
+  mockGetAllObiettivi.mockResolvedValue([] as never);
+  mockGetAllRicorrenze.mockResolvedValue([] as never);
+  mockGetAllTag.mockResolvedValue([]);
+  mockGetAllPrestiti.mockResolvedValue([]);
+  mockGetAllRimborsi.mockResolvedValue([]);
+  mockGetTagMapForTransactions.mockResolvedValue({});
+  mockHydrateUnreadNotifications.mockResolvedValue([]);
+  mockCleanupReadyNotifications.mockResolvedValue(undefined);
+  mockProcessBudgetNotifications.mockResolvedValue([]);
+  mockResetNotificationService.mockImplementation(() => undefined);
+  mockWriteCache.mockResolvedValue(undefined);
+  mockExportFile.mockResolvedValue({ success: true });
+  mockExportToCSV.mockReturnValue('csv-content');
+});
 
 describe('AppDataContext — PLAN 007', () => {
   describe('Bug N9 — readCachedDomainSnapshotPure (INV1, INV2)', () => {
     it('await su tutte le 8 readCache (Promise.all)', async () => {
-      mockReadCache.mockResolvedValue(null)
-      await readCachedDomainSnapshotPure(USER)
-      expect(mockReadCache).toHaveBeenCalledTimes(8)
-      expect(mockReadCache).toHaveBeenCalledWith(USER, 'conti')
-      expect(mockReadCache).toHaveBeenCalledWith(USER, 'transazioni')
-      expect(mockReadCache).toHaveBeenCalledWith(USER, 'categorie')
-      expect(mockReadCache).toHaveBeenCalledWith(USER, 'budget')
-      expect(mockReadCache).toHaveBeenCalledWith(USER, 'obiettivi_risparmio')
-      expect(mockReadCache).toHaveBeenCalledWith(USER, 'ricorrenze')
-      expect(mockReadCache).toHaveBeenCalledWith(USER, 'tag')
-      expect(mockReadCache).toHaveBeenCalledWith(USER, 'transazioni_tag')
-    })
+      mockReadCache.mockResolvedValue(null);
+      await readCachedDomainSnapshotPure(USER);
+      expect(mockReadCache).toHaveBeenCalledTimes(8);
+      expect(mockReadCache).toHaveBeenCalledWith(USER, 'conti');
+      expect(mockReadCache).toHaveBeenCalledWith(USER, 'transazioni');
+      expect(mockReadCache).toHaveBeenCalledWith(USER, 'categorie');
+      expect(mockReadCache).toHaveBeenCalledWith(USER, 'budget');
+      expect(mockReadCache).toHaveBeenCalledWith(USER, 'obiettivi_risparmio');
+      expect(mockReadCache).toHaveBeenCalledWith(USER, 'ricorrenze');
+      expect(mockReadCache).toHaveBeenCalledWith(USER, 'tag');
+      expect(mockReadCache).toHaveBeenCalledWith(USER, 'transazioni_tag');
+    });
 
     it('Caso A — cache valida con array vuoti e mappa vuota → snapshot coerente (INV5 vuoto legittimo)', async () => {
       mockReadCache.mockImplementation(async (_u, table) =>
         table === 'transazioni_tag' ? entry({} as never) : entry([] as never),
-      )
-      const out = await readCachedDomainSnapshotPure(USER)
-      expect(out).not.toBeNull()
-      expect(out?.snapshot.accounts).toEqual([])
-      expect(out?.snapshot.transactions).toEqual([])
-      expect(out?.snapshot.categories).toEqual([])
-      expect(out?.snapshot.budgets).toEqual([])
-      expect(out?.snapshot.savingsGoals).toEqual([])
-      expect(out?.snapshot.ricorrenze).toEqual([])
-      expect(out?.snapshot.tags).toEqual([])
-      expect(out?.snapshot.transactionTagMap).toEqual({})
-      expect(out?.isStale).toBe(false)
-    })
+      );
+      const out = await readCachedDomainSnapshotPure(USER);
+      expect(out).not.toBeNull();
+      expect(out?.snapshot.accounts).toEqual([]);
+      expect(out?.snapshot.transactions).toEqual([]);
+      expect(out?.snapshot.categories).toEqual([]);
+      expect(out?.snapshot.budgets).toEqual([]);
+      expect(out?.snapshot.savingsGoals).toEqual([]);
+      expect(out?.snapshot.ricorrenze).toEqual([]);
+      expect(out?.snapshot.tags).toEqual([]);
+      expect(out?.snapshot.transactionTagMap).toEqual({});
+      expect(out?.isStale).toBe(false);
+    });
 
     it('Caso B — cache miss su una sola tabella → null (no falso positivo)', async () => {
       mockReadCache.mockImplementation(async (_u, table) =>
         table === 'budget' ? null : entry([] as never),
-      )
-      const out = await readCachedDomainSnapshotPure(USER)
-      expect(out).toBeNull()
-    })
+      );
+      const out = await readCachedDomainSnapshotPure(USER);
+      expect(out).toBeNull();
+    });
 
     it('Bug N9 originale — payload Promise non risolta → null (guard struttura)', async () => {
-      const fakePromise = Promise.resolve([])
-      mockReadCache.mockImplementation(async () => entry(fakePromise as unknown as never))
-      const out = await readCachedDomainSnapshotPure(USER)
-      expect(out).toBeNull()
-    })
+      const fakePromise = Promise.resolve([]);
+      mockReadCache.mockImplementation(async () =>
+        entry(fakePromise as unknown as never),
+      );
+      const out = await readCachedDomainSnapshotPure(USER);
+      expect(out).toBeNull();
+    });
 
     it('payload non-array (es. oggetto) → null', async () => {
-      mockReadCache.mockImplementation(async () => entry({} as unknown as never))
-      const out = await readCachedDomainSnapshotPure(USER)
-      expect(out).toBeNull()
-    })
+      mockReadCache.mockImplementation(async () =>
+        entry({} as unknown as never),
+      );
+      const out = await readCachedDomainSnapshotPure(USER);
+      expect(out).toBeNull();
+    });
 
     it('isStale propagato se ALMENO una tabella è scaduta', async () => {
-      mockReadCache.mockImplementation(async () => entry([] as never))
-      mockIsCacheStale.mockImplementation(async (_u, table) => table === 'transazioni')
-      const out = await readCachedDomainSnapshotPure(USER)
-      expect(out?.isStale).toBe(true)
-    })
+      mockReadCache.mockImplementation(async () => entry([] as never));
+      mockIsCacheStale.mockImplementation(
+        async (_u, table) => table === 'transazioni',
+      );
+      const out = await readCachedDomainSnapshotPure(USER);
+      expect(out?.isStale).toBe(true);
+    });
 
     it('isStale false se TUTTE le tabelle sono fresche', async () => {
-      mockReadCache.mockImplementation(async () => entry([] as never))
-      mockIsCacheStale.mockResolvedValue(false)
-      const out = await readCachedDomainSnapshotPure(USER)
-      expect(out?.isStale).toBe(false)
-    })
-  })
+      mockReadCache.mockImplementation(async () => entry([] as never));
+      mockIsCacheStale.mockResolvedValue(false);
+      const out = await readCachedDomainSnapshotPure(USER);
+      expect(out?.isStale).toBe(false);
+    });
+  });
 
   describe('State machine bootstrap (richiede harness Provider)', () => {
     // TODO residui PLAN 011: questi scenari richiedono un harness più ricco
@@ -364,90 +421,114 @@ describe('AppDataContext — PLAN 007', () => {
     // auth/logout via onAuthStateChange. L'harness corrente osserva bene gli
     // esiti finali del bootstrap ma non espone ancora questi boundary.
     it('IDLE → HYDRATING al primo render con utente autenticato', async () => {
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
-      let resolveConti!: (value: never) => void
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      let resolveConti!: (value: never) => void;
       mockGetAllConti.mockImplementation(
-        () => new Promise((resolve) => { resolveConti = resolve as never }),
-      )
+        () =>
+          new Promise(resolve => {
+            resolveConti = resolve as never;
+          }),
+      );
 
-      const harness = renderAppDataProvider()
-
-      await act(async () => {
-        await Promise.resolve()
-      })
-
-      expect(harness.getValue().isLoading).toBe(true)
-      expect(harness.getValue().isDataReady).toBe(false)
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        resolveConti([] as never)
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+      });
 
-      harness.unmount()
-    })
-    it.todo('HYDRATING → CACHE-READY con cache presente e validata')
+      expect(harness.getValue().isLoading).toBe(true);
+      expect(harness.getValue().isDataReady).toBe(false);
+
+      await act(async () => {
+        resolveConti([] as never);
+        await Promise.resolve();
+      });
+
+      harness.unmount();
+    });
+    it.todo('HYDRATING → CACHE-READY con cache presente e validata');
     it('HYDRATING → READY con rete OK e dati caricati', async () => {
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
 
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
-      expect(harness.getValue().isLoading).toBe(false)
-      expect(harness.getValue().isDataReady).toBe(true)
-      expect(harness.getValue().error).toBeNull()
-      harness.unmount()
-    })
+      expect(harness.getValue().isLoading).toBe(false);
+      expect(harness.getValue().isDataReady).toBe(true);
+      expect(harness.getValue().error).toBeNull();
+      harness.unmount();
+    });
     it('READY → hydration secondaria notifiche con fail-soft e flag notificationsHydrated', async () => {
-      const notifications = [{ id: 'notif-1', tipo: 'budget_soglia', titolo: 'Budget', letta: false, canale: 'inapp', createdAt: '2026-05-28T10:00:00.000Z' }]
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
-      mockHydrateUnreadNotifications.mockResolvedValueOnce(notifications)
+      const notifications = [
+        {
+          id: 'notif-1',
+          tipo: 'budget_soglia',
+          titolo: 'Budget',
+          letta: false,
+          canale: 'inapp',
+          createdAt: '2026-05-28T10:00:00.000Z',
+        },
+      ];
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockHydrateUnreadNotifications.mockResolvedValueOnce(notifications);
 
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await Promise.resolve()
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
-      expect(harness.getValue().isDataReady).toBe(true)
-      expect(mockHydrateUnreadNotifications).toHaveBeenCalledTimes(1)
-      expect(mockCleanupReadyNotifications).toHaveBeenCalledTimes(1)
-      expect(harness.getValue().notificationsHydrated).toBe(true)
-      expect(harness.getValue().notifications).toEqual(notifications)
-      expect(harness.getValue().safeNotifications).toEqual(notifications)
-      harness.unmount()
-    })
+      expect(harness.getValue().isDataReady).toBe(true);
+      expect(mockHydrateUnreadNotifications).toHaveBeenCalledTimes(1);
+      expect(mockCleanupReadyNotifications).toHaveBeenCalledTimes(1);
+      expect(harness.getValue().notificationsHydrated).toBe(true);
+      expect(harness.getValue().notifications).toEqual(notifications);
+      expect(harness.getValue().safeNotifications).toEqual(notifications);
+      harness.unmount();
+    });
     it('refreshAll riattiva la hydration secondaria notifiche dopo il primo READY', async () => {
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
-      mockHydrateUnreadNotifications.mockResolvedValue([])
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockHydrateUnreadNotifications.mockResolvedValue([]);
 
-      const harness = renderAppDataProvider()
-
-      await act(async () => {
-        await Promise.resolve()
-        await Promise.resolve()
-        await Promise.resolve()
-      })
-
-      expect(mockHydrateUnreadNotifications).toHaveBeenCalledTimes(1)
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        harness.getValue().refreshAll()
-        await Promise.resolve()
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
-      expect(mockHydrateUnreadNotifications).toHaveBeenCalledTimes(2)
-      expect(harness.getValue().notificationsHydrated).toBe(true)
-      harness.unmount()
-    })
+      expect(mockHydrateUnreadNotifications).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        harness.getValue().refreshAll();
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(mockHydrateUnreadNotifications).toHaveBeenCalledTimes(2);
+      expect(harness.getValue().notificationsHydrated).toBe(true);
+      harness.unmount();
+    });
     it('HYDRATING → READY include il fetch remoto delle ricorrenze', async () => {
       const ricorrenze = [
         {
@@ -461,101 +542,125 @@ describe('AppDataContext — PLAN 007', () => {
           prossimaGenerazione: '2026-06-01',
           attiva: true,
         },
-      ]
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
-      mockGetAllRicorrenze.mockResolvedValueOnce(ricorrenze as never)
+      ];
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockGetAllRicorrenze.mockResolvedValueOnce(ricorrenze as never);
 
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
-      expect(mockGetAllRicorrenze).toHaveBeenCalledTimes(1)
-      expect(harness.getValue().ricorrenze).toEqual(ricorrenze)
-      expect(harness.getValue().safeRicorrenze).toEqual(ricorrenze)
-      expect(harness.getValue().isDataReady).toBe(true)
-      harness.unmount()
-    })
+      expect(mockGetAllRicorrenze).toHaveBeenCalledTimes(1);
+      expect(harness.getValue().ricorrenze).toEqual(ricorrenze);
+      expect(harness.getValue().safeRicorrenze).toEqual(ricorrenze);
+      expect(harness.getValue().isDataReady).toBe(true);
+      harness.unmount();
+    });
     it('HYDRATING → READY include il fetch remoto dei tag e della mappa transazioni-tag', async () => {
-      const transactions = [{ id: 'tx-1' }]
-      const tags = [{ id: 'tag-1', nome: 'Casa', colore: '#112233', icona: 'home', usatoNVolte: 2 }]
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
-      mockGetAllTransazioni.mockResolvedValueOnce(transactions as never)
-      mockGetAllTag.mockResolvedValueOnce(tags as never)
-      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': ['tag-1'] })
+      const transactions = [{ id: 'tx-1' }];
+      const tags = [
+        {
+          id: 'tag-1',
+          nome: 'Casa',
+          colore: '#112233',
+          icona: 'home',
+          usatoNVolte: 2,
+        },
+      ];
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockGetAllTransazioni.mockResolvedValueOnce(transactions as never);
+      mockGetAllTag.mockResolvedValueOnce(tags as never);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': ['tag-1'] });
 
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
-      expect(mockGetAllTag).toHaveBeenCalledTimes(1)
-      expect(mockGetTagMapForTransactions).toHaveBeenCalledWith(['tx-1'])
-      expect(harness.getValue().tags).toEqual(tags)
-      expect(harness.getValue().safeTags).toEqual(tags)
-      expect(harness.getValue().transactionTagMap).toEqual({ 'tx-1': ['tag-1'] })
-      expect(harness.getValue().safeTransactionTagMap).toEqual({ 'tx-1': ['tag-1'] })
-      harness.unmount()
-    })
+      expect(mockGetAllTag).toHaveBeenCalledTimes(1);
+      expect(mockGetTagMapForTransactions).toHaveBeenCalledWith(['tx-1']);
+      expect(harness.getValue().tags).toEqual(tags);
+      expect(harness.getValue().safeTags).toEqual(tags);
+      expect(harness.getValue().transactionTagMap).toEqual({
+        'tx-1': ['tag-1'],
+      });
+      expect(harness.getValue().safeTransactionTagMap).toEqual({
+        'tx-1': ['tag-1'],
+      });
+      harness.unmount();
+    });
     it('HYDRATING → ERROR con rete offline confermata e senza timer bootstrap', async () => {
-      jest.useFakeTimers()
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      jest.useFakeTimers();
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
       mockUseNetworkStatus.mockReturnValue({
         isOffline: true,
         isInitialized: true,
         isConnected: false,
         isInternetReachable: false,
         connectionType: 'wifi',
-      } as never)
+      } as never);
 
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+      });
 
-      expect(harness.getValue().isLoading).toBe(false)
-      expect(harness.getValue().isDataReady).toBe(false)
-      expect(harness.getValue().error).toBe(strings.bootstrap_offline_error)
-      expect(mockGetAllConti).not.toHaveBeenCalled()
+      expect(harness.getValue().isLoading).toBe(false);
+      expect(harness.getValue().isDataReady).toBe(false);
+      expect(harness.getValue().error).toBe(strings.bootstrap_offline_error);
+      expect(mockGetAllConti).not.toHaveBeenCalled();
 
-      harness.unmount()
-      jest.useRealTimers()
-    })
+      harness.unmount();
+      jest.useRealTimers();
+    });
     it('HYDRATING → CACHE-READY con cache valida quando la rete e offline', async () => {
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
       mockUseNetworkStatus.mockReturnValue({
         isOffline: true,
         isInitialized: true,
         isConnected: false,
         isInternetReachable: false,
         connectionType: 'wifi',
-      } as never)
+      } as never);
       mockReadCache.mockImplementation(async (_u, table) =>
         table === 'transazioni_tag' ? entry({} as never) : entry([] as never),
-      )
+      );
 
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
-      expect(harness.getValue().isLoading).toBe(false)
-      expect(harness.getValue().isDataReady).toBe(true)
-      expect(harness.getValue().error).toBe(strings.bootstrap_offline_error)
-      expect(mockGetAllConti).not.toHaveBeenCalled()
-      expect(harness.getValue().transactionTagMap).toEqual({})
-      harness.unmount()
-    })
-    it.todo('CACHE-READY → REMOTE-SYNC al completamento refresh background')
-    it.todo('REMOTE-SYNC → READY come stato di quiete')
-    it.todo('IDLE → READY diretto vietato (deve attraversare HYDRATING)')
+      expect(harness.getValue().isLoading).toBe(false);
+      expect(harness.getValue().isDataReady).toBe(true);
+      expect(harness.getValue().error).toBe(strings.bootstrap_offline_error);
+      expect(mockGetAllConti).not.toHaveBeenCalled();
+      expect(harness.getValue().transactionTagMap).toEqual({});
+      harness.unmount();
+    });
+    it.todo('CACHE-READY → REMOTE-SYNC al completamento refresh background');
+    it.todo('REMOTE-SYNC → READY come stato di quiete');
+    it.todo('IDLE → READY diretto vietato (deve attraversare HYDRATING)');
     it('* → IDLE al logout da qualsiasi stato autenticato', async () => {
       const ricorrenze = [
         {
@@ -569,161 +674,202 @@ describe('AppDataContext — PLAN 007', () => {
           prossimaGenerazione: '2026-06-01',
           attiva: true,
         },
-      ]
-      const tags = [{ id: 'tag-1', nome: 'Casa', colore: '#112233', icona: 'home', usatoNVolte: 2 }]
-      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as never)
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
-      mockGetAllRicorrenze.mockResolvedValueOnce(ricorrenze as never)
-      mockGetAllTag.mockResolvedValueOnce(tags as never)
-      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': ['tag-1'] })
+      ];
+      const tags = [
+        {
+          id: 'tag-1',
+          nome: 'Casa',
+          colore: '#112233',
+          icona: 'home',
+          usatoNVolte: 2,
+        },
+      ];
+      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as never);
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockGetAllRicorrenze.mockResolvedValueOnce(ricorrenze as never);
+      mockGetAllTag.mockResolvedValueOnce(tags as never);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': ['tag-1'] });
 
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
-      expect(harness.getValue().isDataReady).toBe(true)
+      expect(harness.getValue().isDataReady).toBe(true);
 
-      mockUseAuth.mockReturnValue({ isAuthenticated: false, user: null } as never)
-      harness.rerender()
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: false,
+        user: null,
+      } as never);
+      harness.rerender();
 
       await act(async () => {
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+      });
 
-      expect(harness.getValue().isDataReady).toBe(false)
-      expect(harness.getValue().accounts).toEqual([])
-      expect(harness.getValue().transactions).toEqual([])
-      expect(harness.getValue().categories).toEqual([])
-      expect(harness.getValue().budgets).toEqual([])
-      expect(harness.getValue().savingsGoals).toEqual([])
-      expect(harness.getValue().ricorrenze).toEqual([])
-      expect(harness.getValue().tags).toEqual([])
-      expect(harness.getValue().transactionTagMap).toEqual({})
-      expect(harness.getValue().safeRicorrenze).toEqual([])
-      expect(harness.getValue().safeTags).toEqual([])
-      expect(harness.getValue().safeTransactionTagMap).toEqual({})
-      harness.unmount()
-    })
+      expect(harness.getValue().isDataReady).toBe(false);
+      expect(harness.getValue().accounts).toEqual([]);
+      expect(harness.getValue().transactions).toEqual([]);
+      expect(harness.getValue().categories).toEqual([]);
+      expect(harness.getValue().budgets).toEqual([]);
+      expect(harness.getValue().savingsGoals).toEqual([]);
+      expect(harness.getValue().ricorrenze).toEqual([]);
+      expect(harness.getValue().tags).toEqual([]);
+      expect(harness.getValue().transactionTagMap).toEqual({});
+      expect(harness.getValue().safeRicorrenze).toEqual([]);
+      expect(harness.getValue().safeTags).toEqual([]);
+      expect(harness.getValue().safeTransactionTagMap).toEqual({});
+      harness.unmount();
+    });
 
     it('removeAccount ripulisce anche transactionTagMap delle transazioni eliminate', async () => {
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
-      mockGetAllConti.mockResolvedValueOnce([{ id: 'conto-1', nome: 'Conto' }] as never)
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockGetAllConti.mockResolvedValueOnce([
+        { id: 'conto-1', nome: 'Conto' },
+      ] as never);
       mockGetAllTransazioni.mockResolvedValueOnce([
         { id: 'tx-1', contoId: 'conto-1', contoDestinazioneId: undefined },
         { id: 'tx-2', contoId: 'altro-conto', contoDestinazioneId: undefined },
-      ] as never)
-      mockGetAllTag.mockResolvedValueOnce([{ id: 'tag-1', nome: 'Casa', usatoNVolte: 1 }] as never)
+      ] as never);
+      mockGetAllTag.mockResolvedValueOnce([
+        { id: 'tag-1', nome: 'Casa', usatoNVolte: 1 },
+      ] as never);
       mockGetTagMapForTransactions.mockResolvedValueOnce({
         'tx-1': ['tag-1'],
         'tx-2': ['tag-1'],
-      })
+      });
 
-      const harness = renderAppDataProvider()
-
-      await act(async () => {
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await harness.getValue().removeAccount('conto-1')
-      })
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        await harness.getValue().removeAccount('conto-1');
+      });
 
       expect(harness.getValue().transactions).toEqual([
         { id: 'tx-2', contoId: 'altro-conto', contoDestinazioneId: undefined },
-      ])
-      expect(harness.getValue().transactionTagMap).toEqual({ 'tx-2': ['tag-1'] })
-      expect(harness.getValue().tags).toEqual([{ id: 'tag-1', nome: 'Casa', usatoNVolte: 0 }])
-      harness.unmount()
-    })
+      ]);
+      expect(harness.getValue().transactionTagMap).toEqual({
+        'tx-2': ['tag-1'],
+      });
+      expect(harness.getValue().tags).toEqual([
+        { id: 'tag-1', nome: 'Casa', usatoNVolte: 0 },
+      ]);
+      harness.unmount();
+    });
 
     it('removeTransaction decrementa usatoNVolte dei tag associati rimossi', async () => {
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
-      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as never)
-      mockGetAllTag.mockResolvedValueOnce([{ id: 'tag-1', nome: 'Casa', usatoNVolte: 1 }] as never)
-      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': ['tag-1'] })
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as never);
+      mockGetAllTag.mockResolvedValueOnce([
+        { id: 'tag-1', nome: 'Casa', usatoNVolte: 1 },
+      ] as never);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': ['tag-1'] });
 
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
       await act(async () => {
-        await harness.getValue().removeTransaction('tx-1')
-      })
+        await harness.getValue().removeTransaction('tx-1');
+      });
 
-      expect(harness.getValue().transactionTagMap).toEqual({})
-      expect(harness.getValue().tags).toEqual([{ id: 'tag-1', nome: 'Casa', usatoNVolte: 0 }])
-      harness.unmount()
-    })
-  })
+      expect(harness.getValue().transactionTagMap).toEqual({});
+      expect(harness.getValue().tags).toEqual([
+        { id: 'tag-1', nome: 'Casa', usatoNVolte: 0 },
+      ]);
+      harness.unmount();
+    });
+  });
 
   describe('PLAN 011 — bootstrap resiliente', () => {
     afterEach(() => {
-      jest.useRealTimers()
-    })
+      jest.useRealTimers();
+    });
 
     it('Caso 2: online confermato usa timeout nominato di 10 secondi', async () => {
-      jest.useFakeTimers()
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
-      mockGetAllConti.mockImplementation(() => new Promise(() => undefined))
+      jest.useFakeTimers();
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockGetAllConti.mockImplementation(() => new Promise(() => undefined));
 
-      const harness = renderAppDataProvider()
-
-      await act(async () => {
-        await Promise.resolve()
-      })
-
-      expect(harness.getValue().isLoading).toBe(true)
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        jest.advanceTimersByTime(10_000)
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+      });
 
-      expect(harness.getValue().isLoading).toBe(false)
-      expect(harness.getValue().error).toBe(strings.bootstrap_timeout_error)
-      harness.unmount()
-    })
+      expect(harness.getValue().isLoading).toBe(true);
+
+      await act(async () => {
+        jest.advanceTimersByTime(10_000);
+        await Promise.resolve();
+      });
+
+      expect(harness.getValue().isLoading).toBe(false);
+      expect(harness.getValue().error).toBe(strings.bootstrap_timeout_error);
+      harness.unmount();
+    });
 
     it('Caso 3: NetInfo non inizializzato attiva il fail-safe dopo 3 secondi', async () => {
-      jest.useFakeTimers()
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      jest.useFakeTimers();
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
       mockUseNetworkStatus.mockReturnValue({
         isOffline: false,
         isInitialized: false,
         isConnected: true,
         isInternetReachable: true,
         connectionType: 'unknown',
-      } as never)
+      } as never);
 
-      const harness = renderAppDataProvider()
-
-      await act(async () => {
-        await Promise.resolve()
-      })
-
-      expect(mockGetAllConti).not.toHaveBeenCalled()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        jest.advanceTimersByTime(3000)
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+      });
 
-      expect(mockGetAllConti).toHaveBeenCalledTimes(1)
-      expect(harness.getValue().isDataReady).toBe(true)
-      harness.unmount()
-    })
+      expect(mockGetAllConti).not.toHaveBeenCalled();
+
+      await act(async () => {
+        jest.advanceTimersByTime(3000);
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(mockGetAllConti).toHaveBeenCalledTimes(1);
+      expect(harness.getValue().isDataReady).toBe(true);
+      harness.unmount();
+    });
 
     it('Decisione 7-bis: risposta tardiva di NetInfo non avvia una seconda hydration', async () => {
-      jest.useFakeTimers()
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      jest.useFakeTimers();
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
 
       const networkState = {
         isOffline: false,
@@ -731,103 +877,118 @@ describe('AppDataContext — PLAN 007', () => {
         isConnected: true,
         isInternetReachable: true,
         connectionType: 'unknown',
-      }
+      };
 
-      mockUseNetworkStatus.mockImplementation(() => networkState as never)
+      mockUseNetworkStatus.mockImplementation(() => networkState as never);
 
-      let resolveConti!: (value: never) => void
+      let resolveConti!: (value: never) => void;
       mockGetAllConti.mockImplementation(
-        () => new Promise((resolve) => { resolveConti = resolve as never }),
-      )
+        () =>
+          new Promise(resolve => {
+            resolveConti = resolve as never;
+          }),
+      );
 
-      const harness = renderAppDataProvider()
-
-      await act(async () => {
-        jest.advanceTimersByTime(3000)
-        await Promise.resolve()
-      })
-
-      expect(mockGetAllConti).toHaveBeenCalledTimes(1)
-
-      networkState.isInitialized = true
-      networkState.isOffline = true
-      networkState.isConnected = false
-      networkState.isInternetReachable = false
-
-      harness.rerender()
-
-      expect(mockGetAllConti).toHaveBeenCalledTimes(1)
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        resolveConti([] as never)
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        jest.advanceTimersByTime(3000);
+        await Promise.resolve();
+      });
 
-      expect(harness.getValue().isDataReady).toBe(true)
-      harness.unmount()
-    })
+      expect(mockGetAllConti).toHaveBeenCalledTimes(1);
+
+      networkState.isInitialized = true;
+      networkState.isOffline = true;
+      networkState.isConnected = false;
+      networkState.isInternetReachable = false;
+
+      harness.rerender();
+
+      expect(mockGetAllConti).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        resolveConti([] as never);
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(harness.getValue().isDataReady).toBe(true);
+      harness.unmount();
+    });
 
     it('ERROR_NETWORK ed ERROR_DATA restano interni e la UI riceve solo messaggi localizzati', async () => {
-      jest.useFakeTimers()
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
-      mockGetAllConti.mockRejectedValueOnce(new Error('boom'))
+      jest.useFakeTimers();
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      const warnSpy = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => undefined);
+      mockGetAllConti.mockRejectedValueOnce(new Error('boom'));
 
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
-      expect(harness.getValue().error).toBe(strings.bootstrap_data_error)
-      expect(harness.getValue().error).not.toBe('ERROR_DATA')
-      expect(harness.getValue().error).not.toBe('ERROR_NETWORK')
+      expect(harness.getValue().error).toBe(strings.bootstrap_data_error);
+      expect(harness.getValue().error).not.toBe('ERROR_DATA');
+      expect(harness.getValue().error).not.toBe('ERROR_NETWORK');
       expect(warnSpy).toHaveBeenCalledWith(
         '[AppDataContext] bootstrap failure',
         expect.objectContaining({ kind: 'ERROR_DATA' }),
-      )
+      );
 
-      warnSpy.mockRestore()
-      harness.unmount()
-    })
+      warnSpy.mockRestore();
+      harness.unmount();
+    });
 
     it('senza autenticazione i dati non vengono caricati anche con rete disponibile', async () => {
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+      });
 
-      expect(mockGetAllConti).not.toHaveBeenCalled()
-      expect(harness.getValue().isDataReady).toBe(false)
-      harness.unmount()
-    })
-  })
+      expect(mockGetAllConti).not.toHaveBeenCalled();
+      expect(harness.getValue().isDataReady).toBe(false);
+      harness.unmount();
+    });
+  });
 
   describe('Concorrenza refreshAll — INV3 (richiede harness Provider)', () => {
     // TODO residui PLAN 011: servono promise indipendenti per tutte e 5 le
     // repository, wrapper React.StrictMode e controllo deterministico delle
     // race tra refreshAll e hydration iniziale. Il prerequisito manca nella
     // fixture attuale, pensata solo per bootstrap/export a un singolo consumer.
-    it.todo('invocazioni concorrenti refreshAll: nessuna doppia applyDomainSnapshot')
-    it.todo('hydration A pre-B ma termina dopo: B vince (generation counter)')
-    it.todo('React 18 Strict Mode double invoke: nessuna doppia transizione READY')
-    it.todo('hydration invalidata al logout (transizione * → IDLE)')
-  })
+    it.todo(
+      'invocazioni concorrenti refreshAll: nessuna doppia applyDomainSnapshot',
+    );
+    it.todo('hydration A pre-B ma termina dopo: B vince (generation counter)');
+    it.todo(
+      'React 18 Strict Mode double invoke: nessuna doppia transizione READY',
+    );
+    it.todo('hydration invalidata al logout (transizione * → IDLE)');
+  });
 
   describe('writeCache fail-soft — INV4 (richiede harness Provider)', () => {
     // TODO residui PLAN 011: per coprire questi casi serve una fixture che
     // osservi il flush asincrono post-READY e differenzi gli errori per
     // tabella AsyncStorage. Il mock attuale di cache non espone ancora quel
     // livello di granularità né l'ordine dei side effect background.
-    it.todo('errore AsyncStorage.setItem su una tabella: no crash')
-    it.todo('errore writeCache: no unhandled promise rejection')
-    it.todo('errore writeCache: no alterazione stato React in memoria')
-    it.todo('errore su una tabella: altre tabelle vengono comunque scritte')
+    it.todo('errore AsyncStorage.setItem su una tabella: no crash');
+    it.todo('errore writeCache: no unhandled promise rejection');
+    it.todo('errore writeCache: no alterazione stato React in memoria');
+    it.todo('errore su una tabella: altre tabelle vengono comunque scritte');
     it('writeCache include i nuovi slice ricorrenze, tag e transazioni_tag quando il bootstrap e READY', async () => {
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
       const ricorrenze = [
         {
           id: 'ric-1',
@@ -840,271 +1001,376 @@ describe('AppDataContext — PLAN 007', () => {
           prossimaGenerazione: '2026-06-01',
           attiva: true,
         },
-      ]
-      const transactions = [{ id: 'tx-1' }]
-      const tags = [{ id: 'tag-1', nome: 'Casa', colore: '#112233', icona: 'home', usatoNVolte: 2 }]
-      const transactionTagMap = { 'tx-1': ['tag-1'] }
-      mockGetAllTransazioni.mockResolvedValueOnce(transactions as never)
-      mockGetAllRicorrenze.mockResolvedValueOnce(ricorrenze as never)
-      mockGetAllTag.mockResolvedValueOnce(tags as never)
-      mockGetTagMapForTransactions.mockResolvedValueOnce(transactionTagMap)
+      ];
+      const transactions = [{ id: 'tx-1' }];
+      const tags = [
+        {
+          id: 'tag-1',
+          nome: 'Casa',
+          colore: '#112233',
+          icona: 'home',
+          usatoNVolte: 2,
+        },
+      ];
+      const transactionTagMap = { 'tx-1': ['tag-1'] };
+      mockGetAllTransazioni.mockResolvedValueOnce(transactions as never);
+      mockGetAllRicorrenze.mockResolvedValueOnce(ricorrenze as never);
+      mockGetAllTag.mockResolvedValueOnce(tags as never);
+      mockGetTagMapForTransactions.mockResolvedValueOnce(transactionTagMap);
 
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
-      expect(mockWriteCache).toHaveBeenCalledWith(USER, 'ricorrenze', ricorrenze)
-      expect(mockWriteCache).toHaveBeenCalledWith(USER, 'tag', tags)
-      expect(mockWriteCache).toHaveBeenCalledWith(USER, 'transazioni_tag', transactionTagMap)
-      harness.unmount()
-    })
+      expect(mockWriteCache).toHaveBeenCalledWith(
+        USER,
+        'ricorrenze',
+        ricorrenze,
+      );
+      expect(mockWriteCache).toHaveBeenCalledWith(USER, 'tag', tags);
+      expect(mockWriteCache).toHaveBeenCalledWith(
+        USER,
+        'transazioni_tag',
+        transactionTagMap,
+      );
+      harness.unmount();
+    });
 
     it('addTagToTransaction aggiorna transactionTagMap e usatoNVolte in memoria', async () => {
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
-      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as never)
-      mockGetAllTag.mockResolvedValueOnce([{ id: 'tag-1', nome: 'Casa', usatoNVolte: 2 }] as never)
-      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': [] })
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as never);
+      mockGetAllTag.mockResolvedValueOnce([
+        { id: 'tag-1', nome: 'Casa', usatoNVolte: 2 },
+      ] as never);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': [] });
 
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
       await act(async () => {
-        await harness.getValue().addTagToTransaction('tx-1', 'tag-1')
-      })
+        await harness.getValue().addTagToTransaction('tx-1', 'tag-1');
+      });
 
-      expect(harness.getValue().transactionTagMap).toEqual({ 'tx-1': ['tag-1'] })
-      expect(harness.getValue().tags).toEqual([{ id: 'tag-1', nome: 'Casa', usatoNVolte: 3 }])
-      harness.unmount()
-    })
+      expect(harness.getValue().transactionTagMap).toEqual({
+        'tx-1': ['tag-1'],
+      });
+      expect(harness.getValue().tags).toEqual([
+        { id: 'tag-1', nome: 'Casa', usatoNVolte: 3 },
+      ]);
+      harness.unmount();
+    });
 
     it('mutazioni concorrenti addTagToTransaction sulla stessa transazione non perdono aggiornamenti', async () => {
-      mockUseAuth.mockReturnValue({ isAuthenticated: true, user: { id: USER } } as never)
-      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as never)
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as never);
       mockGetAllTag.mockResolvedValueOnce([
         { id: 'tag-1', nome: 'Casa', usatoNVolte: 0 },
         { id: 'tag-2', nome: 'Lavoro', usatoNVolte: 0 },
-      ] as never)
-      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': [] })
+      ] as never);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': [] });
 
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
 
       await act(async () => {
-        await Promise.resolve()
-        await Promise.resolve()
-      })
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
       await act(async () => {
         await Promise.all([
           harness.getValue().addTagToTransaction('tx-1', 'tag-1'),
           harness.getValue().addTagToTransaction('tx-1', 'tag-2'),
-        ])
-      })
+        ]);
+      });
 
-      expect(harness.getValue().transactionTagMap).toEqual({ 'tx-1': ['tag-1', 'tag-2'] })
+      expect(harness.getValue().transactionTagMap).toEqual({
+        'tx-1': ['tag-1', 'tag-2'],
+      });
       expect(harness.getValue().tags).toEqual([
         { id: 'tag-1', nome: 'Casa', usatoNVolte: 1 },
         { id: 'tag-2', nome: 'Lavoro', usatoNVolte: 1 },
-      ])
-      harness.unmount()
-    })
-  })
+      ]);
+      harness.unmount();
+    });
+  });
 
   describe('PLAN 009 — handleExportCSV async branching', () => {
-    let infoSpy: jest.SpyInstance
-    let errorSpy: jest.SpyInstance
-    let warnSpy: jest.SpyInstance
+    let infoSpy: jest.SpyInstance;
+    let errorSpy: jest.SpyInstance;
+    let warnSpy: jest.SpyInstance;
 
     beforeEach(() => {
-      infoSpy = jest.spyOn(console, 'info').mockImplementation(() => undefined)
-      errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined)
-      warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
-    })
+      infoSpy = jest.spyOn(console, 'info').mockImplementation(() => undefined);
+      errorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+      warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    });
 
     afterEach(() => {
-      infoSpy.mockRestore()
-      errorSpy.mockRestore()
-      warnSpy.mockRestore()
-    })
+      infoSpy.mockRestore();
+      errorSpy.mockRestore();
+      warnSpy.mockRestore();
+    });
 
     it('handleExportCSV ritorna Promise<void>', async () => {
-      const harness = renderAppDataProvider()
-      const transactions = [{ id: 't1' }] as never
-      const accounts = [{ id: 'a1' }] as never
+      const harness = renderAppDataProvider();
+      const transactions = [{ id: 't1' }] as never;
+      const accounts = [{ id: 'a1' }] as never;
 
-      const promise = harness.getValue().handleExportCSV(transactions, accounts)
+      const promise = harness
+        .getValue()
+        .handleExportCSV(transactions, accounts);
 
-      expect(promise).toBeInstanceOf(Promise)
-      await expect(promise).resolves.toBeUndefined()
-      harness.unmount()
-    })
+      expect(promise).toBeInstanceOf(Promise);
+      await expect(promise).resolves.toBeUndefined();
+      harness.unmount();
+    });
 
     it('success branch: sound, haptic, toast success e exportFile invocati', async () => {
-      const harness = renderAppDataProvider()
-      const transactions = [{ id: 't1' }, { id: 't2' }] as never
-      const accounts = [{ id: 'a1' }] as never
+      const harness = renderAppDataProvider();
+      const transactions = [{ id: 't1' }, { id: 't2' }] as never;
+      const accounts = [{ id: 'a1' }] as never;
 
       await act(async () => {
-        await harness.getValue().handleExportCSV(transactions, accounts)
-      })
+        await harness.getValue().handleExportCSV(transactions, accounts);
+      });
 
-      expect(mockExportToCSV).toHaveBeenCalledWith(transactions, accounts, [])
+      expect(mockExportToCSV).toHaveBeenCalledWith(transactions, accounts, []);
       expect(mockExportFile).toHaveBeenCalledWith(
         'csv-content',
         expect.stringMatching(/^zecchino-export-\d+\.csv$/),
         'text/csv',
-      )
-      expect(mockSoundPlay).toHaveBeenCalledWith('export')
-      expect(mockHapticExport).toHaveBeenCalled()
-      expect(infoSpy).toHaveBeenCalledWith('[toast:success]', 'Export completato', '')
-      harness.unmount()
-    })
+      );
+      expect(mockSoundPlay).toHaveBeenCalledWith('export');
+      expect(mockHapticExport).toHaveBeenCalled();
+      expect(infoSpy).toHaveBeenCalledWith(
+        '[toast:success]',
+        'Export completato',
+        '',
+      );
+      harness.unmount();
+    });
 
     it('cancelled branch: nessun toast di errore e nessun announce errore', async () => {
-      const harness = renderAppDataProvider()
-      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'CANCELLED' })
+      const harness = renderAppDataProvider();
+      mockExportFile.mockResolvedValueOnce({
+        success: false,
+        reason: 'CANCELLED',
+      });
 
       await act(async () => {
-        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
-      })
+        await harness
+          .getValue()
+          .handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never);
+      });
 
-      expect(errorSpy).not.toHaveBeenCalledWith('[toast:error]', expect.any(String), '')
-      expect(mockExportErrorAnnouncement).not.toHaveBeenCalled()
-      harness.unmount()
-    })
+      expect(errorSpy).not.toHaveBeenCalledWith(
+        '[toast:error]',
+        expect.any(String),
+        '',
+      );
+      expect(mockExportErrorAnnouncement).not.toHaveBeenCalled();
+      harness.unmount();
+    });
 
     it('PERMISSION_DENIED -> toast error e announce exportError', async () => {
-      const harness = renderAppDataProvider()
-      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'PERMISSION_DENIED' })
+      const harness = renderAppDataProvider();
+      mockExportFile.mockResolvedValueOnce({
+        success: false,
+        reason: 'PERMISSION_DENIED',
+      });
 
       await act(async () => {
-        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
-      })
+        await harness
+          .getValue()
+          .handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never);
+      });
 
       expect(errorSpy).toHaveBeenCalledWith(
         '[toast:error]',
         'Permesso negato: concedi accesso allo storage',
         '',
-      )
-      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('PERMISSION_DENIED')
-      harness.unmount()
-    })
+      );
+      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith(
+        'PERMISSION_DENIED',
+      );
+      harness.unmount();
+    });
 
     it('ALREADY_IN_PROGRESS -> toast error localizzato e announce exportError', async () => {
-      const harness = renderAppDataProvider()
-      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'ALREADY_IN_PROGRESS' })
+      const harness = renderAppDataProvider();
+      mockExportFile.mockResolvedValueOnce({
+        success: false,
+        reason: 'ALREADY_IN_PROGRESS',
+      });
 
       await act(async () => {
-        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
-      })
+        await harness
+          .getValue()
+          .handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never);
+      });
 
       expect(errorSpy).toHaveBeenCalledWith(
         '[toast:error]',
         'Esportazione già in corso. Attendi il completamento.',
         '',
-      )
-      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('ALREADY_IN_PROGRESS')
-      harness.unmount()
-    })
+      );
+      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith(
+        'ALREADY_IN_PROGRESS',
+      );
+      harness.unmount();
+    });
 
     it('FILESYSTEM_ERROR -> toast error e announce exportError', async () => {
-      const harness = renderAppDataProvider()
-      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'FILESYSTEM_ERROR' })
+      const harness = renderAppDataProvider();
+      mockExportFile.mockResolvedValueOnce({
+        success: false,
+        reason: 'FILESYSTEM_ERROR',
+      });
 
       await act(async () => {
-        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
-      })
+        await harness
+          .getValue()
+          .handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never);
+      });
 
-      expect(errorSpy).toHaveBeenCalledWith('[toast:error]', 'Errore di scrittura, riprova', '')
-      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('FILESYSTEM_ERROR')
-      harness.unmount()
-    })
+      expect(errorSpy).toHaveBeenCalledWith(
+        '[toast:error]',
+        'Errore di scrittura, riprova',
+        '',
+      );
+      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith(
+        'FILESYSTEM_ERROR',
+      );
+      harness.unmount();
+    });
 
     it('UNSUPPORTED_PLATFORM -> toast error e announce exportError', async () => {
-      const harness = renderAppDataProvider()
-      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'UNSUPPORTED_PLATFORM' })
+      const harness = renderAppDataProvider();
+      mockExportFile.mockResolvedValueOnce({
+        success: false,
+        reason: 'UNSUPPORTED_PLATFORM',
+      });
 
       await act(async () => {
-        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
-      })
+        await harness
+          .getValue()
+          .handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never);
+      });
 
       expect(errorSpy).toHaveBeenCalledWith(
         '[toast:error]',
         'Funzionalità non disponibile su questa piattaforma',
         '',
-      )
-      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('UNSUPPORTED_PLATFORM')
-      harness.unmount()
-    })
+      );
+      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith(
+        'UNSUPPORTED_PLATFORM',
+      );
+      harness.unmount();
+    });
 
     it('INVALID_PATH -> toast error e announce exportError', async () => {
-      const harness = renderAppDataProvider()
-      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'INVALID_PATH' })
+      const harness = renderAppDataProvider();
+      mockExportFile.mockResolvedValueOnce({
+        success: false,
+        reason: 'INVALID_PATH',
+      });
 
       await act(async () => {
-        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
-      })
+        await harness
+          .getValue()
+          .handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never);
+      });
 
       expect(errorSpy).toHaveBeenCalledWith(
         '[toast:error]',
         'Percorso non valido, scegline un altro',
         '',
-      )
-      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('INVALID_PATH')
-      harness.unmount()
-    })
+      );
+      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('INVALID_PATH');
+      harness.unmount();
+    });
 
     it('INSUFFICIENT_SPACE -> toast error e announce exportError', async () => {
-      const harness = renderAppDataProvider()
-      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'INSUFFICIENT_SPACE' })
+      const harness = renderAppDataProvider();
+      mockExportFile.mockResolvedValueOnce({
+        success: false,
+        reason: 'INSUFFICIENT_SPACE',
+      });
 
       await act(async () => {
-        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
-      })
+        await harness
+          .getValue()
+          .handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never);
+      });
 
       expect(errorSpy).toHaveBeenCalledWith(
         '[toast:error]',
         'Spazio insufficiente sul dispositivo',
         '',
-      )
-      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('INSUFFICIENT_SPACE')
-      harness.unmount()
-    })
+      );
+      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith(
+        'INSUFFICIENT_SPACE',
+      );
+      harness.unmount();
+    });
 
     it('UNKNOWN -> toast error e announce exportError generico', async () => {
-      const harness = renderAppDataProvider()
-      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'UNKNOWN' })
+      const harness = renderAppDataProvider();
+      mockExportFile.mockResolvedValueOnce({
+        success: false,
+        reason: 'UNKNOWN',
+      });
 
       await act(async () => {
-        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
-      })
+        await harness
+          .getValue()
+          .handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never);
+      });
 
-      expect(errorSpy).toHaveBeenCalledWith('[toast:error]', "Errore durante l'esportazione", '')
-      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('UNKNOWN')
-      harness.unmount()
-    })
+      expect(errorSpy).toHaveBeenCalledWith(
+        '[toast:error]',
+        "Errore durante l'esportazione",
+        '',
+      );
+      expect(mockExportErrorAnnouncement).toHaveBeenCalledWith('UNKNOWN');
+      harness.unmount();
+    });
 
     it('success branch: announceExportFile riceve visibleTransactions.length', async () => {
-      const harness = renderAppDataProvider()
-      const transactions = [{ id: 't1' }, { id: 't2' }, { id: 't3' }] as never
+      const harness = renderAppDataProvider();
+      const transactions = [{ id: 't1' }, { id: 't2' }, { id: 't3' }] as never;
 
       await act(async () => {
-        await harness.getValue().handleExportCSV(transactions, [{ id: 'a1' }] as never)
-      })
+        await harness
+          .getValue()
+          .handleExportCSV(transactions, [{ id: 'a1' }] as never);
+      });
 
-      expect(mockAnnounceExportFile).toHaveBeenCalledWith(3)
-      expect(mockAnnounce).toHaveBeenCalledWith({ text: 'export:3', priority: 'polite' })
-      harness.unmount()
-    })
+      expect(mockAnnounceExportFile).toHaveBeenCalledWith(3);
+      expect(mockAnnounce).toHaveBeenCalledWith({
+        text: 'export:3',
+        priority: 'polite',
+      });
+      harness.unmount();
+    });
 
     it('error branches: exportError viene invocato per tutti i 7 reason di errore', async () => {
-      const harness = renderAppDataProvider()
+      const harness = renderAppDataProvider();
       const reasons = [
         'ALREADY_IN_PROGRESS',
         'PERMISSION_DENIED',
@@ -1113,31 +1379,39 @@ describe('AppDataContext — PLAN 007', () => {
         'INVALID_PATH',
         'INSUFFICIENT_SPACE',
         'UNKNOWN',
-      ] as const
+      ] as const;
 
       for (const reason of reasons) {
-        mockExportFile.mockResolvedValueOnce({ success: false, reason })
+        mockExportFile.mockResolvedValueOnce({ success: false, reason });
         await act(async () => {
-          await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
-        })
+          await harness
+            .getValue()
+            .handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never);
+        });
       }
 
-      expect(mockExportErrorAnnouncement.mock.calls.map(([reason]) => reason)).toEqual(reasons)
-      harness.unmount()
-    })
+      expect(
+        mockExportErrorAnnouncement.mock.calls.map(([reason]) => reason),
+      ).toEqual(reasons);
+      harness.unmount();
+    });
 
     it('assenza chiamate dirette screenReader: announceSuccess e announceError non vengono invocati', async () => {
-      const harness = renderAppDataProvider()
-      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'PERMISSION_DENIED' })
+      const harness = renderAppDataProvider();
+      mockExportFile.mockResolvedValueOnce({
+        success: false,
+        reason: 'PERMISSION_DENIED',
+      });
 
       await act(async () => {
-        await harness.getValue().handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never)
-      })
+        await harness
+          .getValue()
+          .handleExportCSV([{ id: 't1' }] as never, [{ id: 'a1' }] as never);
+      });
 
-      expect(mockScreenReaderSuccess).not.toHaveBeenCalled()
-      expect(mockScreenReaderError).not.toHaveBeenCalled()
-      harness.unmount()
-    })
-  })
-})
-
+      expect(mockScreenReaderSuccess).not.toHaveBeenCalled();
+      expect(mockScreenReaderError).not.toHaveBeenCalled();
+      harness.unmount();
+    });
+  });
+});

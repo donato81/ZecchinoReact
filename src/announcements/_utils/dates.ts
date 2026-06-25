@@ -6,10 +6,10 @@ const formatter = new Intl.DateTimeFormat('it-IT', {
   day: 'numeric',
   month: 'long',
   year: 'numeric',
-})
+});
 
 export function formatDateVocal(date: string | Date): string {
-  const d = typeof date === 'string' ? new Date(date) : date
-  if (Number.isNaN(d.getTime())) return ''
-  return formatter.format(d)
+  const d = typeof date === 'string' ? new Date(date) : date;
+  if (Number.isNaN(d.getTime())) return '';
+  return formatter.format(d);
 }

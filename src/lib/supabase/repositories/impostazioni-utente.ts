@@ -1,5 +1,10 @@
-import { supabase } from '../client'
-import { RepositoryError, type DbUserSettings, type UserSettings, type UserPreferences } from '../types'
+import { supabase } from '../client';
+import {
+  RepositoryError,
+  type DbUserSettings,
+  type UserSettings,
+  type UserPreferences,
+} from '../types';
 
 function toClient(row: DbUserSettings): UserSettings {
   return {
@@ -9,7 +14,7 @@ function toClient(row: DbUserSettings): UserSettings {
     pinKdfSalt: row.pin_kdf_salt,
     pinMasterKeyEncrypted: row.pin_master_key_encrypted,
     preferences: row.preferences,
-  }
+  };
 }
 
 const fieldMap: Record<keyof Omit<UserSettings, 'preferences'>, string> = {
@@ -18,29 +23,33 @@ const fieldMap: Record<keyof Omit<UserSettings, 'preferences'>, string> = {
   pinPrivatoHash: 'pin_privato_hash',
   pinKdfSalt: 'pin_kdf_salt',
   pinMasterKeyEncrypted: 'pin_master_key_encrypted',
-}
+};
 
 type PinSecurityMaterial = {
-  hash: string | null
-  salt: string | null
-  encryptedMasterKey: string | null
-}
+  hash: string | null;
+  salt: string | null;
+  encryptedMasterKey: string | null;
+};
 
 async function getUid(): Promise<string> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new RepositoryError('Utente non autenticato')
-  return user.id
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new RepositoryError('Utente non autenticato');
+  return user.id;
 }
 
 async function updateFields(
-  campi: Partial<Record<keyof Omit<UserSettings, 'preferences'>, string | null>>
+  campi: Partial<
+    Record<keyof Omit<UserSettings, 'preferences'>, string | null>
+  >,
 ): Promise<UserSettings> {
-  const uid = await getUid()
-  const payload: Record<string, string | null> = {}
+  const uid = await getUid();
+  const payload: Record<string, string | null> = {};
 
   for (const [campo, valore] of Object.entries(campi)) {
     if (valore !== undefined) {
-      payload[fieldMap[campo as keyof typeof fieldMap]] = valore
+      payload[fieldMap[campo as keyof typeof fieldMap]] = valore;
     }
   }
 
@@ -49,35 +58,37 @@ async function updateFields(
     .update(payload)
     .eq('user_id', uid)
     .select()
-    .single()
+    .single();
 
   if (response.error) {
-    throw new Error(`updateFields: aggiornamento fallito — ${response.error.message}`)
+    throw new Error(
+      `updateFields: aggiornamento fallito — ${response.error.message}`,
+    );
   }
 
-  return toClient(response.data as DbUserSettings)
+  return toClient(response.data as DbUserSettings);
 }
 
 // Se il record esiste lo restituisce; altrimenti lo inserisce usando i default DB
 // (il DEFAULT della colonna preferences contiene già le 28 chiavi P25 §3.4).
 // Gestisce la race condition 23505 (unique violation) con retry select.
 export async function getOrCreate(): Promise<UserSettings> {
-  const uid = await getUid()
+  const uid = await getUid();
 
   const { data: existing, error: selectError } = await supabase
     .from('impostazioni_utente')
     .select('*')
     .eq('user_id', uid)
-    .maybeSingle()
+    .maybeSingle();
 
-  if (selectError) throw new RepositoryError(selectError)
-  if (existing) return toClient(existing as DbUserSettings)
+  if (selectError) throw new RepositoryError(selectError);
+  if (existing) return toClient(existing as DbUserSettings);
 
   const { data: created, error: insertError } = await supabase
     .from('impostazioni_utente')
     .insert({ user_id: uid })
     .select()
-    .single()
+    .single();
 
   if (insertError) {
     if (insertError.code === '23505') {
@@ -85,21 +96,21 @@ export async function getOrCreate(): Promise<UserSettings> {
         .from('impostazioni_utente')
         .select('*')
         .eq('user_id', uid)
-        .single()
-      if (retryError) throw new RepositoryError(retryError)
-      return toClient(retry as DbUserSettings)
+        .single();
+      if (retryError) throw new RepositoryError(retryError);
+      return toClient(retry as DbUserSettings);
     }
-    throw new RepositoryError(insertError)
+    throw new RepositoryError(insertError);
   }
 
-  return toClient(created as DbUserSettings)
+  return toClient(created as DbUserSettings);
 }
 
 export async function updateField(
   campo: keyof Omit<UserSettings, 'preferences'>,
-  valore: string | null
+  valore: string | null,
 ): Promise<UserSettings> {
-  return updateFields({ [campo]: valore })
+  return updateFields({ [campo]: valore });
 }
 
 // Merge JSONB atomico su singola chiave tramite RPC — non read-modify-write in JS.
@@ -112,21 +123,21 @@ export async function updateField(
 //   RETURNING *
 export async function updatePreference(
   chiave: keyof UserPreferences,
-  valore: boolean | number | string | object | null
+  valore: boolean | number | string | object | null,
 ): Promise<UserSettings> {
-  const { data, error } = await supabase
-    .rpc('update_impostazioni_preference', {
-      p_chiave: String(chiave),
-      p_valore: valore,
-    })
-  if (error) throw new RepositoryError(error)
-  const rows = data as DbUserSettings[]
-  if (!rows?.length) throw new RepositoryError('Impostazioni non trovate dopo il merge')
-  return toClient(rows[0])
+  const { data, error } = await supabase.rpc('update_impostazioni_preference', {
+    p_chiave: String(chiave),
+    p_valore: valore,
+  });
+  if (error) throw new RepositoryError(error);
+  const rows = data as DbUserSettings[];
+  if (!rows?.length)
+    throw new RepositoryError('Impostazioni non trovate dopo il merge');
+  return toClient(rows[0]);
 }
 
 export async function updatePinHash(hash: string | null): Promise<void> {
-  await updateField('pinPrivatoHash', hash)
+  await updateField('pinPrivatoHash', hash);
 }
 
 /**
@@ -134,42 +145,44 @@ export async function updatePinHash(hash: string | null): Promise<void> {
  * uso diretto vietato per impostare il PIN; usare esclusivamente updatePinHashAndSalt.
  */
 export async function updatePinSalt(salt: string | null): Promise<void> {
-  await updateField('pinKdfSalt', salt)
+  await updateField('pinKdfSalt', salt);
 }
 
 export async function updatePinHashAndSalt(
   hash: string | null,
-  salt: string | null
+  salt: string | null,
 ): Promise<void> {
   if (hash !== null || salt !== null) {
     throw new Error(
-      'updatePinHashAndSalt: usare updatePinSecurityMaterial per i flussi PIN con master key cifrata'
-    )
+      'updatePinHashAndSalt: usare updatePinSecurityMaterial per i flussi PIN con master key cifrata',
+    );
   }
 
   await updatePinSecurityMaterial({
     hash,
     salt,
     encryptedMasterKey: null,
-  })
+  });
 }
 
 export async function updatePinSecurityMaterial(
-  material: PinSecurityMaterial
+  material: PinSecurityMaterial,
 ): Promise<void> {
-  const values = [material.hash, material.salt, material.encryptedMasterKey]
-  const allNull = values.every((value) => value === null)
-  const allPresent = values.every((value) => typeof value === 'string' && value.length > 0)
+  const values = [material.hash, material.salt, material.encryptedMasterKey];
+  const allNull = values.every(value => value === null);
+  const allPresent = values.every(
+    value => typeof value === 'string' && value.length > 0,
+  );
 
   if (!allNull && !allPresent) {
     throw new Error(
-      'updatePinSecurityMaterial: hash, salt e encryptedMasterKey devono essere tutti null o tutti non-null'
-    )
+      'updatePinSecurityMaterial: hash, salt e encryptedMasterKey devono essere tutti null o tutti non-null',
+    );
   }
 
   await updateFields({
     pinPrivatoHash: material.hash,
     pinKdfSalt: material.salt,
     pinMasterKeyEncrypted: material.encryptedMasterKey,
-  })
+  });
 }

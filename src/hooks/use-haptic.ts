@@ -1,26 +1,26 @@
-import { useState, useEffect } from 'react'
-import { hapticSystem } from '@/lib/haptic-system'
+import { useState, useEffect } from 'react';
+import { hapticSystem } from '@/lib/haptic-system';
 
 export function useHaptic() {
-  const [isEnabled, setIsEnabled] = useState(hapticSystem.isEnabled())
-  const [intensity, setIntensity] = useState(hapticSystem.getIntensity())
-  const [isSupported, setIsSupported] = useState(hapticSystem.isSupported())
+  const [isEnabled, setIsEnabled] = useState(hapticSystem.isEnabled());
+  const [intensity, setIntensity] = useState(hapticSystem.getIntensity());
+  const [isSupported, setIsSupported] = useState(hapticSystem.isSupported());
 
   useEffect(() => {
-    setIsEnabled(hapticSystem.isEnabled())
-    setIntensity(hapticSystem.getIntensity())
-    setIsSupported(hapticSystem.isSupported())
-  }, [])
+    setIsEnabled(hapticSystem.isEnabled());
+    setIntensity(hapticSystem.getIntensity());
+    setIsSupported(hapticSystem.isSupported());
+  }, []);
 
   const toggleEnabled = (enabled: boolean) => {
-    hapticSystem.setEnabled(enabled)
-    setIsEnabled(enabled)
-  }
+    hapticSystem.setEnabled(enabled);
+    setIsEnabled(enabled);
+  };
 
   const updateIntensity = (newIntensity: number) => {
-    hapticSystem.setIntensity(newIntensity)
-    setIntensity(newIntensity)
-  }
+    hapticSystem.setIntensity(newIntensity);
+    setIntensity(newIntensity);
+  };
 
   return {
     isEnabled,
@@ -37,5 +37,5 @@ export function useHaptic() {
     selection: hapticSystem.selection.bind(hapticSystem),
     impact: hapticSystem.impact.bind(hapticSystem),
     notification: hapticSystem.notification.bind(hapticSystem),
-  }
+  };
 }

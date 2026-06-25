@@ -22,7 +22,7 @@
  * c) Permettere agli screen reader che la supportano (Narrator su Windows)
  *    di ricevere context aggiuntivo in una futura versione dell'engine.
  */
-export type AnnouncementPriority = 'polite' | 'assertive'
+export type AnnouncementPriority = 'polite' | 'assertive';
 
 /**
  * Struttura di un annuncio pronto da pronunciare.
@@ -31,8 +31,8 @@ export type AnnouncementPriority = 'polite' | 'assertive'
  * nessuna trasformazione sul testo.
  */
 export interface Announcement {
-  text: string
-  priority: AnnouncementPriority
+  text: string;
+  priority: AnnouncementPriority;
 }
 
 // ── Tipi del rilevamento piattaforma ──────────────────────────────────────
@@ -52,17 +52,17 @@ export interface Announcement {
  */
 export interface TalkBackState {
   /** true se lo screen reader è attivo (nativo o override manuale) */
-  isEnabled: boolean
+  isEnabled: boolean;
   /** true se AccessibilityInfo.isScreenReaderEnabled() ha restituito true */
-  isDetected: boolean
+  isDetected: boolean;
   /**
    * 'high' = risposta certa dal sistema operativo (isEnabled è affidabile)
    * 'low' = stato iniziale prima che la Promise sia risolta, oppure
    *         nessuno screen reader attivo
    */
-  confidenceLevel: 'high' | 'low'
+  confidenceLevel: 'high' | 'low';
   /** true se le adattazioni (touch target, timeout, descrizioni) sono attive */
-  adaptationsActive: boolean
+  adaptationsActive: boolean;
 }
 
 /**
@@ -72,13 +72,13 @@ export interface TalkBackState {
  * Fonte di verità: questo file. Vedi DESIGN 003 §11 — "Nota critica: migrazione TalkBackAdaptations".
  */
 export interface TalkBackAdaptations {
-  enhancedTouchTargets: boolean
-  simplifiedNavigation: boolean
-  extendedTimeouts: boolean
-  verboseDescriptions: boolean
-  highContrastMode: boolean
-  reducedMotion: boolean
-  autoFocusManagement: boolean
+  enhancedTouchTargets: boolean;
+  simplifiedNavigation: boolean;
+  extendedTimeouts: boolean;
+  verboseDescriptions: boolean;
+  highContrastMode: boolean;
+  reducedMotion: boolean;
+  autoFocusManagement: boolean;
   // Campo mantenuto per compatibilità con la shape persistita in
   // src/lib/supabase/types.ts e nel database. Non esiste un audio
   // engine che consumi questo flag in questa fase del progetto.
@@ -86,5 +86,5 @@ export interface TalkBackAdaptations {
   // coerenza con la shape originale persistita — non perché il flag
   // sia attivo funzionalmente. Va rivalutato quando il layer audio
   // verrà implementato.
-  spatialAudio: boolean
+  spatialAudio: boolean;
 }

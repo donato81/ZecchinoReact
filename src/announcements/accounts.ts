@@ -1,14 +1,17 @@
 // src/announcements/accounts.ts
 // Funzioni per conti, movimenti, trasferimenti, export/import.
 // Accettano sempre tipi di dominio grezzi (numeri, stringhe), mai stringhe pre-formattate.
-import type { Announcement } from './types'
-import { t } from './_utils/t'
-import { formatCurrencyVocal } from './_utils/currency'
-import { pluralize } from './_utils/plurals'
-import type { ExportFailureReason } from '@/lib/export-service'
+import type { Announcement } from './types';
+import { t } from './_utils/t';
+import { formatCurrencyVocal } from './_utils/currency';
+import { pluralize } from './_utils/plurals';
+import type { ExportFailureReason } from '@/lib/export-service';
 
-function build(text: string, priority: Announcement['priority'] = 'polite'): Announcement {
-  return { text, priority }
+function build(
+  text: string,
+  priority: Announcement['priority'] = 'polite',
+): Announcement {
+  return { text, priority };
 }
 
 export function announceAccountCreated(
@@ -22,22 +25,25 @@ export function announceAccountCreated(
       type,
       amount: formatCurrencyVocal(initialBalance),
     }),
-  )
+  );
 }
 
 export function announceAccountModified(name: string): Announcement {
-  return build(t('conto_modificato', { name }))
+  return build(t('conto_modificato', { name }));
 }
 
-export function announceAccountDeleted(name: string, hadTransactions: boolean): Announcement {
+export function announceAccountDeleted(
+  name: string,
+  hadTransactions: boolean,
+): Announcement {
   if (hadTransactions) {
-    return build(t('conto_eliminato_con_movimenti', { name }))
+    return build(t('conto_eliminato_con_movimenti', { name }));
   }
-  return build(t('conto_eliminato', { name }))
+  return build(t('conto_eliminato', { name }));
 }
 
 export function announceAccountDeletedGeneric(): Announcement {
-  return build(t('conto_eliminato_generico'))
+  return build(t('conto_eliminato_generico'));
 }
 
 export function announceTransaction(
@@ -51,29 +57,38 @@ export function announceTransaction(
       amount: formatCurrencyVocal(amount),
       name: accountName,
     }),
-  )
+  );
 }
 
 export function announceTransactionModified(): Announcement {
-  return build(t('movimento_modificato'))
+  return build(t('movimento_modificato'));
 }
 
 export function announceTransactionDeleted(): Announcement {
-  return build(t('movimento_eliminato'))
+  return build(t('movimento_eliminato'));
 }
 
-export function announceTransfer(amount: number, from: string, to: string): Announcement {
+export function announceTransfer(
+  amount: number,
+  from: string,
+  to: string,
+): Announcement {
   return build(
     t('trasferimento_completato', {
       amount: formatCurrencyVocal(amount),
       from,
       to,
     }),
-  )
+  );
 }
 
-export function announceAccountBalance(name: string, balance: number): Announcement {
-  return build(t('saldo_conto', { name, amount: formatCurrencyVocal(balance) }))
+export function announceAccountBalance(
+  name: string,
+  balance: number,
+): Announcement {
+  return build(
+    t('saldo_conto', { name, amount: formatCurrencyVocal(balance) }),
+  );
 }
 
 export function announceRecentTransactions(count: number): Announcement {
@@ -82,7 +97,7 @@ export function announceRecentTransactions(count: number): Announcement {
       count,
       plural_movimento: pluralize('movimento', count),
     }),
-  )
+  );
 }
 
 export function announceExportCSV(count: number): Announcement {
@@ -91,7 +106,7 @@ export function announceExportCSV(count: number): Announcement {
       count,
       plural_movimento: pluralize('movimento', count),
     }),
-  )
+  );
 }
 
 export function announceExport(count: number): Announcement {
@@ -100,7 +115,7 @@ export function announceExport(count: number): Announcement {
       count,
       plural_elemento: pluralize('elemento', count),
     }),
-  )
+  );
 }
 
 export function announceImportComplete(count: number): Announcement {
@@ -109,15 +124,15 @@ export function announceImportComplete(count: number): Announcement {
       count,
       plural_elemento: pluralize('elemento', count),
     }),
-  )
+  );
 }
 
 export function announceExportInProgress(): Announcement {
-  return build(t('export_in_corso'))
+  return build(t('export_in_corso'));
 }
 
 export function announceExportFile(_count: number): Announcement {
-  return build(t('export_success_sr'))
+  return build(t('export_success_sr'));
 }
 
 export function exportError(
@@ -125,19 +140,19 @@ export function exportError(
 ): Announcement {
   switch (reason) {
     case 'ALREADY_IN_PROGRESS':
-      return build(t('export_already_in_progress_sr'))
+      return build(t('export_already_in_progress_sr'));
     case 'PERMISSION_DENIED':
-      return build(t('export_permission_denied_sr'))
+      return build(t('export_permission_denied_sr'));
     case 'FILESYSTEM_ERROR':
-      return build(t('export_filesystem_error_sr'))
+      return build(t('export_filesystem_error_sr'));
     case 'UNSUPPORTED_PLATFORM':
-      return build(t('export_unsupported_platform_sr'))
+      return build(t('export_unsupported_platform_sr'));
     case 'INVALID_PATH':
-      return build(t('export_invalid_path_sr'))
+      return build(t('export_invalid_path_sr'));
     case 'INSUFFICIENT_SPACE':
-      return build(t('export_insufficient_space_sr'))
+      return build(t('export_insufficient_space_sr'));
     case 'UNKNOWN':
     default:
-      return build(t('export_unknown_error_sr'))
+      return build(t('export_unknown_error_sr'));
   }
 }

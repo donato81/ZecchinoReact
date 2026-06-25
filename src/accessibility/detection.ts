@@ -1,8 +1,8 @@
 // src/accessibility/detection.ts
-import { useState, useEffect, useCallback } from 'react'
-import { AccessibilityInfo } from 'react-native'
-import { useUserSettings } from '@/context/UserSettingsContext'
-import type { TalkBackState, TalkBackAdaptations } from './types'
+import { useState, useEffect, useCallback } from 'react';
+import { AccessibilityInfo } from 'react-native';
+import { useUserSettings } from '@/context/UserSettingsContext';
+import type { TalkBackState, TalkBackAdaptations } from './types';
 
 /**
  * Adattamenti di default applicati quando lo screen reader è rilevato.
@@ -19,7 +19,7 @@ export const DEFAULT_ADAPTATIONS: TalkBackAdaptations = {
   reducedMotion: true,
   autoFocusManagement: true,
   spatialAudio: true,
-}
+};
 
 /**
  * Hook per il rilevamento dello screen reader e il calcolo delle adattazioni.
@@ -39,20 +39,20 @@ export function useAccessibilityDetection() {
     talkBackManualOverride,
     setTalkBackAdaptations,
     setTalkBackManualOverride,
-  } = useUserSettings()
+  } = useUserSettings();
 
   const [talkBackState, setTalkBackState] = useState<TalkBackState>({
     isEnabled: false,
     isDetected: false,
     confidenceLevel: 'low',
     adaptationsActive: false,
-  })
+  });
 
-  const adaptations = talkBackAdaptations ?? DEFAULT_ADAPTATIONS
-  const manualOverride = talkBackManualOverride
+  const adaptations = talkBackAdaptations ?? DEFAULT_ADAPTATIONS;
+  const manualOverride = talkBackManualOverride;
 
   useEffect(() => {
-    let isMounted = true
+    let isMounted = true;
 
     // Lettura asincrona dello stato iniziale dallo screen reader nativo.
     // Finestra di incertezza accettata: al primo mount esiste un brevissimo
@@ -60,9 +60,10 @@ export function useAccessibilityDetection() {
     // screen reader è attivo. Il listener screenReaderChanged corregge lo
     // stato quando la risposta arriva. Non va compensata con meccanismi
     // di pre-idratazione o valori iniziali ottimistici.
-    void AccessibilityInfo.isScreenReaderEnabled().then((nativeEnabled) => {
-      if (!isMounted) return
-      const isEnabled = manualOverride !== null ? Boolean(manualOverride) : nativeEnabled
+    void AccessibilityInfo.isScreenReaderEnabled().then(nativeEnabled => {
+      if (!isMounted) return;
+      const isEnabled =
+        manualOverride !== null ? Boolean(manualOverride) : nativeEnabled;
       setTalkBackState({
         isEnabled,
         isDetected: nativeEnabled,
@@ -70,35 +71,36 @@ export function useAccessibilityDetection() {
         // 'high' se lo screen reader è attivo, 'low' altrimenti.
         confidenceLevel: nativeEnabled ? 'high' : 'low',
         adaptationsActive: isEnabled,
-      })
-    })
+      });
+    });
 
     // Listener reattivo: risponde ai cambiamenti durante la sessione
     // senza riavvio dell'app.
     const subscription = AccessibilityInfo.addEventListener(
       'screenReaderChanged',
       (nativeEnabled: boolean) => {
-        if (!isMounted) return
-        const isEnabled = manualOverride !== null ? Boolean(manualOverride) : nativeEnabled
+        if (!isMounted) return;
+        const isEnabled =
+          manualOverride !== null ? Boolean(manualOverride) : nativeEnabled;
         setTalkBackState({
           isEnabled,
           isDetected: nativeEnabled,
           confidenceLevel: nativeEnabled ? 'high' : 'low',
           adaptationsActive: isEnabled,
-        })
-      }
-    )
+        });
+      },
+    );
 
     return () => {
-      isMounted = false
+      isMounted = false;
       // Verifica difensiva: subscription.remove potrebbe non essere una
       // funzione su versioni di react-native-windows precedenti a RN 0.65.
       // Coerente con il Rischio R2 di DESIGN 003 §10.
       if (typeof subscription.remove === 'function') {
-        subscription.remove()
+        subscription.remove();
       }
-    }
-  }, [manualOverride])
+    };
+  }, [manualOverride]);
 
   // ── Controllo manuale ───────────────────────────────────────────────────
 
@@ -108,19 +110,33 @@ export function useAccessibilityDetection() {
   // adattazioni. Il nome è mantenuto perché semanticamente descrittivo
   // per i futuri consumatori che arriveranno nel documento successivo —
   // cambiarlo richiederebbe aggiornare l'API pubblica del hook.
-  const enableTalkBack = useCallback((manual: boolean = false) => {
-    if (manual) {
-      setTalkBackManualOverride(true).catch(console.error)
-    }
-    setTalkBackState(prev => ({ ...prev, isEnabled: true, adaptationsActive: true }))
-  }, [setTalkBackManualOverride])
+  const enableTalkBack = useCallback(
+    (manual: boolean = false) => {
+      if (manual) {
+        setTalkBackManualOverride(true).catch(console.error);
+      }
+      setTalkBackState(prev => ({
+        ...prev,
+        isEnabled: true,
+        adaptationsActive: true,
+      }));
+    },
+    [setTalkBackManualOverride],
+  );
 
-  const disableTalkBack = useCallback((manual: boolean = false) => {
-    if (manual) {
-      setTalkBackManualOverride(false).catch(console.error)
-    }
-    setTalkBackState(prev => ({ ...prev, isEnabled: false, adaptationsActive: false }))
-  }, [setTalkBackManualOverride])
+  const disableTalkBack = useCallback(
+    (manual: boolean = false) => {
+      if (manual) {
+        setTalkBackManualOverride(false).catch(console.error);
+      }
+      setTalkBackState(prev => ({
+        ...prev,
+        isEnabled: false,
+        adaptationsActive: false,
+      }));
+    },
+    [setTalkBackManualOverride],
+  );
 
   /**
    * Cancella l'override manuale e rilegge lo stato reale dallo screen reader
@@ -133,70 +149,84 @@ export function useAccessibilityDetection() {
    * - Rilegge il valore nativo e aggiorna lo stato.
    */
   const resetDetection = useCallback(async () => {
-    await setTalkBackManualOverride(null)
-    const nativeEnabled = await AccessibilityInfo.isScreenReaderEnabled()
+    await setTalkBackManualOverride(null);
+    const nativeEnabled = await AccessibilityInfo.isScreenReaderEnabled();
     setTalkBackState({
       isEnabled: nativeEnabled,
       isDetected: nativeEnabled,
       confidenceLevel: nativeEnabled ? 'high' : 'low',
       adaptationsActive: nativeEnabled,
-    })
-  }, [setTalkBackManualOverride])
+    });
+  }, [setTalkBackManualOverride]);
 
   // ── Gestione adattamenti ────────────────────────────────────────────────
 
   const updateAdaptation = useCallback(
     (key: keyof TalkBackAdaptations, value: boolean) => {
-      setTalkBackAdaptations({ ...adaptations, [key]: value }).catch(console.error)
+      setTalkBackAdaptations({ ...adaptations, [key]: value }).catch(
+        console.error,
+      );
     },
-    [adaptations, setTalkBackAdaptations]
-  )
+    [adaptations, setTalkBackAdaptations],
+  );
 
   const resetAdaptations = useCallback(() => {
-    setTalkBackAdaptations(DEFAULT_ADAPTATIONS).catch(console.error)
-  }, [setTalkBackAdaptations])
+    setTalkBackAdaptations(DEFAULT_ADAPTATIONS).catch(console.error);
+  }, [setTalkBackAdaptations]);
 
   // ── Funzioni utilitarie (logica invariata, sorgente dati aggiornata) ───
 
   const getTouchTargetSize = useCallback(() => {
-    if (!talkBackState.adaptationsActive || !adaptations.enhancedTouchTargets) return 44
-    return 56
-  }, [talkBackState.adaptationsActive, adaptations])
+    if (!talkBackState.adaptationsActive || !adaptations.enhancedTouchTargets)
+      return 44;
+    return 56;
+  }, [talkBackState.adaptationsActive, adaptations]);
 
   const getAnimationDuration = useCallback(
     (baseMs: number) => {
-      if (!talkBackState.adaptationsActive || !adaptations.reducedMotion) return baseMs
-      return Math.min(baseMs * 0.5, 100)
+      if (!talkBackState.adaptationsActive || !adaptations.reducedMotion)
+        return baseMs;
+      return Math.min(baseMs * 0.5, 100);
     },
-    [talkBackState.adaptationsActive, adaptations]
-  )
+    [talkBackState.adaptationsActive, adaptations],
+  );
 
   const getTimeout = useCallback(
     (baseMs: number) => {
-      if (!talkBackState.adaptationsActive || !adaptations.extendedTimeouts) return baseMs
-      return baseMs * 2
+      if (!talkBackState.adaptationsActive || !adaptations.extendedTimeouts)
+        return baseMs;
+      return baseMs * 2;
     },
-    [talkBackState.adaptationsActive, adaptations]
-  )
+    [talkBackState.adaptationsActive, adaptations],
+  );
 
   const shouldUseVerboseDescriptions = useCallback(() => {
-    return talkBackState.adaptationsActive && (adaptations.verboseDescriptions ?? true)
-  }, [talkBackState.adaptationsActive, adaptations])
+    return (
+      talkBackState.adaptationsActive &&
+      (adaptations.verboseDescriptions ?? true)
+    );
+  }, [talkBackState.adaptationsActive, adaptations]);
 
   const shouldSimplifyNavigation = useCallback(() => {
-    return talkBackState.adaptationsActive && (adaptations.simplifiedNavigation ?? true)
-  }, [talkBackState.adaptationsActive, adaptations])
+    return (
+      talkBackState.adaptationsActive &&
+      (adaptations.simplifiedNavigation ?? true)
+    );
+  }, [talkBackState.adaptationsActive, adaptations]);
 
   const shouldAutoManageFocus = useCallback(() => {
-    return talkBackState.adaptationsActive && (adaptations.autoFocusManagement ?? true)
-  }, [talkBackState.adaptationsActive, adaptations])
+    return (
+      talkBackState.adaptationsActive &&
+      (adaptations.autoFocusManagement ?? true)
+    );
+  }, [talkBackState.adaptationsActive, adaptations]);
 
   const getAriaDescription = useCallback(
     (brief: string, verbose: string) => {
-      return shouldUseVerboseDescriptions() ? verbose : brief
+      return shouldUseVerboseDescriptions() ? verbose : brief;
     },
-    [shouldUseVerboseDescriptions]
-  )
+    [shouldUseVerboseDescriptions],
+  );
 
   // ── Return ───────────────────────────────────────────────────────────────
 
@@ -215,5 +245,5 @@ export function useAccessibilityDetection() {
     shouldSimplifyNavigation,
     shouldAutoManageFocus,
     getAriaDescription,
-  }
+  };
 }

@@ -1,26 +1,30 @@
-import type { ReactNode } from 'react'
-import { Platform, View } from 'react-native'
+import type { ReactNode } from 'react';
+import { Platform, View } from 'react-native';
 
 interface ActivityDetectorViewProps {
-  onActivity: () => void
-  children: ReactNode
+  onActivity: () => void;
+  children: ReactNode;
 }
 
-export function ActivityDetectorView({ onActivity, children }: ActivityDetectorViewProps) {
+export function ActivityDetectorView({
+  onActivity,
+  children,
+}: ActivityDetectorViewProps) {
   const handleStartShouldSetResponder = () => {
-    onActivity()
-    return false
-  }
+    onActivity();
+    return false;
+  };
 
-  const handleMoveShouldSetResponder = () => false
+  const handleMoveShouldSetResponder = () => false;
 
-  const keyboardProps = Platform.OS === 'windows'
-    ? {
-        onKeyDown: () => {
-          onActivity()
-        },
-      }
-    : {}
+  const keyboardProps =
+    Platform.OS === 'windows'
+      ? {
+          onKeyDown: () => {
+            onActivity();
+          },
+        }
+      : {};
 
   return (
     <View
@@ -31,5 +35,5 @@ export function ActivityDetectorView({ onActivity, children }: ActivityDetectorV
     >
       {children}
     </View>
-  )
+  );
 }

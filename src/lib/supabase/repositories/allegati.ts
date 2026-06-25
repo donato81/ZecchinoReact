@@ -1,14 +1,14 @@
-import { strings } from '@/locales'
-import { storageCleanupService } from '@/lib/storage-cleanup-service'
-import type { Allegato, AttachmentFileInput } from '../../types'
-import { deleteAttachment, uploadAttachment } from '../storage'
-import { supabase } from '../client'
-import { RepositoryError, type DbAllegato } from '../types'
+import { strings } from '@/locales';
+import { storageCleanupService } from '@/lib/storage-cleanup-service';
+import type { Allegato, AttachmentFileInput } from '../../types';
+import { deleteAttachment, uploadAttachment } from '../storage';
+import { supabase } from '../client';
+import { RepositoryError, type DbAllegato } from '../types';
 
 export interface AllegatoCreateInput {
-  transazioneId: string
-  file: AttachmentFileInput
-  descrizione?: string
+  transazioneId: string;
+  file: AttachmentFileInput;
+  descrizione?: string;
 }
 
 function toClient(row: DbAllegato): Allegato {
@@ -22,34 +22,36 @@ function toClient(row: DbAllegato): Allegato {
     descrizione: row.descrizione ?? undefined,
     miniaturaPath: row.miniatura_path ?? undefined,
     createdAt: row.created_at,
-  }
+  };
 }
 
 async function getUid(errorMessage: string): Promise<string> {
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
-    throw new RepositoryError(errorMessage)
+    throw new RepositoryError(errorMessage);
   }
 
-  return user.id
+  return user.id;
 }
 
 export async function getAll(transazioneId: string): Promise<Allegato[]> {
   if (!transazioneId.trim()) {
-    throw new RepositoryError(strings['errors.allegati.loadFailed'])
+    throw new RepositoryError(strings['errors.allegati.loadFailed']);
   }
 
   const { data, error } = await supabase
     .from('allegati_transazioni')
     .select('*')
     .eq('transazione_id', transazioneId)
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: false });
 
   if (error) {
-    throw new RepositoryError(strings['errors.allegati.loadFailed'])
+    throw new RepositoryError(strings['errors.allegati.loadFailed']);
   }
 
-  return (data as DbAllegato[]).map(toClient)
+  return (data as DbAllegato[]).map(toClient);
 }
 
 export async function getById(id: string): Promise<Allegato> {
@@ -57,22 +59,26 @@ export async function getById(id: string): Promise<Allegato> {
     .from('allegati_transazioni')
     .select('*')
     .eq('id', id)
-    .single()
+    .single();
 
   if (error) {
-    throw new RepositoryError(strings['errors.allegati.loadFailed'])
+    throw new RepositoryError(strings['errors.allegati.loadFailed']);
   }
 
-  return toClient(data as DbAllegato)
+  return toClient(data as DbAllegato);
 }
 
 export async function create(input: AllegatoCreateInput): Promise<Allegato> {
-  const userId = await getUid(strings['errors.allegati.uploadFailed'])
-  let uploaded
+  const userId = await getUid(strings['errors.allegati.uploadFailed']);
+  let uploaded;
   try {
-    uploaded = await uploadAttachment(userId, input.transazioneId, input.file)
+    uploaded = await uploadAttachment(userId, input.transazioneId, input.file);
   } catch (error) {
-    throw new RepositoryError(error instanceof Error ? error.message : strings['errors.allegati.uploadFailed'])
+    throw new RepositoryError(
+      error instanceof Error
+        ? error.message
+        : strings['errors.allegati.uploadFailed'],
+    );
   }
 
   const { data, error } = await supabase
@@ -88,27 +94,29 @@ export async function create(input: AllegatoCreateInput): Promise<Allegato> {
       miniatura_path: null,
     })
     .select()
-    .single()
+    .single();
 
   if (error) {
-    void storageCleanupService.cleanupSpecificOrphan(userId, uploaded.storagePath).catch(() => undefined)
+    void storageCleanupService
+      .cleanupSpecificOrphan(userId, uploaded.storagePath)
+      .catch(() => undefined);
 
-    throw new RepositoryError(strings['errors.allegati.uploadFailed'])
+    throw new RepositoryError(strings['errors.allegati.uploadFailed']);
   }
 
-  return toClient(data as DbAllegato)
+  return toClient(data as DbAllegato);
 }
 
 export async function remove(id: string): Promise<void> {
-  const allegato = await getById(id)
-  await deleteAttachment(allegato.storagePath)
+  const allegato = await getById(id);
+  await deleteAttachment(allegato.storagePath);
 
   const { error } = await supabase
     .from('allegati_transazioni')
     .delete()
-    .eq('id', id)
+    .eq('id', id);
 
   if (error) {
-    throw new RepositoryError(strings['errors.allegati.deleteFailed'])
+    throw new RepositoryError(strings['errors.allegati.deleteFailed']);
   }
 }

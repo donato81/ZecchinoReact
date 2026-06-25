@@ -11,14 +11,14 @@ const IRREGULAR: Record<string, string> = {
   obiettivo: 'obiettivi',
   dato: 'dati',
   categoria: 'categorie',
-}
+};
 
 export function pluralize(word: string, count: number): string {
-  if (count === 1) return word
-  const lower = word.toLowerCase()
-  if (lower in IRREGULAR) return IRREGULAR[lower]
-  if (word.endsWith('o')) return `${word.slice(0, -1)}i`
-  if (word.endsWith('a')) return `${word.slice(0, -1)}e`
-  if (word.endsWith('e')) return `${word.slice(0, -1)}i`
-  return word
+  if (count === 1) return word;
+  const lower = word.toLowerCase();
+  if (lower in IRREGULAR) return IRREGULAR[lower];
+  if (word.endsWith('o')) return `${word.slice(0, -1)}i`;
+  if (word.endsWith('a')) return `${word.slice(0, -1)}e`;
+  if (word.endsWith('e')) return `${word.slice(0, -1)}i`;
+  return word;
 }

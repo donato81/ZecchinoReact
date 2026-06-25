@@ -33,20 +33,34 @@ jest.mock('@/lib/haptic-system', () => ({
 }));
 
 jest.mock('@/hooks/use-inactivity-timer', () => ({
-  useInactivityTimer: jest.fn(() => ({ resetTimer: jest.fn(), showWarning: false })),
+  useInactivityTimer: jest.fn(() => ({
+    resetTimer: jest.fn(),
+    showWarning: false,
+  })),
 }));
 
 jest.mock('@/accessibility/detection', () => ({
-  useAccessibilityDetection: jest.fn(() => ({ talkBackState: { enabled: false } })),
+  useAccessibilityDetection: jest.fn(() => ({
+    talkBackState: { enabled: false },
+  })),
 }));
 
 jest.mock('@/announcements', () => ({
   announce: jest.fn(),
   auth: {
-    pinNotConfigured: jest.fn(() => ({ text: 'pin-not-configured', priority: 'assertive' })),
+    pinNotConfigured: jest.fn(() => ({
+      text: 'pin-not-configured',
+      priority: 'assertive',
+    })),
     pinInvalid: jest.fn(() => ({ text: 'pin-invalid', priority: 'assertive' })),
-    privateUnlocked: jest.fn(() => ({ text: 'private-unlocked', priority: 'polite' })),
-    privateAccountLocked: jest.fn(() => ({ text: 'private-locked', priority: 'polite' })),
+    privateUnlocked: jest.fn(() => ({
+      text: 'private-unlocked',
+      priority: 'polite',
+    })),
+    privateAccountLocked: jest.fn(() => ({
+      text: 'private-locked',
+      priority: 'polite',
+    })),
     pinSet: jest.fn(() => ({ text: 'pin-set', priority: 'polite' })),
     pinChanged: jest.fn(() => ({ text: 'pin-changed', priority: 'polite' })),
     pinRemoved: jest.fn(() => ({ text: 'pin-removed', priority: 'polite' })),
@@ -73,11 +87,16 @@ const mockGetSession = supabase.auth.getSession as jest.Mock;
 const mockOnAuthStateChange = supabase.auth.onAuthStateChange as jest.Mock;
 const mockSignOut = supabase.auth.signOut as jest.Mock;
 const mockGetOrCreate = getOrCreate as jest.MockedFunction<typeof getOrCreate>;
-const mockUpdatePinSecurityMaterial = updatePinSecurityMaterial as jest.MockedFunction<typeof updatePinSecurityMaterial>;
+const mockUpdatePinSecurityMaterial =
+  updatePinSecurityMaterial as jest.MockedFunction<
+    typeof updatePinSecurityMaterial
+  >;
 
 type AuthValue = ReturnType<typeof useAuth>;
 
-function makeSettings(overrides: Partial<Awaited<ReturnType<typeof getOrCreate>>> = {}) {
+function makeSettings(
+  overrides: Partial<Awaited<ReturnType<typeof getOrCreate>>> = {},
+) {
   return {
     nomeVisualizzato: 'Mario',
     valutaDefault: 'EUR',
@@ -127,7 +146,10 @@ function makeSettings(overrides: Partial<Awaited<ReturnType<typeof getOrCreate>>
   } as Awaited<ReturnType<typeof getOrCreate>>;
 }
 
-function renderAuthProvider(): { getValue: () => AuthValue; unmount: () => void } {
+function renderAuthProvider(): {
+  getValue: () => AuthValue;
+  unmount: () => void;
+} {
   let captured: AuthValue | null = null;
   let renderer: TestRenderer.ReactTestRenderer;
 
@@ -159,7 +181,9 @@ function renderAuthProvider(): { getValue: () => AuthValue; unmount: () => void 
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockGetSession.mockResolvedValue({ data: { session: { user: { id: 'user-010' } } } });
+  mockGetSession.mockResolvedValue({
+    data: { session: { user: { id: 'user-010' } } },
+  });
   mockOnAuthStateChange.mockReturnValue({
     data: { subscription: { unsubscribe: jest.fn() } },
   });
@@ -222,7 +246,11 @@ describe('AuthContext PIN flows — PLAN 010', () => {
     expect(updateArg.encryptedMasterKey).not.toBe(encryptedMasterKey);
     expect(
       encodeBase64(
-        unwrapMasterKeyWithPin(updateArg.encryptedMasterKey, '222222', require('@/lib/crypto').decodeBase64(updateArg.salt)),
+        unwrapMasterKeyWithPin(
+          updateArg.encryptedMasterKey,
+          '222222',
+          require('@/lib/crypto').decodeBase64(updateArg.salt),
+        ),
       ),
     ).toBe(encodeBase64(masterKey));
 

@@ -5,11 +5,9 @@ jest.mock('@/lib/supabase/client', () => ({
     },
     from: jest.fn(),
   },
-}))
+}));
 
-import {
-  updatePinSecurityMaterial,
-} from '@/lib/supabase/repositories/impostazioni-utente';
+import { updatePinSecurityMaterial } from '@/lib/supabase/repositories/impostazioni-utente';
 import { supabase } from '@/lib/supabase/client';
 
 const mockGetUser = supabase.auth.getUser as jest.Mock;

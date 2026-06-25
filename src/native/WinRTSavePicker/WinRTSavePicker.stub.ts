@@ -15,10 +15,10 @@ import type {
   PickSavePathOptions,
   PickSavePathResult,
   WinRTSavePickerSpec,
-} from './WinRTSavePicker'
+} from './WinRTSavePicker';
 
 export const WinRTSavePicker: WinRTSavePickerSpec = {
   pickSavePath(_options: PickSavePathOptions): Promise<PickSavePathResult> {
-    return Promise.resolve({ status: 'PICKER_UNAVAILABLE' })
+    return Promise.resolve({ status: 'PICKER_UNAVAILABLE' });
   },
-}
+};

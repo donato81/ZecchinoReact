@@ -7,8 +7,8 @@
 //
 // NOTA: src/locales/it.ts non deve essere importato direttamente
 // al di fuori di questa cartella.
-import it from './it'
+import it from './it';
 
-export type { Strings, StringKey } from './it'
+export type { Strings, StringKey } from './it';
 
-export const strings = it
+export const strings = it;
