@@ -3,139 +3,39 @@
 ## [0.13.9] — 2026-05-28 — Reallineamento versione
 
 ### Versioning
+
 - Versione riallineata da 0.4.0 a 0.13.9 per coerenza con lo stato reale del progetto. La versione precedente rifletteva i passi tecnici della migrazione da web a React Native, non la maturita funzionale effettiva.
 - Criteri applicati: primo numero fermo a 0 per assenza di UI completa e navigabile su una piattaforma reale; secondo numero portato a 13 per le aree funzionali implementate e validate; terzo numero portato a 9 per i blocchi tecnici validati aggiuntivi non gia contati come aree funzionali.
 - Aree funzionali conteggiate: autenticazione e sessione Supabase, sicurezza PIN e crittografia avanzata, gestione conti, gestione transazioni, gestione categorie, gestione budget con soglie di allerta, gestione obiettivi di risparmio, export, ricorrenze, tag, notifiche, allegati, accessibilita e layer annunci per screen reader.
 
-## [Unreleased]
+## [0.16.0] — 2026-06-26 — Prestiti, confronto mensile e orchestrazione notifiche
 
 ### Added
-- Aggiunti i documenti di design:
-  - `docs/2-projects/013-DESIGN_repository-ricorrenze_v0.1.0.md`
-  - `docs/2-projects/014-DESIGN_repository-tag-transazioni-tag_v0.1.0.md`
-  - `docs/2-projects/015-DESIGN_repository-notifiche-notification-service_v0.1.0.md`
-  - `docs/2-projects/016-DESIGN_allegati-transazioni_v0.1.0.md`
-  - `docs/2-projects/016-bis-DESIGN_cleanup-orfani-storage_v0.1.0.md`
-  - `docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md`
 
-### Docs
-- [DOCS] — Creati 017-PLAN, 017-TODO, 018-PLAN, 018-TODO, 019-PLAN, 019-TODO. Stato iniziale DRAFT/PENDING. Pronto per review architetto.
-- Aggiunti 2026-05-28:
-  - DESIGN 017 `017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`: definisce l'architettura del dominio prestiti, mutui e simulazione finanziaria. Motore di calcolo puro (`loan-calculator.ts`), due nuove tabelle (`prestiti_mutui`, `prestiti_rimborsi`), RPC atomiche per la gestione del saldo residuo, conversione da simulazione a contratto attivo.
-  - DESIGN 018 `018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md`: definisce il modulo di confronto mese su mese per categoria (`monthly-comparison.ts`). Modulo puro senza effetti collaterali, timezone-safe, con regole ufficiali per i casi percentuali e 17 scenari di test obbligatori.
-  - DESIGN 019 `019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md`: definisce l'architettura a tre layer per le notifiche budget. Estrae `checkBudgetNotifications` da `AppDataContext`, introduce `notification-service.ts` come orchestratore, `repositories/notifiche.ts` come layer di persistenza. Deduplicazione ibrida, escalation replace, secondary hydration.
-- Corretto DESIGN 017 `017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`: chiarito che `roundCurrency` viene introdotta in DESIGN 017 e riusata dai design successivi senza ridefinizione; sostituita la migrazione SQL unica con i placeholder provvisori `P52`, `P53`, `P54`; aggiunto il test obbligatorio che vieta write Supabase per simulazioni locali non salvate.
-- Corretto DESIGN 018 `018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md`: chiarito che `extractDatePart` appartiene a `src/lib/helpers.ts`, è introdotta da DESIGN 017 e viene consumata da DESIGN 018 senza ridefinizione; resa obbligatoria la regola `differenzaPercentuale = null` quando il mese base è zero o assente, con divieto esplicito di valori non finiti; aggiunto in `sorgente` il collegamento a DESIGN 019 per il consumo dei dati aggregati da parte del motore notifiche.
-- Corretto DESIGN 019 `019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md`: rimossi i riferimenti al dominio prestiti/mutui/rimborsi dal perimetro della v1; aggiunte decisioni architetturali su idempotenza mensile locale e scarto silenzioso dei budget mancanti; sostituite le soglie numeriche con le costanti `BUDGET_ALERT_THRESHOLD_WARNING` e `BUDGET_ALERT_THRESHOLD_CRITICAL`; estesa la sezione test e registrato il debito tecnico `DT-019-01` su batching notifiche e accessibility throttling.
-- Correzioni pre-REVIEWED 2026-05-29 senza cambio di stato documentale:
-  - `docs/2-projects/017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`: confermati i placeholder SQL `P52`, `P53`, `P54`; aggiunta nota su `dataFinePrevista` come campo TypeScript opzionale ma calcolato dal repository; aggiunta nota architetturale sull'assenza intenzionale di `updated_at` in `prestiti_rimborsi`.
-  - `docs/2-projects/018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md`: riallineata la dipendenza da `src/lib/helpers.ts` per `roundCurrency` ed `extractDatePart`; collegato il Caso 2 della tabella percentuali allo scenario di test 5; aggiunta la precondizione formale verso DESIGN 017.
-  - `docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md`: rinumerata la migrazione notifiche a `P55`; aggiunta la motivazione architetturale per l'assenza di `updated_at` e la specifica di fallback per `metadata` assenti o parziali.
-- [DATA 2026-05-29] — DESIGN 017, 018, 019 — Correzioni chirurgiche pre-revisione: risolte anomalie di allineamento inter-documento, aggiunte specifiche mancanti su roundCurrency, extractDatePart, deduplicazione notifiche, gestione edge case. Stato: REVIEWED PENDING — in attesa di approvazione finale.
-
-### [2026-05-29] — Correzioni chirurgiche applicate (PLAN 017, 018, 019)
-
-- PLAN 017 (`docs/3-coding-plans/017-PLAN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`):
-  - Dichiarata proprietà delle funzioni `roundCurrency` ed `extractDatePart` in `src/lib/helpers.ts` come introdotte da PLAN 017.
-  - Aggiunto scenario di test obbligatorio per la non-persistenza delle simulazioni temporanee.
-
-- PLAN 018 (`docs/3-coding-plans/018-PLAN_confronto-mese-su-mese-categoria_v0.1.0.md`):
-  - Risolto l'errore numerico: la suite di test ora richiede 12 scenari obbligatori (sostituzione di 17 → 12).
-  - Chiarita la provenienza di `extractDatePart`: ora dichiarata come introdotta in PLAN 017 e non ridefinibile in 018.
-  - Aggiornato il dodicesimo scenario di test: controllo performance e stabilita per dataset di 1000 righe (≤100ms).
-
-- PLAN 019 (`docs/3-coding-plans/019-PLAN_notifiche-budget-orchestrazione_v0.1.0.md`):
-  - Inserito meccanismo di deduplicazione runtime per la sessione attiva (registro indicizzato per tipo_notifica + id_budget + YYYY-MM).
-  - Confermato che le soglie sono esposte come costanti nominate e documentata la politica di scarto silenzioso per budget mancanti.
-
-Note: le modifiche documentali sono presenti in workspace. I commit su `main` non sono stati eseguiti da questo agente (policy Agent-Git). Eseguire i commit manualmente con i comandi consigliati nel report diagnostico.
-
-### Aggiunto — Repository Ricorrenze
-- Introdotti `DbRecurrence`, `RecurrenceType`, `Recurrence` e il repository Supabase `src/lib/supabase/repositories/ricorrenze.ts` con `getAll`, `getById`, `getDue`, `create`, `update` e `deactivate`.
-- Integrate le ricorrenze nel bootstrap dati, nel reset logout, nella cache offline e nel context value di `AppDataContext`.
-- File principali: `src/lib/supabase/repositories/ricorrenze.ts`, `src/context/AppDataContext.tsx`, `src/context/app-data-cache.ts`, `src/lib/supabase/cache.ts`, `__tests__/ricorrenze.repository.test.ts`.
-- Gate validazione: PASSED.
-
-### Aggiunto — Repository Tag e Transazioni-Tag
-- Introdotti `DbTag`, `DbTransactionTag`, `Tag` e i repository Supabase `src/lib/supabase/repositories/tag.ts` e `src/lib/supabase/repositories/transazioni-tag.ts` con CRUD tag, query bulk `getTagMapForTransactions` e RPC `add_tag_to_transaction`, `set_transaction_tags`, `remove_tag_from_transaction`.
-- Estesi bootstrap remoto, fallback cache offline, reset logout e persistenza cache di `AppDataContext` con i nuovi slice `tags` e `transazioni_tag`, inclusa la sincronizzazione locale di `usatoNVolte` sulle associazioni.
-- Allineato `docs/6-sql/P50-rpc-tag-transazioni.sql` con i parametri `p_transaction_id` e con il trigger `sync_tag_usage_count` per mantenere coerente `usato_n_volte` anche sulle delete a cascata.
-- File principali: `src/lib/supabase/repositories/tag.ts`, `src/lib/supabase/repositories/transazioni-tag.ts`, `src/context/AppDataContext.tsx`, `src/context/app-data-cache.ts`, `docs/6-sql/P50-rpc-tag-transazioni.sql`, `__tests__/tag.repository.test.ts`, `__tests__/transazioni-tag.repository.test.ts`, `__tests__/AppDataContext.spec.ts`.
-- Gate validazione e review: PASSED.
-
-### Aggiunto — Repository Notifiche e Notification Service
-- Introdotti `DbNotification`, `AppNotification`, `NotificationType`, cache `notifiche` con TTL dedicato a 1 ora e il repository Supabase `src/lib/supabase/repositories/notifiche.ts` con query unread, deduplicazione per entità/livello e API di cleanup lifecycle.
-- Creato `src/lib/notification-service.ts` come layer di orchestrazione per deduplicazione, escalation replace, hydration secondaria e cleanup post-READY delle notifiche budget.
-- Rifattorizzato `AppDataContext` con stato `notifications`, flag `notificationsHydrated`, hydration secondaria fail-soft dopo `READY`, refresh delle notifiche dopo `refreshAll` e merge locale coerente sulle escalation.
-- Aggiunta la migration `docs/6-sql/P51-notifiche-metadata-jsonb.sql` per il campo `metadata` JSONB della tabella `notifiche`.
-- File principali: `src/lib/supabase/repositories/notifiche.ts`, `src/lib/notification-service.ts`, `src/context/AppDataContext.tsx`, `src/lib/budget-alerts.ts`, `docs/6-sql/P51-notifiche-metadata-jsonb.sql`, `__tests__/notifiche.repository.test.ts`, `__tests__/notification-service.test.ts`, `__tests__/AppDataContext.spec.ts`.
-- Gate validazione e review: PASSED.
-
-### Aggiunto — Repository Allegati e Storage Validato
-- Introdotti `DbAllegato`, `Allegato`, `AttachmentFileInput`, `AttachmentUploadResult` e `AttachmentValidationError` per modellare il dominio allegati transazioni tra layer client e layer Supabase.
-- Creati `src/lib/supabase/storage.ts` e `src/lib/supabase/repositories/allegati.ts` con validazione file lato client, path sicuro `{user_id}/{transazione_id}/{uuid}-{safe_filename}`, signed URL privata, upload con compensating transaction best-effort e delete in ordine Storage poi DB.
-- Aggiunte le 12 chiavi di localizzazione obbligatorie per gli allegati e coperti i casi di rollback, isolamento utente, signed URL fail, MIME mismatch, MIME non consentito e nome file invalido.
-- File principali: `src/lib/supabase/storage.ts`, `src/lib/supabase/repositories/allegati.ts`, `src/lib/types.ts`, `src/lib/supabase/types.ts`, `src/locales/it.ts`, `__tests__/allegati.storage.test.ts`, `__tests__/allegati.repository.test.ts`.
-- Gate validazione e review: PASSED.
-
-### Aggiunto — Cleanup Orfani Storage
-- Creato `src/lib/storage-cleanup-service.ts` con `CleanupResult`, guardia concorrente per utente, throttle per utente, safety window, scan ultime 48 ore, trigger dedicati e logging tecnico `console.warn('[storage-cleanup]', ...)`.
-- Integrati i trigger non bloccanti su login/logout in `AuthContext`, post-cancellazione transazione in `AppDataContext` e trigger specifico post-upload fallito nel repository allegati.
-- File principali: `src/lib/storage-cleanup-service.ts`, `src/context/AuthContext.tsx`, `src/context/AppDataContext.tsx`, `src/lib/supabase/repositories/allegati.ts`, `__tests__/storage-cleanup-service.test.ts`.
-- Gate validazione e review: PASSED.
-
-### Aggiunto — Magic Bytes Validation Allegati
-- Creati i reader `src/lib/file-system/magic-bytes-reader.ts`, `.android.ts`, `.windows.ts` con lettura header limitata a 8 byte, fallback fail-closed e helper `matchesSignature`.
-- Estesa `validateAttachmentFile` con ordine di validazione MIME whitelist → estensione fonte primaria → magic bytes per firme JPEG/PNG/PDF.
-- File principali: `src/lib/file-system/magic-bytes-reader.ts`, `src/lib/file-system/magic-bytes-reader.android.ts`, `src/lib/file-system/magic-bytes-reader.windows.ts`, `src/lib/supabase/storage.ts`, `__tests__/magic-bytes-validation.test.ts`, `__tests__/allegati.storage.test.ts`.
-- Gate validazione e review: PASSED.
-
-### Security
-- Introdotta la Wrapped Master Key Architecture per il PIN privato con payload versionato `{version, iv, ciphertext, tag}` e rewrap della sola master key durante `changePin`.
-  Riferimento: [PLAN-010]
+- Modulo 017: tipi PrestitoMutuo e RimborsoPrestitoMutuo in types.ts, repository prestiti.ts e prestiti-rimborsi.ts, calcolo ammortamento loan-calculator.ts con metodo francese e italiano, integrazione domain object in AppDataContext, suite test loan-calculator.test.ts, prestiti.repository.test.ts, prestiti-rimborsi.repository.test.ts.
+- Modulo 018: monthly-comparison.ts con calcolo delta mese su mese per categoria, tipo MonthlyComparison in types.ts, suite test monthly-comparison.test.ts.
+- Modulo 019: budget-notification-config.ts con soglie e tipo NotificationLevel, tipo BudgetNotificationMetadata in types.ts, riallineamento repository notifiche con titolo_key, messaggio_key e livello, aggiornamento notification-service con mappatura chiavi, chiavi di localizzazione warning, critical, exceeded in it.ts, migration SQL P55-notifiche-riallineamento.sql eseguita in Supabase.
 
 ### Changed
-- Il repository `impostazioni-utente` ora aggiorna in modo atomico `pin_privato_hash`, `pin_kdf_salt` e `pin_master_key_encrypted`; `removePin` cancella i tre campi e forza il logout globale.
-  Riferimento: [PLAN-010]
 
-### Fixed
-- Rimossi i messaggi hardcoded dai flussi PIN di `AuthContext` a favore delle chiavi di localizzazione già usate dagli announcement auth.
-  Riferimento: [PLAN-010]
+- AppDataContext aggiornato con slice prestiti e rimborsi nel domain object globale.
+- Suite test AppDataContext.spec.ts estesa con mock per i nuovi repository.
+- Formatter Prettier applicato su tutti i file src e tests modificati nella sequenza 017-019.
 
-### Reliability
-- `NetworkStatusProvider` usa ora un fail-safe di inizializzazione a 3 secondi e `AppDataContext` separa i casi offline, online e NetInfo non inizializzato con timeout bootstrap nominato a 10 secondi.
-  Riferimento: [PLAN-011]
+### Open Threads
 
-### Changed
-- `App.tsx` monta `NetworkStatusProvider` come primo provider della catena; `AppDataContext` confina `ERROR_NETWORK` e `ERROR_DATA` al modulo e propaga solo messaggi localizzati verso la UI.
-  Riferimento: [PLAN-011]
+- BC-01: src/lib/budget-templates.ts, import @phosphor-icons/react, BLOCCO BUILD ANDROID.
+- BC-02: package.json, @phosphor-icons/react da rimuovere, BLOCCO BUILD ANDROID.
+- BC-03: package.json, react-dom da rimuovere, BLOCCO BUILD ANDROID.
+- AN-01: src/lib/haptic-system.ts, riscrittura con Vibration RN, in attesa DESIGN 020.
+- AN-02: src/lib/sound-system.ts, riscrittura con API RN, in attesa DESIGN 020.
 
-### Correctness
-- `export-service.ts` introduce la guardia concorrente sincrona `inProgress`, il reason pubblico `ALREADY_IN_PROGRESS` e il rilascio obbligatorio del flag nel blocco `finally`.
-  Riferimento: [PLAN-012]
-
-### Changed
-- `AppDataContext` gestisce il nuovo esito `ALREADY_IN_PROGRESS` con toast e announcement localizzati; la suite export è riallineata ai 13 casi richiesti dal design.
-  Riferimento: [PLAN-012]
-
-### Documentazione
-- Aggiunte tre righe nel registro di stato del todo-master.md per i blocchi 010, 011, 012.
-- Aggiornato campo Blocco in Carico e Snapshot di Ripresa per codifica sequenziale 010/011/012.
-- Aggiunta colonna pin_master_key_encrypted alla tabella impostazioni_utente (file P41).
-- TODO 011 corretto: aggiunto Test 8 per verifica localizzazione messaggi bootstrap.
-
-### [DOCS] Correzioni editoriali batch design 013-016-ter (2026-05-28)
-- DESIGN 013: corretto path schema SQL, aggiunta invariante stringhe hardcoded, espanse chiavi locales.
-- DESIGN 014: aggiunta RPC remove_tag_from_transaction (obbligatoria), aggiunta invariante stringhe hardcoded, espanse chiavi locales e nota su `removeTag`.
-- DESIGN 015: aggiunta funzione `cleanupReadExpiredBefore` nell'elenco API pubbliche (documentato), aggiunta invariante stringhe hardcoded.
-- DESIGN 016: aggiunta Sezione 3 "Invarianti architetturali" con invariante stringhe hardcoded.
-- DESIGN 016-bis: espanso elenco test da abbreviato a completo (11 test), aggiunta invariante stringhe hardcoded e nota console.warn.
-- DESIGN 016-ter: espanso elenco test da abbreviato a completo (13 test), aggiunta invariante firma parziale, aggiunta invariante stringhe hardcoded.
-- Serie 013-016-ter promossa a: REVIEWED (dopo correzioni).
+## [Unreleased]
 
 ## [0.4.0-docs.2] — 2026-05-28 — Pianificazione
 
 ### Added
+
 - PLAN 013: coding plan Repository Ricorrenze (stato DRAFT) — docs/3-coding-plans/013-PLAN_repository-ricorrenze_v0.1.0.md
 - TODO 013: todo list Repository Ricorrenze (stato PENDING) — docs/4-todo-lists/013-TODO_repository-ricorrenze_v0.1.0.md
 - PLAN 014: coding plan Repository Tag e Transazioni-Tag (stato DRAFT, prereq: PLAN 013) — docs/3-coding-plans/014-PLAN_repository-tag-transazioni-tag_v0.1.0.md
@@ -152,6 +52,7 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
 ## [0.4.0] — 2026-05-28 — Documentazione
 
 ### Added
+
 - DESIGN 013: Repository Ricorrenze — approvato
   e validato. Introduce il repository per
   transazioni programmate ricorrenti con
@@ -175,6 +76,7 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
   per JPEG, PNG, PDF su Android e Windows.
 
 ### Technical Debt Registered
+
 - DT-016-01: magic bytes validation (soluzione in 016-ter)
 - DT-016-02: cleanup orfani storage (soluzione in 016-bis)
 - DT-016-bis-01: script CLI manutenzione
@@ -194,13 +96,13 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
   documentazione, FASE 1: scansione sorgente, FASE 2: classificazione,
   FASE 3: test review, FASE 4: report). Identifica:
   — 3 Blocchi Critici BC-01/02/03: `@phosphor-icons/react` e `react-dom`
-    in `budget-templates.ts` e `package.json` (impediscono build Android);
+  in `budget-templates.ts` e `package.json` (impediscono build Android);
   — 4 Adattamenti Necessari AN-01/02/03/04: `haptic-system.ts` (Web
-    Vibration API), `sound-system.ts` (Web Audio API), colori `oklch(...)`
-    in `constants.ts` e `budget-templates.ts` (non supportati da RN);
+  Vibration API), `sound-system.ts` (Web Audio API), colori `oklch(...)`
+  in `constants.ts` e `budget-templates.ts` (non supportati da RN);
   — 3 Discrepanze DD-01/02/03: patch netinfo 12.0.1 orfana, stale
-    reference a `use-online-status.ts` in architettura.md, descrizione
-    errata della cache in CLAUDE.md.
+  reference a `use-online-status.ts` in architettura.md, descrizione
+  errata della cache in CLAUDE.md.
 
 #### Verified Compatible (FASE 1)
 
@@ -247,7 +149,6 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
   lo stato iniziale APERTO e il riepilogo operativo dei task principali per i
   design 010, 011 e 012.
 
-
 ### PLAN 009-native — WinRT Save Picker bridge (2026-05-25)
 
 #### Added
@@ -270,7 +171,7 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
   apre `Windows.Storage.Pickers.FileSavePicker` sullo HWND
   della finestra attiva (`IInitializeWithWindow`) e marshalla
   il risultato sull'UI thread via `ReactContext.UIDispatcher()
-  .Post()`. Eccezioni C++/WinRT (`hresult_canceled`,
+.Post()`. Eccezioni C++/WinRT (`hresult_canceled`,
   `E_INVALIDARG`, `E_FAIL`, std::exception) sono mappate in
   modo esaustivo su `status`/`code` JSValueObject (DESIGN
   009-native §6, §8).
@@ -286,7 +187,7 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
   cintura difensiva sul reject del bridge.
 
 - **Test mock-based ramo Windows**
-  ([__tests__/ExportService.test.ts](__tests__/ExportService.test.ts)).
+  ([**tests**/ExportService.test.ts](__tests__/ExportService.test.ts)).
   10 test eseguibili che coprono SUCCESS, USER_CANCELLED,
   PICKER_UNAVAILABLE, INVALID_ARGUMENT, INTERNAL_ERROR (con e
   senza `code=INVALID_FILENAME`), bridge throw, write
@@ -396,7 +297,7 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
   [src/hooks/use-network-status.ts](src/hooks/use-network-status.ts)).
   Nuovo `NetworkStatusProvider` basato su `@react-native-community/netinfo`
   che espone il contratto `NetworkStatus = { isOffline, isConnected,
-  isInternetReachable, connectionType, isInitialized }`. Semantica
+isInternetReachable, connectionType, isInitialized }`. Semantica
   `isOffline` conforme a DESIGN 008 §5 (INV-7): captive portal
   trattato come offline, `isInternetReachable === null` interpretato
   come online-first. Debounce di 1000 ms applicato SOLO sulla
@@ -404,11 +305,11 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
   Fail-Safe Online-First (INV-4): se `NetInfo.addEventListener` lancia
   o non riceve eventi entro 1500 ms, lo stato viene forzato a
   `{ isOffline:false, isConnected:true, isInternetReachable:true,
-  connectionType:'unknown', isInitialized:true }` con warning su
+connectionType:'unknown', isInitialized:true }` con warning su
   `console.warn`. Cleanup completo (`unsubscribe` + clear di tutti i
   timer + `isMountedRef` guard) all'unmount.
 - **Test dedicati per il provider rete**
-  ([__tests__/use-network-status.spec.ts](__tests__/use-network-status.spec.ts)).
+  ([**tests**/use-network-status.spec.ts](__tests__/use-network-status.spec.ts)).
   7 test verdi (PLAN 008 T6): Online, Offline confermato, Captive
   portal, Flapping con debounce (4a online→offline 1000 ms, 4b
   offline→online immediato), Fail-Safe su timeout init, Cleanup
@@ -420,7 +321,7 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
 - **`AppDataContext` ora usa `useNetworkStatus`**
   ([src/context/AppDataContext.tsx](src/context/AppDataContext.tsx)).
   Sostituiti i due controlli inline `typeof navigator !== 'undefined'
-  && navigator.onLine === false` (righe 354 e 415) con la lettura di
+&& navigator.onLine === false` (righe 354 e 415) con la lettura di
   `isOffline` proveniente da `useNetworkStatus()`. Aggiunto early
   return `if (!isNetworkInitialized) return` nel primo `useEffect`
   bootstrap per evitare di consumare uno stato di rete indeterminato
@@ -445,13 +346,13 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
 
 - **`src/hooks/use-online-status.ts`** (24 righe). Vecchio hook
   basato su `navigator.onLine` + `window.addEventListener('online'/
-  'offline')` non funzionante in React Native. Nessun consumer
+'offline')` non funzionante in React Native. Nessun consumer
   esterno restava attivo prima della rimozione.
 
 #### Notes
 
 - **iOS**: il maintainer deve eseguire `cd ios && bundle exec pod
-  install && cd ..` prima del primo `npm run ios` (macOS non
+install && cd ..` prima del primo `npm run ios` (macOS non
   disponibile in sessione, comando non eseguito).
 - Gate G1-G8 (PLAN 008 §7) tutti PASS. Baseline TypeScript = 3
   errori, invariata pre/post-PLAN. Suite Jest: 7/7 suite verdi,
@@ -486,8 +387,8 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
   Aggiunti `announceExportFile()` ed `exportError()` per il routing
   accessibile del risultato export.
 - **Test eseguibili export**
-  ([__tests__/ExportService.test.ts](__tests__/ExportService.test.ts),
-  [__tests__/AppDataContext.spec.ts](__tests__/AppDataContext.spec.ts)).
+  ([**tests**/ExportService.test.ts](__tests__/ExportService.test.ts),
+  [**tests**/AppDataContext.spec.ts](__tests__/AppDataContext.spec.ts)).
   Coperti 11 scenari contrattuali + no-throw per `ExportService` e 12
   scenari per il branching async di `handleExportCSV`.
 
@@ -562,7 +463,7 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
   Piano operativo derivato da DESIGN 008 (REVIEWED) per sostituire il
   rilevamento di connettività basato su `navigator.onLine` /
   `window.addEventListener('online'|'offline')` — non funzionante in
-  React Native — con un *connectivity contract* centralizzato basato su
+  React Native — con un _connectivity contract_ centralizzato basato su
   `@react-native-community/netinfo`. Strategia adottata: **Strategia A
   (migrazione completa)** — eliminazione di `src/hooks/use-online-status.ts`
   (zero consumer verificati nel codebase). 8 task atomici T1-T8,
@@ -611,7 +512,7 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
 
 - **State machine bootstrap esplicita a 6 stati** in `AppDataContext`
   (PLAN 007 T3): `IDLE | HYDRATING | CACHE-READY | REMOTE-SYNC | READY |
-  ERROR`. Tutte le transizioni passano per `transitionTo()` che aggiorna
+ERROR`. Tutte le transizioni passano per `transitionTo()` che aggiorna
   in modo atomico `bootstrapState`, `isLoading`, `isDataReady`, `error`.
   Matrice `ALLOWED_TRANSITIONS` blocca salti illegali con `console.warn`.
 - **Generation counter `hydrationGen`** (PLAN 007 T4):
@@ -660,6 +561,7 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
 - Pre-flight Patch 007 (2026-05-24) — Allineamento documentale di
   PLAN 007 v0.1.0 e TODO 007 v0.1.0 senza modifiche al codice
   sorgente né ai file di test. Operazioni eseguite:
+
   - **TODO 007 §6 Log Validazione**: aggiunte 4 righe pre-flight
     datate 2026-05-24 (verifica DESIGN 001 implementato, DESIGN 002
     implementato, AsyncStorage dipendenza presente, compilazione
@@ -682,8 +584,7 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
     e T8 (esecuzione full suite con verifica regressioni). I
     criteri di accettazione dettagliati restano nel TODO 007 §4.
     Aggiunta nota di chiusura su G4 nel PLAN 007 §5.
-  - **TODO 007 §4 T7 — Direttiva QA "vuoto vs errore" (INVARIANTE
-    5)**: aggiunta direttiva obbligatoria con Caso A (storage vuoto
+  - **TODO 007 §4 T7 — Direttiva QA "vuoto vs errore" (INVARIANTE 5)**: aggiunta direttiva obbligatoria con Caso A (storage vuoto
     ma valido → `READY`, asserzione esplicita `expect(...).toEqual([])`
     e `expect(...).not.toBeUndefined()`) e Caso B (hydration fallita
     / snapshot corrotto → `ERROR`). Nota di chiusura: G4 non chiuso
@@ -735,7 +636,7 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
   `decryptData(encryptedData, key): Promise<string>` INVARIATE.
   `hashPin`/`verifyPin` (bcryptjs) NON toccati.
   Errori di decifratura normalizzati a `'Decryption failed: authentication
-  tag mismatch'` (chiave errata, payload manomesso o troncato).
+tag mismatch'` (chiave errata, payload manomesso o troncato).
 
 [Unreleased]: https://github.com/donato81/ZecchinoReact/compare/v0.4.0...HEAD
 [0.4.0]: https://github.com/donato81/ZecchinoReact/compare/v0.3.0...v0.4.0
@@ -789,7 +690,7 @@ Note: le modifiche documentali sono presenti in workspace. I commit su `main` no
   Perimetro: `src/context/AppDataContext.tsx`. Esclusioni esplicite
   (§7): rimozione di `navigator.onLine` rinviata a DESIGN 008,
   nessuna modifica a `src/lib/supabase/cache.ts` e ai repository.
-- __tests__/AppDataContext.spec.ts: CREATO. File spec con `it.todo`
+- **tests**/AppDataContext.spec.ts: CREATO. File spec con `it.todo`
   che documenta i quattro scenari obbligatori di accettazione di
   PLAN 007 (hydration N9 con `await`, transizioni della state machine,
   concorrenza `refreshAll`, `writeCache` fail-soft, vuoto legittimo
@@ -877,22 +778,23 @@ l'override dei tipi `node` che mascherava gli errori (N11). Gate runtime
 (D3 — fuori perimetro STEP 002).
 
 #### Modificato
+
 - `tsconfig.json` (MODIFICATO) — N11. Rimossa la riga
   `"types": ["node"]` da `compilerOptions`. Permette a `tsc --noEmit`
   di segnalare gli usi residui di `window`/`document`/`navigator` nel
   codice RN, evitando falsi positivi di compatibilita'.
 - `src/context/AuthContext.tsx` (MODIFICATO) — N8. Sostituita la
   detection screen reader DOM-based (`document.querySelector('[aria-live]')`
-  + `document.documentElement.getAttribute('data-sr-active')`) con
-  `AccessibilityInfo.isScreenReaderEnabled()` di React Native e
-  sottoscrizione `addEventListener('screenReaderChanged', ...)` con
-  cleanup tramite `subscription.remove()`. Aggiunto import
-  `AccessibilityInfo` da `react-native`, aggiunto state
-  `isScreenReaderActive` (boolean) gestito da nuovo `useEffect`
-  dedicato. N6 (parte): aggiunto import
-  `ActivityDetectorView` e wrap condizionale dei `children` quando
-  `isAuthenticated === true` (Opzione B del PLAN) per propagare gli
-  eventi di attivita' utente al timer di inattivita'.
+  - `document.documentElement.getAttribute('data-sr-active')`) con
+    `AccessibilityInfo.isScreenReaderEnabled()` di React Native e
+    sottoscrizione `addEventListener('screenReaderChanged', ...)` con
+    cleanup tramite `subscription.remove()`. Aggiunto import
+    `AccessibilityInfo` da `react-native`, aggiunto state
+    `isScreenReaderActive` (boolean) gestito da nuovo `useEffect`
+    dedicato. N6 (parte): aggiunto import
+    `ActivityDetectorView` e wrap condizionale dei `children` quando
+    `isAuthenticated === true` (Opzione B del PLAN) per propagare gli
+    eventi di attivita' utente al timer di inattivita'.
 - `src/hooks/use-inactivity-timer.ts` (MODIFICATO) — N6. Riscritto
   su API RN native: rimossa la costante `ACTIVITY_EVENTS` e il blocco
   `document.addEventListener`/`removeEventListener` nell'`useEffect`
@@ -902,6 +804,7 @@ l'override dei tipi `node` che mascherava gli errori (N11). Gate runtime
   invariata.
 
 #### Aggiunto
+
 - `src/components/ActivityDetectorView.tsx` (CREATO) — N6. Componente
   View RN che cattura gli eventi di attivita' utente tramite
   `onStartShouldSetResponder` (touch/click) senza acquisire il
@@ -921,6 +824,7 @@ definito da `docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md`
 e dal coding plan `docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md`.
 
 #### Aggiunto
+
 - `src/env.d.ts` (CREATO) — dichiarazione modulo `@env` con
   `SUPABASE_URL` e `SUPABASE_ANON_KEY` tipizzate come `string`.
   Sblocca l'import tipato in `src/lib/supabase/client.ts`.
@@ -930,6 +834,7 @@ e dal coding plan `docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md`.
   Soddisfa l'import gia' presente in `src/context/AuthContext.tsx`.
 
 #### Modificato
+
 - `babel.config.js` (MODIFICATO) — aggiunti due plugin all'array
   `plugins`: `react-native-dotenv` (moduleName `@env`, allowlist
   `SUPABASE_URL`/`SUPABASE_ANON_KEY`, `allowUndefined: false`) e
@@ -960,6 +865,7 @@ e dal coding plan `docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md`.
   Tutti i 23+ call site preesistenti restano invariati.
 
 #### Fixed
+
 - App ora bundlable: Metro risolve l'alias `@/` (B1) e le variabili
   `@env` (B2+B6); `npm install` completa senza errori 404 su
   AsyncStorage (B5); `tsc --noEmit` non segnala piu' import irrisolti
@@ -967,6 +873,7 @@ e dal coding plan `docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md`.
   incompatibili con Hermes/React Native (B4).
 
 #### Note operative
+
 - Validazione runtime ancora da eseguire: `npm install`, `npx tsc --noEmit`,
   `npm start` (osservare 30s di log Metro). Test E2E platform-specific
   rimandati alla fase di montaggio provider (DESIGN 002).
@@ -977,6 +884,7 @@ e dal coding plan `docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md`.
 ### DESIGN 003 — 2026-05-21 (implementazione accessibility engine)
 
 #### Aggiunto
+
 - `src/accessibility/types.ts` (CREATO) — Tipi condivisi tra i layer
   accessibility: `AnnouncementPriority`, `Announcement`, `TalkBackState`,
   `TalkBackAdaptations`. Entry point dei contratti pubblici per engine.ts,
@@ -1001,6 +909,7 @@ e dal coding plan `docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md`.
   Esporta `{ strings }` e `type { Strings, StringKey }`.
 
 #### Rimosso
+
 - `src/hooks/use-talkback.ts` (ELIMINATO) — Rimosso dopo conferma assenza
   consumatori (T6: 0 import nel codebase). Sostituito da
   `src/accessibility/detection.ts`. Eliminava 5 errori tsc pre-esistenti
@@ -1009,6 +918,7 @@ e dal coding plan `docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md`.
 ### Docs — 2026-05-21 (correzioni documentali DESIGN 003 e ADR_001 — sette fix validati)
 
 #### Modificato
+
 - `docs/2-projects/003-DESIGN_fix-accessibility-engine_v1.0.0.md`
   (MODIFICATO) — applicate sette correzioni validate dal Consiglio AI
   (Perplexity, Claude, ChatGPT, DeepSeek, Gemini):
@@ -1043,6 +953,7 @@ Report di convalida di riferimento:
 ### Docs — 2026-05-21 (analisi coerenza DESIGN 003 + PLAN 003)
 
 #### Aggiunto
+
 - `docs/1-reports/REPORT_analisi-coerenza_DESIGN-003_v1.0.0.md`
   (CREATO) — Report analisi coerenza e validazione DESIGN 003 e PLAN 003.
   Quattro incoerenze documentali identificate: C1 CRITICA (contraddizione
@@ -1054,6 +965,7 @@ Report di convalida di riferimento:
 ### Docs — 2026-05-21 (correzioni A1/A2/A3 + nota C2)
 
 #### Modificato
+
 - `docs/3-coding-plans/001-PLAN_fix-blocchi-avvio_v0.1.0.md`
   (MODIFICATO) — A1: rimosso riferimento stale a "sezione 10 DESIGN"
   nell'intestazione del Gate di verifica globale.
@@ -1068,7 +980,7 @@ Report di convalida di riferimento:
   La nota avvisa l'implementatore di non testare i path PIN/sblocco
   privato (unlockPrivate, setPin, changePin, removePin) fino al
   completamento di DESIGN 003, per evitare `ReferenceError: document
-  is not defined` originato da `initializeLiveRegions()` privo di guard
+is not defined` originato da `initializeLiveRegions()` privo di guard
   in `src/lib/screen-reader.ts`.
 - `docs/4-todo-lists/002-TODO_fix-provider-bootstrap_v0.2.0.md`
   (MODIFICATO) — A2b: aggiornato riferimento righe nel task N8-3 da
@@ -1080,6 +992,7 @@ Report di convalida di riferimento:
 ### Docs — 2026-05-20 (analisi coerenza)
 
 #### Aggiunto
+
 - `docs/1-reports/REPORT_analisi-coerenza_DESIGN-001-002_v1.0.0.md`
   (CREATO) — Report analisi coerenza e validazione DESIGN 001 e DESIGN 002.
   Sei incoerenze documentali identificate (nessuna bloccante per la
@@ -1090,6 +1003,7 @@ Report di convalida di riferimento:
 ### Docs — 2026-05-20 (aggiornamento)
 
 #### Modificato
+
 - `docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md` (REVIEWED) —
   chiuse precondizioni P2 e P3 con esito di verifica documentato.
   Marcatura stato da DRAFT a REVIEWED. Precondizione P1 residua:
@@ -1109,12 +1023,14 @@ Report di convalida di riferimento:
 ### Docs — 2026-05-20
 
 #### Aggiunto
-- `docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md` (CREATO) — documento di design per il *delivery layer* di export file nativo multi-formato e multi-piattaforma. Architettura a tre layer: `exportToCSV` in `src/lib/helpers.ts` (generazione contenuto, invariata) / nuovo `ExportService` in `src/lib/export-service.ts` (delivery infrastrutturale asincrono, nessuna dipendenza React, nessun side effect UX) / `AppDataContext.tsx` (orchestrazione + side effect UX). Contratto `ExportResult` con sette classi di errore OS-native (`CANCELLED`, `PERMISSION_DENIED`, `FILESYSTEM_ERROR`, `UNSUPPORTED_PLATFORM`, `INVALID_PATH`, `INSUFFICIENT_SPACE`, `UNKNOWN`). Strategia multi-piattaforma: share sheet nativa su iOS/Android (`react-native-share`), save file dialog su Windows (`react-native-fs` o alternativa, soggetta a verifica di compatibilità con RNW 0.82.x). Struttura future-proof per formati multipli (CSV implementato; PDF/XLSX/altri rimandati). Breaking change documentato: firma `handleExportCSV` da `void` a `Promise<void>`. Risolve il punto N10 del report di diagnosi compatibilità React Native. Stato DRAFT.
-- `docs/2-projects/008-DESIGN_network-connectivity_v0.1.0.md` (CREATO) — definisce il *connectivity contract* dell'applicazione, sostituendo il rilevamento di rete basato su `navigator.onLine` e `window.addEventListener('online'|'offline')` (non funzionante in React Native) con un produttore centralizzato basato su NetInfo (`NetworkStatusProvider` + hook pubblico `useNetworkStatus`). Formalizza la semantica offline con distinzione `isConnected`/`isInternetReachable` (inclusa captive portal), il debounce direzionale 1000ms sul flapping online→offline, la strategia Fail-Safe Online-First per il fallback Windows, la posizione del provider nell'albero e il boundary producer-consumer con DESIGN 007. Perimetro: `src/hooks/use-online-status.ts`, `src/context/AppDataContext.tsx`. Risolve il punto N5 del report di diagnosi compatibilità React Native. Stato DRAFT.
+
+- `docs/2-projects/009-DESIGN_export-nativo_v0.1.0.md` (CREATO) — documento di design per il _delivery layer_ di export file nativo multi-formato e multi-piattaforma. Architettura a tre layer: `exportToCSV` in `src/lib/helpers.ts` (generazione contenuto, invariata) / nuovo `ExportService` in `src/lib/export-service.ts` (delivery infrastrutturale asincrono, nessuna dipendenza React, nessun side effect UX) / `AppDataContext.tsx` (orchestrazione + side effect UX). Contratto `ExportResult` con sette classi di errore OS-native (`CANCELLED`, `PERMISSION_DENIED`, `FILESYSTEM_ERROR`, `UNSUPPORTED_PLATFORM`, `INVALID_PATH`, `INSUFFICIENT_SPACE`, `UNKNOWN`). Strategia multi-piattaforma: share sheet nativa su iOS/Android (`react-native-share`), save file dialog su Windows (`react-native-fs` o alternativa, soggetta a verifica di compatibilità con RNW 0.82.x). Struttura future-proof per formati multipli (CSV implementato; PDF/XLSX/altri rimandati). Breaking change documentato: firma `handleExportCSV` da `void` a `Promise<void>`. Risolve il punto N10 del report di diagnosi compatibilità React Native. Stato DRAFT.
+- `docs/2-projects/008-DESIGN_network-connectivity_v0.1.0.md` (CREATO) — definisce il _connectivity contract_ dell'applicazione, sostituendo il rilevamento di rete basato su `navigator.onLine` e `window.addEventListener('online'|'offline')` (non funzionante in React Native) con un produttore centralizzato basato su NetInfo (`NetworkStatusProvider` + hook pubblico `useNetworkStatus`). Formalizza la semantica offline con distinzione `isConnected`/`isInternetReachable` (inclusa captive portal), il debounce direzionale 1000ms sul flapping online→offline, la strategia Fail-Safe Online-First per il fallback Windows, la posizione del provider nell'albero e il boundary producer-consumer con DESIGN 007. Perimetro: `src/hooks/use-online-status.ts`, `src/context/AppDataContext.tsx`. Risolve il punto N5 del report di diagnosi compatibilità React Native. Stato DRAFT.
 - `docs/2-projects/007-DESIGN_async-cache-hydration_v0.1.0.md` (CREATO) — definisce il bootstrap lifecycle e la state machine di hydration per `AppDataContext.tsx`. Formalizza il contratto di `isLoading`/`isDataReady`, la strategia cache-first/stale-while-revalidate, la distinzione tra vuoto legittimo ed errore, la gestione della concorrenza di `refreshAll` e la failure strategy per `writeCache`. Risolve il punto N9 del report di diagnosi compatibilità React Native. Stato DRAFT.
 - `docs/design/DESIGN_006_kdf-pin.md` (CREATO) — documento di design architetturale per la Key Derivation Function del PIN privato: sostituzione della derivazione debole (padding/troncatura) con PBKDF2-SHA256 (`@noble/hashes`); salt casuale 16 byte persistito in colonna `pin_kdf_salt` su Supabase; versionamento payload `[KDF_VERSION | SALT | IV | Ciphertext | AuthTag]`; golden vectors K1–K3 (semantica); impatto su `DbUserSettings`, `UserSettings` e repository `updatePinSalt`.
 
 #### Modificato
+
 - **`docs/2-projects/006-DESIGN_kdf-pin_v0.2.0.md` — Correzioni pre-REVIEWED (20 maggio 2026)**
   - Sezione 4: aggiunto floor minimo invalicabile di 100.000 iterazioni PBKDF2-SHA256 con riferimento esplicito alle raccomandazioni OWASP contemporanee.
   - Sezione 7: aggiunto richiamo esplicito al floor minimo e procedura per documentare il tradeoff se non raggiungibile entro il budget 100–300 ms.
@@ -1125,17 +1041,18 @@ Report di convalida di riferimento:
 ### Docs — 2026-05-19
 
 #### Aggiunto
+
 - `docs/2-projects/005-DESIGN_sostituzione-crypto-N4_v0.3.0.md` (CREATED) — documento di design architetturale per N4: sostituzione di `crypto.subtle` con `@noble/ciphers` (pure-JS, compatibile con Hermes); include analisi payload, golden test vectors, tradeoff sicurezza, debolezza KDF documentata come rinviata
 - `docs/3-coding-plans/003-PLAN_fix-accessibility-engine_v1.0.0.md` (CREATED) — coding plan estratto da DESIGN 003, task T1-T8
 - `docs/3-coding-plans/004-PLAN_announcements-layer_v1_0_0.md` (CREATED) — coding plan estratto da DESIGN 004, task T1-T14
 
 #### Modificato
+
 - `docs/2-projects/001-DESIGN_fix-blocchi-avvio_v0.1.0.md` — rimosso contenuto tecnico-implementativo (code block, bash, gate di verifica); mantenuto contenuto logico-cognitivo §1–§7; PLAN 001 non richiede aggiornamenti
 - `docs/2-projects/002-DESIGN_fix-provider-bootstrap_v0.2.0.md` — rimosso contenuto tecnico-implementativo (code block, bash, gate di verifica); mantenuto contenuto logico-cognitivo §1–§5 incluse Opzione A/B per N6; PLAN 002 non richiede aggiornamenti
 - `docs/2-projects/003-DESIGN_fix-accessibility-engine_v1.0.0.md` — sezioni implementative sostituite con riferimenti incrociati al coding plan 003
 - `docs/2-projects/004-DESIGN_announcements-layer_v1_0_0.md` — sezioni implementative sostituite con riferimenti incrociati al coding plan 004
 - `docs/todo-master.md` — Snapshot di Ripresa aggiornato; Reference Documents aggiunti a Fase P1 e P2
-
 
 ## [0.4.0] — 2026-05-24
 
@@ -1148,13 +1065,14 @@ Report di convalida di riferimento:
 - Nota architetturale futura: Wrapped Master Key (§13)
 - Dependency Governance prescritta (§14)
 
-
 ## [0.1.0] - 2026-05-13
 
 ### Origini del progetto
+
 - App nata come applicazione web con GitHub
 
 ### Migrato
+
 - Logica applicativa estratta dal file monolitico originale (1800+ righe)
   e suddivisa in file con responsabilità separate
 - Salvataggio dati migrato da storage locale Spark a database Supabase
@@ -1163,10 +1081,12 @@ Report di convalida di riferimento:
   e il layer dati in preparazione alla riscrittura nativa
 
 ### Corretto
+
 - Nessuna correzione ancora applicata in questa versione base
   (i fix B1-B6 saranno documentati nella versione 0.1.1)
 
 ### Noto
+
 - B1: alias @/ non risolti da Metro (manca babel-plugin-module-resolver)
 - B2: variabili ambiente Supabase non disponibili a runtime in RN
   (process.env non funziona in React Native, serve react-native-dotenv)

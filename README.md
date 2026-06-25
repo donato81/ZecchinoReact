@@ -1,9 +1,9 @@
-﻿# ZecchinoReact
+# ZecchinoReact
 
 App di finanza personale per **Android**, **iOS** e **Windows** (react-native-windows).  
 Il dominio â€” nomi variabili, tipi, label UI â€” Ã¨ interamente in italiano.
 
-Versione progetto: **0.4.0**.
+Versione progetto: **0.16.0**.
 
 > **Stato attuale**: migrazione da web (React + shadcn) a React Native in corso.  
 > L'app **non Ã¨ avviabile** fino alla risoluzione dei 6 blocchi di build documentati in  
@@ -28,21 +28,24 @@ tracciati in `docs/todo-master.md` e nel report compatibilita'. Il sotto-piano
 - Blocco 016 completato: repository `allegati`, storage Supabase privato con validazione file lato client, path sicuro per upload e rollback best-effort su fallimento DB.
 - Blocco 016-bis completato: cleanup automatico e silenzioso dei file orfani Storage con trigger su login, logout, delete transazione e rollback allegati.
 - Blocco 016-ter completato: hardening allegati con magic bytes validation su JPEG, PNG e PDF prima dell'upload.
+- Blocco 017 completato: modulo prestiti e mutui con tipi PrestitoMutuo e RimborsoPrestitoMutuo, repository prestiti.ts e prestiti-rimborsi.ts con operazioni CRUD complete, calcolo piano di ammortamento in loan-calculator.ts con metodo francese e italiano, integrazione nel domain object globale di AppDataContext.
+- Blocco 018 completato: modulo confronto mese su mese per categoria in monthly-comparison.ts, calcolo delta percentuale e assoluto tra mese corrente e mese precedente per categoria di spesa, aggiunta del tipo MonthlyComparison a types.ts.
+- Blocco 019 completato: orchestrazione notifiche budget con budget-notification-config.ts, riallineamento repository notifiche con campi titolo_key e messaggio_key per localizzazione a runtime, introduzione tipo NotificationLevel e BudgetNotificationMetadata, chiavi di localizzazione warning, critical ed exceeded in it.ts, mappatura nel notification-service e nel context orchestrator.
 
 ---
 
 ## Stack tecnologico
 
-| Tecnologia | Versione | Ruolo |
-|-----------|---------|-------|
-| React Native (bare) | 0.82.1 | UI framework â€” Android, iOS |
-| React | 19.1.1 | |
-| react-native-windows | ^0.82.5 | Target Windows (UWP) |
-| Supabase JS | ^2.105.4 | Backend: auth, DB PostgreSQL, RLS |
-| AsyncStorage | ^2.x | Cache locale (24h TTL) |
-| bcryptjs | ^3.0.3 | Hashing PIN privato |
-| react-native-quick-crypto | 1.1.5 | PBKDF2-SHA256 nativa (OpenSSL) per KDF PIN |
-| TypeScript | â€” | Tipizzazione completa |
+| Tecnologia                | Versione | Ruolo                                      |
+| ------------------------- | -------- | ------------------------------------------ |
+| React Native (bare)       | 0.82.1   | UI framework â€” Android, iOS              |
+| React                     | 19.1.1   |                                            |
+| react-native-windows      | ^0.82.5  | Target Windows (UWP)                       |
+| Supabase JS               | ^2.105.4 | Backend: auth, DB PostgreSQL, RLS          |
+| AsyncStorage              | ^2.x     | Cache locale (24h TTL)                     |
+| bcryptjs                  | ^3.0.3   | Hashing PIN privato                        |
+| react-native-quick-crypto | 1.1.5    | PBKDF2-SHA256 nativa (OpenSSL) per KDF PIN |
+| TypeScript                | â€”      | Tipizzazione completa                      |
 
 ---
 
@@ -156,12 +159,12 @@ Tutti i file SQL si trovano in `docs/6-sql/`.
 
 ## Documentazione tecnica
 
-| Documento | Contenuto |
-|-----------|-----------|
-| [`docs/api.md`](docs/api.md) | Riferimento completo di tutti i moduli pubblici in `src/` |
-| [`docs/architettura.md`](docs/architettura.md) | Layer diagram, compatibilitÃ  RN per file, piano migrazione |
-| [`docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md`](docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md) | Diagnosi completa: 6 BLOCCANTI, 11 NON BLOCCANTI |
-| [`docs/1-reports/1-report-analisi-migrazione-react-native.md`](docs/1-reports/1-report-analisi-migrazione-react-native.md) | Classificazione TIENI/VALUTA/ELIMINA per ogni file `src/` |
+| Documento                                                                                                                  | Contenuto                                                   |
+| -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| [`docs/api.md`](docs/api.md)                                                                                               | Riferimento completo di tutti i moduli pubblici in `src/`   |
+| [`docs/architettura.md`](docs/architettura.md)                                                                             | Layer diagram, compatibilitÃ  RN per file, piano migrazione |
+| [`docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md`](docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md)   | Diagnosi completa: 6 BLOCCANTI, 11 NON BLOCCANTI            |
+| [`docs/1-reports/1-report-analisi-migrazione-react-native.md`](docs/1-reports/1-report-analisi-migrazione-react-native.md) | Classificazione TIENI/VALUTA/ELIMINA per ogni file `src/`   |
 
 ---
 
