@@ -5,8 +5,8 @@
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
- - **Ultimo Agente Attivo:** Agent-Orchestrator — stesura coding plan e todo list 017 / 018 / 019 — 2026-05-29
- - **Blocco in Carico:** Coding plan e todo list 017-019 creati. Prossimo passo: review donny-81 e autorizzazione implementazione 017-019.
+ - **Ultimo Agente Attivo:** donny-81 — review e allineamento 017-018-019, esecuzione P55 in Supabase — 2026-06-25
+ - **Blocco in Carico:** 017-018-019 pronti alla codifica. Review completata 2026-06-25. P55-notifiche.sql eseguito in Supabase. Prossimo passo: avvio codifica sequenziale blocco 017.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
@@ -44,7 +44,7 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** BLOCCO PIANIFICAZIONE 017-019 — creati i sei file PLAN/TODO per DESIGN 017, 018 e 019 (2026-05-29).
+- **Last Completed Task:** ALLINEAMENTO 017-019 — review completata, correzioni applicate, P55-notifiche.sql eseguito in Supabase (2026-06-25). PLAN 019 T7 e gate G-019-6 chiusi.
 - **Last Validated Block:** CICLO-G 017-019 — revisione globale completata con esito PASS, G8 incluso (2026-05-29, Agent-Orchestrator).
 - **Files Modified But Not Validated:** Nessuno (sessione DUSU-ANALYZER
   è read-only per src/). Documenti aggiornati: REPORT-compatibilita-android-v1.0.0.md
@@ -60,7 +60,7 @@
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
- - **Next Action:** Review donny-81 dei sei file di pianificazione 017-019 e autorizzazione all'implementazione.
+ - **Next Action:** Avvio codifica sequenziale blocco 017 — Prestiti, Mutui e Simulazione Finanziaria. Prerequisiti 017 soddisfatti. Attendere VAI da donny-81.
 
 > Nota sessione orchestrazione 2026-05-29:
 > Creati i sei documenti di pianificazione richiesti:
@@ -565,6 +565,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B8-TODO-018 | Todo list 018 — Confronto Mese su Mese per Categoria | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
 | P3.B8-PLAN-019 | Coding plan 019 — Notifiche Budget e Orchestrazione | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
 | P3.B8-TODO-019 | Todo list 019 — Notifiche Budget e Orchestrazione | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
+| P3.B9-SQL-P55 | Migrazione P55 — tabella notifiche schema Supabase | [x] DONE — 2026-06-25 donny-81 | [x] PASSED — eseguito in Supabase |
 
 ### Log di Validazione
 
@@ -617,6 +618,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-29 | P3.B8-TODO-018 | Agent-Orchestrator | PASSED | Creata e validata `018-TODO_confronto-mese-su-mese-categoria_v0.1.0.md`; Ciclo-G PASS |
 | 2026-05-29 | P3.B8-PLAN-019 | Agent-Orchestrator | PASSED | Creato e validato `019-PLAN_notifiche-budget-orchestrazione_v0.1.0.md`; Ciclo-G PASS |
 | 2026-05-29 | P3.B8-TODO-019 | Agent-Orchestrator | PASSED | Creata e validata `019-TODO_notifiche-budget-orchestrazione_v0.1.0.md`; Ciclo-G PASS |
+| 2026-06-25 | P3.B9-SQL-P55 | donny-81 | DONE | P55-notifiche.sql eseguito in Supabase. Tabella notifiche creata con indici, RLS e metadata JSONB. PLAN 019 T7 e gate G-019-6 chiusi. |
 
 ---
 
