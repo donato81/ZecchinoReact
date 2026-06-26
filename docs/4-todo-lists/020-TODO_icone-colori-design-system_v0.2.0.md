@@ -30,7 +30,7 @@ autore: Agent-Orchestrator
 
 ### P-020
 - Azione: Verificare e confermare i 16 colori hex convertiti nel DESIGN 020 (Sezione 6).
-- Task Status: [ ] TODO
+- Task Status: [x] DONE — 2026-06-26 — hex convertiti in sessione, valori definitivi in DESIGN 020 Sezione 6
 
 ### T1
 - Azione: Creare il file centrale dei design token `colors.ts` popolato con i valori hex convertiti, esportando `DESIGN_COLORS` e i tipi `BudgetColorToken`, `AccountCategoryColorToken`, `BudgetTemplateIconKey`.
@@ -81,3 +81,11 @@ autore: Agent-Orchestrator
 
 - docs/2-projects/020-DESIGN_icone-colori-design-system_v0.2.0.md
 - docs/3-coding-plans/020-PLAN_icone-colori-design-system_v0.2.0.md
+
+
+## 8. Dichiarazione di Completamento
+
+- Data completamento: —
+- Completato da: —
+- Stato finale: —
+- Note: —

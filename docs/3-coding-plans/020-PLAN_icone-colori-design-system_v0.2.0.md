@@ -44,6 +44,7 @@ Fuori perimetro:
 
 ### P-020
 - Azione: Verificare e compilare i 16 colori hex convertiti nel DESIGN 020 (Sezione 6).
+- Stato: DONE — 2026-06-26 — completato in sessione Perplexity, valori definitivi in DESIGN 020 Sezione 6
 
 ### T1
 - Azione: Creare il file centrale dei design token `colors.ts` popolato con i valori hex convertiti, esportando `DESIGN_COLORS` e i tipi `BudgetColorToken`, `AccountCategoryColorToken`, `BudgetTemplateIconKey`.
