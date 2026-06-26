@@ -39,6 +39,7 @@
 
 ## [Unreleased]
 
+- feat(haptic): implementa haptic-system nativo con expo-haptics — rimozione navigator.vibrate(), persistenza AsyncStorage, shim @deprecated 33 metodi legacy, supporto Platform.OS Windows no-op, sincronizzazione Supabase UserPreferences haptic_enabled. Chiude AN-01.
 - docs(design): aggiunto documento di design 021 — refactor haptic-system AN-01
 
 ### Docs

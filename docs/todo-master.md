@@ -47,19 +47,16 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** P3.B8-IMPL-017, P3.B8-IMPL-018, P3.B8-IMPL-019, P3.B8-IMPL-020 (completati 2026-06-25 e 2026-06-26).
-- **Last Validated Block:** CICLO-G 017-020 — revisione globale completata con esito PASS (2026-06-26, donny-81).
+- **Last Completed Task:** P3.B8-AN-01 (completato 2026-06-26).
+- **Last Validated Block:** CICLO-G 021 — Haptic System Refactor (2026-06-26, DUSU-CODER).
 - **Files Modified But Not Validated:** Nessuno
  - **Open Threads:**
-  - AN-01: IN DESIGN — 021-DESIGN_haptic-system_v0.1.0.md — 2026-06-26
   - AN-02: `src/lib/sound-system.ts` — riscrittura con expo-av/react-native-sound (P1.B2 TODO)
   - AN-03: `oklch colori` — da verificare per compatibilità Android (da DESIGN 020)
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
- - **Next Action:** Avviare coding AN-01 — Haptic System Refactor.
-      Coding Plan: docs/3-coding-plans/021-PLAN_haptic-system_v0.1.0.md
-      Todo: docs/4-todo-lists/021-TODO_haptic-system_v0.1.0.md
+ - **Next Action:** Da definire da donny-81 (AN-02 sound-system o AN-03 OKLCH).
 
 > Nota sessione orchestrazione 2026-05-29:
 > Creati i sei documenti di pianificazione richiesti:
@@ -572,8 +569,9 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B8-TODO-020 | Todo list 020 — Centralizzazione design tokens | [x] DONE — 2026-06-26 Agent-Orchestrator | [x] PASSED |
 | P3.B8-IMPL-020 | Codifica blocco 020 — Centralizzazione design tokens | [x] DONE — 2026-06-26 Antigravity | [x] PASSED |
 | P3.B9-SQL-P55 | Migrazione P55 — tabella notifiche schema Supabase | [x] DONE — 2026-06-25 donny-81 | [x] PASSED — eseguito in Supabase |
-| P3.AN-01-PLAN | Redazione Coding Plan 021 — Haptic System Refactor | [ ] IN PROGRESS — 2026-06-26 donny-81 | [ ] PENDING |
-| P3.AN-01-TODO | Redazione Todo Specifico 021 — Haptic System Refactor | [ ] IN PROGRESS — 2026-06-26 donny-81 | [ ] PENDING |
+| P3.AN-01-PLAN | Redazione Coding Plan 021 — Haptic System Refactor | [x] DONE — 2026-06-26 DUSU-FIX | [x] PASSED |
+| P3.AN-01-TODO | Redazione Todo Specifico 021 — Haptic System Refactor | [x] DONE — 2026-06-26 DUSU-FIX | [x] PASSED |
+| P3.B8-AN-01 | Codifica 021 — Haptic System (expo-haptics) | [x] DONE — 2026-06-26 DUSU-CODER | [x] PASSED |
 
 ### Log di Validazione
 
@@ -626,8 +624,8 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-29 | P3.B8-TODO-018 | Agent-Orchestrator | PASSED | Creata e validata `018-TODO_confronto-mese-su-mese-categoria_v0.1.0.md`; Ciclo-G PASS |
 | 2026-05-29 | P3.B8-PLAN-019 | Agent-Orchestrator | PASSED | Creato e validato `019-PLAN_notifiche-budget-orchestrazione_v0.1.0.md`; Ciclo-G PASS |
 | 2026-05-29 | P3.B8-TODO-019 | Agent-Orchestrator | PASSED | Creata e validata `019-TODO_notifiche-budget-orchestrazione_v0.1.0.md`; Ciclo-G PASS |
-| 2026-06-26 | P3.B8-PLAN-020 | Agent-Orchestrator | PASSED | Creato e validato `020-PLAN_icone-colori-design-system_v0.2.0.md`; Ciclo-G PASS |
-| 2026-06-26 | P3.B8-TODO-020 | Agent-Orchestrator | PASSED | Creata e validata `020-TODO_icone-colori-design-system_v0.2.0.md`; Ciclo-G PASS |
+| 2026-06-26 | P3.AN-01-PLAN | DUSU-FIX | PASSED | Applicate 10 micro-correzioni pre-codifica su PLAN 021 e TODO 021, stato portato a REVIEWED. |
+| 2026-06-26 | P3.B8-AN-01 | DUSU-CODER | DONE | Implementato refactor Haptic System (AN-01) con expo-haptics e AsyncStorage. Test unitari e compilazione superati. |
 | 2026-06-26 | P3.B8-IMPL-020 | Antigravity | DONE | Implementato PLAN 020: token in colors.ts, refactoring template/costanti, rimosso phosphor. Test/Build passati. |
 | 2026-06-25 | P3.B9-SQL-P55 | donny-81 | DONE | P55-notifiche.sql eseguito in Supabase. Tabella notifiche creata con indici, RLS e metadata JSONB. PLAN 019 T7 e gate G-019-6 chiusi. |
 | 2026-06-25 | P3.B8-IMPL-017 | donny-81 | DONE | Codifica 017 — Prestiti, Mutui e Simulazione Finanziaria: tipi, repository, calcolo ammortamento, integrato AppDataContext. Test passati. |

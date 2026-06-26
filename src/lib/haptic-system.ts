@@ -1,73 +1,77 @@
-type HapticPattern =
-  | 'light'
-  | 'medium'
-  | 'heavy'
-  | 'success'
-  | 'warning'
-  | 'error'
-  | 'selection'
-  | 'impact-light'
-  | 'impact-medium'
-  | 'impact-heavy'
-  | 'notification-success'
-  | 'notification-warning'
-  | 'notification-error'
-  | 'rigid'
-  | 'soft';
+import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
 
-interface HapticSettings {
+export type HapticFeedbackType =
+  | 'success'
+  | 'error'
+  | 'warning'
+  | 'selection'
+  | 'impactLight'
+  | 'impactMedium'
+  | 'impactHeavy';
+
+export interface HapticSettings {
   enabled: boolean;
-  intensity: number;
 }
 
-class HapticSystem {
+export interface IHapticSystem {
+  isEnabled(): boolean;
+  setEnabled(enabled: boolean): Promise<void>;
+  getSettings(): HapticSettings;
+  isSupported(): boolean;
+
+  // 7 feedback nativi
+  success(): Promise<void>;
+  error(): Promise<void>;
+  warning(): Promise<void>;
+  selection(): Promise<void>;
+  impactLight(): Promise<void>;
+  impactMedium(): Promise<void>;
+  impactHeavy(): Promise<void>;
+}
+
+export class HapticSystem implements IHapticSystem {
   private settings: HapticSettings = {
     enabled: true,
-    intensity: 1.0,
   };
   private supportsVibration: boolean = false;
+  private isInitialized: boolean = false;
 
   constructor() {
-    this.supportsVibration = 'vibrate' in navigator;
+    this.supportsVibration = Platform.OS !== 'windows';
     this.loadSettings();
   }
 
-  private loadSettings(): void {
+  private async loadSettings(): Promise<void> {
     try {
-      const stored = localStorage.getItem('haptic-settings');
+      const stored = await AsyncStorage.getItem('haptic-settings');
       if (stored) {
         const parsed = JSON.parse(stored);
         this.settings = { ...this.settings, ...parsed };
       }
     } catch (error) {
       console.warn('Failed to load haptic settings:', error);
+    } finally {
+      this.isInitialized = true;
     }
   }
 
-  private saveSettings(): void {
+  private async saveSettings(): Promise<void> {
     try {
-      localStorage.setItem('haptic-settings', JSON.stringify(this.settings));
+      await AsyncStorage.setItem('haptic-settings', JSON.stringify(this.settings));
     } catch (error) {
       console.warn('Failed to save haptic settings:', error);
     }
   }
 
   isEnabled(): boolean {
-    return this.settings.enabled && this.supportsVibration;
+    return this.isInitialized && this.settings.enabled && this.supportsVibration;
   }
 
-  setEnabled(enabled: boolean): void {
+  async setEnabled(enabled: boolean): Promise<void> {
     this.settings.enabled = enabled;
-    this.saveSettings();
-  }
-
-  getIntensity(): number {
-    return this.settings.intensity;
-  }
-
-  setIntensity(intensity: number): void {
-    this.settings.intensity = Math.max(0, Math.min(1, intensity));
-    this.saveSettings();
+    await this.saveSettings();
   }
 
   getSettings(): HapticSettings {
@@ -78,257 +82,139 @@ class HapticSystem {
     return this.supportsVibration;
   }
 
-  private vibrate(pattern: number | number[]): void {
+  // 7 feedback nativi
+  async success(): Promise<void> {
     if (!this.isEnabled()) return;
-
     try {
-      if (Array.isArray(pattern)) {
-        const adjustedPattern = pattern.map(duration =>
-          Math.round(duration * this.settings.intensity),
-        );
-        navigator.vibrate(adjustedPattern);
-      } else {
-        navigator.vibrate(Math.round(pattern * this.settings.intensity));
-      }
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
-      console.warn('Vibration failed:', error);
+      console.warn('Haptic success failed:', error);
     }
   }
 
-  play(pattern: HapticPattern): void {
+  async error(): Promise<void> {
     if (!this.isEnabled()) return;
-
-    switch (pattern) {
-      case 'light':
-        this.vibrate(10);
-        break;
-
-      case 'medium':
-        this.vibrate(20);
-        break;
-
-      case 'heavy':
-        this.vibrate(40);
-        break;
-
-      case 'success':
-        this.vibrate([10, 30, 10]);
-        break;
-
-      case 'warning':
-        this.vibrate([20, 50, 20, 50, 20]);
-        break;
-
-      case 'error':
-        this.vibrate([50, 100, 50]);
-        break;
-
-      case 'selection':
-        this.vibrate(5);
-        break;
-
-      case 'impact-light':
-        this.vibrate(15);
-        break;
-
-      case 'impact-medium':
-        this.vibrate(30);
-        break;
-
-      case 'impact-heavy':
-        this.vibrate(50);
-        break;
-
-      case 'notification-success':
-        this.vibrate([10, 50, 10, 50, 15]);
-        break;
-
-      case 'notification-warning':
-        this.vibrate([25, 50, 25, 50, 25, 50, 25]);
-        break;
-
-      case 'notification-error':
-        this.vibrate([50, 100, 50, 100, 60]);
-        break;
-
-      case 'rigid':
-        this.vibrate(20);
-        break;
-
-      case 'soft':
-        this.vibrate(8);
-        break;
-
-      default:
-        this.vibrate(10);
+    try {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } catch (error) {
+      console.warn('Haptic error failed:', error);
     }
   }
 
-  click(): void {
-    this.play('light');
-  }
-
-  buttonPress(): void {
-    this.play('medium');
-  }
-
-  success(): void {
-    this.play('success');
-  }
-
-  error(): void {
-    this.play('error');
-  }
-
-  warning(): void {
-    this.play('warning');
-  }
-
-  selection(): void {
-    this.play('selection');
-  }
-
-  impact(): void {
-    this.play('impact-medium');
-  }
-
-  notification(type: 'success' | 'warning' | 'error' = 'success'): void {
-    if (type === 'success') {
-      this.play('notification-success');
-    } else if (type === 'warning') {
-      this.play('notification-warning');
-    } else if (type === 'error') {
-      this.play('notification-error');
+  async warning(): Promise<void> {
+    if (!this.isEnabled()) return;
+    try {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    } catch (error) {
+      console.warn('Haptic warning failed:', error);
     }
   }
 
-  pinSuccess(): void {
-    this.play('notification-success');
+  async selection(): Promise<void> {
+    if (!this.isEnabled()) return;
+    try {
+      await Haptics.selectionAsync();
+    } catch (error) {
+      console.warn('Haptic selection failed:', error);
+    }
   }
 
-  pinError(): void {
-    this.play('error');
+  async impactLight(): Promise<void> {
+    if (!this.isEnabled()) return;
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error) {
+      console.warn('Haptic impactLight failed:', error);
+    }
   }
 
-  unlock(): void {
-    this.play('success');
+  async impactMedium(): Promise<void> {
+    if (!this.isEnabled()) return;
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (error) {
+      console.warn('Haptic impactMedium failed:', error);
+    }
   }
 
-  privateUnlock(): void {
-    this.vibrate([15, 30, 15, 30, 15, 30, 20]);
+  async impactHeavy(): Promise<void> {
+    if (!this.isEnabled()) return;
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    } catch (error) {
+      console.warn('Haptic impactHeavy failed:', error);
+    }
   }
 
-  accountCreated(): void {
-    this.play('notification-success');
-  }
-
-  accountDeleted(): void {
-    this.play('error');
-  }
-
-  transactionCreated(): void {
-    this.play('impact-medium');
-  }
-
-  income(): void {
-    this.vibrate([10, 40, 15]);
-  }
-
-  expense(): void {
-    this.vibrate([15, 40, 10]);
-  }
-
-  transfer(): void {
-    this.vibrate([10, 30, 10, 30, 10]);
-  }
-
-  save(): void {
-    this.play('success');
-  }
-
-  delete(): void {
-    this.play('error');
-  }
-
-  budgetCreated(): void {
-    this.play('notification-success');
-  }
-
-  budgetDeleted(): void {
-    this.play('error');
-  }
-
-  budgetWarning(): void {
-    this.play('warning');
-  }
-
-  budgetCritical(): void {
-    this.vibrate([30, 60, 30, 60, 30]);
-  }
-
-  budgetExceeded(): void {
-    this.vibrate([50, 80, 50, 80, 50, 80, 60]);
-  }
-
-  goalCreated(): void {
-    this.play('notification-success');
-  }
-
-  goalCompleted(): void {
-    this.vibrate([20, 40, 20, 40, 20, 40, 20, 40, 30]);
-  }
-
-  export(): void {
-    this.play('success');
-  }
-
-  dialogOpen(): void {
-    this.play('soft');
-  }
-
-  dialogClose(): void {
-    this.play('soft');
-  }
-
-  tabChange(): void {
-    this.play('selection');
-  }
-
-  filterToggle(): void {
-    this.play('light');
-  }
-
-  categoryToggle(): void {
-    this.play('selection');
-  }
-
-  alertDismissed(): void {
-    this.play('light');
-  }
-
-  navigation(): void {
-    this.play('selection');
-  }
-
-  focus(): void {
-    this.vibrate(3);
-  }
-
-  swipe(): void {
-    this.play('light');
-  }
-
-  longPress(): void {
-    this.play('rigid');
-  }
-
-  refresh(): void {
-    this.vibrate([10, 20, 10]);
-  }
-
-  custom(duration: number | number[]): void {
-    this.vibrate(duration);
-  }
+  // Strato di Compatibilità (Shim Deprecato)
+  /** @deprecated Usare impactLight() */
+  click(): void { this.impactLight(); }
+  /** @deprecated Usare impactMedium() */
+  buttonPress(): void { this.impactMedium(); }
+  /** @deprecated Usare success() */
+  pinSuccess(): void { this.success(); }
+  /** @deprecated Usare error() */
+  pinError(): void { this.error(); }
+  /** @deprecated Usare success() */
+  unlock(): void { this.success(); }
+  /** @deprecated Usare success() */
+  privateUnlock(): void { this.success(); }
+  /** @deprecated Usare success() */
+  accountCreated(): void { this.success(); }
+  /** @deprecated Usare error() */
+  accountDeleted(): void { this.error(); }
+  /** @deprecated Usare impactMedium() */
+  transactionCreated(): void { this.impactMedium(); }
+  /** @deprecated Usare impactLight() */
+  income(): void { this.impactLight(); }
+  /** @deprecated Usare impactLight() */
+  expense(): void { this.impactLight(); }
+  /** @deprecated Usare impactMedium() */
+  transfer(): void { this.impactMedium(); }
+  /** @deprecated Usare success() */
+  save(): void { this.success(); }
+  /** @deprecated Usare error() */
+  delete(): void { this.error(); }
+  /** @deprecated Usare success() */
+  budgetCreated(): void { this.success(); }
+  /** @deprecated Usare error() */
+  budgetDeleted(): void { this.error(); }
+  /** @deprecated Usare warning() */
+  budgetWarning(): void { this.warning(); }
+  /** @deprecated Usare error() */
+  budgetCritical(): void { this.error(); }
+  /** @deprecated Usare error() */
+  budgetExceeded(): void { this.error(); }
+  /** @deprecated Usare success() */
+  goalCreated(): void { this.success(); }
+  /** @deprecated Usare success() */
+  goalCompleted(): void { this.success(); }
+  /** @deprecated Usare success() */
+  export(): void { this.success(); }
+  /** @deprecated Usare selection() */
+  dialogOpen(): void { this.selection(); }
+  /** @deprecated Usare selection() */
+  dialogClose(): void { this.selection(); }
+  /** @deprecated Usare selection() */
+  tabChange(): void { this.selection(); }
+  /** @deprecated Usare selection() */
+  filterToggle(): void { this.selection(); }
+  /** @deprecated Usare selection() */
+  categoryToggle(): void { this.selection(); }
+  /** @deprecated Usare selection() */
+  alertDismissed(): void { this.selection(); }
+  /** @deprecated Usare selection() */
+  navigation(): void { this.selection(); }
+  /** @deprecated Usare selection() */
+  focus(): void { this.selection(); }
+  /** @deprecated Usare selection() */
+  swipe(): void { this.selection(); }
+  /** @deprecated Usare selection() */
+  longPress(): void { this.selection(); }
+  /** @deprecated Usare selection() */
+  refresh(): void { this.selection(); }
+  /** @deprecated Usare success() o impactMedium() */
+  custom(duration: number | number[]): void { this.impactMedium(); }
 }
 
 export const hapticSystem = new HapticSystem();

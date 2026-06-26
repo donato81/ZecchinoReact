@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { ACCOUNT_CATEGORIES } from '@/lib/constants';
+import { hapticSystem } from '@/lib/haptic-system';
 import { updatePreference } from '@/lib/supabase/repositories/impostazioni-utente';
 import type {
   TalkBackAdaptations,
@@ -140,6 +141,8 @@ export type UserSettingsState = {
   audioVolume: number;
   setAudioEnabled: (v: boolean) => Promise<void>;
   setAudioVolume: (v: number) => Promise<void>;
+  hapticEnabled: boolean;
+  setHapticEnabled: (v: boolean) => Promise<void>;
   displayPreferences: DisplayPreferences;
   setDisplayPreference: <K extends keyof DisplayPreferences>(
     key: K,
@@ -170,6 +173,7 @@ export function useUserSettings(): UserSettingsState {
 
   const [audioEnabled, setAudioEnabledState] = useState<boolean>(true);
   const [audioVolume, setAudioVolumeState] = useState<number>(0.3);
+  const [hapticEnabled, setHapticEnabledState] = useState<boolean>(true);
 
   const [displayPreferences, setDisplayPreferencesState] =
     useState<DisplayPreferences>(DISPLAY_DEFAULTS);
@@ -188,6 +192,7 @@ export function useUserSettings(): UserSettingsState {
       setDismissedBudgetAlertsState([]);
       setAudioEnabledState(true);
       setAudioVolumeState(0.3);
+      setHapticEnabledState(true);
       setDisplayPreferencesState(DISPLAY_DEFAULTS);
       setScreenReaderPreferencesState(SR_DEFAULTS);
       setTalkBackAdaptationsState(DEFAULT_TALKBACK_ADAPTATIONS);
@@ -215,6 +220,11 @@ export function useUserSettings(): UserSettingsState {
     setAudioVolumeState(
       typeof prefs.audio_volume === 'number' ? prefs.audio_volume : 0.3,
     );
+    const cloudHaptic = prefs.haptic_enabled !== false;
+    setHapticEnabledState(cloudHaptic);
+    if (hapticSystem.getSettings().enabled !== cloudHaptic) {
+      hapticSystem.setEnabled(cloudHaptic);
+    }
 
     setDisplayPreferencesState({
       showBalances: prefs.display_show_balances !== false,
@@ -361,6 +371,31 @@ export function useUserSettings(): UserSettingsState {
     }
   }, []);
 
+  const setHapticEnabled = useCallback(
+    async (v: boolean): Promise<void> => {
+      if (!isAuthenticated) {
+        setHapticEnabledState(v);
+        await hapticSystem.setEnabled(v);
+        return;
+      }
+      setIsSettingsLoading(true);
+      setSettingsError(null);
+      try {
+        await updatePreference('haptic_enabled', v);
+        setHapticEnabledState(v);
+        await hapticSystem.setEnabled(v);
+      } catch (err) {
+        setSettingsError(
+          err instanceof Error ? err.message : 'Errore aggiornamento feedback tattile',
+        );
+        console.error('Failed to update haptic preference:', err);
+      } finally {
+        setIsSettingsLoading(false);
+      }
+    },
+    [isAuthenticated],
+  );
+
   // ── Wave B: Display setter ──────────────────────────────────────────────────
   const setDisplayPreference = useCallback(
     async <K extends keyof DisplayPreferences>(
@@ -489,6 +524,8 @@ export function useUserSettings(): UserSettingsState {
     audioVolume,
     setAudioEnabled,
     setAudioVolume,
+    hapticEnabled,
+    setHapticEnabled,
     // Wave B
     displayPreferences,
     setDisplayPreference,

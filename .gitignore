@@ -82,3 +82,7 @@ yarn-error.log
 .env*.local
 # Cartella workspace personale AI
 Zecchino-React-Work-Spaces-AI/
+# Expo
+.expo
+dist/
+web-build/

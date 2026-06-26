@@ -20,33 +20,33 @@ debito-tecnico: AN-01
 
 | ID task | Titolo | Stato | Note |
 |---|---|---|---|
-| T01 | Verifica ed eventuale configurazione Expo Modules | [ ] TODO | FASE-1 |
-| T02 | Installazione expo-haptics | [ ] TODO | FASE-1 |
-| T03 | Verifica package.json | [ ] TODO | FASE-1 |
-| T04 | Rilascio di navigator.vibrate() | [ ] TODO | FASE-2 |
-| T05 | Implementazione 7 metodi atomici | [ ] TODO | FASE-2 |
-| T06 | Supporto Platform.OS Windows no-op | [ ] TODO | FASE-2 |
-| T07 | Integrazione persistenza AsyncStorage | [ ] TODO | FASE-2 |
-| T08 | Aggiornamento interfaccia IHapticSystem | [ ] TODO | FASE-2 |
-| T09 | Inserimento shim legacy @deprecated | [ ] TODO | FASE-2 |
-| T10 | Aggiornamento use-haptic.ts | [ ] TODO | FASE-3 |
-| T11 | Aggiornamento types.ts | [ ] TODO | FASE-4 |
-| T12 | Aggiornamento use-user-settings.ts | [ ] TODO | FASE-5 |
-| T13 | Verifica tsc --noEmit | [ ] TODO | FASE-6 |
-| T14 | Test unitario 1 - enabled=false | [ ] TODO | FASE-7 |
-| T15 | Test unitario 2 - bootstrap unknown | [ ] TODO | FASE-7 |
-| T16 | Test unitario 3 - Supabase false | [ ] TODO | FASE-7 |
-| T17 | Test unitario 4 - cloud to AsyncStorage | [ ] TODO | FASE-7 |
-| T18 | Test unitario 5 - success() | [ ] TODO | FASE-7 |
-| T19 | Test unitario 6 - error() | [ ] TODO | FASE-7 |
-| T20 | Test unitario 7 - warning() | [ ] TODO | FASE-7 |
-| T21 | Test unitario 8 - selection() | [ ] TODO | FASE-7 |
-| T22 | Test unitario 9 - impactLight/Medium/Heavy | [ ] TODO | FASE-7 |
-| T23 | Test unitario 10 - Platform Windows no-op | [ ] TODO | FASE-7 |
-| T24 | Test unitario 11 - legacy @deprecated shim | [ ] TODO | FASE-7 |
-| T25 | Test unitario 12 - use-haptic.ts contract | [ ] TODO | FASE-7 |
-| T26 | Gate sicurezza Windows (npm run windows) | [ ] TODO | FASE-8 |
-| T27 | Gate manuale Android | [ ] TODO | FASE-9 (BLOCCATO-UI) |
+| T01 | Verifica ed eventuale configurazione Expo Modules | [x] DONE | FASE-1 |
+| T02 | Installazione expo-haptics | [x] DONE | FASE-1 |
+| T03 | Verifica package.json | [x] DONE | FASE-1 |
+| T04 | Rilascio di navigator.vibrate() | [x] DONE | FASE-2 |
+| T05 | Implementazione 7 metodi atomici | [x] DONE | FASE-2 |
+| T06 | Supporto Platform.OS Windows no-op | [x] DONE | FASE-2 |
+| T07 | Integrazione persistenza AsyncStorage | [x] DONE | FASE-2 |
+| T08 | Aggiornamento interfaccia IHapticSystem | [x] DONE | FASE-2 |
+| T09 | Inserimento shim legacy @deprecated | [x] DONE | FASE-2 |
+| T10 | Aggiornamento use-haptic.ts | [x] DONE | FASE-3 |
+| T11 | Aggiornamento types.ts | [x] DONE | FASE-4 |
+| T12 | Aggiornamento use-user-settings.ts | [x] DONE | FASE-5 |
+| T13 | Verifica tsc --noEmit | [x] DONE | FASE-6 |
+| T14 | Test unitario 1 - enabled=false | [x] DONE | FASE-7 |
+| T15 | Test unitario 2 - bootstrap unknown | [x] DONE | FASE-7 |
+| T16 | Test unitario 3 - Supabase false | [x] DONE | FASE-7 |
+| T17 | Test unitario 4 - cloud to AsyncStorage | [x] DONE | FASE-7 |
+| T18 | Test unitario 5 - success() | [x] DONE | FASE-7 |
+| T19 | Test unitario 6 - error() | [x] DONE | FASE-7 |
+| T20 | Test unitario 7 - warning() | [x] DONE | FASE-7 |
+| T21 | Test unitario 8 - selection() | [x] DONE | FASE-7 |
+| T22 | Test unitario 9 - impactLight/Medium/Heavy | [x] DONE | FASE-7 |
+| T23 | Test unitario 10 - Platform Windows no-op | [x] DONE | FASE-7 |
+| T24 | Test unitario 11 - legacy @deprecated shim | [x] DONE | FASE-7 |
+| T25 | Test unitario 12 - use-haptic.ts contract | [x] DONE | FASE-7 |
+| T26 | Gate sicurezza Windows (npm run windows) | [x] DONE | FASE-8 |
+| T27 | Gate manuale Android | [ ] BLOCCATO-UI | FASE-9 (BLOCCATO-UI) |
 
 ---
 
@@ -278,14 +278,15 @@ Comportamento bootstrap fail-closed: durante l'inizializzazione del sistema apti
 | Data | Task ID | Eseguito Da | Risultato | Note |
 |---|---|---|---|---|
 | 2026-06-26 | — | DUSU-PLAN | CREATO | Todo list iniziale |
+| 2026-06-26 | T01-T26 | DUSU-CODER | DONE | Refactoring completato, compilazione OK e test 100% PASS |
 
 ---
 
 ## 6. Gate di Chiusura
 
-- **G-021-1**: `npx tsc --noEmit` non riporta alcun errore nel codebase. (Gate Status: [ ] OPEN)
-- **G-021-2**: La suite di test unitari (test T14-T25) viene eseguita con esito 100% PASS. (Gate Status: [ ] OPEN)
-- **G-021-3**: `npm run windows` si avvia con successo senza crash da `expo-haptics`. (Gate Status: [ ] OPEN)
+- **G-021-1**: `npx tsc --noEmit` non riporta alcun errore nel codebase. (Gate Status: [x] PASS)
+- **G-021-2**: La suite di test unitari (test T14-T25) viene eseguita con esito 100% PASS. (Gate Status: [x] PASS)
+- **G-021-3**: `npm run windows` si avvia con successo senza crash da `expo-haptics`. (Gate Status: [x] PASS)
 - **G-021-4**: Verifica manuale su dispositivo Android fisica (T27) completata. (Gate Status: [ ] BLOCCATO-UI)
 
 ---

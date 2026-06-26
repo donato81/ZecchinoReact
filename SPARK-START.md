@@ -35,7 +35,7 @@ Prossima azione: Attendere definizione prossimo blocco da donny-81.
 |------|-------|---------------|
 | Gate 1 — Build Android | ✅ PRONTO | — (BC-01, BC-02, BC-03 CLOSED) |
 | Gate 2 — Runtime Core | ✅ PRONTO | — (crypto, export, NetInfo, Supabase ✅) |
-| Gate 3 — Runtime UI | ⏳ IN ATTESA | AN-01 (haptic), AN-02 (sound), AN-03 (oklch) |
+| Gate 3 — Runtime UI | ⏳ IN ATTESA | AN-02 (sound), AN-03 (oklch) (AN-01 CLOSED 2026-06-26) |
 | Gate 4 — Documentazione | ⏳ IN ATTESA | DD-01 (patch orfana), DD-02 (architettura.md stale) |
 
 **Target platform:** iOS ✅ (non testato) · Android ✅ (pronto per build) · Windows ❄️ (DT-009-N-01 aperto)

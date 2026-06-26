@@ -74,6 +74,7 @@ export interface UserPreferences {
   talkback_adaptations: TalkBackAdaptations;
   talkback_manual_override: boolean | null;
   onboarding_completed?: boolean;
+  haptic_enabled?: boolean;
 }
 
 export interface UserSettings {

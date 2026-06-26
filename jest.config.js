@@ -13,5 +13,6 @@ module.exports = {
     '^@react-native-community/netinfo$': require.resolve(
       '@react-native-community/netinfo/jest/netinfo-mock'
     ),
+    '^expo-haptics$': '<rootDir>/__mocks__/expo-haptics.js',
   },
 };
