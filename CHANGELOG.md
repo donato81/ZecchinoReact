@@ -41,6 +41,11 @@
 
 - docs(design): aggiunto documento di design 021 — refactor haptic-system AN-01
 
+### Docs
+
+- Redazione Coding Plan AN-01: docs/3-coding-plans/021-PLAN_haptic-system_v0.1.0.md
+- Redazione Todo Specifico AN-01: docs/4-todo-lists/021-TODO_haptic-system_v0.1.0.md
+
 ## [0.4.0-docs.2] — 2026-05-28 — Pianificazione
 
 ### Added

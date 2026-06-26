@@ -5,8 +5,8 @@
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
- - **Ultimo Agente Attivo:** donny-81 — 2026-06-26
- - **Blocco in Carico:** Nessuno — blocchi 017, 018, 019 e 020 completati.
+ - **Ultimo Agente Attivo:** donny-81, 2026-06-26
+ - **Blocco in Carico:** AN-01 — Refactor Haptic System (AN-01) in corso.
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
@@ -57,7 +57,9 @@
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
- - **Next Action:** Attendere definizione prossimo blocco da donny-81.
+ - **Next Action:** Avviare coding AN-01 — Haptic System Refactor.
+      Coding Plan: docs/3-coding-plans/021-PLAN_haptic-system_v0.1.0.md
+      Todo: docs/4-todo-lists/021-TODO_haptic-system_v0.1.0.md
 
 > Nota sessione orchestrazione 2026-05-29:
 > Creati i sei documenti di pianificazione richiesti:
@@ -570,6 +572,8 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B8-TODO-020 | Todo list 020 — Centralizzazione design tokens | [x] DONE — 2026-06-26 Agent-Orchestrator | [x] PASSED |
 | P3.B8-IMPL-020 | Codifica blocco 020 — Centralizzazione design tokens | [x] DONE — 2026-06-26 Antigravity | [x] PASSED |
 | P3.B9-SQL-P55 | Migrazione P55 — tabella notifiche schema Supabase | [x] DONE — 2026-06-25 donny-81 | [x] PASSED — eseguito in Supabase |
+| P3.AN-01-PLAN | Redazione Coding Plan 021 — Haptic System Refactor | [ ] IN PROGRESS — 2026-06-26 donny-81 | [ ] PENDING |
+| P3.AN-01-TODO | Redazione Todo Specifico 021 — Haptic System Refactor | [ ] IN PROGRESS — 2026-06-26 donny-81 | [ ] PENDING |
 
 ### Log di Validazione
 
