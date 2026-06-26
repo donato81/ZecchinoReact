@@ -55,7 +55,9 @@ debito-tecnico: AN-01
 ### FASE-1: Installazione e configurazione expo-haptics
 
 #### T01
-- **Azione**: Verificare se il progetto è già configurato per Expo Modules eseguendo `cat package.json | grep '"expo"'`. Se assente, eseguire `npx install-expo-modules@latest`.
+- **Azione**: Verificare se il progetto è già configurato per Expo Modules aprendo package.json e cercando la chiave expo in dependencies o devDependencies. In alternativa, eseguire il seguente comando cross-platform:
+node -e "const p=require('./package.json'); console.log(Boolean((p.dependencies&&p.dependencies.expo)||(p.devDependencies&&p.devDependencies.expo)))"
+Se il risultato è false, eseguire: npx install-expo-modules@latest
 - **Fase**: FASE-1
 - **Stato**: [ ] TODO
 - **Success Metric**: Comando completato senza errori di build.
@@ -115,7 +117,7 @@ debito-tecnico: AN-01
 - **Success Metric**: TypeScript compila senza errori sul contratto del file.
 
 #### T09
-- **Azione**: Inserire i circa 35 metodi legacy contrassegnati come `@deprecated` come shim di compatibilità, mappandoli internamente ai 7 metodi nativi.
+- **Azione**: Inserire i 33 metodi legacy contrassegnati come `@deprecated` come shim di compatibilità, mappandoli internamente ai 7 metodi nativi.
 - **Fase**: FASE-2
 - **Stato**: [ ] TODO
 - **Depends On**: T05
@@ -171,6 +173,8 @@ debito-tecnico: AN-01
 ---
 
 ### FASE-7: Scrittura e aggiornamento test unitari
+
+Nota di dipendenza obbligatoria: tutti i task T14-T25 dipendono da T13. Nessun test unitario deve essere avviato, implementato o considerato valido prima che il gate T13 (npx tsc --noEmit) sia PASS. Un fallimento TypeScript produce falsi negativi nei test che fuorviano la diagnosi.
 
 #### T14
 - **Azione**: Implementare test unitario: `enabled=false` blocca ogni chiamata nativa.
@@ -240,6 +244,8 @@ debito-tecnico: AN-01
 - **Azione**: Avviare la build ed esecuzione su Windows (`npm run windows`) e verificare che la dipendenza `expo-haptics` non causi errori di compilazione o crash e che tutte le chiamate rimangano no-op silenziose.
 - **Fase**: FASE-8
 - **Stato**: [ ] TODO
+- **Depends On**: T13, T23
+- **Commento**: T13 = compilazione TypeScript pulita prima della build Windows. T23 = test unitario no-op Windows già validato prima del gate di sistema.
 - **Success Metric**: Windows compilato e funzionante con feedback aptici silenti.
 
 ---
@@ -248,7 +254,7 @@ debito-tecnico: AN-01
 
 #### T27
 - **Azione**: Eseguire la verifica manuale su dispositivo fisico Android o emulatore con vibrazione attiva:
-  1. Avvio app → `success()` produce feedback.
+  1. Dopo bootstrap completato e con haptic_enabled abilitato nelle impostazioni, invocare un'azione applicativa esplicitamente collegata a success() (es. PIN corretto) e verificare che produca feedback tattile reale.
   2. Errore PIN → `error()` produce feedback di errore.
   3. Disattivazione `haptic_enabled` → feedback tattile bloccato all'istante.
 - **Fase**: FASE-9
@@ -262,6 +268,8 @@ debito-tecnico: AN-01
 
 - Durante l'inizializzazione del sistema aptico, lo stato di `supportsVibration` deve essere impostato a `false` se `Platform.OS === 'windows'` per bloccare le chiamate all'avvio.
 - Lo shim deprecato è temporaneo e deve essere preservato per non rompere `AuthContext` ed `AppDataContext`.
+
+Comportamento bootstrap fail-closed: durante l'inizializzazione del sistema aptico, se lo stato è unknown, se AsyncStorage non ha ancora completato il caricamento, o se l'utente è autenticato ma il profilo Supabase non è ancora idratato, il sistema non deve produrre alcuna vibrazione. In caso di dubbio sullo stato corrente, nessuna vibrazione. Questa regola è dettagliata nel DESIGN 021 Sezione 5, regola di precedenza 2.
 
 ---
 

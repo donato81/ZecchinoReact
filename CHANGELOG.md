@@ -43,6 +43,7 @@
 
 ### Docs
 
+- docs: micro-correzioni pre-codifica PLAN 021 e TODO 021 — mapping shim vincolante, dipendenze test, bootstrap fail-closed, aggiornamento frontmatter PLAN 021 da DRAFT a REVIEWED.
 - Redazione Coding Plan AN-01: docs/3-coding-plans/021-PLAN_haptic-system_v0.1.0.md
 - Redazione Todo Specifico AN-01: docs/4-todo-lists/021-TODO_haptic-system_v0.1.0.md
 

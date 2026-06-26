@@ -3,10 +3,14 @@ tipo: coding-plan
 titolo: Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics
 versione: 0.1.0
 data: 2026-06-26
-stato: DRAFT
+stato: REVIEWED
 design-sorgente: docs/2-projects/021-DESIGN_haptic-system_v0.1.0.md
 debito-tecnico: AN-01
-revisore: 
+data-revisione: 2026-06-26
+revisore: Consiglio AI + donny-81
+note-revisione: "Micro-correzioni obbligatorie pre-codifica applicate.
+  Mapping shim vincolante al DESIGN 021. Dipendenze test corrette.
+  Pronto per implementazione AN-01."
 ---
 
 # PLAN 021 - Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics
@@ -51,7 +55,7 @@ Fuori perimetro:
   - Configurare l'importazione di `expo-haptics` ed integrarla secondo l'interfaccia `IHapticSystem` con i 7 metodi nativi (`success`, `error`, `warning`, `selection`, `impactLight`, `impactMedium`, `impactHeavy`).
   - Implementare il controllo `Platform.OS === 'windows'` per rendere tutte le chiamate no-op silenziose su Windows.
   - Implementare il caricamento e il salvataggio asincrono dello stato locale `enabled` tramite `AsyncStorage`.
-  - Includere la classe di compatibilità shim con i circa 35 metodi legacy contrassegnati come `@deprecated` che delegano internamente ai nuovi feedback nativi.
+  - Includere la classe di compatibilità shim con tutti i metodi legacy pubblici attualmente esposti da src/lib/haptic-system.ts, secondo la tabella del DESIGN 021 Sezione 6 (33 metodi elencati) contrassegnati come @deprecated che delegano internamente ai nuovi feedback nativi. La mappatura di ogni metodo legacy verso i 7 metodi atomici deve seguire esattamente la tabella dello strato di compatibilità (Shim Deprecato) definita nel DESIGN 021, Sezione 6. Nessun metodo legacy può essere mappato autonomamente dall'agente di coding. Se un metodo presente nel codice attuale non compare nella tabella del DESIGN 021, l'agente deve dichiarare HALT e chiedere revisione prima di procedere.
 - **Gate di completamento**: Il file esporta la classe `HapticSystem` con il nuovo contratto ed espone i metodi shim senza errori di sintassi.
 
 ### FASE-3: Aggiornamento use-haptic.ts
@@ -65,7 +69,7 @@ Fuori perimetro:
 ### FASE-4: Aggiornamento types.ts
 - **File coinvolti**: `src/lib/supabase/types.ts`
 - **Operazioni**:
-  - Estendere l'interfaccia `UserPreferences` aggiungendo il campo opzionale `haptic_enabled: boolean`.
+  - Estendere l'interfaccia `UserPreferences` aggiungendo il campo opzionale `haptic_enabled?: boolean`.
 - **Gate di completamento**: Il compilatore riconosce `haptic_enabled` all'interno di `UserPreferences`.
 
 ### FASE-5: Aggiornamento use-user-settings.ts
@@ -73,7 +77,7 @@ Fuori perimetro:
 - **Operazioni**:
   - Aggiungere lo stato locale `hapticEnabled` nel hook `useUserSettings`.
   - Integrare la sincronizzazione bidirezionale: all'idratazione da Supabase, se `haptic_enabled` differisce dal valore locale del sistema aptico, chiamare `hapticSystem.setEnabled(haptic_enabled)`.
-  - Implementare il setter `setHapticEnabled` che invoca `updatePreference('haptic_enabled', valore)` e aggiorna `hapticSystem`.
+  - Implementare il setter `setHapticEnabled` che invoca `updatePreference('haptic_enabled', valore)` e aggiorna `hapticSystem`. setHapticEnabled deve seguire il modello non ottimistico già adottato in useUserSettings: prima eseguire updatePreference('haptic_enabled', valore) verso Supabase, poi aggiornare lo stato locale e chiamare hapticSystem.setEnabled(valore). In caso di errore Supabase, la preferenza non deve essere considerata aggiornata come definitiva. Per l'utente non autenticato, l'aggiornamento locale può avvenire immediatamente.
   - Mantenere la regola di precedenza (se Supabase indica `false`, la vibrazione applicativa è disattivata).
 - **Gate di completamento**: `useUserSettings` espone `hapticEnabled` e `setHapticEnabled` correttamente collegati a Supabase.
 
@@ -121,7 +125,7 @@ Fuori perimetro:
 1. **Lettura preventiva**: Leggere sempre interamente ogni file prima di modificarlo.
 2. **Controllo incrementale**: Verificare la compilazione TypeScript dopo la modifica di ciascun file.
 3. **Sbarramento dei Gate**: Non procedere alla fase successiva se la corrente presenta gate aperti (ad eccezione della FASE-9 che è BLOCCATA-UI).
-4. **Strategia in caso di blocco**: Se un gate fallisce per 5 tentativi consecutivi, dichiarare HALT e produrre un report diagnostico dettagliato (file, gate fallito, errore ottenuto, tentativi).
+4. **Strategia in caso di blocco**: Se un gate fallisce per 10 tentativi consecutivi, dichiarare HALT e produrre un report diagnostico dettagliato (file, gate fallito, errore ottenuto, tentativi).
 
 ## 6. Debiti Tecnici Generati
 
