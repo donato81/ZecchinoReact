@@ -1,4 +1,5 @@
 import { AccountType } from './types';
+import { DESIGN_COLORS } from './design-tokens/colors';
 
 export type AccountCategory =
   | 'banking'
@@ -73,7 +74,7 @@ export const ACCOUNT_CATEGORIES: AccountCategoryInfo[] = [
     label: 'Bancari',
     description: 'Conti correnti e carte tradizionali',
     types: ['bancario', 'credito'],
-    color: 'oklch(0.35 0.08 250)',
+    color: DESIGN_COLORS.accountCategory.banking,
     badgeVariant: 'default',
   },
   {
@@ -81,7 +82,7 @@ export const ACCOUNT_CATEGORIES: AccountCategoryInfo[] = [
     label: 'Digitali',
     description: 'Portafogli digitali e prepagate',
     types: ['prepagata', 'paypal'],
-    color: 'oklch(0.65 0.15 190)',
+    color: DESIGN_COLORS.accountCategory.digital,
     badgeVariant: 'secondary',
   },
   {
@@ -89,7 +90,7 @@ export const ACCOUNT_CATEGORIES: AccountCategoryInfo[] = [
     label: 'Risparmio',
     description: 'Fondi e riserve',
     types: ['contanti', 'salvadanaio'],
-    color: 'oklch(0.75 0.12 85)',
+    color: DESIGN_COLORS.accountCategory.savings,
     badgeVariant: 'outline',
   },
   {
@@ -97,7 +98,7 @@ export const ACCOUNT_CATEGORIES: AccountCategoryInfo[] = [
     label: 'Investimenti',
     description: 'Portafogli e fondi',
     types: ['investimenti', 'crypto', 'pensione'],
-    color: 'oklch(0.55 0.18 140)',
+    color: DESIGN_COLORS.accountCategory.investments,
     badgeVariant: 'outline',
   },
   {
@@ -105,7 +106,7 @@ export const ACCOUNT_CATEGORIES: AccountCategoryInfo[] = [
     label: 'Privato',
     description: 'Conti protetti',
     types: ['privato'],
-    color: 'oklch(0.55 0.15 25)',
+    color: DESIGN_COLORS.accountCategory.private,
     badgeVariant: 'destructive',
   },
 ];

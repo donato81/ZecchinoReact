@@ -1,6 +1,6 @@
 # API Reference — ZecchinoReact
 
-> Aggiornato al: 2026-05-28  
+> Aggiornato al: 2026-06-26  
 > Branch: main  
 > Copertura: tutti i file pubblici in `src/` presenti nel branch corrente.
 
@@ -55,7 +55,7 @@ Tipi di dominio client-side. Nessuna dipendenza esterna.
 
 Costanti di dominio. Dipendenza interna: `./types`.
 
-> **Nota migrazione**: `badgeVariant` e `color` in `AccountCategoryInfo` usano notazione oklch (CSS) — da sostituire con token colore RN prima di usarli in componenti nativi.
+> **Nota migrazione**: `badgeVariant` in `AccountCategoryInfo` usa una variante web — da sostituire per componenti nativi. Il campo `color` usa token centralizzati RN-compatibili.
 
 ### Tipi esportati
 
@@ -73,7 +73,7 @@ Costanti di dominio. Dipendenza interna: `./types`.
 | `ACCOUNT_TYPE_ICONS`        | `Record<AccountType, string>`          | Identificatori icona stringa (es. `'bank'`, `'lock'`) | ✅                                           |
 | `TRANSACTION_TYPE_LABELS`   | `Record<string, string>`               | Etichette per tipo transazione                        | ✅                                           |
 | `RECURRENCE_LABELS`         | `Record<string, string>`               | Etichette per frequenza ricorrenza                    | ✅                                           |
-| `ACCOUNT_CATEGORIES`        | `AccountCategoryInfo[]`                | Definizione delle 5 categorie di conto                | ⚠️ (campo `color` oklch, `badgeVariant` web) |
+| `ACCOUNT_CATEGORIES`        | `AccountCategoryInfo[]`                | Definizione delle 5 categorie di conto                | ⚠️ (`badgeVariant` web)                      |
 | `ACCOUNT_TYPE_TO_CATEGORY`  | `Record<AccountType, AccountCategory>` | Mappa tipo → categoria                                | ✅                                           |
 
 ---
@@ -167,21 +167,21 @@ Storico periodi budget. Dipendenze interne: `./types`.
 
 ---
 
-## `src/lib/budget-templates.ts` ⚠️
+## `src/lib/budget-templates.ts` ✅
 
-Template predefiniti. Dipendenza esterna: `@phosphor-icons/react` (icone web — da rimuovere per RN).
+Template predefiniti. Nessuna dipendenza web, usa `iconKey` semantiche e colori centralizzati.
 
 ### Tipi esportati
 
 | Nome             | Tipo        | Descrizione                                                                                                                                                                             |
 | ---------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `BudgetTemplate` | `interface` | `id`, `nome`, `descrizione`, `importoSuggerito`, `periodo: BudgetPeriod`, `categorieTarget: string[]`, `icon: Icon` (phosphor — da sostituire), `color: string` (oklch — da sostituire) |
+| `BudgetTemplate` | `interface` | `id`, `nome`, `descrizione`, `importoSuggerito`, `periodo: BudgetPeriod`, `categorieTarget: string[]`, `iconKey: BudgetTemplateIconKey`, `color: string` (token) |
 
 ### Costanti esportate
 
 | Nome               | Tipo               | Descrizione                                                                                                                  | RN                                  |
 | ------------------ | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| `BUDGET_TEMPLATES` | `BudgetTemplate[]` | 10 template predefiniti (spesa, ristoranti, trasporti, casa, svago, salute, abbonamenti, abbigliamento, elettronica, viaggi) | ⚠️ (`icon` phosphor, `color` oklch) |
+| `BUDGET_TEMPLATES` | `BudgetTemplate[]` | 11 template predefiniti (spesa, ristoranti, trasporti, casa, svago, salute, abbonamenti, abbigliamento, elettronica, viaggi, budget totale) | ✅                                   |
 
 ---
 

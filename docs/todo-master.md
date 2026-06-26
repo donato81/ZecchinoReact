@@ -18,6 +18,9 @@
 - **Active Block:** Nessuno — implementazione DESIGN 004 completata.
  - **Last Updated:** 2026-05-29
 - **Pending Plans:**
+  - **PLAN 020 COMPLETATO** (release 0.16.x) —
+    `docs/3-coding-plans/020-PLAN_icone-colori-design-system_v0.2.0.md`
+    e `docs/4-todo-lists/020-TODO_icone-colori-design-system_v0.2.0.md` in stato DONE. Centralizzazione design tokens implementata e testata.
   - **PLAN 007 COMPLETATO** (release 0.2.0) —
     `docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md`
     e `docs/4-todo-lists/007-TODO_async-cache-hydration_v0.1.0.md` in stato
@@ -51,12 +54,9 @@
   (CREATO), docs/todo-master.md (aggiornato), CHANGELOG.md (aggiornato),
   SPARK-START.md (aggiornato).
  - **Open Threads:**
-  - BC-01: `src/lib/budget-templates.ts` — import `@phosphor-icons/react` (BLOCCO BUILD ANDROID)
-  - BC-02: `package.json` — `@phosphor-icons/react` da rimuovere (BLOCCO BUILD ANDROID)
   - BC-03: `package.json` — `react-dom` da rimuovere (BLOCCO BUILD ANDROID)
   - AN-01: `src/lib/haptic-system.ts` — riscrittura con Vibration RN (P1.B1 TODO)
   - AN-02: `src/lib/sound-system.ts` — riscrittura con expo-av/react-native-sound (P1.B2 TODO)
-  - AN-03: `src/lib/constants.ts` — 5 colori oklch→hex (ADATTAMENTO MINORE)
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
@@ -528,8 +528,8 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P1.B6 | Documentazione DESIGN 006 — TODO 006 creato (PLAN 006 v1.1.0 pronto per implementazione a valle di PLAN 005) | [x] DONE | [x] DONE |
 | P1.B6-IMPL | Implementazione PLAN 006 — KDF PIN PBKDF2-SHA256 (T2–T9 PASS, gate chiusura superato) | [x] DONE | [x] PASSED |
 | DUSU-ANALYZER | Analisi statica compatibilità Android v0.4.0 — 3 BC, 4 AN, 3 DD, report prodotto | [x] DONE | [x] PASSED |
-| BC-01-FIX | Rimozione @phosphor-icons/react da budget-templates.ts | [ ] TODO | [ ] OPEN |
-| BC-02-FIX | Rimozione @phosphor-icons/react da package.json | [ ] TODO | [ ] OPEN |
+| BC-01-FIX | Rimozione @phosphor-icons/react da budget-templates.ts | [x] DONE | [x] PASSED |
+| BC-02-FIX | Rimozione @phosphor-icons/react da package.json | [x] DONE | [x] PASSED |
 | BC-03-FIX | Rimozione react-dom da package.json | [ ] TODO | [ ] OPEN |
 | P3.B3-DOCS-010 | Documenti 010 approvati — Wrapped Master Key PIN — schema DB aggiornato | [x] DONE | [x] PASSED |
 | P3.B3-DOCS-011 | Documenti 011 approvati — Resilienza Bootstrap — TODO 011 corretto Test 8 | [x] DONE | [x] PASSED |
@@ -568,6 +568,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B8-TODO-019 | Todo list 019 — Notifiche Budget e Orchestrazione | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
 | P3.B8-PLAN-020 | Coding plan 020 — Centralizzazione design tokens | [x] DONE — 2026-06-26 Agent-Orchestrator | [x] PASSED |
 | P3.B8-TODO-020 | Todo list 020 — Centralizzazione design tokens | [x] DONE — 2026-06-26 Agent-Orchestrator | [x] PASSED |
+| P3.B8-IMPL-020 | Codifica blocco 020 — Centralizzazione design tokens | [x] DONE — 2026-06-26 Antigravity | [x] PASSED |
 | P3.B9-SQL-P55 | Migrazione P55 — tabella notifiche schema Supabase | [x] DONE — 2026-06-25 donny-81 | [x] PASSED — eseguito in Supabase |
 
 ### Log di Validazione
@@ -623,6 +624,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-29 | P3.B8-TODO-019 | Agent-Orchestrator | PASSED | Creata e validata `019-TODO_notifiche-budget-orchestrazione_v0.1.0.md`; Ciclo-G PASS |
 | 2026-06-26 | P3.B8-PLAN-020 | Agent-Orchestrator | PASSED | Creato e validato `020-PLAN_icone-colori-design-system_v0.2.0.md`; Ciclo-G PASS |
 | 2026-06-26 | P3.B8-TODO-020 | Agent-Orchestrator | PASSED | Creata e validata `020-TODO_icone-colori-design-system_v0.2.0.md`; Ciclo-G PASS |
+| 2026-06-26 | P3.B8-IMPL-020 | Antigravity | DONE | Implementato PLAN 020: token in colors.ts, refactoring template/costanti, rimosso phosphor. Test/Build passati. |
 | 2026-06-25 | P3.B9-SQL-P55 | donny-81 | DONE | P55-notifiche.sql eseguito in Supabase. Tabella notifiche creata con indici, RLS e metadata JSONB. PLAN 019 T7 e gate G-019-6 chiusi. |
 
 ---

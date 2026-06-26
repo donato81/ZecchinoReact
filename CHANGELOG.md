@@ -24,8 +24,6 @@
 
 ### Open Threads
 
-- BC-01: src/lib/budget-templates.ts, import @phosphor-icons/react, BLOCCO BUILD ANDROID.
-- BC-02: package.json, @phosphor-icons/react da rimuovere, BLOCCO BUILD ANDROID.
 - BC-03: package.json, react-dom da rimuovere, BLOCCO BUILD ANDROID.
 - AN-01: src/lib/haptic-system.ts, riscrittura con Vibration RN, in attesa DESIGN 020.
 - AN-02: src/lib/sound-system.ts, riscrittura con API RN, in attesa DESIGN 020.
@@ -35,8 +33,8 @@
 ### Documentation
 
 - DESIGN 020: Centralizzazione design tokens, rimozione phosphor icons (REVIEWED)
-- PLAN 020: Coding plan Centralizzazione design tokens (DRAFT)
-- TODO 020: Todo list Centralizzazione design tokens (PENDING)
+- PLAN 020: Coding plan Centralizzazione design tokens (COMPLETED)
+- TODO 020: Todo list Centralizzazione design tokens (COMPLETED)
 
 ## [0.4.0-docs.2] — 2026-05-28 — Pianificazione
 

@@ -1,17 +1,6 @@
 import { BudgetPeriod } from './types';
-import {
-  ShoppingCart,
-  ForkKnife,
-  Car,
-  House,
-  FilmSlate,
-  Heartbeat,
-  GraduationCap,
-  PawPrint,
-  TShirt,
-  DeviceMobile,
-} from '@phosphor-icons/react';
-import type { Icon } from '@phosphor-icons/react';
+import { DESIGN_COLORS } from './design-tokens/colors';
+import type { BudgetTemplateIconKey } from './design-tokens/colors';
 
 export interface BudgetTemplate {
   id: string;
@@ -20,7 +9,7 @@ export interface BudgetTemplate {
   importoSuggerito: number;
   periodo: BudgetPeriod;
   categorieTarget: string[];
-  icon: Icon;
+  iconKey: BudgetTemplateIconKey;
   color: string;
 }
 
@@ -32,8 +21,8 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     importoSuggerito: 400,
     periodo: 'mensile',
     categorieTarget: ['Spesa alimentare'],
-    icon: ShoppingCart,
-    color: 'oklch(0.65 0.15 140)',
+    iconKey: 'groceries',
+    color: DESIGN_COLORS.budget.groceries,
   },
   {
     id: 'ristoranti',
@@ -42,8 +31,8 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     importoSuggerito: 200,
     periodo: 'mensile',
     categorieTarget: ['Ristorante/Bar'],
-    icon: ForkKnife,
-    color: 'oklch(0.70 0.15 45)',
+    iconKey: 'dining',
+    color: DESIGN_COLORS.budget.dining,
   },
   {
     id: 'trasporti',
@@ -52,8 +41,8 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     importoSuggerito: 150,
     periodo: 'mensile',
     categorieTarget: ['Trasporti'],
-    icon: Car,
-    color: 'oklch(0.60 0.15 230)',
+    iconKey: 'transport',
+    color: DESIGN_COLORS.budget.transport,
   },
   {
     id: 'casa',
@@ -62,8 +51,8 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     importoSuggerito: 800,
     periodo: 'mensile',
     categorieTarget: ['Affitto/Mutuo', 'Bollette'],
-    icon: House,
-    color: 'oklch(0.55 0.12 30)',
+    iconKey: 'housing',
+    color: DESIGN_COLORS.budget.housing,
   },
   {
     id: 'svago',
@@ -72,8 +61,8 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     importoSuggerito: 100,
     periodo: 'mensile',
     categorieTarget: ['Svago/Intrattenimento'],
-    icon: FilmSlate,
-    color: 'oklch(0.68 0.18 300)',
+    iconKey: 'entertainment',
+    color: DESIGN_COLORS.budget.entertainment,
   },
   {
     id: 'salute',
@@ -82,8 +71,8 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     importoSuggerito: 100,
     periodo: 'mensile',
     categorieTarget: ['Salute/Farmacia'],
-    icon: Heartbeat,
-    color: 'oklch(0.65 0.15 25)',
+    iconKey: 'health',
+    color: DESIGN_COLORS.budget.health,
   },
   {
     id: 'abbonamenti',
@@ -92,8 +81,8 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     importoSuggerito: 50,
     periodo: 'mensile',
     categorieTarget: ['Abbonamenti'],
-    icon: DeviceMobile,
-    color: 'oklch(0.58 0.15 280)',
+    iconKey: 'subscriptions',
+    color: DESIGN_COLORS.budget.subscriptions,
   },
   {
     id: 'abbigliamento',
@@ -102,8 +91,8 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     importoSuggerito: 300,
     periodo: 'trimestrale',
     categorieTarget: ['Abbigliamento'],
-    icon: TShirt,
-    color: 'oklch(0.62 0.12 320)',
+    iconKey: 'clothing',
+    color: DESIGN_COLORS.budget.clothing,
   },
   {
     id: 'istruzione',
@@ -112,8 +101,8 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     importoSuggerito: 500,
     periodo: 'annuale',
     categorieTarget: ['Istruzione'],
-    icon: GraduationCap,
-    color: 'oklch(0.55 0.15 250)',
+    iconKey: 'education',
+    color: DESIGN_COLORS.budget.education,
   },
   {
     id: 'animali',
@@ -122,8 +111,8 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     importoSuggerito: 80,
     periodo: 'mensile',
     categorieTarget: ['Animali'],
-    icon: PawPrint,
-    color: 'oklch(0.70 0.14 60)',
+    iconKey: 'pets',
+    color: DESIGN_COLORS.budget.pets,
   },
   {
     id: 'budget-totale',
@@ -132,8 +121,8 @@ export const BUDGET_TEMPLATES: BudgetTemplate[] = [
     importoSuggerito: 2000,
     periodo: 'mensile',
     categorieTarget: [],
-    icon: ShoppingCart,
-    color: 'oklch(0.35 0.08 250)',
+    iconKey: 'overall-budget',
+    color: DESIGN_COLORS.budget.overallBudget,
   },
 ];
 

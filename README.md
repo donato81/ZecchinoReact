@@ -99,12 +99,12 @@ npm run test:windows   # Jest con config Windows
 src/
   lib/
     types.ts                  # Tipi dominio client (camelCase)
-    constants.ts              # Label, icone, mappe tipoâ†’categoria
+    constants.ts              # Label, icone, mappe tipo→categoria
     helpers.ts                # Calcoli puri (saldo, formattazione, CSV)
     budget-alerts.ts          # Alert budget
     budget-forecasting.ts     # Previsione spesa con livello confidence
     budget-history.ts         # Storico periodi budget
-    budget-templates.ts       # Template predefiniti (âš ï¸ phosphor-icons da rimuovere)
+    budget-templates.ts       # Template predefiniti (✅ icone RN)
     crypto.ts                 # Hash PIN, AES-GCM legacy e payload PIN versionato
     kdf-provider.ts           # Boundary PBKDF2-SHA256 verso react-native-quick-crypto
     haptic-system.ts          # Feedback aptico (❌ navigator.vibrate)
