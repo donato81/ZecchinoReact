@@ -37,16 +37,26 @@
 - AN-02: src/lib/sound-system.ts, riscrittura con API RN (TODO P1.B2).
 - AN-03: oklch colori, da verificare per compatibilità Android (da DESIGN 020).
 
-## [Unreleased]
+## [0.16.1] — 2026-06-26 — Haptic System nativo (AN-01)
 
+### Added
 - feat(haptic): implementa haptic-system nativo con expo-haptics — rimozione navigator.vibrate(), persistenza AsyncStorage, shim @deprecated 33 metodi legacy, supporto Platform.OS Windows no-op, sincronizzazione Supabase UserPreferences haptic_enabled. Chiude AN-01.
 - docs(design): aggiunto documento di design 021 — refactor haptic-system AN-01
-
-### Docs
-
 - docs: micro-correzioni pre-codifica PLAN 021 e TODO 021 — mapping shim vincolante, dipendenze test, bootstrap fail-closed, aggiornamento frontmatter PLAN 021 da DRAFT a REVIEWED.
 - Redazione Coding Plan AN-01: docs/3-coding-plans/021-PLAN_haptic-system_v0.1.0.md
 - Redazione Todo Specifico AN-01: docs/4-todo-lists/021-TODO_haptic-system_v0.1.0.md
+
+### Fixed
+- AN-01: rimosso navigator.vibrate(), sostituito con expo-haptics.
+  Chiude il debito tecnico AN-01 identificato nel REPORT compatibilità Android v1.0.0.
+
+### Open Threads aggiornati
+- AN-01: CLOSED
+- AN-02: src/lib/sound-system.ts, riscrittura con API RN (TODO P1.B2) — APERTO
+- AN-03: oklch colori, compatibilità Android — APERTO
+
+## [Unreleased]
+
 
 ## [0.4.0-docs.2] — 2026-05-28 — Pianificazione
 

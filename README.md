@@ -3,15 +3,15 @@
 App di finanza personale per **Android**, **iOS** e **Windows** (react-native-windows).  
 Il dominio â€” nomi variabili, tipi, label UI â€” Ã¨ interamente in italiano.
 
-Versione progetto: **0.16.0**.
+Versione progetto: **0.16.1**.
 
 > **Stato attuale**: migrazione da web (React + shadcn) a React Native in corso.  
 > L'app **non Ã¨ avviabile** fino alla risoluzione dei 6 blocchi di build documentati in  
 > [`docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md`](docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md).
 
-Stato rilascio: la release `0.16.0` integra i blocchi 017 (Prestiti), 018 (Confronto Mese su Mese per Categoria), 019 (Notifiche Budget e Orchestrazione) e 020 (Centralizzazione design tokens).
+Stato rilascio: la release `0.16.1` integra i blocchi 017 (Prestiti), 018 (Confronto Mese su Mese per Categoria), 019 (Notifiche Budget e Orchestrazione), 020 (Centralizzazione design tokens) e 021 (Haptic System nativo).
 
-Aggiornamento 2026-06-26: i blocchi 017, 018, 019 e 020 sono stati completati e validati. I blocchi critici di build Android BC-01, BC-02 e BC-03 sono stati risolti e chiusi. La versione è stata avanzata a `0.16.0` in conformità con la chiusura delle funzionalità e la centralizzazione del design system.
+Aggiornamento 2026-06-26: i blocchi 017, 018, 019, 020 e 021 sono stati completati e validati. I blocchi critici di build Android BC-01, BC-02 e BC-03 sono stati risolti e chiusi. La versione è stata avanzata a `0.16.1` in conformità con la chiusura delle funzionalità, la centralizzazione del design system e il refactor del feedback aptico nativo.
 
 ## Funzionalità implementate
 
@@ -25,6 +25,7 @@ Aggiornamento 2026-06-26: i blocchi 017, 018, 019 e 020 sono stati completati e 
 - Blocco 018 completato: modulo confronto mese su mese per categoria in monthly-comparison.ts, calcolo delta percentuale e assoluto tra mese corrente e mese precedente per categoria di spesa, aggiunta del tipo MonthlyComparison a types.ts.
 - Blocco 019 completato: orchestrazione notifiche budget con budget-notification-config.ts, riallineamento repository notifiche con campi titolo_key e messaggio_key per localizzazione a runtime, introduzione tipo NotificationLevel e BudgetNotificationMetadata, chiavi di localizzazione warning, critical ed exceeded in it.ts, mappatura nel notification-service e nel context orchestrator.
 - Blocco 020 completato: centralizzazione design tokens per colori e chiavi icone in colors.ts, refactoring constants.ts e budget-templates.ts per rimuovere la dipendenza da @phosphor-icons/react.
+- Blocco 021 completato: riscrittura di `src/lib/haptic-system.ts` con `expo-haptics` per Android/iOS e no-op stub per Windows, aggiunta persistenza preferenza in `AsyncStorage`, sincronizzazione con Supabase e shim deprecati.
 
 ---
 
@@ -101,7 +102,7 @@ src/
     budget-templates.ts       # Template predefiniti (✅ icone RN)
     crypto.ts                 # Hash PIN, AES-GCM legacy e payload PIN versionato
     kdf-provider.ts           # Boundary PBKDF2-SHA256 verso react-native-quick-crypto
-    haptic-system.ts          # Feedback aptico (❌ navigator.vibrate)
+    haptic-system.ts          # Feedback aptico (✅ expo-haptics (Android/iOS) + no-op stub (Windows))
     sound-system.ts           # Audio (❌ Web Audio API)
     supabase/
       client.ts               # Singleton Supabase
@@ -119,10 +120,9 @@ src/
     use-user-settings.ts      # Preferenze da Supabase
     use-visible-data.ts       # Filtro conti/transazioni per stato privato
     use-display-preferences.ts
-    use-haptic.ts             # (❌ dipende da haptic-system)
+    use-haptic.ts             # (✅ compatibile)
     use-inactivity-timer.ts   # (❌ document.addEventListener)
-    use-online-status.ts      # (âŒ navigator.onLine)
-    use-talkback.ts           # (âŒ matchMedia/sessionStorage)
+    use-talkback.ts           # (❌ matchMedia/sessionStorage)
   screens/                    # (vuoto — da implementare)
   components/                 # (vuoto — da implementare)
   accessibility/              # Engine + detection (DESIGN 003)

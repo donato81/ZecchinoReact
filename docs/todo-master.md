@@ -1,12 +1,12 @@
 ## 1. Metadata e Context Header
 
 - **Project Name:** ZecchinoReact
-- **Version:** 0.16.0
+- **Version:** 0.16.1
 - **Owner:** donny-81
 - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
 - **Environment Sync:** Local
  - **Ultimo Agente Attivo:** donny-81, 2026-06-26
- - **Blocco in Carico:** AN-01 — Refactor Haptic System (AN-01) in corso.
+ - **Blocco in Carico:** Nessuno
 - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
 
 ### Stato Globale Corrente
@@ -49,14 +49,14 @@
 
 - **Last Completed Task:** P3.B8-AN-01 (completato 2026-06-26).
 - **Last Validated Block:** CICLO-G 021 — Haptic System Refactor (2026-06-26, DUSU-CODER).
-- **Files Modified But Not Validated:** Nessuno
+- **Files Modified But Not Validated:** 
  - **Open Threads:**
   - AN-02: `src/lib/sound-system.ts` — riscrittura con expo-av/react-native-sound (P1.B2 TODO)
   - AN-03: `oklch colori` — da verificare per compatibilità Android (da DESIGN 020)
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
-  - DD-02: `docs/architettura.md` — use-online-status.ts elencata ma rimossa (STALE)
+  - DD-02: `docs/architettura.md` — use-online-status.ts — CLOSED
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
- - **Next Action:** Da definire da donny-81 (AN-02 sound-system o AN-03 OKLCH).
+ - **Next Action:** AN-02 sound-system.ts — riscrittura con API React Native. Prossimo blocco: PLAN 022 (da definire con donny-81).
 
 > Nota sessione orchestrazione 2026-05-29:
 > Creati i sei documenti di pianificazione richiesti:
@@ -572,6 +572,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.AN-01-PLAN | Redazione Coding Plan 021 — Haptic System Refactor | [x] DONE — 2026-06-26 DUSU-FIX | [x] PASSED |
 | P3.AN-01-TODO | Redazione Todo Specifico 021 — Haptic System Refactor | [x] DONE — 2026-06-26 DUSU-FIX | [x] PASSED |
 | P3.B8-AN-01 | Codifica 021 — Haptic System (expo-haptics) | [x] DONE — 2026-06-26 DUSU-CODER | [x] PASSED |
+| P3.B1-IMPL-021 | Haptic System nativo — expo-haptics | [x] DONE — 2026-06-26 donny-81 | [x] PASSED |
 
 ### Log di Validazione
 
@@ -626,6 +627,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-29 | P3.B8-TODO-019 | Agent-Orchestrator | PASSED | Creata e validata `019-TODO_notifiche-budget-orchestrazione_v0.1.0.md`; Ciclo-G PASS |
 | 2026-06-26 | P3.AN-01-PLAN | DUSU-FIX | PASSED | Applicate 10 micro-correzioni pre-codifica su PLAN 021 e TODO 021, stato portato a REVIEWED. |
 | 2026-06-26 | P3.B8-AN-01 | DUSU-CODER | DONE | Implementato refactor Haptic System (AN-01) con expo-haptics e AsyncStorage. Test unitari e compilazione superati. |
+| 2026-06-26 | P3.B1-IMPL-021 | donny-81 | PASSED | Haptic System nativo — expo-haptics |
 | 2026-06-26 | P3.B8-IMPL-020 | Antigravity | DONE | Implementato PLAN 020: token in colors.ts, refactoring template/costanti, rimosso phosphor. Test/Build passati. |
 | 2026-06-25 | P3.B9-SQL-P55 | donny-81 | DONE | P55-notifiche.sql eseguito in Supabase. Tabella notifiche creata con indici, RLS e metadata JSONB. PLAN 019 T7 e gate G-019-6 chiusi. |
 | 2026-06-25 | P3.B8-IMPL-017 | donny-81 | DONE | Codifica 017 — Prestiti, Mutui e Simulazione Finanziaria: tipi, repository, calcolo ammortamento, integrato AppDataContext. Test passati. |

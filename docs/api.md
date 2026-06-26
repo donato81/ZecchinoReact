@@ -1,6 +1,6 @@
 # API Reference — ZecchinoReact
 
-> Aggiornato al: 2026-06-26  
+> Aggiornato al: 2026-06-26 (v0.16.1)  
 > Branch: main  
 > Copertura: tutti i file pubblici in `src/` presenti nel branch corrente.
 
@@ -75,6 +75,24 @@ Costanti di dominio. Dipendenza interna: `./types`.
 | `RECURRENCE_LABELS`         | `Record<string, string>`               | Etichette per frequenza ricorrenza                    | ✅                                           |
 | `ACCOUNT_CATEGORIES`        | `AccountCategoryInfo[]`                | Definizione delle 5 categorie di conto                | ⚠️ (`badgeVariant` web)                      |
 | `ACCOUNT_TYPE_TO_CATEGORY`  | `Record<AccountType, AccountCategory>` | Mappa tipo → categoria                                | ✅                                           |
+
+---
+
+## `src/lib/design-tokens/colors.ts` ✅
+
+Token di design centralizzati per colori hex e icone per ZecchinoReact. Tutti i valori sono compatibili con React Native.
+
+### Costanti esportate
+
+| Nome | Tipo | Descrizione |
+| --- | --- | --- |
+| `DESIGN_COLORS` | `object` | Oggetto contenente i colori semantici per `budget` (groceries, dining, transport, housing, entertainment, health, subscriptions, clothing, education, pets, overallBudget) e `accountCategory` (banking, digital, savings, investments, private). |
+
+### Tipi esportati
+
+- `BudgetColorToken`: Unione delle chiavi di `DESIGN_COLORS.budget`
+- `AccountCategoryColorToken`: Unione delle chiavi di `DESIGN_COLORS.accountCategory`
+- `BudgetTemplateIconKey`: Unione di 11 identificatori icona (`'groceries' | 'dining' | 'transport' | 'housing' | 'entertainment' | 'health' | 'subscriptions' | 'clothing' | 'education' | 'pets' | 'overall-budget'`)
 
 ---
 
@@ -218,33 +236,39 @@ Hashing PIN e cifratura dati. Dipendenze esterne: `bcryptjs`,
 
 ---
 
-## `src/lib/haptic-system.ts` ❌
+## `src/lib/haptic-system.ts` ✅
 
-Feedback aptico. Nessuna dipendenza esterna, ma usa `localStorage` e `navigator.vibrate`.
+Feedback aptico nativo basato su `expo-haptics` per Android e iOS, con no-op stub per Windows e persistenza preferenze in `AsyncStorage`.
 
-### Tipo esportato
+### Tipi esportati
 
-| Nome            | Tipo                                                                                                                                                            |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `HapticPattern` | `type` — 15 valori: `'light' \| 'medium' \| 'heavy' \| 'success' \| 'warning' \| 'error' \| 'selection' \| 'impact-*' \| 'notification-*' \| 'rigid' \| 'soft'` |
+| Nome | Tipo | Descrizione |
+| --- | --- | --- |
+| `HapticFeedbackType` | `type` | Unione: `'success' \| 'error' \| 'warning' \| 'selection' \| 'impactLight' \| 'impactMedium' \| 'impactHeavy'` |
+| `HapticSettings` | `interface` | `{ enabled: boolean }` |
+| `IHapticSystem` | `interface` | Contratto dell'haptic system |
 
-### Classe `HapticSystem` — metodi pubblici
+### Metodi pubblici della classe `HapticSystem` (implementa `IHapticSystem`)
 
-| Metodo                                                                                                               | Parametri       | Ritorna          | Funziona in RN                      |
-| -------------------------------------------------------------------------------------------------------------------- | --------------- | ---------------- | ----------------------------------- |
-| `isEnabled()`                                                                                                        | —               | `boolean`        | ❌ (dipende da `navigator.vibrate`) |
-| `isSupported()`                                                                                                      | —               | `boolean`        | ❌ (`'vibrate' in navigator`)       |
-| `setEnabled(enabled)`                                                                                                | `boolean`       | `void`           | ❌ (`localStorage`)                 |
-| `getIntensity()`                                                                                                     | —               | `number`         | ✅                                  |
-| `setIntensity(intensity)`                                                                                            | `number` (0–1)  | `void`           | ❌ (`localStorage`)                 |
-| `getSettings()`                                                                                                      | —               | `HapticSettings` | ✅                                  |
-| `play(pattern)`                                                                                                      | `HapticPattern` | `void`           | ❌ (`navigator.vibrate`)            |
-| `click()`, `buttonPress()`, `success()`, `error()`, `warning()`, `selection()`, `impact(type)`, `notification(type)` | vari            | `void`           | ❌                                  |
-| `pinError()`, `pinSuccess()`, `privateUnlock()`, `privateLock()`                                                     | —               | `void`           | ❌                                  |
+| Metodo | Parametri | Ritorna | Descrizione |
+| --- | --- | --- | --- |
+| `isEnabled()` | — | `boolean` | Ritorna `true` se l'haptic è abilitato e supportato |
+| `setEnabled(enabled)` | `boolean` | `Promise<void>` | Imposta e persiste la preferenza dell'haptic |
+| `getSettings()` | — | `HapticSettings` | Ritorna le impostazioni correnti |
+| `isSupported()` | — | `boolean` | Ritorna `true` se la piattaforma supporta la vibrazione (`Platform.OS !== 'windows'`) |
+| `success()` | — | `Promise<void>` | Trigger feedback di notifica Success |
+| `error()` | — | `Promise<void>` | Trigger feedback di notifica Error |
+| `warning()` | — | `Promise<void>` | Trigger feedback di notifica Warning |
+| `selection()` | — | `Promise<void>` | Trigger feedback di selezione |
+| `impactLight()` | — | `Promise<void>` | Trigger feedback di impatto leggero |
+| `impactMedium()` | — | `Promise<void>` | Trigger feedback di impatto medio |
+| `impactHeavy()` | — | `Promise<void>` | Trigger feedback di impatto pesante |
+
+### Compatibilità e metodi deprecati (Shim)
+
+Il modulo espone 33 metodi legacy marcati come `@deprecated` per retrocompatibilità, mappati internamente sui nuovi feedback nativi (es. `click()`, `buttonPress()`, `pinSuccess()`, `pinError()`, `dialogOpen()`, ecc.).
 
 **Singleton esportato**: `hapticSystem: HapticSystem`
-
-> Da riscrivere con `react-native` `Vibration` API o `expo-haptics`. Storage da migrare ad `AsyncStorage`.
 
 ---
 
@@ -851,9 +875,9 @@ useDisplayPreferences(): DisplayPreferences
 
 ---
 
-## `src/hooks/use-haptic.ts` ⚠️
+## `src/hooks/use-haptic.ts` ✅
 
-Wrapper hook su `hapticSystem`. Compatibile in sé (solo useState/useEffect), ma inutile finché `haptic-system.ts` non è riscritto per RN.
+Wrapper hook su `hapticSystem`. Consente di leggere le impostazioni correnti dell'haptic ed abilitarlo/disabilitarlo con reattività React.
 
 ---
 
@@ -865,12 +889,9 @@ File rimosso (DESIGN 004). Sostituito dalle funzioni builder esposte da
 
 ---
 
-## `src/hooks/use-network-status.ts` ✅ (pianificato — PLAN 008)
+## `src/hooks/use-network-status.ts` ✅
 
-Hook pubblico per consumo del contratto di connettività centralizzato
-(`NetworkStatusProvider`). Sostituisce `useOnlineStatus` (rimosso da
-PLAN 008, Strategia A — migrazione completa: 0 consumer verificati nel
-codebase prima della rimozione).
+Hook pubblico per il consumo dello stato di connettività di rete centralizzato (`NetworkStatusProvider`). Sostituisce `useOnlineStatus` (rimosso in PLAN 008).
 
 ```ts
 export type NetworkStatus = {
@@ -885,24 +906,11 @@ export function useNetworkStatus(): NetworkStatus;
 ```
 
 **Semantica `isOffline`** (DESIGN 008 §5, INV-7):
-`isOffline === true` se `isConnected === false | null` **oppure**
-`isInternetReachable === false`. Il caso captive portal
-(`isConnected === true && isInternetReachable === false`) è trattato
-come `isOffline === true`. Il caso `isInternetReachable === null` è
-online-first (non determinato → consumi come online).
+`isOffline === true` se `isConnected === false | null` **oppure** `isInternetReachable === false`. Il caso captive portal (`isConnected === true && isInternetReachable === false`) è trattato come offline. Il caso `isInternetReachable === null` è online-first (non determinato → consuma come online).
 
-**Errori**: lancia `Error('useNetworkStatus must be used within NetworkStatusProvider')`
-se invocato fuori dal provider.
+**Errori**: lancia `Error('useNetworkStatus must be used within NetworkStatusProvider')` se invocato fuori dal provider.
 
-> Provider associato: `NetworkStatusProvider`, esposto da
-> `src/context/NetworkStatusContext.tsx`. Posizionato in `App.tsx`
-> sopra `AuthProvider` (e sopra `AppDataProvider` quando wired).
-> Debounce direzionale 1000 ms solo su online → offline (INV-3).
-> Fail-Safe Online-First su fallimento NetInfo o timeout init (INV-4).
->
-> Stato implementazione: **pianificato** (DRAFT), task T2 di
-> [PLAN 008](3-coding-plans/008-PLAN_network-connectivity_v0.1.0.md).
-> Sostituisce `useOnlineStatus` (rimosso in PLAN 008 T3).
+> Provider associato: `NetworkStatusProvider`, esposto da `src/context/NetworkStatusContext.tsx` ed inserito in `App.tsx` come antenato di `AuthProvider`.
 
 ---
 
