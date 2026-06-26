@@ -1,6 +1,6 @@
 {
   "name": "ZecchinoReact",
-  "version": "0.13.9",
+  "version": "0.16.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",

@@ -9,16 +9,9 @@ Versione progetto: **0.16.0**.
 > L'app **non Ã¨ avviabile** fino alla risoluzione dei 6 blocchi di build documentati in  
 > [`docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md`](docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md).
 
-Stato rilascio: la release `0.4.0` estende la `0.3.0` completando il PLAN 006
-con KDF PIN PBKDF2-SHA256, payload versionato `0x01`, colonna Supabase
-`pin_kdf_salt` e aggiornamento atomico hash+salt.
+Stato rilascio: la release `0.16.0` integra i blocchi 017 (Prestiti), 018 (Confronto Mese su Mese per Categoria), 019 (Notifiche Budget e Orchestrazione) e 020 (Centralizzazione design tokens).
 
-Aggiornamento 2026-05-27: i blocchi 010, 011 e 012 sono stati completati e
-validati con suite Jest completa verde (`11/11` suite, `75` test passati,
-`13` `it.todo` documentati). Non e' stato promosso un nuovo minor bump: la
-versione resta `0.4.0` finche' non vengono chiusi i debiti Android/Windows gia'
-tracciati in `docs/todo-master.md` e nel report compatibilita'. Il sotto-piano
-`009-native` resta quindi fuori dalla release corrente.
+Aggiornamento 2026-06-26: i blocchi 017, 018, 019 e 020 sono stati completati e validati. I blocchi critici di build Android BC-01, BC-02 e BC-03 sono stati risolti e chiusi. La versione è stata avanzata a `0.16.0` in conformità con la chiusura delle funzionalità e la centralizzazione del design system.
 
 ## Funzionalità implementate
 
@@ -31,6 +24,7 @@ tracciati in `docs/todo-master.md` e nel report compatibilita'. Il sotto-piano
 - Blocco 017 completato: modulo prestiti e mutui con tipi PrestitoMutuo e RimborsoPrestitoMutuo, repository prestiti.ts e prestiti-rimborsi.ts con operazioni CRUD complete, calcolo piano di ammortamento in loan-calculator.ts con metodo francese e italiano, integrazione nel domain object globale di AppDataContext.
 - Blocco 018 completato: modulo confronto mese su mese per categoria in monthly-comparison.ts, calcolo delta percentuale e assoluto tra mese corrente e mese precedente per categoria di spesa, aggiunta del tipo MonthlyComparison a types.ts.
 - Blocco 019 completato: orchestrazione notifiche budget con budget-notification-config.ts, riallineamento repository notifiche con campi titolo_key e messaggio_key per localizzazione a runtime, introduzione tipo NotificationLevel e BudgetNotificationMetadata, chiavi di localizzazione warning, critical ed exceeded in it.ts, mappatura nel notification-service e nel context orchestrator.
+- Blocco 020 completato: centralizzazione design tokens per colori e chiavi icone in colors.ts, refactoring constants.ts e budget-templates.ts per rimuovere la dipendenza da @phosphor-icons/react.
 
 ---
 

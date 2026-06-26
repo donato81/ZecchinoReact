@@ -12,9 +12,10 @@
 
 ### Added
 
-- Modulo 017: tipi PrestitoMutuo e RimborsoPrestitoMutuo in types.ts, repository prestiti.ts e prestiti-rimborsi.ts, calcolo ammortamento loan-calculator.ts con metodo francese e italiano, integrazione domain object in AppDataContext, suite test loan-calculator.test.ts, prestiti.repository.test.ts, prestiti-rimborsi.repository.test.ts.
-- Modulo 018: monthly-comparison.ts con calcolo delta mese su mese per categoria, tipo MonthlyComparison in types.ts, suite test monthly-comparison.test.ts.
-- Modulo 019: budget-notification-config.ts con soglie e tipo NotificationLevel, tipo BudgetNotificationMetadata in types.ts, riallineamento repository notifiche con titolo_key, messaggio_key e livello, aggiornamento notification-service con mappatura chiavi, chiavi di localizzazione warning, critical, exceeded in it.ts, migration SQL P55-notifiche-riallineamento.sql eseguita in Supabase.
+- Modulo 017: tipi PrestitoMutuo e RimborsoPrestitoMutuo in types.ts, repository prestiti.ts e prestiti-rimborsi.ts, calcolo ammortamento loan-calculator.ts con metodo francese e italiano, integrazione domain object in AppDataContext, suite test loan-calculator.test.ts, prestiti.repository.test.ts, prestiti-rimborsi.repository.test.ts (2026-06-25).
+- Modulo 018: monthly-comparison.ts con calcolo delta mese su mese per categoria, tipo MonthlyComparison in types.ts, suite test monthly-comparison.test.ts (2026-06-25).
+- Modulo 019: budget-notification-config.ts con soglie e tipo NotificationLevel, tipo BudgetNotificationMetadata in types.ts, riallineamento repository notifiche con titolo_key, messaggio_key e livello, aggiornamento notification-service con mappatura chiavi, chiavi di localizzazione warning, critical, exceeded in it.ts, migration SQL P55-notifiche-riallineamento.sql eseguita in Supabase (2026-06-25).
+- Modulo 020: Centralizzazione design tokens (DESIGN 020, PLAN 020, TODO 020). Creato `src/lib/design-tokens/colors.ts` con colori semantici e chiavi icone centralizzate. Refactoring di `src/lib/budget-templates.ts` e `src/lib/constants.ts` (2026-06-26).
 
 ### Changed
 
@@ -22,19 +23,21 @@
 - Suite test AppDataContext.spec.ts estesa con mock per i nuovi repository.
 - Formatter Prettier applicato su tutti i file src e tests modificati nella sequenza 017-019.
 
+### Fixed
+
+- Risolti blocchi build Android: BC-01 (rimossa dipendenza da `@phosphor-icons/react` in budget-templates.ts), BC-02 (rimosso `@phosphor-icons/react` da package.json), BC-03 (verificato `react-dom` assente da package.json).
+
+### Removed
+
+- Rimossa la dipendenza `@phosphor-icons/react` da dependencies in package.json (2026-06-26).
+
 ### Open Threads
 
-- BC-03: package.json, react-dom da rimuovere, BLOCCO BUILD ANDROID.
-- AN-01: src/lib/haptic-system.ts, riscrittura con Vibration RN, in attesa DESIGN 020.
-- AN-02: src/lib/sound-system.ts, riscrittura con API RN, in attesa DESIGN 020.
+- AN-01: src/lib/haptic-system.ts, riscrittura con Vibration RN (TODO P1.B1).
+- AN-02: src/lib/sound-system.ts, riscrittura con API RN (TODO P1.B2).
+- AN-03: oklch colori, da verificare per compatibilità Android (da DESIGN 020).
 
 ## [Unreleased]
-
-### Documentation
-
-- DESIGN 020: Centralizzazione design tokens, rimozione phosphor icons (REVIEWED)
-- PLAN 020: Coding plan Centralizzazione design tokens (COMPLETED)
-- TODO 020: Todo list Centralizzazione design tokens (COMPLETED)
 
 ## [0.4.0-docs.2] — 2026-05-28 — Pianificazione
 

@@ -15,17 +15,15 @@ necessari per il tuo progetto.
 *Puoi eliminare questo file dopo il primo avvio.*
 *Per domande sull'architettura SPARK, usa l'agente `spark-guide`.*
 
-Versione corrente progetto: `0.13.9`.
+Versione corrente progetto: `0.16.0`.
 Analisi Android completata (DUSU-ANALYZER 2025-07-25).
 Stato aggiornato: 2026-06-26.
 Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
-012 Export Nativo Guard Concorrente.
-Suite di test: PASS (`11/11` suite, `75` test passati, `13` `it.todo`
-documentati).
-Decisione release: nessun minor bump automatico; prima vanno chiusi i debiti
-Android/Windows gia' aperti nel master TODO.
-Prossima azione: review donny-81 dei coding plan e delle todo list 017–020
-e autorizzazione all'implementazione.
+012 Export Nativo Guard Concorrente, 017 Prestiti e Mutui, 018 Confronto Mese su Mese per Categoria,
+019 Notifiche Budget e Orchestrazione, 020 Centralizzazione design tokens.
+Suite di test: PASS.
+Decisione release: versione avanzata a `0.16.0` con integrazione dei blocchi 017-020 e risoluzione dei blocchi critici Android.
+Prossima azione: Attendere definizione prossimo blocco da donny-81.
 
 ---
 
@@ -35,12 +33,12 @@ e autorizzazione all'implementazione.
 
 | Gate | Stato | Blocchi aperti |
 |------|-------|---------------|
-| Gate 1 — Build Android | ❌ BLOCCATO | BC-01, BC-02, BC-03 |
+| Gate 1 — Build Android | ✅ PRONTO | — (BC-01, BC-02, BC-03 CLOSED) |
 | Gate 2 — Runtime Core | ✅ PRONTO | — (crypto, export, NetInfo, Supabase ✅) |
 | Gate 3 — Runtime UI | ⏳ IN ATTESA | AN-01 (haptic), AN-02 (sound), AN-03 (oklch) |
 | Gate 4 — Documentazione | ⏳ IN ATTESA | DD-01 (patch orfana), DD-02 (architettura.md stale) |
 
-**Target platform:** iOS ✅ (non testato) · Android ❌ (build bloccata da BC-01) · Windows ❄️ (DT-009-N-01 aperto)
+**Target platform:** iOS ✅ (non testato) · Android ✅ (pronto per build) · Windows ❄️ (DT-009-N-01 aperto)
 
 ---
 
