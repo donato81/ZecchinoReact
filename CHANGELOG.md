@@ -39,6 +39,8 @@
 
 ## [Unreleased]
 
+- docs(design): aggiunto documento di design 021 — refactor haptic-system AN-01
+
 ## [0.4.0-docs.2] — 2026-05-28 — Pianificazione
 
 ### Added

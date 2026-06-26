@@ -51,7 +51,7 @@
 - **Last Validated Block:** CICLO-G 017-020 — revisione globale completata con esito PASS (2026-06-26, donny-81).
 - **Files Modified But Not Validated:** Nessuno
  - **Open Threads:**
-  - AN-01: `src/lib/haptic-system.ts` — riscrittura con Vibration RN (P1.B1 TODO)
+  - AN-01: IN DESIGN — 021-DESIGN_haptic-system_v0.1.0.md — 2026-06-26
   - AN-02: `src/lib/sound-system.ts` — riscrittura con expo-av/react-native-sound (P1.B2 TODO)
   - AN-03: `oklch colori` — da verificare per compatibilità Android (da DESIGN 020)
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
