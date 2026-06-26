@@ -57,6 +57,9 @@
 
 ## [Unreleased]
 
+### Added
+- docs: aggiunto 022-DESIGN_sound-system_v0.1.0.md — refactoring motore audio nativo (AN-02)
+
 
 ## [0.4.0-docs.2] — 2026-05-28 — Pianificazione
 

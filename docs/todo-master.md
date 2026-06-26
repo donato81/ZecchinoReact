@@ -47,16 +47,16 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** P3.B8-AN-01 (completato 2026-06-26).
-- **Last Validated Block:** CICLO-G 021 — Haptic System Refactor (2026-06-26, DUSU-CODER).
+- **Last Completed Task:** Stesura 022-DESIGN_sound-system_v0.1.0.md (bozza) (completato 2026-06-27).
+- **Last Validated Block:** DESIGN 022 — Sound System Refactor (2026-06-27, DUSU-DOCS).
 - **Files Modified But Not Validated:** 
  - **Open Threads:**
-  - AN-02: `src/lib/sound-system.ts` — riscrittura con expo-av/react-native-sound (P1.B2 TODO)
+  - AN-02: `src/lib/sound-system.ts` — stesura DESIGN 022 completata (bozza) — in attesa di PLAN 022
   - AN-03: `oklch colori` — da verificare per compatibilità Android (da DESIGN 020)
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts — CLOSED
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
- - **Next Action:** AN-02 sound-system.ts — riscrittura con API React Native. Prossimo blocco: PLAN 022 (da definire con donny-81).
+  - **Next Action:** AN-02 sound-system.ts — pianificazione con PLAN 022 (da definire con donny-81).
 
 > Nota sessione orchestrazione 2026-05-29:
 > Creati i sei documenti di pianificazione richiesti:

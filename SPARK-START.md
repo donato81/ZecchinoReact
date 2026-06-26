@@ -57,6 +57,8 @@ Prossima azione: Attendere definizione prossimo blocco da donny-81.
 - [DESIGN 018 — Confronto mese su mese per categoria](docs/2-projects/018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 019 — Notifiche Budget e Orchestrazione](docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 020 — Centralizzazione design tokens: colori e chiavi icone](docs/2-projects/020-DESIGN_icone-colori-design-system_v0.2.0.md) — v0.2.0 — REVIEWED
+- [DESIGN 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics](docs/2-projects/021-DESIGN_haptic-system_v0.1.0.md) — v0.1.0 — REVIEWED
+- [DESIGN 022 — Sound System — Refactoring motore audio nativo](docs/2-projects/022-DESIGN_sound-system_v0.1.0.md) — v0.1.0 — bozza
 
 ## Stato PLAN / TODO
 
@@ -84,6 +86,9 @@ Prossima azione: Attendere definizione prossimo blocco da donny-81.
 - [TODO 019 — Notifiche Budget e Orchestrazione](docs/4-todo-lists/019-TODO_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — PENDING
 - [PLAN 020 — Centralizzazione design tokens: colori e chiavi icone](docs/3-coding-plans/020-PLAN_icone-colori-design-system_v0.2.0.md) — v0.2.0 — DRAFT
 - [TODO 020 — Centralizzazione design tokens: colori e chiavi icone](docs/4-todo-lists/020-TODO_icone-colori-design-system_v0.2.0.md) — v0.2.0 — PENDING
+- [PLAN 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics](docs/3-coding-plans/021-PLAN_haptic-system_v0.1.0.md) — v0.1.0 — REVIEWED
+- [TODO 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics](docs/4-todo-lists/021-TODO_haptic-system_v0.1.0.md) — v0.1.0 — PENDING
+
 
 Correzioni applicate il 2026-06-26.
 Stato: REVIEWED PENDING.
