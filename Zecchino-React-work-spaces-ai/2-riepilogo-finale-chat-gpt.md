@@ -6,727 +6,507 @@ https://github.com/donato81/ZecchinoReact
 ---
 
 report di perplexity:
-Ho letto tutti e tre i file nella loro interezza. Ecco il report completo.
-
-***
-
-# REPORT DI REVISIONE TECNICA — CODING PLANS 017, 018, 019
-**Data:** 2026-05-29
-**Preparato da:** Perplexity AI su incarico del Project Owner
-**Oggetto:** Seconda analisi dei file PLAN dopo revisione degli agenti — valutazione di chiusura
-**Repository:** [github.com/donato81/ZecchinoReact](https://github.com/donato81/ZecchinoReact)
-**SHA analizzati:**
-- PLAN 017: dee1574f6df825d320ff1dcedeebaa73a74d27b4
-- PLAN 018: 17eb7465ea2fe3a66a22c66961cd026753514a5f
-- PLAN 019: 274eba4515b3f70faf010b11f4f1a7dc964af0ae
-
-***
-
-## NOTA METODOLOGICA
-
-Questo report nasce dalla lettura integrale dei tre file committati. Per ciascun PLAN viene verificata la completezza strutturale, la coerenza interna, la coerenza cross-documento e la corrispondenza con le anomalie segnalate nel report precedente del 2026-05-29 mattina. I tre file recano già stato REVIEWED nel frontmatter, ma questo report valuta se tale stato è giustificato dai contenuti effettivi.
-
-***
-
-## PLAN 017 — Prestiti, Mutui e Simulazione Finanziaria
-
-**Dimensione:** 15.482 caratteri
-**Stato dichiarato nel frontmatter:** REVIEWED
-
-### Risoluzione delle anomalie precedenti
-
-Anomalia 017-A1 — Proprietà di roundCurrency e extractDatePart: RISOLTA COMPLETAMENTE.
-Il documento ora dichiara esplicitamente nel Perimetro Sezione 2 che PLAN 017 è il proprietario di entrambe le funzioni, che vengono introdotte in helpers.ts, e che i PLAN 018, 019 e successivi le riutilizzano senza ridefinirle. La stessa dichiarazione è ribadita nella Decisione 3 e nel Task T3. La catena di proprietà è ora tracciabile senza ambiguità.
-
-Anomalia 017-A2 — Numeri di migrazione SQL mancanti: PARZIALMENTE RISOLTA, con nota da considerare.
-Il documento ora dichiara P52, P53 e P54 in modo esplicito nella sezione Perimetro e nel Task T10. Tuttavia, nel Task T6, i numeri RPC specifici per rpc_aggiungi_rimborso e rpc_elimina_rimborso sono ancora indicati come placeholder P_017_01 e P_017_02 con istruzione di aggiornamento al momento dell'implementazione. Questo è accettabile come scelta consapevole di rinvio, ma il documento avrebbe dovuto formalizzare chi ha la responsabilità di aggiornare quei placeholder durante l'implementazione: l'agente che esegue T6 oppure il revisore finale. Raccomandazione residua: aggiungere una nota nel Task T6 che assegna esplicitamente la responsabilità di aggiornamento al task stesso durante l'esecuzione.
-
-Anomalia 017-A3 — Test di non-persistenza simulazioni temporanee: RISOLTA COMPLETAMENTE.
-La sezione Test Obbligatori ora contiene due scenari distinti e complementari: il primo verifica l'assenza di write Supabase durante la simulazione locale, il secondo aggiunge la verifica tramite query diretta sulla tabella. Il Gate G-017-4 referenzia entrambi. La copertura è adeguata.
-
-### Nuove osservazioni sulla versione attuale
-
-Osservazione 017-N1 — Il Gate G-017-5 richiede verifica manuale senza strumento automatizzato.
-Il gate che verifica che saldoResiduo non venga mai aggiornato direttamente lato client è classificato come verifica manuale. Per un invariante così critico è auspicabile che i test di integrazione per il repository rimborsi coprano anche un tentativo di update diretto del saldo, che deve fallire o essere rigettato. Questa non è un'anomalia bloccante ma un miglioramento qualitativo raccomandato.
-
-Osservazione 017-N2 — Il Rollback per roundCurrency e extractDatePart contiene una condizione da interpretare.
-La sezione Rollback specifica di rimuovere le utility solo se nessun altro blocco successivo le sta già consumando. Questa condizione di rollback dipende da una verifica esterna che non è automatizzabile. È un approccio corretto ma richiede che l'agente che esegue il rollback abbia consapevolezza dello stato dei blocchi 018 e 019.
-
-**Esito PLAN 017:** CONFERMATO REVIEWED. Le anomalie bloccanti precedenti sono state risolte. Le osservazioni residue sono migliorative e non impediscono la chiusura.
-
-***
-
-## PLAN 018 — Confronto Mese su Mese per Categoria
-
-**Dimensione:** 9.442 caratteri
-**Stato dichiarato nel frontmatter:** REVIEWED
-**Dipendenze dichiarate nel frontmatter:** PLAN 017
-**Dipendenti dichiarati nel frontmatter:** PLAN 019
-
-### Risoluzione delle anomalie precedenti
-
-Anomalia 018-A1 — extractDatePart non aveva un proprietario dichiarato: RISOLTA COMPLETAMENTE.
-Il documento ora chiarisce nella sezione Perimetro che extractDatePart è definita e introdotta in PLAN 017, che questo PLAN la importa e la utilizza, e che non deve essere ridefinita. Il Gate G-018-4 riflette questa dipendenza. La Decisione 4 e il Task T2 confermano la stessa posizione in modo coerente e ripetuto.
-
-Anomalia 018-A2 — Caso base zero non specificato: RISOLTA COMPLETAMENTE.
-La Decisione 6 ora contiene una dichiarazione esplicita e dettagliata: se il valore del mese di riferimento per una categoria è zero, differenzaPercentuale viene restituito null, e il componente consumer deve trattare null come assenza di confronto disponibile. La specifica esclude esplicitamente Infinity, NegativeInfinity, NaN e undefined. Il test corrispondente è presente nella sezione Test Obbligatori.
-
-Anomalia 018-A3 — Dipendenza verso PLAN 019 non dichiarata: RISOLTA COMPLETAMENTE.
-Il frontmatter ora include il campo dipendenti con valore PLAN 019. La sezione Riferimenti include il link al PLAN 019. La catena bidirezionale è ora documentata.
-
-### Nuove osservazioni sulla versione attuale
-
-Osservazione 018-N1 — La sezione Perimetro contiene una voce di file che descrive una funzione non di competenza del PLAN.
-Nella sezione 2 Perimetro, sotto la voce del modello tipi client, appare il testo: "src/lib/helpers.ts - questo file riceve l'aggiunta della funzione extractDatePart". Questa descrizione è fuorviante perché PLAN 017, non PLAN 018, è il proprietario dell'aggiunta a helpers.ts. Il testo successivo corregge l'equivoco specificando di non ridefinire, ma la struttura della voce può generare confusione per un agente che legge solo la lista dei file target senza leggere le note. Raccomandazione: riscrivere quella voce in modo che sia chiaro che helpers.ts è citato come dipendenza da consumare, non come file da modificare da parte di PLAN 018.
-
-Osservazione 018-N2 — Il numero minimo di scenari obbligatori nel Task T5 è allineato con i test dichiarati.
-Il Task T5 richiede almeno 12 scenari. La sezione Test Obbligatori ne elenca esattamente 12. La coerenza è verificata e positiva.
-
-**Esito PLAN 018:** CONFERMATO REVIEWED con una raccomandazione editoriale residua sulla voce helpers.ts nel Perimetro, che non è bloccante per l'implementazione ma può generare confusione agli agenti.
-
-***
-
-## PLAN 019 — Notifiche Budget e Orchestrazione
-
-**Dimensione:** 14.648 caratteri
-**Stato dichiarato nel frontmatter:** REVIEWED
-**Dipendenze dichiarate nel frontmatter:** PLAN 015, PLAN 017
-
-### Risoluzione delle anomalie precedenti
-
-Anomalia 019-A1 — Contraddizione tra PLAN 017 e PLAN 019 sulle notifiche rate prestiti: RISOLTA COMPLETAMENTE.
-La sezione Fuori Perimetro contiene ora una Nota di Allineamento con DESIGN 017 che dichiara esplicitamente l'esclusione delle notifiche per le rate dei prestiti dalla versione 1, con motivazione che richiama il perimetro v1 di DESIGN 017. La nota aggiunge un'istruzione operativa diretta all'agente implementatore: ignorare la sezione fino a esplicita revisione del perimetro. Questo è un esempio eccellente di documentazione difensiva che risolve il conflitto senza cancellare la traccia della feature futura.
-
-Anomalia 019-A2 — Soglie hardcoded: RISOLTA COMPLETAMENTE.
-La Decisione 2 introduce BUDGET_ALERT_THRESHOLD_WARNING e BUDGET_ALERT_THRESHOLD_CRITICAL come costanti nominate con valori default dichiarati, in un file dedicato src/lib/budget-notification-config.ts. I Task T1 e T4 ribadiscono l'obbligo. Il Gate G-019-1 verifica la centralizzazione. La soglia di superamento al 100% è anch'essa nominata. La soluzione è corretta, configurabile in futuro e non introduce accoppiamenti.
-
-Anomalia 019-A3 — Mancanza del meccanismo di deduplicazione: RISOLTA COMPLETAMENTE.
-La Decisione 3 ora contiene una specifica dettagliata del meccanismo di deduplicazione a due livelli. Il registro in-memory è indicizzato per tipo più identificatore. Il reset avviene alla chiusura dell'app. Le notifiche di errore sono esplicitamente escluse dal meccanismo. Il Task T4 aggiunge la specifica della chiave composita tipo_notifica più id_budget più mese_anno in formato YYYY-MM e richiede che la logica di deduplicazione sia implementata come funzione pura e testabile separatamente. I test nella sezione Test Obbligatori coprono deduplicazione runtime, idempotenza mensile e invalidazione al cambio mese.
-
-Anomalia 019-A4 — Budget eliminato con notifica pendente non specificato: RISOLTA COMPLETAMENTE.
-Il Task T5 nella sezione Casi Limite dichiara esplicitamente il comportamento: l'orchestratore rimuove la notifica pendente dallo stato al momento della rilevazione dell'eliminazione, la rimozione è silenziosa e non genera errori. Il testo specifica anche che nessuna notifica riferita a un budget inesistente deve essere mostrata.
-
-### Nuove osservazioni sulla versione attuale
-
-Osservazione 019-N1 — La dipendenza da PLAN 018 non è dichiarata nel frontmatter, il che è coerente con il perimetro.
-PLAN 019 non dichiara PLAN 018 come dipendenza nel frontmatter, e questo è corretto: la sezione Fuori Perimetro esclude esplicitamente l'integrazione immediata con il confronto mensile come sorgente attiva di eventi. Tuttavia, la sezione Riferimenti non include il link al PLAN 018, mentre PLAN 018 referenzia PLAN 019. Questa asimmetria non è bloccante ma crea una catena di riferimenti non bidirezionale. Raccomandazione editoriale: aggiungere il riferimento a PLAN 018 nella sezione Riferimenti di PLAN 019, con nota che la dipendenza è futura e non attiva in v1.
-
-Osservazione 019-N2 — Il Gate G-019-6 verifica P55 manualmente senza criterio automatizzabile.
-La migrazione P55 viene verificata manualmente. Per coerenza con gli altri gate che usano npx tsc e npx jest, sarebbe utile indicare almeno un criterio di validazione documentale formale, come la verifica della presenza di titolo_key, messaggio_key, livello e assenza di updated_at nel file SQL. Non è un difetto bloccante ma riduce la consistenza del sistema di gate.
-
-Osservazione 019-N3 — Il Perimetro esclude la riscrittura completa di budget-alerts.ts ma non chiarisce cosa succede ai file parzialmente esistenti.
-La voce Fuori Perimetro indica che la riscrittura completa di budget-alerts.ts è esclusa. Tuttavia i task del Perimetro includono il riallineamento del servizio di orchestrazione notifiche. Non è chiaro se budget-alerts.ts viene refactored parzialmente, rinominato o conservato in parallelo con notification-service.ts. Questo punto può generare ambiguità per l'agente implementatore. Raccomandazione: aggiungere una nota nella sezione Perimetro che specifica la relazione tra budget-alerts.ts esistente e notification-service.ts nuovo, indicando se il file viene modificato, dismesso o affiancato.
-
-**Esito PLAN 019:** CONFERMATO REVIEWED con una raccomandazione operativa su budget-alerts.ts che è consigliabile risolvere prima dell'implementazione per evitare che l'agente faccia scelte non documentate su un file esistente.
-
-***
-
-## RIEPILOGO ESECUTIVO PER IL CONSIGLIO AI
-
-### Stato complessivo
-
-Tutti e tre i PLAN sono meritevoli dello stato REVIEWED. Le quattro anomalie bloccanti del report precedente sono state risolte in modo corretto e verificabile. I documenti dimostrano un netto miglioramento qualitativo rispetto alla versione di stamattina.
-
-### Punti che richiedono attenzione prima dell'implementazione
-
-Punto 1 — CONSIGLIATO, PLAN 017 Task T6: chiarire esplicitamente chi aggiorna i placeholder P_017_01 e P_017_02 durante l'esecuzione del task. La responsabilità va assegnata all'agente implementatore di T6, non lasciata implicita.
-
-Punto 2 — CONSIGLIATO, PLAN 018 sezione Perimetro: riscrivere la voce helpers.ts per chiarire che PLAN 018 consuma quella utility ma non la introduce. Il rischio è che un agente tratti helpers.ts come file da modificare nell'ambito di PLAN 018.
-
-Punto 3 — CONSIGLIATO, PLAN 019: aggiungere una nota che definisce la relazione tra budget-alerts.ts e notification-service.ts prima che l'agente inizi l'implementazione. Senza questa nota l'agente farà una scelta autonoma non documentata su un file esistente nel codebase reale.
-
-### Punti di eccellenza documentale da preservare
-
-Il meccanismo di deduplicazione con chiave composita in PLAN 019 è una specifica di qualità superiore alla media. La Nota di Allineamento in PLAN 019 che risolve la contraddizione con DESIGN 017 senza cancellare la feature futura è un pattern da replicare in tutti i documenti dove il perimetro v1 esclude feature pianificate. La struttura dei Gate di Chiusura in tutti e tre i PLAN è coerente e azionabile.
-
-### Raccomandazione finale
-
-I tre PLAN possono essere passati agli agenti Copilot per l'implementazione. Si raccomanda di comunicare agli agenti le tre note operative sopra elencate come istruzioni aggiuntive prima dell'avvio, per evitare che facciano scelte non documentate sui punti ancora aperti. Il blocco 017 deve essere implementato per primo e completato prima che 018 e 019 possano partire, in quanto la disponibilità di roundCurrency ed extractDatePart in helpers.ts è un prerequisito bloccante dichiarato da entrambi.
-
-***
-
-*Report generato il 2026-05-29 ore 15:53 CEST — ZecchinoReact — Consiglio AI*
-*Analisi effettuata sui file presenti nel repository al commit: [4d30cf1980fec269e0b6ea0e7be4e64933d0fa55](https://github.com/donato81/ZecchinoReact/blob/4d30cf1980fec269e0b6ea0e7be4e64933d0fa55/docs/3-coding-plans/)*
 
 --
 
-report di chat gpt:
-Ho verificato direttamente i tre file al commit `4d30cf1980fec269e0b6ea0e7be4e64933d0fa55`. Il report di Perplexity è migliorato, ma la sua conclusione “REVIEWED confermato” è **troppo ottimistica** per PLAN 017, 018 e soprattutto 019. In particolare, alcune correzioni che Perplexity dichiara risolte o non bloccanti risultano ancora aperte nei file reali.
-
-Di seguito il rapporto finale da restituire.
+reporrt di chat gpt:
+Ho analizzato attentamente le tre domande. A differenza di P52–P54, qui non ci sono problemi di correttezza tecnica: si tratta di **decisioni architetturali**. Ti rispondo quindi come farei nel Consiglio AI, privilegiando la coerenza futura del progetto.
 
 ---
 
-# RAPPORTO FINALE DI VALIDAZIONE — CODING PLAN 017, 018, 019
+# Giudizio generale
 
-## Verifica su commit `4d30cf1980fec269e0b6ea0e7be4e64933d0fa55`
+Le tre domande sono ben formulate e affrontano aspetti che, se decisi ora, eviteranno rifattorizzazioni future.
 
-**Data:** 29 maggio 2026
-**Oggetto:** Validazione del report Perplexity e verifica diretta dei tre Coding Plan 017, 018, 019.
-**Repository:** `donato81/ZecchinoReact`
-**Esito finale del Consiglio AI:** **NON confermare ancora REVIEWED definitivo senza ultimo fix chirurgico.**
+La mia raccomandazione è:
 
----
+* **Domanda 1 → Opzione B**
+* **Domanda 2 → Opzione B2**
+* **Domanda 3 → Chiavi semantiche, non derivate da Phosphor**
 
-## 1. Stato verificato dei file
-
-I tre PLAN risultano effettivamente in stato `REVIEWED` nel frontmatter:
-
-* PLAN 017: `stato: REVIEWED` 
-* PLAN 018: `stato: REVIEWED` 
-* PLAN 019: `stato: REVIEWED` 
-
-Tuttavia lo stato formale non coincide ancora pienamente con la qualità operativa richiesta. Rimangono anomalie documentali che possono guidare male gli agenti implementatori.
+Le considero tre decisioni coerenti tra loro.
 
 ---
 
-# 2. PLAN 017 — Prestiti, Mutui e Simulazione Finanziaria
+# Domanda 1 — Centralizzare i token colore?
 
-## 2.1 Punti corretti
-
-PLAN 017 dichiara chiaramente che introduce `roundCurrency` ed `extractDatePart` in `src/lib/helpers.ts`, e che PLAN 018, 019 e successivi devono riusarle senza ridefinizione. 
-
-Il task T3 ribadisce correttamente il contratto tecnico:
-
-* `roundCurrency` usa `parseFloat(value.toFixed(2))`;
-* `extractDatePart` restituisce i primi dieci caratteri della stringa data. 
-
-Il perimetro SQL P52, P53 e P54 è dichiarato. 
-
-## 2.2 Problema ancora aperto: T5 non impone uso di `loan-calculator.ts`
-
-Perplexity conferma `REVIEWED`, ma il punto che avevamo già segnalato non è stato chiuso del tutto.
-
-T5 crea il repository prestiti e dipende da T4, quindi la dipendenza esiste. 
-Però la metrica di successo parla solo di mapping, promozione, ricalcolo `dataFinePrevista` e assenza di mutazioni fuori contratto. 
-
-Manca ancora la frase vincolante:
-
-> il repository deve importare e usare `loan-calculator.ts` per derivare `rataMensile`, `totaleInteressi` e `dataFinePrevista`; è vietata la reimplementazione inline delle formule finanziarie nel repository.
-
-Questa non è una questione cosmetica: serve a evitare duplicazione della logica finanziaria.
-
-**Classificazione:** media, da correggere prima di considerare PLAN 017 pienamente chiuso.
-
-## 2.3 Problema aperto: prerequisito SQL ambiguo
-
-La sezione prerequisiti dice che P52, P53 e P54 devono essere create prima dell’implementazione dei repository. 
-Ma T10 è proprio il task che crea P52, P53 e P54. 
-
-Va chiarito che T10 produce i placeholder SQL e che i repository non devono essere chiusi finché T10 non è completato.
-
-**Classificazione:** minore, ma consigliata.
-
-## 2.4 Esito PLAN 017
-
-**Quasi approvabile, ma non perfetto.**
-Per `REVIEWED` robusto serve almeno aggiungere il vincolo anti-formule-inline in T5.
-
----
-
-# 3. PLAN 018 — Confronto Mese su Mese per Categoria
-
-## 3.1 Punti corretti
-
-Il PLAN 018 dipende da PLAN 017 e dichiara PLAN 019 come dipendente. 
-
-La discrepanza “17 scenari vs 12 scenari” risulta corretta: T5 ora cita almeno 12 scenari, e la sezione Test Obbligatori ne elenca 12.  
-
-La gestione base zero è ben definita: `differenzaPercentuale` è `null`, e il modulo non può restituire `Infinity`, `-Infinity`, `NaN` o `undefined`. 
-
-## 3.2 Problema ancora aperto: voce `helpers.ts` nel perimetro
-
-Perplexity lo segnala correttamente. La sezione Perimetro contiene ancora:
-
-> `src/lib/helpers.ts - questo file riceve l'aggiunta della funzione extractDatePart.`
-
-Subito sotto il documento corregge parzialmente dicendo che `extractDatePart` è definita in PLAN 017 e che PLAN 018 la importa e non la ridefinisce. 
-
-Ma la prima frase resta fuorviante: PLAN 018 non deve “ricevere l’aggiunta” di `extractDatePart`.
-
-**Correzione richiesta:**
-
-Sostituire la voce con:
-
-> `src/lib/helpers.ts` — il PLAN 018 consuma `extractDatePart` e `roundCurrency` introdotte da PLAN 017; non aggiunge né ridefinisce helper condivise.
-
-**Classificazione:** media-bassa, ma da correggere perché riguarda ownership inter-piano.
-
-## 3.3 Problema ancora aperto: G-018-3 resta manuale
-
-Il gate G-018-3 è ancora:
-
-> `Comando: verifica manuale sul modulo puro di confronto mensile` 
-
-Questo era già stato segnalato come migliorabile. Per un vincolo di purezza così importante, il gate dovrebbe essere riproducibile.
-
-**Correzione consigliata:**
-
-```bash
-grep -RIn "supabase\|AppDataContext\|cache\|repositories" src/lib/monthly-comparison.ts
-```
-
-Esito atteso: zero occorrenze.
-
-**Classificazione:** media, consigliata prima della chiusura definitiva.
-
-## 3.4 Nota su test performance
-
-Il test 12 ora è più misurabile: “tempo di esecuzione non supera i 100ms su un input di 1000 righe”. 
-Questa correzione risolve il precedente “percettibilmente stabile”, anche se il benchmark temporale resta potenzialmente fragile su ambienti CI diversi. Non è bloccante.
-
-## 3.5 Esito PLAN 018
-
-**Sostanzialmente approvabile**, ma con due rifiniture consigliate:
-
-1. correggere la voce `helpers.ts`;
-2. rendere G-018-3 verificabile.
-
----
-
-# 4. PLAN 019 — Notifiche Budget e Orchestrazione
-
-## 4.1 Punti corretti
-
-PLAN 019 dipende da PLAN 015 e PLAN 017. 
-
-L’assenza di PLAN 018 tra le dipendenze è corretta, perché il file dichiara fuori perimetro l’integrazione immediata con il confronto mensile come sorgente attiva di eventi. 
-
-Le soglie sono centralizzate in costanti nominate, con default warning 75%, critical 90%, e superamento 100%.  
-
-La deduplicazione è descritta con meccanismo runtime e chiave composita nel task T4.  
-
-## 4.2 Problema bloccante ancora presente: P55 è ancora dopo repository
-
-Questo è il punto principale.
-
-La sezione Prerequisiti dice:
-
-> la migrazione P55 deve essere prodotta prima di riallineare repository e test al nuovo schema persistito. 
-
-Però i task sono ancora ordinati così:
-
-* T3: repository notifiche; 
-* T7: migrazione P55. 
-
-Inoltre T3 dipende solo da T2 e T1, non da T7. 
-
-Quindi il problema segnalato nei cicli precedenti **non è stato risolto**. Perplexity lo considera ormai accettabile, ma dai file reali non lo è.
-
-Un agente sequenziale può ancora implementare il repository notifiche prima che il file P55 esista.
-
-**Correzione bloccante richiesta:**
-
-Opzione preferita: rinumerare i task così:
+## Risposta
 
 ```text
-T1 — Configurazione soglie
-T2 — Tipi client/Supabase
-T3 — Migrazione P55
-T4 — Repository notifiche
-T5 — Notification-service
-T6 — AppDataContext
-T7 — Localizzazione
-T8 — Test
+SÌ.
+Approvata l'Opzione B.
 ```
 
-Opzione minima:
+## Perché
+
+Nel progetto hai già adottato un principio molto forte:
+
+> una sola fonte di verità per ogni informazione condivisa.
+
+Lo hai fatto per:
+
+* messaggi utente;
+* annunci screen reader;
+* costanti;
+* repository;
+* logica finanziaria.
+
+I colori non dovrebbero fare eccezione.
+
+Oggi hai circa 16 valori distribuiti in più file. Domani potrebbero diventare 30 o 40.
+
+Se lasci i colori sparsi:
 
 ```text
-T3 Dipende da: T2, T1, T7
+budget-templates.ts
+constants.ts
+...
 ```
 
-e nota esplicita:
+ogni modifica richiederà di ricordarsi dove sono stati copiati.
 
-> T3 non può iniziare finché `docs/6-sql/P55-notifiche.sql` non esiste ed è allineato allo schema finale.
+Se li centralizzi:
 
-**Classificazione:** bloccante prima del `REVIEWED` definitivo.
-
-## 4.3 Problema aperto: G-019-1 resta manuale
-
-Il gate G-019-1 è ancora:
-
-> `Comando: verifica manuale sulla configurazione soglie, sul servizio notifiche e sui test correlati` 
-
-Questo è un controllo automatizzabile e già richiesto nei cicli precedenti.
-
-**Correzione consigliata:**
-
-```bash
-grep -RIn "0\.75\|0\.90\|0\.80\|0\.65\|0\.70\|75\|80\|90\|100" src/lib src/context __tests__ \
-  | grep -v "budget-notification-config.ts"
+```text
+Colore Verde Successo
+↓
+un solo punto
+↓
+tutto il progetto
 ```
 
-Esito atteso: zero occorrenze di soglie budget numeriche cablate inline fuori dal file di configurazione.
+Questo è molto più coerente con l'architettura di ZecchinoReact.
 
-**Classificazione:** media.
-
-## 4.4 Osservazione su `budget-alerts.ts`
-
-Perplexity segnala correttamente che PLAN 019 esclude la riscrittura completa di `budget-alerts.ts`, ma T1 dice che `notification-service`, `budget-alerts` e i test possono importare le soglie.  
-
-Serve una frase in Perimetro o Note Operative:
-
-> `budget-alerts.ts` non viene riscritto integralmente in PLAN 019; può essere solo adeguato in modo minimale per importare costanti di soglia e non duplicare letterali, mentre l’orchestrazione budget resta responsabilità di `notification-service.ts`.
-
-**Classificazione:** consigliata, non bloccante quanto P55.
-
-## 4.5 Esito PLAN 019
-
-**Non confermerei REVIEWED definitivo** finché P55/T7 resta dopo T3 repository notifiche. Questo è l’unico vero blocco rimasto, ma è reale.
+Quindi **non vedo motivi per scegliere l'Opzione A**.
 
 ---
 
-# 5. Classificazione finale corretta
+# Domanda 2 — Dove mettere i token?
 
-## Bloccante
+## Risposta
 
-### B1 — PLAN 019: P55 deve precedere repository notifiche
+```text
+Scelgo B2.
+```
 
-La contraddizione è ancora presente: prerequisito dice P55 prima del repository, ma T3 repository precede T7 P55 e non dipende da T7.   
+cioè:
+
+```text
+src/lib/design-tokens/colors.ts
+```
+
+## Perché
+
+Questa scelta non è utile solo oggi.
+
+È utile fra uno o due anni.
+
+Oggi avrai:
+
+```text
+colors.ts
+```
+
+Domani potresti aggiungere:
+
+```text
+typography.ts
+spacing.ts
+radius.ts
+icons.ts
+```
+
+Senza dover spostare nulla.
+
+Mi piace molto anche il nome:
+
+```text
+design-tokens
+```
+
+perché separa chiaramente:
+
+```text
+logica
+
+↓
+
+presentazione
+```
+
+pur restando ancora nel layer condiviso.
+
+Non userei:
+
+```text
+theme.ts
+```
+
+perché "theme" tende a diventare un contenitore generico.
 
 ---
 
-## Medie da correggere o comunicare agli agenti
+# Domanda 3 — Come chiamare le icone?
 
-### M1 — PLAN 017: T5 deve imporre uso di `loan-calculator.ts`
+Questa, secondo me, è la decisione più importante.
 
-T5 dipende da T4 ma non vieta formule inline. 
+## NON userei nomi derivati da Phosphor.
 
-### M2 — PLAN 018: correggere voce `helpers.ts`
+Per esempio:
 
-La voce dice ancora che PLAN 018 riceve l’aggiunta di `extractDatePart`. 
+```text
+shopping-cart
+fork-knife
+film-slate
+paw-print
+```
 
-### M3 — PLAN 018: rendere G-018-3 verificabile
+Perché?
 
-Il gate resta manuale. 
+Perché quei nomi sono molto vicini al catalogo di una libreria specifica.
 
-### M4 — PLAN 019: rendere G-019-1 verificabile
+Noi invece avevamo deciso:
 
-Il gate resta manuale. 
+```text
+il dominio NON conosce la libreria grafica.
+```
 
-### M5 — PLAN 019: chiarire rapporto `budget-alerts.ts` / `notification-service.ts`
-
-La riscrittura completa di `budget-alerts.ts` è fuori perimetro, ma T1 lo cita come consumer delle soglie.  
+Quindi le chiavi devono descrivere **il significato**, non il nome del componente.
 
 ---
 
-## Minori
+## Io sceglierei nomi semantici
 
-* PLAN 017: chiarire che T10 crea P52/P53/P54, non che devono preesistere.  
-* PLAN 017: assegnare esplicitamente all’agente T6 la responsabilità di sostituire i placeholder `P_017_01` e `P_017_02`. 
-* PLAN 019: spostare la nota lunga su prestiti fuori dall’elenco Fuori Perimetro. 
-* PLAN 019: spostare `Casi limite` fuori dai Task Atomici. 
+Per esempio:
+
+```text
+shopping
+food
+transport
+home
+entertainment
+health
+technology
+clothing
+education
+pets
+```
+
+Oppure, se vuoi essere ancora più esplicito:
+
+```text
+shopping
+restaurant
+car
+house
+cinema
+health
+phone
+clothes
+school
+pets
+```
+
+L'importante è che descrivano il concetto.
 
 ---
 
-# 6. Verdetto finale
+## Perché
 
-Il report di Perplexity è corretto nel riconoscere il forte miglioramento dei tre documenti, ma **non è corretto nel confermare senza riserve lo stato REVIEWED**.
+Immagina che fra tre anni tu cambi libreria.
 
-La decisione del Consiglio AI è:
-
-```text
-REVIEWED NON ANCORA CONFERMATO OPERATIVAMENTE
-APPROVARE SOLO DOPO FIX B1 SU PLAN 019
-```
-
-Il fix minimo indispensabile è uno solo:
+Con le chiavi:
 
 ```text
-PLAN 019: rendere P55 precedente o dipendenza esplicita del repository notifiche.
+shopping-cart
 ```
 
-Dopo quel fix, i restanti punti possono essere:
+ti verrà spontaneo cercare un'icona che si chiama così.
 
-* corretti nel documento prima del commit finale;
-* oppure passati come note operative obbligatorie agli agenti Copilot.
+Con:
 
-La raccomandazione più sicura è fare un ultimo mini-commit chirurgico con:
+```text
+shopping
+```
 
-1. PLAN 019: riordinare T7/P55 prima di T3 repository;
-2. PLAN 017: aggiungere vincolo `loan-calculator.ts` in T5;
-3. PLAN 018: correggere voce `helpers.ts`;
-4. PLAN 018 e 019: sostituire gate manuali principali con grep;
-5. PLAN 019: chiarire `budget-alerts.ts`.
+la UI sceglierà semplicemente "l'icona migliore" disponibile.
 
-Dopo questo, il passaggio a `REVIEWED` sarà pienamente giustificato.
+Il dominio non cambia.
 
 ---
 
-# 7. Risposta sintetica da restituire a Perplexity
+# La mia lista definitiva
 
-Perplexity, il Consiglio AI conferma che i tre PLAN sono molto migliorati, ma non conferma ancora senza riserve lo stato `REVIEWED`.
+Io userei:
 
-Il punto bloccante ancora aperto è PLAN 019: il documento dichiara che P55 deve essere prodotta prima del riallineamento repository/test, ma T3 è ancora il repository notifiche e T7 è ancora la migrazione P55. Inoltre T3 non dipende da T7. Questa contraddizione operativa deve essere corretta prima della chiusura definitiva.
-
-Sono inoltre raccomandate queste correzioni medie:
-
-* PLAN 017: T5 deve imporre esplicitamente l’uso di `loan-calculator.ts`;
-* PLAN 018: la voce `helpers.ts` deve dire che il PLAN consuma `extractDatePart` da PLAN 017, non che la aggiunge;
-* PLAN 018: G-018-3 va reso verificabile;
-* PLAN 019: G-019-1 va reso verificabile;
-* PLAN 019: va chiarita la relazione tra `budget-alerts.ts` e `notification-service.ts`.
-
-Verdetto:
-
-```text
-APPROVABILE DOPO ULTIMO FIX CHIRURGICO
-NON ANCORA REVIEWED PIENO
+```ts
+export type BudgetTemplateIconKey =
+  | 'shopping'
+  | 'food'
+  | 'transport'
+  | 'home'
+  | 'entertainment'
+  | 'health'
+  | 'technology'
+  | 'clothing'
+  | 'education'
+  | 'pets';
 ```
 
-Sequenza implementativa confermata:
+Trovo che sia più stabile nel tempo.
+
+---
+
+# Una piccola proposta aggiuntiva
+
+Io farei un passo in più.
+
+Se hai già:
 
 ```text
-PLAN 017 → PLAN 018 → PLAN 019
+ACCOUNT_TYPE_ICONS
 ```
+
+e adesso introduci:
+
+```text
+BudgetTemplateIconKey
+```
+
+stai creando due vocabolari diversi.
+
+Valuterei invece un **vocabolario unico delle icone dell'app**.
+
+Per esempio:
+
+```text
+src/lib/design-tokens/icons.ts
+```
+
+dove vivi solo:
+
+```ts
+export const APP_ICON_KEYS = {
+  shopping: 'shopping',
+  food: 'food',
+  home: 'home',
+  ...
+} as const;
+```
+
+e poi:
+
+* AccountType usa quelle chiavi;
+* BudgetTemplate usa quelle chiavi;
+* Tag potrà usarle in futuro.
+
+In questo modo esiste un solo linguaggio comune per tutte le icone dell'app.
+
+---
+
+# Verdetto finale del Consiglio AI
+
+## Domanda 1
+
+```text
+APPROVATA OPZIONE B
+
+Centralizzare tutti i colori.
+```
+
+---
+
+## Domanda 2
+
+```text
+APPROVATA OPZIONE B2
+
+src/lib/design-tokens/colors.ts
+```
+
+---
+
+## Domanda 3
+
+```text
+NON approvato stile derivato da Phosphor.
+
+APPROVATO stile semantico.
+```
+
+Lista consigliata:
+
+```text
+shopping
+food
+transport
+home
+entertainment
+health
+technology
+clothing
+education
+pets
+```
+
+---
+
+# Conclusione
+
+Tra le tre decisioni, quella che considero più importante è la terza.
+
+Se usi nomi derivati dalla libreria (`shopping-cart`, `fork-knife`, ecc.), il dominio continuerà ad avere un legame psicologico con Phosphor, anche dopo aver eliminato la dipendenza.
+
+Se invece usi **chiavi semantiche** (`shopping`, `food`, `home`, ecc.), il dominio parlerà esclusivamente il linguaggio del business, mentre la UI sarà completamente libera di scegliere qualunque libreria di icone oggi o in futuro.
+
+Questa soluzione è quella che ritengo più coerente con il principio architetturale che hai seguito fin dall'inizio di ZecchinoReact: **il dominio descrive il significato, la UI decide come rappresentarlo**.
 
 --
 
 report di deepseek:
-# CONSIGLIO MASTRO — VERDETTO FINALE SUI CODING PLANS 017, 018, 019
-
-**Data:** 2026-05-29  
-**Oggetto:** Analisi, verifica e convalida dei file di coding plans 017, 018, 019  
-**Fonti esaminate:**  
-- Rapporto di Perplexity (terza revisione, 2026-05-29 ore 15:53 CEST)  
-- Rapporto di ChatGPT (validazione su commit `4d30cf1980fec269e0b6ea0e7be4e64933d0fa55`)  
-**Repository di riferimento:** [github.com/donato81/ZecchinoReact](https://github.com/donato81/ZecchinoReact)  
+Ecco le mie risposte definitive alle tre domande aperte, consapevole che il DESIGN 020 potrà così passare direttamente a stato **REVIEWED**.
 
 ---
 
-## PREMESSA
+## Risposta Domanda 1 – Centralizzazione token colore
 
-Il Consiglio Mastro ha letto integralmente entrambi i rapporti.  
-Il rapporto di Perplexity documenta un netto miglioramento dei tre file e li giudica meritevoli di `REVIEWED`.  
-Il rapporto di ChatGPT, sulla base di una verifica diretta dei file al commit indicato, rileva che **alcune correzioni critiche non sono state ancora applicate**, in particolare nel PLAN 019.
+**Approvata Opzione B: centralizzazione completa.**
 
-Il Consiglio Mastro **accoglie la valutazione di ChatGPT** perché più granulare, verificabile e allineata con la necessità di evitare ambiguità operative per gli agenti implementatori.
+Porto i fatti a sostegno:
 
----
+- I valori `oklch()` sono già oggi sparsi in almeno due file (`budget-templates.ts` e `constants.ts`) e potrebbero essercene altri. Convertirli in hex senza centralizzarli cristallizzerebbe questa dispersione in forma esadecimale, rendendo ogni futura modifica più faticosa e soggetta a errori di inconsistenza.
+- Il costo aggiuntivo dell’operazione B è minimo adesso (spostare dichiarazioni e creare un file unico), mentre il beneficio a regime – un unico punto di verità – è altissimo, soprattutto in un progetto guidato da uno sviluppatore non vedente che deve poter navigare il codice con pochi comandi di ricerca certi.
+- La centralizzazione rispetta il principio architetturale già emerso in altri design: nessuna dispersione di configurazione visiva.
 
-## VERDETTO SULLO STATO ATTUALE
-
-I tre Coding Plan **NON SONO ANCORA PRONTI** per lo stato `REVIEWED` definitivo.
-
-Nonostante i significativi miglioramenti, permangono:
-
-- **Una anomalia bloccante** (PLAN 019 – ordine dei task P55 / repository)
-- **Diverse anomalie medie** che possono generare scelte non documentate da parte degli agenti
-
-Lo stato formale dichiarato nei frontmatter (`REVIEWED`) è **prematuro** e non corrisponde pienamente alla qualità operativa richiesta.
+Confermo quindi che **i 16+ token diventeranno hex e abiteranno un unico file centrale**.
 
 ---
 
-## ANOMALIE RESIDUE – CLASSIFICAZIONE FINALE
+## Risposta Domanda 2 – Nome e posizione del file centrale
 
-### 🔴 BLOCANTE (da correggere assolutamente prima di REVIEWED)
+**Approvata Opzione B2: `src/lib/design-tokens/colors.ts`.**
 
-**B1 – PLAN 019: P55 deve precedere il repository notifiche**
+Motivazione tecnica:
 
-- **Problema:** La sezione Prerequisiti dichiara che la migrazione P55 deve essere prodotta prima di riallineare repository e test. Tuttavia il task T3 (repository notifiche) è numerato prima di T7 (migrazione P55) e non dipende da T7.
-- **Rischio:** Un agente che segue l’ordine numerico potrebbe implementare il repository prima che lo schema SQL esista.
-- **Correzione richiesta (opzione preferita):**  
-  Rinumerare i task di PLAN 019 come segue:
-  ```
-  T1 – Configurazione soglie
-  T2 – Tipi client/Supabase
-  T3 – Migrazione P55 (attuale T7)
-  T4 – Repository notifiche (attuale T3)
-  T5 – Notification-service
-  T6 – AppDataContext
-  T7 – Localizzazione
-  T8 – Test
-  ```
-  **Opzione minima:**  
-  Modificare T3 aggiungendo `T7` come dipendenza esplicita e una nota che blocca l’inizio fino all’esistenza del file SQL.
+- Creare una sottocartella `design-tokens/` fin da subito segnala in modo esplicito lo strato di *design system visivo*, separandolo dalla logica di dominio (i servizi, i tipi, le costanti di business). Questo disaccoppiamento è prezioso per la manutenibilità futura, specie quando aggiungeremo tipografia, spaziature, ombre, breakpoint.
+- Il nome `colors.ts` è auto‑esplicativo e lascia spazio a futuri `typography.ts`, `spacing.ts` senza dover rinominare il file o riorganizzare la cartella. L’argomento “una sola cartella per un solo file oggi” non è un problema reale: il costo di creare una cartella è irrisorio e la chiarezza architetturale paga subito.
+- Per uno sviluppatore che usa NVDA, una struttura di cartelle chiara e prevedibile (come `lib/design-tokens/` che contiene tutti i token visivi) riduce il carico mentale e permette di raggiungere il file con pochi tasti.
+
+**Pertanto il file sarà:**  
+`src/lib/design-tokens/colors.ts`  
+con tutte le costanti esadecimali esportate.
 
 ---
 
-### 🟠 ANOMALIE MEDIE (raccomandate prima di REVIEWED)
+## Risposta Domanda 3 – Chiavi semantiche per le icone
 
-| ID | PLAN | Descrizione | Correzione |
-|----|------|-------------|-------------|
-| M1 | 017 | T5 non impone l’uso di `loan-calculator.ts` | Aggiungere vincolo esplicito: il repository deve importare il motore per derivare `rataMensile`, `totaleInteressi`, `dataFinePrevista`; vietata reimplementazione inline. |
-| M2 | 018 | Voce fuorviante su `helpers.ts` nel Perimetro | Sostituire con: “`src/lib/helpers.ts` – PLAN 018 consuma `extractDatePart` e `roundCurrency` introdotte da PLAN 017; non aggiunge né ridefinisce helper condivise.” |
-| M3 | 018 | Gate G-018-3 ancora manuale | Sostituire con comando grep verificabile (es. ricerca di import da supabase/context/cache). |
-| M4 | 019 | Gate G-019-1 ancora manuale | Sostituire con comando grep che verifichi l’assenza di soglie numeriche fuori dal file di configurazione. |
-| M5 | 019 | Relazione tra `budget-alerts.ts` e `notification-service.ts` non chiara | Aggiungere nota: `budget-alerts.ts` non viene riscritto; può solo importare costanti di soglia; l’orchestrazione budget è delegata a `notification-service.ts`. |
+**Approvata la lista definitiva a stile semantico-descrittivo, allineata alla convenzione esistente.**
 
----
+Analizzo la situazione reale del repository:
 
-### 🟢 ANOMALIE MINORI / COSMETICHE (opzionali)
+- Il dominio `ACCOUNT_TYPE_ICONS` in `src/lib/constants.ts` usa già chiavi descrittive in inglese come `'bank'`, `'credit-card'`, `'money'`, `'lock'`. Questo è un precedente architetturale consolidato.
+- La proposta iniziale di mantenere i nomi Phosphor (`'shopping-cart'`, `'fork-knife'`, …) **non è sbagliata**, ma crea un accoppiamento linguistico con una libreria che stiamo abbandonando. Anche se questi termini sono generici, il principio di indipendenza dalle librerie ci impone di scegliere identificatori che descrivano il *concetto di dominio*, non l’icona di una specifica libreria.
+- Inoltre, la futura UI potrà mappare queste chiavi concettuali a qualsiasi set di icone native (Material, Ionic, Phosphor su React Native) senza che il nome tradisca una provenienza.
 
-- PLAN 017: chiarire che T10 crea i placeholder SQL, non che devono preesistere.
-- PLAN 017: assegnare esplicitamente all’agente T6 la responsabilità di sostituire i placeholder `P_017_01` e `P_017_02`.
-- PLAN 019: spostare la nota lunga su prestiti fuori dall’elenco “Fuori Perimetro”.
-- PLAN 019: spostare la sezione “Casi limite” in una posizione autonoma tra Task e Test.
-- Ripristino degli accenti e apostrofi (migliora la leggibilità).
+**Lista definitiva delle 10 chiavi per `BudgetTemplateIconKey`:**
 
----
+| Icona Phosphor originale | Chiave semantica approvata |
+|--------------------------|----------------------------|
+| `ShoppingCart`           | `'groceries'`              |
+| `ForkKnife`              | `'dining'`                 |
+| `Car`                    | `'transport'`              |
+| `House`                  | `'housing'`                |
+| `FilmSlate`              | `'entertainment'`          |
+| `Heartbeat`              | `'health'`                 |
+| `DeviceMobile`           | `'phone'`                  |
+| `TShirt`                 | `'clothing'`               |
+| `GraduationCap`          | `'education'`              |
+| `PawPrint`               | `'pets'`                   |
 
-## RACCOMANDAZIONE OPERATIVA AL PROJECT OWNER
+Queste chiavi:
 
-Prima di autorizzare l’implementazione da parte degli agenti Copilot, il Project Owner deve:
-
-1. **Applicare la correzione bloccante B1** su PLAN 019 (riordinare P55 prima del repository).
-2. **Applicare le correzioni medie M1, M2, M3, M4, M5** (o quantomeno comunicarle formalmente agli agenti come istruzioni vincolanti).
-3. **Dopo le correzioni**, rieseguire una verifica leggera (o chiedere una quarta validazione).
-4. **Solo allora** transitare i tre file a `REVIEWED` definitivo.
-
-Una volta che i file saranno corretti e promossi a `REVIEWED`, l’implementazione dovrà avvenire in **sequenza stretta**:
-
-```
-PLAN 017 → PLAN 018 → PLAN 019
-```
-
-Il file `AppDataContext.tsx` è modificato sia da PLAN 017 sia da PLAN 019: il parallelismo è vietato.
+- sono tutte in inglese (coerenti con il resto delle costanti tecniche del progetto; le stringhe utente risiedono in `src/locales/it.ts`),
+- sono semantiche e disaccoppiate da qualsiasi libreria di icone,
+- sono immediatamente comprensibili e pronte per essere usate nell’`iconRegistry` quando popoleremo i componenti nativi.
 
 ---
 
-## CONCLUSIONI
+## Riepilogo decisioni
 
-Il Consiglio Mastro **non convalida** i tre Coding Plan nella versione attuale come pronti per `REVIEWED`.  
-Tuttavia, **li considera architetturalmente validi** e ritiene che le correzioni richieste siano limitate e ben circoscritte.
+- **Domanda 1**: Opzione B approvata – centralizzazione completa in un unico file.
+- **Domanda 2**: Opzione B2 approvata – il file sarà `src/lib/design-tokens/colors.ts`.
+- **Domanda 3**: Approvate le 10 chiavi semantiche descrittive sopra elencate, da usare come tipo `BudgetTemplateIconKey`.
 
-Si invita il Project Owner a eseguire l’ultimo ciclo chirurgico descritto prima di procedere.
-
----
-
-**Firmato:**  
-Consiglio Mastro — ZecchinoReact  
-2026-05-29
+Con queste risposte il DESIGN 020 può essere riscritto nella sua versione definitiva, completo di Sezione 5 e 6, e potrà passare a stato REVIEWED senza ulteriori cicli.
 
 --
 
-report di geminy.
-Ricevuto, Donato. Ho esaminato attentamente l'intero flusso dei tre rapporti (il cambio di passo di Perplexity, il filtraggio chirurgico di ChatGPT sul commit reale `4d30cf1` e il verdetto di sintesi del Consiglio Mastro di DeepSeek).
-
-Il verdetto è unanime e insindacabile: **lo stato `REVIEWED` attualmente presente nei frontmatter dei file è prematuro**. Non possiamo dare il via libera agli agenti di coding finché la logica sequenziale dei piani presenta queste frizioni. Perplexity è stato troppo ottimista, mentre ChatGPT e DeepSeek hanno centrato i punti critici.
-
-Dato che i file sono già nel tuo repository, per evitare di farti perdere tempo a rincorrere le modifiche a mano riga per riga, **ho preparato i blocchi di testo esatti e definitivi per l'applicazione delle patch**.
-
-Puoi copiare e incollare direttamente queste sezioni nei rispettivi file per sanare il blocco prima del commit di sblocco reale.
+report di gemini:
+Ecco la risoluzione e la ratifica ufficiale delle tre domande aperte relative al documento **DESIGN 020**, pensate per blindare l'architettura di **ZecchinoReact**, eliminare le incompatibilità native e garantire la massima linearità per lo sviluppo futuro.
 
 ---
 
-## 🛠️ PATCH 1: `017-PLAN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md`
+## Risoluzione Domanda 1 — Centralizzazione dei token colore: sì o no?
 
-### 1. In Sezione Prerequisiti Bloccanti
+### Decisione del Consiglio AI: Opzione B (Conversione + Centralizzazione)
 
-Sostituisci il punto relativo ai file SQL con:
+**Motivazione Tecnica:** Lasciare 16 valori colore sparsi e hardcoded tra `budget-templates.ts` e `constants.ts` risolverebbe il blocco immediato della build ma consoliderebbe un debito tecnico architetturale. Centralizzare i colori in un unico punto di verità permette di:
 
-```markdown
-*   Le migrazioni placeholder P52, P53 e P54 sono prodotte formalmente dal Task T10; i task operativi di persistenza e repository non possono essere considerati conclusi finché T10 non ha generato i relativi file strutturali in docs/6-sql/.
-
-```
-
-### 2. In Sezione 5 - Task T5 (Repository Prestiti)
-
-Aggiungi alle Note Operative / Metriche di Successo:
-
-```markdown
-*   **Vincolo Architetturale:** Il repository deve importare e utilizzare obbligatoriamente il motore puro `loan-calculator.ts` per derivare i valori di `rataMensile`, `totaleInteressi` e `dataFinePrevista`. È vietata in alcun caso la reimplementazione inline o la duplicazione delle formule finanziarie all'interno del layer del repository.
-
-```
-
-### 3. In Sezione 5 - Task T6 (RPC Rimborsi)
-
-Aggiungi in coda alla nota operativa:
-
-```markdown
-*   **Nota di Responsabilità:** L'agente implementatore di questo task (T6) ha l'obbligo esplicito di sostituire i placeholder strutturali `P_017_01` e `P_017_02` con i riferimenti reali generati nel file di migrazione finale.
-
-```
+1. Isolare completamente i file di logica di dominio (`lib`) da dettagli visivi.
+2. Effettuare controlli di contrasto WCAG AA centralizzati e istantanei (tramite un unico file).
+3. Predisporre l'applicazione in modo pulito a una futura implementazione di temi dinamici o Dark Mode (DT-020-01) senza dover toccare i file dei dati di business.
 
 ---
 
-## 🛠️ PATCH 2: `018-PLAN_confronto-mese-su-mese-categoria_v0.1.0.md`
+## Risoluzione Domanda 2 — Nome e posizione del file centrale dei token colore
 
-### 1. In Sezione 2 - Perimetro di Intervento
+### Decisione del Consiglio AI: Opzione B2 (`src/lib/design-tokens/colors.ts`)
 
-Sostituisci la riga relativa a `helpers.ts` con:
+**Motivazione Tecnica e di Accessibilità:**
+La scelta della sottocartella dedicata `design-tokens/` è nettamente superiore a un file piatto e generico come `theme.ts`.
 
-```markdown
-*   `src/lib/helpers.ts` — Il PLAN 018 consuma `extractDatePart` e `roundCurrency` introdotte da PLAN 017; il file viene letto e utilizzato come dipendenza pura, non riceve aggiunte né ridefinizioni di helper condivise in questo piano.
+* Per un developer che naviga la struttura del progetto con lo screen reader NVDA, la cartella `design-tokens/` delimita e dichiara immediatamente il contesto visivo, separandolo semanticamente dalla logica algoritmica di `lib/`.
+* Evita il rischio che un domani `theme.ts` diventi un "monolite" ingestibile contenente colori, spaziature, font e stili d'interfaccia. La struttura è così già predisposta ad accogliere `typography.ts` o `spacing.ts` in modo atomico.
 
-```
+---
 
-### 2. In Sezione 7 - Gate di Chiusura (G-018-3)
+## Risoluzione Domanda 3 — Chiavi semantiche per le icone e allineamento
 
-Sostituisci la riga del comando manuale con:
+### Decisione del Consiglio AI: Stile Semantico-Descrittivo (In inglese, agnostico rispetto alla libreria)
 
-```markdown
-*   **Comando di Verifica:** `grep -RIn "supabase\|AppDataContext\|cache\|repositories" src/lib/monthly-comparison.ts`
-*   **Esito Atteso:** 0 occorrenze (il modulo deve rimanere puramente computazionale e privo di effetti collaterali o accoppiamenti di stato).
+**Motivazione Tecnica:**
+Le chiavi memorizzate nel layer dei dati non devono riflettere i nomi dei componenti di una specifica libreria (come Phosphor), altrimenti il disaccoppiamento sarebbe solo parziale. Adottare uno stile semantico-descrittivo basato sul *concetto* (es. `shopping`, `food`) e non sul *glifo* (es. `shopping-cart`, `fork-knife`) rende il modello dati totalmente agnostico. In questo modo, se domani si passerà da Phosphor a Material Icons o a icone SVG proprietarie, i dati strutturati rimarranno immutati.
+
+Si sceglie la lingua **inglese** per le chiavi per mantenere la coerenza con la convenzione già attiva in `ACCOUNT_TYPE_ICONS` (`'bank'`, `'credit-card'`, `'money'`).
+
+### Lista Definitiva e Approvata per il tipo `BudgetTemplateIconKey`
+
+Il report di Perplexity faceva riferimento a 11 template ma elencava 10 icone. Di seguito si fornisce la mappatura definitiva e normalizzata per tutte le occorrenze, strutturata per l'inserimento immediato nel design e nel tipo TypeScript:
+
+```typescript
+export type BudgetTemplateIconKey =
+  | 'shopping'       // Sostituisce ShoppingCart
+  | 'food'           // Sostituisce ForkKnife
+  | 'transport'      // Sostituisce Car
+  | 'home'           // Sostituisce House
+  | 'entertainment'  // Sostituisce FilmSlate
+  | 'health'         // Sostituisce Heartbeat
+  | 'utilities'      // Sostituisce DeviceMobile (Bollette/Abbonamenti)
+  | 'clothing'       // Sostituisce TShirt
+  | 'education'      // Sostituisce GraduationCap
+  | 'pets'           // Sostituisce PawPrint
+  | 'miscellaneous'; // Undicesimo fallback semantico di sicurezza
 
 ```
 
 ---
 
-## 🛠️ PATCH 3: `019-PLAN_notifiche-budget-orchestrazione_v0.1.0.md`
+## Sintesi per la Stesura Finale del DESIGN 020
 
-### 1. In Sezione Note Operative / Perimetro
+Con queste definizioni ratificate, la versione definitiva del documento incorporerà:
 
-Aggiungi questo chiarimento fondamentale su `budget-alerts.ts`:
+1. **Decisione 1 riscritta:** Utilizzo di una libreria vettoriale nativa combinata a un componente wrapper centralizzato (`AppIcon`) che riceve le chiavi semantiche ed eroga i corretti attributi di accessibilità Windows/Android (`importantForAccessibility` / `accessibilityElementsHidden`).
+2. **Centralizzazione Colori:** Spostamento di tutti i 16 valori rilevati nel nuovo file `src/lib/design-tokens/colors.ts` espresso unicamente in valori `hex`.
+3. **Sezioni 5 e 6 pre-approvate:** Le tabelle di mapping useranno la lista delle chiavi semantiche sopra definite e il file centralizzato dei token.
 
-```markdown
-*   **Relazione budget-alerts / notification-service:** La riscrittura completa di `budget-alerts.ts` è fuori perimetro. Il file esistente può essere unicamente modificato per importare le costanti centralizzate dal file di configurazione (`budget-notification-config.ts`) al fine di eliminare i letterali numerici hardcoded, mentre l'intera logica di nuova orchestrazione delle notifiche è delegata esclusivamente al nuovo `notification-service.ts`.
-
-```
-
-### 2. In Sezione 5 - Task Atomici (Risoluzione Bloccante B1)
-
-Ristruttura l'ordine e le dipendenze dei task invertiti applicando questa sequenza:
-
-```markdown
-### T1: Configurazione Soglie Centralizzate
-*   **File target:** `src/lib/budget-notification-config.ts`
-*   **Dettaglio:** Definizione di BUDGET_ALERT_THRESHOLD_WARNING (0.75), BUDGET_ALERT_THRESHOLD_CRITICAL (0.90) e superamento (1.00).
-
-### T2: Estensione Tipi Client / Supabase
-*   **File target:** `src/types/supabase.ts` o file di estensione locale dei tipi notifiche.
-
-### T3: Creazione File di Migrazione SQL (Ex T7)
-*   **File target:** `docs/6-sql/P55-notifiche.sql`
-*   **Dettaglio:** Creazione della struttura della tabella notifiche e degli indici correlati.
-
-### T4: Riallineamento Repository Notifiche (Ex T3)
-*   **Dipenda da:** T1, T2, T3
-*   **Nota:** Non può essere avviato finché il file SQL di T3 non è presente nel workspace.
-
-### T5: Aggiornamento ed Implementazione Notification Service (Ex T4)
-*   **Dipende da:** T4
-
-### T6: Estrazione e Disaccoppiamento Orchestrazione (Ex T5)
-*   **File target:** `src/context/AppDataContext.tsx`
-
-### T7: Chiavi di Localizzazione (Ex T6)
-*   **File target:** `src/i18n/it.ts`
-
-### T8: Suite di Test e Copertura Codice
-*   **File target:** `__tests__/notification-service.test.ts`
-
-```
-
-### 3. In Sezione 7 - Gate di Chiusura (G-019-1)
-
-Sostituisci il comando di verifica con:
-
-```markdown
-*   **Comando di Verifica:** `grep -RIn "0\.75\|0\.90\|0\.80\|0\.65\|0\.70\|75\|80\|90\|100" src/lib src/context __tests__ | grep -v "budget-notification-config.ts"`
-*   **Esito Atteso:** 0 occorrenze (nessun valore di soglia deve essere espresso come costante letterale inline fuori dal file di configurazione).
-
-```
-
----
-
-## 🚀 Prossimi Passi
-
-1. Sostituisci questi blocchi di testo nei file del tuo workspace.
-2. Sposta la dicitura del frontmatter da `stato: REVIEWED` a un temporaneo `stato: REVIEWED PENDING` (o lasciala `REVIEWED` solo se esegui il commit contestualmente alle correzioni).
-3. Esegui il push sul branch `main`.
-
-Una volta completato questo allineamento, la catena di dipendenze $017 \rightarrow 018 \rightarrow 019$ sarà blindata sia per te che per qualsiasi agente AI che prenderà in carico lo sviluppo.
-
-Procedi pure con i fix nel workspace; se hai bisogno di un controllo al volo sul file modificato o sui comandi grep, sono qui.
+Le risposte sono definitive: la bozza può essere convertita direttamente in versione finale pronta per il rilascio del codice.
