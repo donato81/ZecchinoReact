@@ -187,33 +187,35 @@ Tutte le icone dei template budget sono attualmente di tipo decorativa o informa
 
 ## 6. Catalogo colori — fonte di verità per la conversione
 
-Questo catalogo riporta tutti i 16 valori `oklch()` trovati nel codice sorgente, pronti per la conversione in hex. I valori hex e le verifiche contrasto devono essere compilati prima del commit.
+Questo catalogo riporta tutti i 16 valori `oklch()` trovati nel codice sorgente con la conversione in hex verificata. Il contrasto è calcolato rispetto al bianco puro `#FFFFFF` e rispetto allo sfondo scuro `#1C1B19` del design system. La colonna WCAG AA indica in quale combinazione il colore supera la soglia 4.5:1 per testo normale.
 
 ### 6.1 Colori template budget — da `src/lib/budget-templates.ts`
 
-| Token centrale              | Template id     | Valore oklch originale  | Hex convertito | Contrasto su bianco | Contrasto su scuro | WCAG AA | Note                  |
-|-----------------------------|-----------------|-------------------------|----------------|---------------------|--------------------|---------|-----------------------|
-| `budget.groceries`          | spesa-mensile   | `oklch(0.65 0.15 140)`  | da compilare   | da verificare       | da verificare      | —       | Verde medio           |
-| `budget.dining`             | ristoranti      | `oklch(0.70 0.15 45)`   | da compilare   | da verificare       | da verificare      | —       | Arancio caldo         |
-| `budget.transport`          | trasporti       | `oklch(0.60 0.15 230)`  | da compilare   | da verificare       | da verificare      | —       | Blu medio             |
-| `budget.housing`            | casa            | `oklch(0.55 0.12 30)`   | da compilare   | da verificare       | da verificare      | —       | Marrone caldo         |
-| `budget.entertainment`      | svago           | `oklch(0.68 0.18 300)`  | da compilare   | da verificare       | da verificare      | —       | Viola medio           |
-| `budget.health`             | salute          | `oklch(0.65 0.15 25)`   | da compilare   | da verificare       | da verificare      | —       | Arancio rosato        |
-| `budget.subscriptions`      | abbonamenti     | `oklch(0.58 0.15 280)`  | da compilare   | da verificare       | da verificare      | —       | Viola scuro           |
-| `budget.clothing`           | abbigliamento   | `oklch(0.62 0.12 320)`  | da compilare   | da verificare       | da verificare      | —       | Rosa medio            |
-| `budget.education`          | istruzione      | `oklch(0.55 0.15 250)`  | da compilare   | da verificare       | da verificare      | —       | Blu viola             |
-| `budget.pets`               | animali         | `oklch(0.70 0.14 60)`   | da compilare   | da verificare       | da verificare      | —       | Giallo caldo          |
-| `budget.overallBudget`      | budget-totale   | `oklch(0.35 0.08 250)`  | da compilare   | da verificare       | da verificare      | —       | Blu scuro — coincide con banking |
+| Token centrale              | Template id     | Valore oklch originale  | Hex convertito | Contrasto su bianco | Contrasto su scuro | WCAG AA              | Note                  |
+|-----------------------------|-----------------|-------------------------|----------------|---------------------|--------------------|----------------------|-----------------------|
+| `budget.groceries`          | spesa-mensile   | `oklch(0.65 0.15 140)`  | `#58A546`      | 3.05:1              | 5.64:1             | AA (testo scuro OK)  | Verde medio           |
+| `budget.dining`             | ristoranti      | `oklch(0.70 0.15 45)`   | `#E97C47`      | 2.82:1              | 6.10:1             | AA (testo scuro OK)  | Arancio caldo         |
+| `budget.transport`          | trasporti       | `oklch(0.60 0.15 230)`  | `#008EC7`      | 3.69:1              | 4.67:1             | AA (testo scuro OK)  | Blu medio             |
+| `budget.housing`            | casa            | `oklch(0.55 0.12 30)`   | `#AC5345`      | 5.15:1              | 3.34:1             | AA (bianco OK)       | Marrone caldo         |
+| `budget.entertainment`      | svago           | `oklch(0.68 0.18 300)`  | `#AB79F4`      | 3.10:1              | 5.55:1             | AA (testo scuro OK)  | Viola medio           |
+| `budget.health`             | salute          | `oklch(0.65 0.15 25)`   | `#DC655E`      | 3.46:1              | 4.97:1             | AA (testo scuro OK)  | Arancio rosato        |
+| `budget.subscriptions`      | abbonamenti     | `oklch(0.58 0.15 280)`  | `#6B6CCF`      | 4.50:1              | 3.83:1             | AA large solo        | Viola scuro           |
+| `budget.clothing`           | abbigliamento   | `oklch(0.62 0.12 320)`  | `#A66DB2`      | 3.85:1              | 4.47:1             | AA large solo        | Rosa medio            |
+| `budget.education`          | istruzione      | `oklch(0.55 0.15 250)`  | `#0F74C4`      | 4.87:1              | 3.54:1             | AA (bianco OK)       | Blu viola             |
+| `budget.pets`               | animali         | `oklch(0.70 0.14 60)`   | `#DD8735`      | 2.77:1              | 6.22:1             | AA (testo scuro OK)  | Giallo caldo          |
+| `budget.overallBudget`      | budget-totale   | `oklch(0.35 0.08 250)`  | `#143C62`      | 11.34:1             | 1.52:1             | AA (bianco OK)       | Blu scuro — coincide con banking |
 
 ### 6.2 Colori categorie conto — da `src/lib/constants.ts`
 
-| Token centrale                  | Categoria id | Valore oklch originale  | Hex convertito | Contrasto su bianco | Contrasto su scuro | WCAG AA | Note                  |
-|---------------------------------|--------------|-------------------------|----------------|---------------------|--------------------|---------|-----------------------|
-| `accountCategory.banking`       | banking      | `oklch(0.35 0.08 250)`  | da compilare   | da verificare       | da verificare      | —       | Blu scuro — coincide con overallBudget |
-| `accountCategory.digital`       | digital      | `oklch(0.65 0.15 190)`  | da compilare   | da verificare       | da verificare      | —       | Verde acqua           |
-| `accountCategory.savings`       | savings      | `oklch(0.75 0.12 85)`   | da compilare   | da verificare       | da verificare      | —       | Giallo verde chiaro   |
-| `accountCategory.investments`   | investments  | `oklch(0.55 0.18 140)`  | da compilare   | da verificare       | da verificare      | —       | Verde scuro           |
-| `accountCategory.private`       | private      | `oklch(0.55 0.15 25)`   | da compilare   | da verificare       | da verificare      | —       | Arancio scuro         |
+| Token centrale                  | Categoria id | Valore oklch originale  | Hex convertito | Contrasto su bianco | Contrasto su scuro | WCAG AA              | Note                  |
+|---------------------------------|--------------|-------------------------|----------------|---------------------|--------------------|----------------------|-----------------------|
+| `accountCategory.banking`       | banking      | `oklch(0.35 0.08 250)`  | `#143C62`      | 11.34:1             | 1.52:1             | AA (bianco OK)       | Blu scuro — coincide con overallBudget |
+| `accountCategory.digital`       | digital      | `oklch(0.65 0.15 190)`  | `#00ABA3`      | 2.86:1              | 6.03:1             | AA (testo scuro OK)  | Verde acqua           |
+| `accountCategory.savings`       | savings      | `oklch(0.75 0.12 85)`   | `#D1A84A`      | 2.23:1              | 7.71:1             | AA (testo scuro OK)  | Giallo verde chiaro   |
+| `accountCategory.investments`   | investments  | `oklch(0.55 0.18 140)`  | `#258900`      | 4.51:1              | 3.82:1             | AA (bianco OK)       | Verde scuro           |
+| `accountCategory.private`       | private      | `oklch(0.55 0.15 25)`   | `#B94642`      | 5.23:1              | 3.29:1             | AA (bianco OK)       | Arancio scuro         |
+
+**Nota WCAG AA large solo:** I token `budget.subscriptions` (`#6B6CCF`) e `budget.clothing` (`#A66DB2`) superano la soglia 3:1 ma non quella 4.5:1 in nessuna combinazione. Sono accettabili per testo grande (18pt o 14pt grassetto) o per elementi decorativi come badge e icone. Se nella fase UI questi colori verranno usati come sfondo di testo piccolo, dovranno essere scuriti.
 
 ***
 
