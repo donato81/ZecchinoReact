@@ -3,9 +3,22 @@ tipo: design
 titolo: Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics
 versione: 0.1.0
 data: 2026-06-26
-stato: DRAFT
+stato: REVIEWED
+data-revisione: 2026-06-26
+revisore: Consiglio AI + donny-81
+note-revisione: "9 punti corretti su indicazione Consiglio AI. Pronto per coding plan AN-01."
 sorgente: docs/todo-master.md
-perimetro: src/lib/haptic-system.ts, src/hooks/use-user-settings.ts
+perimetro:
+  - src/lib/haptic-system.ts
+  - src/hooks/use-haptic.ts
+  - src/hooks/use-user-settings.ts
+  - src/lib/supabase/types.ts
+  - package.json
+  - package-lock.json
+precondizioni:
+  - Verifica se expo è presente in package.json
+  - Se expo non è presente, configurare Expo Modules con: npx install-expo-modules@latest
+  - Solo dopo, installare: npx expo install expo-haptics
 ---
 
 # DESIGN 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics
@@ -30,13 +43,13 @@ Questo documento definisce il piano di refactoring del modulo aptico per:
 - Semplificare l'interfaccia esposta rimuovendo i metodi specifici per funzionalità non ancora definite.
 - Gestire il fallback silenzioso per la piattaforma Windows.
 
-Riferimento al codice attuale: commit SHA [67eb32cf076e6ef443634d45db7f108b4a861718](file:///C:/Sviluppo/ZecchinoReact/src/lib/haptic-system.ts).
+Riferimento al codice attuale: commit SHA [67eb32cf076e6ef443634d45db7f108b4a861718](src/lib/haptic-system.ts).
 
 ---
 
 ## 2. Analisi dello stato attuale
 
-Il file attuale [src/lib/haptic-system.ts](file:///C:/Sviluppo/ZecchinoReact/src/lib/haptic-system.ts) definisce le seguenti strutture e comportamenti:
+Il file attuale [src/lib/haptic-system.ts](src/lib/haptic-system.ts) definisce le seguenti strutture e comportamenti:
 1. **Definizione di `HapticPattern` (righe 1-16)**: Un'unione di tipi di pattern di vibrazione che include vecchi tipi legacy (es. `'light'`, `'medium'`, `'heavy'`, `'rigid'`, `'soft'`) e tipi specifici (`'notification-success'`, ecc.).
 2. **Interfaccia `HapticSettings` (righe 18-21)**: Definisce le proprietà `enabled` (boolean) e `intensity` (number).
 3. **Persistenza sincrona via `localStorage` (righe 35-53)**: I metodi `loadSettings()` e `saveSettings()` leggono e scrivono sincronicamente su `localStorage`, che non esiste in React Native, sollevando eccezioni catturate in modo silenzioso via `catch` con `console.warn`.
@@ -65,7 +78,7 @@ Di seguito si formalizzano le 6 decisioni architetturalmente concordate e approv
   - `impactLight`: impatto fisico leggero (`ImpactFeedbackStyle.Light`)
   - `impactMedium`: impatto fisico medio (`ImpactFeedbackStyle.Medium`)
   - `impactHeavy`: impatto fisico pesante (`ImpactFeedbackStyle.Heavy`)
-- **Motivazione**: Questi 7 feedback rappresentano le sole funzionalità native supportate sia da iOS che da Android attraverso `expo-haptics`.
+- **Motivazione**: Questi 7 feedback rappresentano il sottoinsieme atomico scelto per il primo refactor cross-platform. Non rappresentano l'intera superficie API di expo-haptics, che espone anche altri stili (Rigid, Soft) e API Android-specifiche.
 - **Impatto sul codice**: Semplificazione di `HapticPattern` e rimozione di pattern numerici custom.
 
 ### Decisione 3 — Rinvio dei metodi specifici per funzionalità
@@ -90,9 +103,29 @@ Di seguito si formalizzano le 6 decisioni architetturalmente concordate e approv
 
 ---
 
+## Precondizione — Expo Modules
+
+Prima di introdurre expo-haptics, verificare se il progetto è già configurato per Expo Modules eseguendo:
+
+  cat package.json | grep '"expo"'
+
+Se expo non è presente in package.json, eseguire prima:
+
+  npx install-expo-modules@latest
+
+Verificare che il comando sia completato senza errori, quindi installare:
+
+  npx expo install expo-haptics
+
+Questa precondizione è obbligatoria perché expo-haptics è un modulo Expo SDK e richiede l'infrastruttura Expo Modules in un progetto React Native CLI esistente.
+
+Nota Windows: l'integrazione Expo Modules deve essere verificata specificamente con react-native-windows. Tracciata come DT-021-02.
+
+---
+
 ## 4. Analisi della dipendenza expo-haptics
 
-Dall'analisi di [package.json](file:///C:/Sviluppo/ZecchinoReact/package.json), si è verificato che la dipendenza `expo-haptics` **non è presente** nelle dipendenze del progetto.
+Dall'analisi di [package.json](package.json), si è verificato che la dipendenza `expo-haptics` **non è presente** nelle dipendenze del progetto.
 
 ### Procedura di installazione e compatibilità:
 Per garantire la stabilità su React Native 0.82.1, l'installazione dovrà seguire le linee guida di Expo:
@@ -126,14 +159,28 @@ Il file attuale utilizza `localStorage` per persistere lo stato delle impostazio
 ### Scelta Architetturale Adottata: Modello Ibrido
 Per coniugare i vantaggi di entrambe le opzioni, si adotta un **modello ibrido**:
 1. **Persistenza Locale Primaria**: `haptic-system.ts` utilizza `AsyncStorage` locale per caricare e salvare in modo asincrono lo stato `enabled` al mount, garantendo zero latenza durante la fase di bootstrap (es. inserimento del PIN nella schermata di sblocco).
-2. **Sincronizzazione Cloud (Supabase)**: Si estende l'interfaccia `UserPreferences` in [types.ts](file:///C:/Sviluppo/ZecchinoReact/src/lib/supabase/types.ts) aggiungendo il campo `haptic_enabled: boolean`.
-3. **Allineamento nel Hook**: Il hook `useUserSettings` in [use-user-settings.ts](file:///C:/Sviluppo/ZecchinoReact/src/hooks/use-user-settings.ts) viene esteso per includere `hapticEnabled` e `setHapticEnabled`. Quando lo stato di `useUserSettings` viene idratato dal cloud, invoca `hapticSystem.setEnabled(haptic_enabled)` per sincronizzare la preferenza locale con quella del profilo utente.
+2. **Sincronizzazione Cloud (Supabase)**: Si estende l'interfaccia `UserPreferences` in [types.ts](src/lib/supabase/types.ts) aggiungendo il campo `haptic_enabled: boolean`.
+3. **Allineamento nel Hook**: Il hook `useUserSettings` in [use-user-settings.ts](src/hooks/use-user-settings.ts) viene esteso per include `hapticEnabled` e `setHapticEnabled`. Quando lo stato di `useUserSettings` viene idratato dal cloud, invoca `hapticSystem.setEnabled(haptic_enabled)` per sincronizzare la preferenza locale con quella del profilo utente.
+
+### Regola di precedenza — AsyncStorage vs Supabase
+
+Il modello ibrido usa AsyncStorage come cache locale e Supabase come fonte autoritativa per l'utente autenticato.
+
+Regole:
+
+1. Se l'utente non è autenticato, il sistema usa solo la preferenza locale.
+2. Se l'utente è autenticato ma il profilo cloud non è ancora idratato, il sistema non produce feedback aptici. Comportamento: fail-closed. Significato: in caso di dubbio, nessuna vibrazione.
+3. Quando haptic_enabled viene letto da Supabase, il valore cloud sovrascrive sempre il valore locale.
+4. Dopo l'allineamento, il valore cloud viene riscritto in AsyncStorage per coerenza ai successivi avvii.
+5. Se Supabase dice haptic_enabled = false, nessun valore locale può riabilitare le vibrazioni.
+
+Questa regola è necessaria per rispettare la scelta dell'utente su tutti i dispositivi, in particolare per chi ha disabilità sensoriali o neurologiche che rendono le vibrazioni indesiderate o fastidiose.
 
 ---
 
 ## 6. Interfaccia pubblica del nuovo modulo
 
-Di seguito viene definito il contratto TypeScript del nuovo modulo [src/lib/haptic-system.ts](file:///C:/Sviluppo/ZecchinoReact/src/lib/haptic-system.ts).
+Di seguito viene definito il contratto TypeScript del nuovo modulo [src/lib/haptic-system.ts](src/lib/haptic-system.ts).
 
 ```typescript
 import { Platform } from 'react-native';
@@ -167,6 +214,16 @@ export interface IHapticSystem {
   impactHeavy(): Promise<void>;
 }
 ```
+
+| Metodo pubblico IHapticSystem | Chiamata expo-haptics |
+|---|---|
+| success() | Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success) |
+| error() | Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error) |
+| warning() | Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning) |
+| selection() | Haptics.selectionAsync() |
+| impactLight() | Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light) |
+| impactMedium() | Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) |
+| impactHeavy() | Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy) |
 
 ### Strato di Compatibilità (Shim Deprecato)
 Per evitare errori di compilazione TypeScript nei moduli `AuthContext.tsx` e `AppDataContext.tsx` senza espanderne lo scope di modifica, la classe `HapticSystem` manterrà le seguenti firme legacy come metodi deprecati:
@@ -246,6 +303,20 @@ class HapticSystem implements IHapticSystem {
 }
 ```
 
+### Strategia di uscita dallo shim legacy
+
+Lo shim legacy è introdotto esclusivamente per mantenere compilabili i consumer esistenti (AuthContext.tsx, AppDataContext.tsx, use-haptic.ts) durante il refactor AN-01.
+
+Regole:
+
+1. Tutti i metodi legacy nello shim devono essere marcati @deprecated.
+2. Nessun nuovo codice può usare i metodi legacy.
+3. I nuovi consumer usano solo i 7 metodi atomici del contratto pubblico.
+4. Lo shim sarà rimosso quando AuthContext.tsx, AppDataContext.tsx e use-haptic.ts saranno riallineati ai 7 metodi atomici.
+5. La rimozione è tracciata come sotto-task obbligatoria AN-01-Phase2, registrata come DT-021-01 nel registro debiti tecnici del documento.
+6. Lo shim non deve sopravvivere al blocco UI/Impostazioni che introdurrà il controllo grafico per haptic_enabled.
+```
+
 ---
 
 ## 7. Comportamento per piattaforma
@@ -266,7 +337,7 @@ Di seguito viene descritto il comportamento atteso per ciascun feedback aptico s
 
 ## 8. Compatibilità con il motore di accessibilità
 
-Il feedback aptico è parte dell'esperienza sensoriale accessibile definita in ADR_001. Il refactoring deve rispettare le seguenti regole di compatibilità:
+Il feedback aptico è parte dell'esperienza sensoriale accessibile coerente con docs/0-architecture/ADR_001_sistema-annunci-accessibili.md, che definisce il principio di separazione delle responsabilità nel sistema di accessibilità. Il refactoring deve rispettare le seguenti regole di compatibilità:
 1. **Integrazione con AppDataContext**: I consumer in `AppDataContext.tsx` continuano a chiamare l'interfaccia di compatibilità shim senza subire crash.
 2. **Priorità delle Impostazioni di Sistema**: Se l'utente ha disabilitato il feedback tattile nelle impostazioni globali del sistema operativo del dispositivo (Android/iOS Settings > Accessibility > Vibration), le chiamate a `expo-haptics` verranno ignorate a livello di sistema operativo senza generare errori o crash nell'applicazione.
 3. **Disattivazione Applicativa**: Se l'utente disabilita l'opzione aptica nell'app (tramite l'impostazione persista `haptic_enabled = false`), il metodo `isEnabled()` del modulo deve restituire `false`, e tutte le funzioni di feedback devono bloccarsi immediatamente all'inizio per evitare chiamate inutili alle API native.
@@ -277,19 +348,42 @@ Il feedback aptico è parte dell'esperienza sensoriale accessibile definita in A
 
 Prima di considerare completata l'implementazione del refactoring del sistema aptico (a valle di questo design doc), dovranno essere soddisfatti i seguenti criteri di accettazione:
 
-### Automated Tests
-1. **Compilation Gate**: Il comando `npx tsc --noEmit` non deve produrre alcun errore TypeScript relativo a `src/lib/haptic-system.ts` o ai suoi consumer (`use-haptic.ts`, `AuthContext.tsx`, `AppDataContext.tsx`).
-2. **Jest Suite**: La suite di test per `useHaptic` (da implementare o aggiornare) deve passare con successo simulando le risposte di `expo-haptics` e verificando che lo stato locale `enabled` venga salvato e letto correttamente tramite AsyncStorage.
+### Gate di compilazione
+- `npx tsc --noEmit` deve passare senza errori sui file:
+  - `src/lib/haptic-system.ts`
+  - `src/hooks/use-haptic.ts`
+  - `src/hooks/use-user-settings.ts`
+  - `src/lib/supabase/types.ts`
+  - `src/context/AuthContext.tsx`
+  - `src/context/AppDataContext.tsx`
 
-### Manual Verification
-1. **Verification on Android Device/Emulator**:
-   - Avviare l'app su un dispositivo Android fisico o su un emulatore che supporti la vibrazione.
-   - Verificare che le operazioni di successo (es. salvataggio transazione) generino un feedback aptico avvertibile.
-   - Verificare che gli errori di sblocco PIN generino il pattern di errore.
-   - Disabilitare i feedback tattili dalle impostazioni dell'app e verificare che le vibrazioni cessino immediatamente.
-2. **Verification on Windows**:
-   - Avviare l'app su Windows tramite `npm run windows`.
-   - Verificare che non si verifichino crash all'avvio o durante l'esecuzione di azioni che innescano feedback aptici (es. sblocco, transazioni).
+### Gate test unitari obbligatori (creare o aggiornare)
+1. `enabled=false` blocca ogni chiamata nativa.
+2. Stato `unknown` durante bootstrap non produce vibrazioni (fail-closed).
+3. Supabase `haptic_enabled=false` sovrascrive AsyncStorage per utente autenticato.
+4. Il valore cloud viene riscritto in AsyncStorage dopo l'idratazione.
+5. `success()` chiama `notificationAsync` con `NotificationFeedbackType.Success`.
+6. `error()` chiama `notificationAsync` con `NotificationFeedbackType.Error`.
+7. `warning()` chiama `notificationAsync` with `NotificationFeedbackType.Warning`.
+8. `selection()` chiama `selectionAsync()`.
+9. `impactLight/Medium/Heavy` chiamano `impactAsync` con lo stile corretto.
+10. `Platform.OS === 'windows'` restituisce no-op silenzioso senza eccezioni.
+11. I metodi legacy `@deprecated` inoltrano ai 7 metodi atomici senza errori.
+12. Aggiornare `src/hooks/use-haptic.ts` affinché non esponga più: `intensity`, `setIntensity`, `play`, `impact`, `notification` salvo shim esplicitamente documentato con `@deprecated`. Il nuovo hook deve esporre esclusivamente: `isEnabled`, `isSupported`, `setEnabled`, `success`, `error`, `warning`, `selection`, `impactLight`, `impactMedium`, `impactHeavy`. Creare o aggiornare la suite di test relativa e verificare che i metodi rimossi non siano più accessibili dal contratto pubblico del hook.
+
+### Gate dipendenze
+1. `package.json` contiene `expo-haptics` solo dopo aver configurato Expo Modules.
+2. `package-lock.json` è aggiornato coerentemente.
+
+### Gate sicurezza import Windows
+- `npm run windows` non fallisce per import di `expo-haptics`.
+- Tutte le chiamate aptiche su Windows sono no-op silenziose.
+- Azioni che chiamano lo shim legacy non producono crash su Windows.
+
+### Gate manuale Android (da eseguire su dispositivo fisico o emulatore con vibrazione)
+1. Avvio app → `success()` produce feedback aptico.
+2. Errore PIN → `error()` produce feedback di errore.
+3. Disattivazione `haptic_enabled` → feedback bloccato immediatamente.
 
 ---
 
@@ -299,3 +393,12 @@ Prima di considerare completata l'implementazione del refactoring del sistema ap
 1. **Nessun cambio UI**: Nessuna modifica grafica ai pulsanti o alle impostazioni all'interno di questo blocco (l'interruttore delle impostazioni UI fa parte dei design successivi).
 2. **Nessuna modifica ad altri consumer**: Nessun riallineamento manuale delle chiamate semantiche in `AppDataContext.tsx` o `AuthContext.tsx` (risolto tramite lo shim di compatibilità).
 3. **Sound System**: La riscrittura di `sound-system.ts` fa parte del debito tecnico separato **AN-02** ed è del tutto fuori perimetro per questo documento.
+
+---
+
+## 11. Debiti tecnici
+
+- **DT-021-01 — Rimozione shim legacy haptic**: Lo shim deprecated verrà rimosso in `AN-01-Phase2` dopo il riallineamento di `AuthContext.tsx`, `AppDataContext.tsx` e `use-haptic.ts` ai 7 metodi atomici.
+- **DT-021-02 — Verifica Expo Modules su Windows**: L'integrazione Expo Modules deve essere verificata specificamente con `react-native-windows` prima della build Windows.
+- **DT-021-03 — Preferenza haptic UI**: L'interruttore grafico per `haptic_enabled` è fuori scope in questo design. Sarà introdotto in un blocco UI successivo.
+- **DT-021-04 — Test su dispositivo fisico Android**: La validazione finale del feedback aptico richiede almeno un test su dispositivo Android fisico o emulatore compatibile con vibrazione.
