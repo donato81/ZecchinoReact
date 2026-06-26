@@ -32,6 +32,12 @@
 
 ## [Unreleased]
 
+### Documentation
+
+- DESIGN 020: Centralizzazione design tokens, rimozione phosphor icons (REVIEWED)
+- PLAN 020: Coding plan Centralizzazione design tokens (DRAFT)
+- TODO 020: Todo list Centralizzazione design tokens (PENDING)
+
 ## [0.4.0-docs.2] — 2026-05-28 — Pianificazione
 
 ### Added

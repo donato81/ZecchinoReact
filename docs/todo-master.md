@@ -558,6 +558,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B7-DOCS-017 | DESIGN 017 — Prestiti, Mutui e Simulazione Finanziaria | [x] DONE — 2026-05-28 Agent-Docs | Stato: REVIEWED 2026-05-29 |
 | P3.B7-DOCS-018 | DESIGN 018 — Confronto Mese su Mese per Categoria | [x] DONE — 2026-05-28 Agent-Docs | Stato: REVIEWED 2026-05-29 |
 | P3.B7-DOCS-019 | DESIGN 019 — Notifiche Budget e Orchestrazione | [x] DONE — 2026-05-28 Agent-Docs | Stato: REVIEWED 2026-05-29 |
+| P3.B7-DOCS-020 | DESIGN 020 — Centralizzazione design tokens | [x] DONE — 2026-06-26 Agent-Docs | Stato: REVIEWED 2026-06-26 |
 
 | P3.B8-PLAN-017 | Coding plan 017 — Prestiti, Mutui e Simulazione Finanziaria | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
 | P3.B8-TODO-017 | Todo list 017 — Prestiti, Mutui e Simulazione Finanziaria | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
@@ -565,6 +566,8 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B8-TODO-018 | Todo list 018 — Confronto Mese su Mese per Categoria | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
 | P3.B8-PLAN-019 | Coding plan 019 — Notifiche Budget e Orchestrazione | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
 | P3.B8-TODO-019 | Todo list 019 — Notifiche Budget e Orchestrazione | [x] DONE — 2026-05-29 Agent-Orchestrator | [x] PASSED |
+| P3.B8-PLAN-020 | Coding plan 020 — Centralizzazione design tokens | [x] DONE — 2026-06-26 Agent-Orchestrator | [x] PASSED |
+| P3.B8-TODO-020 | Todo list 020 — Centralizzazione design tokens | [x] DONE — 2026-06-26 Agent-Orchestrator | [x] PASSED |
 | P3.B9-SQL-P55 | Migrazione P55 — tabella notifiche schema Supabase | [x] DONE — 2026-06-25 donny-81 | [x] PASSED — eseguito in Supabase |
 
 ### Log di Validazione
@@ -618,6 +621,8 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | 2026-05-29 | P3.B8-TODO-018 | Agent-Orchestrator | PASSED | Creata e validata `018-TODO_confronto-mese-su-mese-categoria_v0.1.0.md`; Ciclo-G PASS |
 | 2026-05-29 | P3.B8-PLAN-019 | Agent-Orchestrator | PASSED | Creato e validato `019-PLAN_notifiche-budget-orchestrazione_v0.1.0.md`; Ciclo-G PASS |
 | 2026-05-29 | P3.B8-TODO-019 | Agent-Orchestrator | PASSED | Creata e validata `019-TODO_notifiche-budget-orchestrazione_v0.1.0.md`; Ciclo-G PASS |
+| 2026-06-26 | P3.B8-PLAN-020 | Agent-Orchestrator | PASSED | Creato e validato `020-PLAN_icone-colori-design-system_v0.2.0.md`; Ciclo-G PASS |
+| 2026-06-26 | P3.B8-TODO-020 | Agent-Orchestrator | PASSED | Creata e validata `020-TODO_icone-colori-design-system_v0.2.0.md`; Ciclo-G PASS |
 | 2026-06-25 | P3.B9-SQL-P55 | donny-81 | DONE | P55-notifiche.sql eseguito in Supabase. Tabella notifiche creata con indici, RLS e metadata JSONB. PLAN 019 T7 e gate G-019-6 chiusi. |
 
 ---

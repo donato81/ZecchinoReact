@@ -17,14 +17,14 @@ necessari per il tuo progetto.
 
 Versione corrente progetto: `0.13.9`.
 Analisi Android completata (DUSU-ANALYZER 2025-07-25).
-Stato aggiornato: 2026-05-29.
+Stato aggiornato: 2026-06-26.
 Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
 012 Export Nativo Guard Concorrente.
 Suite di test: PASS (`11/11` suite, `75` test passati, `13` `it.todo`
 documentati).
 Decisione release: nessun minor bump automatico; prima vanno chiusi i debiti
 Android/Windows gia' aperti nel master TODO.
-Prossima azione: review donny-81 dei coding plan e delle todo list 017–019
+Prossima azione: review donny-81 dei coding plan e delle todo list 017–020
 e autorizzazione all'implementazione.
 
 ---
@@ -58,6 +58,7 @@ e autorizzazione all'implementazione.
 - [DESIGN 017 — Prestiti, Mutui e Simulazione Finanziaria](docs/2-projects/017-DESIGN_prestiti-mutui-simulazione-finanziaria_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 018 — Confronto mese su mese per categoria](docs/2-projects/018-DESIGN_confronto-mese-su-mese-categoria_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 019 — Notifiche Budget e Orchestrazione](docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — REVIEWED
+- [DESIGN 020 — Centralizzazione design tokens: colori e chiavi icone](docs/2-projects/020-DESIGN_icone-colori-design-system_v0.2.0.md) — v0.2.0 — REVIEWED
 
 ## Stato PLAN / TODO
 
@@ -83,8 +84,10 @@ e autorizzazione all'implementazione.
 - [TODO 018 — Confronto Mese su Mese per Categoria](docs/4-todo-lists/018-TODO_confronto-mese-su-mese-categoria_v0.1.0.md) — v0.1.0 — PENDING
 - [PLAN 019 — Notifiche Budget e Orchestrazione](docs/3-coding-plans/019-PLAN_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — REVIEWED
 - [TODO 019 — Notifiche Budget e Orchestrazione](docs/4-todo-lists/019-TODO_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — PENDING
+- [PLAN 020 — Centralizzazione design tokens: colori e chiavi icone](docs/3-coding-plans/020-PLAN_icone-colori-design-system_v0.2.0.md) — v0.2.0 — DRAFT
+- [TODO 020 — Centralizzazione design tokens: colori e chiavi icone](docs/4-todo-lists/020-TODO_icone-colori-design-system_v0.2.0.md) — v0.2.0 — PENDING
 
-Correzioni applicate il 2026-05-29.
+Correzioni applicate il 2026-06-26.
 Stato: REVIEWED PENDING.
 
 Blocco residuo: `009-native` resta aperto solo per le validazioni runtime
