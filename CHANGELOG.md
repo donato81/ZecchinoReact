@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## [2026-06-27] — Todo list 022 Sound System
+### docs/4-todo-lists/022-TODO_sound-system_v0.1.0.md
+- Creato file todo-list per PLAN 022 Sound System
+- Organizzazione per sistema operativo:
+  trasversale, Android, Windows
+- 4 task con subtask verificabili
+- 20 test T01-T20 con caselle singole
+- Gate G-022-WIN con comandi operativi
+- 5 debiti tecnici e 4 invarianti registrati
+
 ## [2026-06-27] — Correzione PLAN 022
 ### docs/3-coding-plans/022-PLAN_sound-system_v0.1.0.md
 - Chiusura delibera PA-01:

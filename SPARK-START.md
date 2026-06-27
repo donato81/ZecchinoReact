@@ -89,6 +89,7 @@ Prossima azione: Attendere definizione prossimo blocco da donny-81.
 - [PLAN 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics](docs/3-coding-plans/021-PLAN_haptic-system_v0.1.0.md) — v0.1.0 — REVIEWED
 - [TODO 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics](docs/4-todo-lists/021-TODO_haptic-system_v0.1.0.md) — v0.1.0 — PENDING
 - [PLAN 022 — Sound System — Refactoring motore audio nativo](docs/3-coding-plans/022-PLAN_sound-system_v0.1.0.md) — v0.1.0 — APPROVED (passato da bozza ad approvato il 27/06/2026)
+- [TODO 022 — Sound System — Refactoring motore audio nativo](docs/4-todo-lists/022-TODO_sound-system_v0.1.0.md) — v0.1.0 — PENDING
 
 
 Correzioni applicate il 2026-06-26.
