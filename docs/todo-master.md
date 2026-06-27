@@ -15,6 +15,7 @@
 - - **Active Block:** Nessuno — implementazione 017-022 completata.
 -  - **Last Updated:** 2026-06-27
  - **Pending Plans:**
+   - **Piano di test moduli core (Fase A) — IN ATTESA DI REVISIONE ARCHITETTO** (report `docs/1-reports/REPORT-piano-test-moduli-core_v1.0.0.md` prodotto il 2026-06-27).
    - **PLAN 022 COMPLETATO** (release 0.17.0) — Refactoring del Sound System in ambiente nativo completato e validato.
    - **PLAN 020 COMPLETATO** —
      `docs/3-coding-plans/020-PLAN_icone-colori-design-system_v0.2.0.md`
@@ -58,7 +59,7 @@
   - Permesso VIBRATE Android: aggiunto in AndroidManifest.xml il 2026-06-27. Problema critico Android chiuso.
   - DT-016-ter-01 CHIUSO il 2026-06-27: supporto HEIC e WEBP aggiunto alla validazione magic bytes.
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
-  - **Next Action:** Attendere definizione prossimo blocco da donny-81.
+  - **Next Action:** IN ATTESA DI REVISIONE ARCHITETTO per il piano di test dei moduli core (Fase A).
 
 > Nota sessione orchestrazione 2026-05-29:
 > Creati i sei documenti di pianificazione richiesti:
@@ -579,11 +580,13 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.AN-02-TODO | Redazione Todo Specifico 022 — Sound System Refactor | [x] DONE — 2026-06-27 Antigravity | [x] PASSED |
 | P3.B8-AN-02 | Codifica 022 — Sound System (react-native-audio-api) | [x] DONE — 2026-06-27 Antigravity | [x] PASSED |
 | P3.B1-IMPL-022 | Sound System nativo — react-native-audio-api | [x] DONE — 2026-06-27 Antigravity | [x] PASSED |
+| CORE-TEST-PLAN-A | Piano di test moduli core (Fase A) | [x] DONE | [~] IN ATTESA DI REVISIONE ARCHITETTO |
 
 ### Log di Validazione
 
 | Data | Block ID | Validato Da | Risultato | Note |
 |------|----------|-------------|-----------|------|
+| 2026-06-27 | CORE-TEST-PLAN-A | Antigravity | IN ATTESA REVISIONE | Prodotto report di piano di test dettagliato per i sette moduli core |
 | 2026-06-27 | P3.B8-AN-02 | Antigravity | DONE | PLAN 022 — Sound System nativo con react-native-audio-api |
 | 2026-05-22 | P0.B1 | Agent-Orchestrator | DONE | DESIGN 001 — babel.config.js |
 | 2026-05-22 | P0.B2 | Agent-Orchestrator | DONE | DESIGN 001 — package.json |

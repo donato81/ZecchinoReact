@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [2026-06-27] — Piano di test moduli core (Fase A)
+### docs/1-reports/REPORT-piano-test-moduli-core_v1.0.0.md
+- Creato il report con il piano di test dettagliato per i sette moduli core del progetto.
+- Analisi approfondita dei flussi normali, casi limite, scenari di errore e note architetturali per i moduli:
+  - `src/lib/budget-forecasting.ts`
+  - `src/lib/budget-history.ts`
+  - `src/lib/budget-templates.ts`
+  - `src/lib/kdf-provider.ts`
+  - `src/lib/helpers.ts`
+  - `src/accessibility/engine.ts`
+  - `src/accessibility/detection.ts`
+- Documento impostato in attesa di revisione da parte dell'architetto.
+
 ## [2026-06-27] — Todo list 022 Sound System
 ### docs/4-todo-lists/022-TODO_sound-system_v0.1.0.md
 - Creato file todo-list per PLAN 022 Sound System
