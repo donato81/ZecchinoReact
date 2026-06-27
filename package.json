@@ -24,6 +24,7 @@
     "expo-haptics": "~15.0.8",
     "react": "19.1.1",
     "react-native": "0.82.1",
+    "react-native-audio-api": "^0.12.2",
     "react-native-dotenv": "^3.4.11",
     "react-native-fs": "^2.20.0",
     "react-native-get-random-values": "^1.11.0",

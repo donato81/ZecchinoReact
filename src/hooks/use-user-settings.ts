@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { ACCOUNT_CATEGORIES } from '@/lib/constants';
 import { hapticSystem } from '@/lib/haptic-system';
+import { soundSystem } from '@/lib/sound-system';
 import { updatePreference } from '@/lib/supabase/repositories/impostazioni-utente';
 import type {
   TalkBackAdaptations,
@@ -216,10 +217,11 @@ export function useUserSettings(): UserSettingsState {
     );
 
     // Migrazione KV → Supabase completata. Periodo grazia scaduto 2026-08-01.
-    setAudioEnabledState(prefs.audio_enabled !== false);
-    setAudioVolumeState(
-      typeof prefs.audio_volume === 'number' ? prefs.audio_volume : 0.3,
-    );
+    const cloudAudioEnabled = prefs.audio_enabled !== false;
+    const cloudAudioVolume = typeof prefs.audio_volume === 'number' ? prefs.audio_volume : 0.3;
+    setAudioEnabledState(cloudAudioEnabled);
+    setAudioVolumeState(cloudAudioVolume);
+    soundSystem.initFromSettings(cloudAudioEnabled, cloudAudioVolume);
     const cloudHaptic = prefs.haptic_enabled !== false;
     setHapticEnabledState(cloudHaptic);
     if (hapticSystem.getSettings().enabled !== cloudHaptic) {
@@ -347,6 +349,7 @@ export function useUserSettings(): UserSettingsState {
     try {
       await updatePreference('audio_enabled', v);
       setAudioEnabledState(v);
+      await soundSystem.setEnabled(v);
     } catch (err) {
       setSettingsError(
         err instanceof Error ? err.message : 'Errore aggiornamento audio',
@@ -362,6 +365,7 @@ export function useUserSettings(): UserSettingsState {
     try {
       await updatePreference('audio_volume', v);
       setAudioVolumeState(v);
+      await soundSystem.setVolume(v);
     } catch (err) {
       setSettingsError(
         err instanceof Error ? err.message : 'Errore aggiornamento volume',
