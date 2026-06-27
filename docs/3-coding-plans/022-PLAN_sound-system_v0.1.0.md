@@ -3,7 +3,7 @@ tipo: coding-plan
 titolo: Sound System — Refactoring motore audio nativo
 versione: 0.1.0
 data: 2026-06-27
-stato: bozza
+stato: approvato
 design-ref: 022-DESIGN_sound-system_v0.1.0.md
 blocco: AN-02
 ---
@@ -12,11 +12,31 @@ blocco: AN-02
 
 Questo piano di coding fa riferimento al documento di design docs/2-projects/022-DESIGN_sound-system_v0.1.0.md. Il file sorgente modificato è src/lib/sound-system.ts. L'obiettivo principale è sostituire il motore audio basato sulle API del browser con la libreria nativa react-native-audio-api, garantendo la compatibilità con i consumer reali esistenti dell'applicazione tramite uno strato di mapping legacy.
 
-## NOTA PRELIMINARE — Punto aperto da decidere prima del coding
+## Precedente metodologico
 
-Il valore 'lock' è presente in LegacySoundType ma non ha una riga dedicata nella tabella di mapping del documento di design. Attualmente ricade nel mapping predefinito 'click'. Prima di scrivere il metodo normalizeSoundType(), decidere esplicitamente se 'lock' deve mappare a 'navigation', 'success' o confermare 'click' come scelta intenzionale.
+Questo piano segue il modello di DESIGN/PLAN 021 sul sistema aptico (021-PLAN_haptic-system_v0.1.0.md):
+- singleton esportato come istanza già pronta
+- architettura fail-soft: errori ingoiati senza eccezioni verso la UI
+- mapping legacy temporaneo per proteggere i consumer esistenti durante il refactoring
+- sincronizzazione runtime con useUserSettings
+- consumer esistenti non toccati durante il refactoring
 
-Questa decisione non blocca la stesura del piano ma deve essere risolta dal team prima dell'esecuzione del Task 2. Registrare la decisione come commento nel codice.
+Il programmatore che ha già lavorato al PLAN 021 riconoscerà la stessa struttura.
+
+## NOTA PRELIMINARE — Punto deliberato
+
+Il valore 'lock' era presente in LegacySoundType senza una riga dedicata nella tabella di mapping.
+
+DECISIONE DELIBERATA dal Consiglio AI il 27/06/2026:
+  lock -> navigation
+  private-lock -> navigation
+  unlock -> success
+
+Motivazione: lock e private-lock rappresentano chiusura o protezione di una sezione, analogamente a dialog-close e panel-collapse. Non sono errori né successi. Appartengono alla famiglia navigation.
+unlock rappresenta invece il completamento riuscito di un'operazione di sblocco: appartiene a success.
+private-unlock era già correttamente mappato a success nel DESIGN 022. Questa delibera lo conferma.
+
+Questa decisione deve essere registrata come commento nel codice al momento dell'implementazione di normalizeSoundType().
 
 ## Prerequisiti
 
@@ -68,7 +88,11 @@ Questi file usano soundSystem.play() con nomi legacy. Grazie al mapping introdot
   * 2.3 — Implementare normalizeSoundType():
     * Usare una switch o una Map con tutti i mapping della tabella nel DESIGN 022.
     * Il ramo default restituisce 'click'.
-    * Risolvere prima il punto aperto su 'lock' indicato nella Nota Preliminare.
+    * Mapping deliberati dal Consiglio AI (27/06/2026) da aggiungere esplicitamente nella switch o Map:
+      lock -> navigation (delibera PA-01)
+      private-lock -> navigation (delibera PA-01)
+      unlock -> success (delibera PA-01)
+    * private-unlock era già nella tabella del DESIGN 022 come -> success. Verificare che sia incluso.
     * Aggiungere un commento nel codice che documenta la decisione presa per 'lock'.
   * 2.4 — Implementare il costruttore del singleton:
     * Il costruttore è vuoto.
@@ -146,7 +170,7 @@ Questi file usano soundSystem.play() con nomi legacy. Grazie al mapping introdot
     * **T17** — La funzione setAudioVolume aggiorna l'istanza soundSystem dopo la persistenza su Supabase.
     * **T18** — playSequence() pianifica le note usando audioContext.currentTime con oscillator.start(startTime) e oscillator.stop(stopTime), dove startTime è espresso in secondi come offset su currentTime. setTimeout non viene usato per la temporizzazione musicale.
     * **T19** — Se AudioContext fallisce durante ensureContext(), la proprietà enabled viene impostata a false solo in memoria runtime. La preferenza Supabase audio_enabled non viene modificata. Un successivo initFromSettings() con enabled=true ripristina correttamente il comportamento.
-    * **T20** — I SoundType legacy usati dai consumer reali attuali vengono normalizzati verso i 5 canonici tramite normalizeSoundType() senza errore di tipo TypeScript e senza ricadere nel ramo default. Consumer da coprire obbligatoriamente: pin-error, private-unlock, dialog-close, budget-exceeded, budget-critical, budget-warning, save, account-created, income, expense, transfer, delete, budget-deleted, export.
+    * **T20** — I SoundType legacy usati dai consumer reali attuali vengono normalizzati verso i 5 canonici tramite normalizeSoundType() senza errore di tipo TypeScript e senza ricadere nel ramo default. Consumer da coprire obbligatoriamente: pin-error, private-unlock, dialog-close, budget-exceeded, budget-critical, budget-warning, save, account-created, income, expense, transfer, delete, budget-deleted, export, budget-created, goal-created.
   * 4.3 — Configurare i mock per i test:
     * Mock di AudioContext e della libreria react-native-audio-api
     * Mock di AppState di react-native
@@ -154,14 +178,22 @@ Questi file usano soundSystem.play() con nomi legacy. Grazie al mapping introdot
     * Mock di soundSystem.play per i test T06-T10
   * 4.4 — Per T11, verificare che initialize() non esista nel file. Utilizzare: expect(soundSystem['initialize']).toBeUndefined()
   * 4.5 — Per T18, verificare che playSequence usi currentTime e non setTimeout. Spiare audioContext.currentTime e verificare che oscillator.start sia chiamato con un offset.
-  * 4.6 — Per T20, chiamare soundSystem.play() per ciascuno dei 14 suoni legacy obbligatori e verificare che nessuno lanci errori TypeScript e che normalizeSoundType non ricada nel default. I 14 suoni legacy obbligatori sono: pin-error, private-unlock, dialog-close, budget-exceeded, budget-critical, budget-warning, save, account-created, income, expense, transfer, delete, budget-deleted, export.
+  * 4.6 — Per T20, chiamare soundSystem.play() per ciascuno dei 16 suoni legacy obbligatori e verificare che nessuno lanci errori TypeScript e che normalizeSoundType non ricada nel default. I 16 suoni legacy obbligatori sono: pin-error, private-unlock, dialog-close, budget-exceeded, budget-critical, budget-warning, save, account-created, income, expense, transfer, delete, budget-deleted, export, budget-created, goal-created.
 * **Condizione di accettazione**: npx jest sound-system (o equivalente) con tutti i test T01-T20 che passano. Nessun test in stato skip o pending.
 
 ## Gate di Validazione Finale
 
 * **G-022-TS**: Esecuzione del type-checking tramite npx tsc --noEmit senza alcun errore. Eseguire dopo ogni task, non solo alla fine.
 * **G-022-ANDROID**: La build Android compila senza errori: npx expo run:android (o npm run android). Eseguire dopo TASK-01 e dopo TASK-02.
-* **G-022-WIN**: Il file sound-system.ts non contiene import statici di react-native-audio-api al livello del modulo. Verifica tramite comando statico che non ci siano import globali non condizionali.
+* **G-022-WIN**: Il file src/lib/sound-system.ts non deve contenere import statici top-level da react-native-audio-api. L'import della libreria deve essere dinamico dentro ensureContext(), protetto da Platform.OS !== 'windows'.
+
+  Comando di verifica Unix e Git Bash:
+    grep "from 'react-native-audio-api'" src/lib/sound-system.ts
+
+  Comando di verifica cross-platform Node (funziona anche su Windows senza Git Bash):
+    node -e "const fs=require('fs'); const s=fs.readFileSync('src/lib/sound-system.ts','utf8'); const bad=/^import\s+.*from\s+['\"]react-native-audio-api['\"]/m.test(s); if(bad){console.error('ERRORE: import statico top-level trovato');process.exit(1)} console.log('OK: nessun import statico top-level da react-native-audio-api')"
+
+  Accettazione: il comando stampa OK. Se stampa ERRORE il gate è fallito.
 * **G-022-TESTS**: Tutti i test T01-T20 passano con successo. Eseguire dopo TASK-04.
 
 ## Debiti Tecnici Registrati

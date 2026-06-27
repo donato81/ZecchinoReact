@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [2026-06-27] — Correzione PLAN 022
+### docs/3-coding-plans/022-PLAN_sound-system_v0.1.0.md
+- Chiusura delibera PA-01:
+  lock e private-lock mappano a navigation,
+  unlock mappa a success
+- Subtask 4.6: lista legacy portata da 14 a 16 suoni
+  (aggiunti budget-created e goal-created)
+- Gate G-022-WIN: aggiunto comando di verifica
+  operativo grep e Node cross-platform
+- Aggiunta sezione Precedente metodologico
+  con riferimento a PLAN 021 haptic-system
+- Stato frontmatter: bozza -> approvato
+
 ## [0.1.1] — 2026-06-27
 
 ### PLAN 022 — Sound System
