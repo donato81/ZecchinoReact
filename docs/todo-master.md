@@ -53,6 +53,7 @@
   - AN-03: `oklch colori` — da verificare per compatibilità Android (da DESIGN 020)
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts — CLOSED
+  - Pulizia documentale 7.1: 2 debiti tecnici chiusi in data 2026-06-27 dopo verifica codice.
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
   - **Next Action:** Attendere definizione prossimo blocco da donny-81.
 
@@ -746,7 +747,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 - **Riferimento:** docs/2-projects/016-DESIGN_allegati-transazioni_v0.1.0.md
 - **Design risolutivo:** docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md
 - **Priorità:** media
-- **Stato:** APERTO — soluzione progettata, da codificare
+- **Stato:** CHIUSO — implementazione verificata nel codice il 2026-06-27. File: src/lib/file-system/magic-bytes-reader.ts.
 
 ### DT-016-02 — Cleanup automatico file orfani Storage
 
@@ -757,7 +758,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 - **Riferimento:** docs/2-projects/016-DESIGN_allegati-transazioni_v0.1.0.md
 - **Design risolutivo:** docs/2-projects/016-bis-DESIGN_cleanup-orfani-storage_v0.1.0.md
 - **Priorità:** media
-- **Stato:** APERTO — soluzione progettata, da codificare
+- **Stato:** CHIUSO — implementazione verificata nel codice il 2026-06-27. File: src/lib/storage-cleanup-service.ts.
 
 ### DT-016-bis-01 — Script CLI manutenzione storage
 
