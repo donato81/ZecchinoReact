@@ -8,22 +8,18 @@ jest.mock('react-native', () => ({
   },
 }));
 
-declare global {
-  var __DEV__: boolean;
-}
-
 describe('ScreenReaderEngine', () => {
   let originalDev: boolean;
   let spyConsoleLog: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    originalDev = global.__DEV__;
+    originalDev = (globalThis as any).__DEV__;
     spyConsoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    global.__DEV__ = originalDev;
+    (globalThis as any).__DEV__ = originalDev;
     spyConsoleLog.mockRestore();
   });
 
@@ -60,7 +56,7 @@ describe('ScreenReaderEngine', () => {
   // --- CASI LIMITE ---
 
   test('Esecuzione in ambiente di test (senza API nativa) con __DEV__ = true', () => {
-    global.__DEV__ = true;
+    (globalThis as any).__DEV__ = true;
     
     // Temporarily remove native function
     const originalAnnounce = AccessibilityInfo.announceForAccessibility;
@@ -83,7 +79,7 @@ describe('ScreenReaderEngine', () => {
   });
 
   test('Esecuzione in ambiente di test (senza API nativa) con __DEV__ = false', () => {
-    global.__DEV__ = false;
+    (globalThis as any).__DEV__ = false;
     
     const originalAnnounce = AccessibilityInfo.announceForAccessibility;
     (AccessibilityInfo as any).announceForAccessibility = undefined;

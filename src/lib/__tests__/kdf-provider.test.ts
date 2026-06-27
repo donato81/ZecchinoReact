@@ -1,19 +1,40 @@
+let mockPbkdf2Sync = jest.fn();
+let mockShouldThrowQuickCrypto = false;
+
+// Hoisted mock for react-native-quick-crypto using getters to dynamically throw or return the mock function
+jest.mock('react-native-quick-crypto', () => {
+  return {
+    get pbkdf2Sync() {
+      if (mockShouldThrowQuickCrypto) {
+        throw new Error('react-native-quick-crypto not available');
+      }
+      return mockPbkdf2Sync;
+    },
+    get default() {
+      if (mockShouldThrowQuickCrypto) {
+        throw new Error('react-native-quick-crypto not available');
+      }
+      return {
+        pbkdf2Sync: mockPbkdf2Sync,
+      };
+    }
+  };
+}, { virtual: true });
+
+import { derivePbkdf2Sha256 } from '../kdf-provider';
+const crypto: any = require('crypto');
+
 describe('KDF Provider', () => {
   beforeEach(() => {
-    jest.resetModules();
+    jest.clearAllMocks();
+    mockShouldThrowQuickCrypto = false;
   });
 
   // --- CASI NORMALI ---
 
   test('should use react-native-quick-crypto when available', () => {
-    const mockPbkdf2Sync = jest.fn().mockReturnValue(new Uint8Array([1, 2, 3]));
-    jest.doMock('react-native-quick-crypto', () => ({
-      default: {
-        pbkdf2Sync: mockPbkdf2Sync,
-      },
-    }), { virtual: true });
-
-    const { derivePbkdf2Sha256 } = require('../kdf-provider');
+    mockShouldThrowQuickCrypto = false;
+    mockPbkdf2Sync.mockReturnValue(new Uint8Array([1, 2, 3]));
 
     const pin = '1234';
     const salt = new Uint8Array([9, 8, 7]);
@@ -27,16 +48,8 @@ describe('KDF Provider', () => {
   });
 
   test('should fall back to node crypto when react-native-quick-crypto is not available', () => {
-    jest.doMock('react-native-quick-crypto', () => {
-      throw new Error('Module not found');
-    }, { virtual: true });
-
-    const mockNodePbkdf2Sync = jest.fn().mockReturnValue(new Uint8Array([4, 5, 6]));
-    jest.doMock('crypto', () => ({
-      pbkdf2Sync: mockNodePbkdf2Sync,
-    }));
-
-    const { derivePbkdf2Sha256 } = require('../kdf-provider');
+    mockShouldThrowQuickCrypto = true;
+    const spyNodePbkdf2Sync = jest.spyOn(crypto, 'pbkdf2Sync').mockReturnValue(new Uint8Array([4, 5, 6]) as any);
 
     const pin = '1234';
     const salt = new Uint8Array([9, 8, 7]);
@@ -45,17 +58,14 @@ describe('KDF Provider', () => {
 
     const result = derivePbkdf2Sha256(pin, salt, iterations, keyLength);
 
-    expect(mockNodePbkdf2Sync).toHaveBeenCalledWith(pin, salt, iterations, keyLength, 'sha256');
+    expect(spyNodePbkdf2Sync).toHaveBeenCalledWith(pin, salt, iterations, keyLength, 'sha256');
     expect(result).toEqual(new Uint8Array([4, 5, 6]));
+
+    spyNodePbkdf2Sync.mockRestore();
   });
 
   test('Caso 1: Derivazione corretta SHA-256 (derivePbkdf2Sha256) - standard output deterministico', () => {
-    jest.doMock('react-native-quick-crypto', () => {
-      throw new Error('Module not found');
-    }, { virtual: true });
-    jest.dontMock('crypto');
-
-    const { derivePbkdf2Sha256 } = require('../kdf-provider');
+    mockShouldThrowQuickCrypto = true;
 
     const pin = '1234';
     const salt = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
@@ -73,12 +83,7 @@ describe('KDF Provider', () => {
   // --- CASI LIMITE ---
 
   test('Valore di iterazioni minimo (iterations = 1)', () => {
-    jest.doMock('react-native-quick-crypto', () => {
-      throw new Error('Module not found');
-    }, { virtual: true });
-    jest.dontMock('crypto');
-
-    const { derivePbkdf2Sha256 } = require('../kdf-provider');
+    mockShouldThrowQuickCrypto = true;
 
     const pin = '1234';
     const salt = new Uint8Array([1, 2, 3, 4]);
@@ -87,12 +92,7 @@ describe('KDF Provider', () => {
   });
 
   test('Lunghezza della chiave nulla (keyLength = 0)', () => {
-    jest.doMock('react-native-quick-crypto', () => {
-      throw new Error('Module not found');
-    }, { virtual: true });
-    jest.dontMock('crypto');
-
-    const { derivePbkdf2Sha256 } = require('../kdf-provider');
+    mockShouldThrowQuickCrypto = true;
 
     const pin = '1234';
     const salt = new Uint8Array([1, 2, 3, 4]);
@@ -102,12 +102,7 @@ describe('KDF Provider', () => {
   });
 
   test('PIN o Salt vuoti', () => {
-    jest.doMock('react-native-quick-crypto', () => {
-      throw new Error('Module not found');
-    }, { virtual: true });
-    jest.dontMock('crypto');
-
-    const { derivePbkdf2Sha256 } = require('../kdf-provider');
+    mockShouldThrowQuickCrypto = true;
 
     const result = derivePbkdf2Sha256('', new Uint8Array(0), 10, 16);
     expect(result.length).toBe(16);
@@ -116,28 +111,20 @@ describe('KDF Provider', () => {
   // --- CASI DI ERRORE ---
 
   test('Assenza di librerie crittografiche disponibili', () => {
-    // Both react-native-quick-crypto and crypto throw error on require
-    jest.doMock('react-native-quick-crypto', () => {
-      throw new Error('react-native-quick-crypto not found');
-    }, { virtual: true });
-    jest.doMock('crypto', () => {
+    mockShouldThrowQuickCrypto = true;
+    const spyNodePbkdf2Sync = jest.spyOn(crypto, 'pbkdf2Sync').mockImplementation(() => {
       throw new Error('crypto not found');
     });
-
-    const { derivePbkdf2Sha256 } = require('../kdf-provider');
 
     expect(() => {
       derivePbkdf2Sha256('1234', new Uint8Array([1]), 10, 16);
     }).toThrow();
+
+    spyNodePbkdf2Sync.mockRestore();
   });
 
   test('Valori numerici negativi (iterations o keyLength negativi)', () => {
-    jest.doMock('react-native-quick-crypto', () => {
-      throw new Error('Module not found');
-    }, { virtual: true });
-    jest.dontMock('crypto');
-
-    const { derivePbkdf2Sha256 } = require('../kdf-provider');
+    mockShouldThrowQuickCrypto = true;
 
     expect(() => {
       derivePbkdf2Sha256('1234', new Uint8Array([1]), -10, 16);
