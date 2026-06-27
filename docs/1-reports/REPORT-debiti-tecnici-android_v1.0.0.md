@@ -75,8 +75,11 @@ Il presente report fornisce un'analisi dettagliata dello stato dei debiti tecnic
 - **Descrizione:** Il sistema aptico nativo (`haptic-system.ts`) utilizza le funzionalità di vibrazione hardware tramite `expo-haptics`. Tuttavia, il permesso per la vibrazione non è dichiarato nel file manifest di Android.
 - **File coinvolto:** [AndroidManifest.xml](file:///c:/Sviluppo/ZecchinoReact/android/app/src/main/AndroidManifest.xml)
 - **Impatto su build o runtime Android:** A runtime, le chiamate al feedback aptico falliranno silenziosamente o produrranno eccezioni di sicurezza su vari dispositivi Android.
-- **Priorità:** ALTA
+- **Priorità:** CHIUSO
 - **Suggerimento di risoluzione:** Aggiungere la riga `<uses-permission android:name="android.permission.VIBRATE" />` a [AndroidManifest.xml](file:///c:/Sviluppo/ZecchinoReact/android/app/src/main/AndroidManifest.xml).
+
+  Risolto il 2026-06-27.
+  Fix applicato: aggiunto VIBRATE in AndroidManifest.xml.
 
 ### 2. Dipendenze in package.json non censite in architettura.md o api.md
 - **Descrizione:** Le librerie `@noble/hashes`, `react-native-nitro-modules` e `react-native-fs` sono incluse in `package.json` ma non compaiono in alcuna tabella di compatibilità all'interno della documentazione tecnica.

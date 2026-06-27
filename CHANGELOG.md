@@ -110,6 +110,7 @@
 - docs(api/architettura): aggiornate le API reference e l'architettura per riflettere la compatibilità del Sound System nativo.
 
 ### Fixed
+- fix(android): aggiunto permesso VIBRATE in AndroidManifest.xml per expo-haptics
 - AN-02: rimosso l'utilizzo delle Web Audio API del browser, sostituito con `react-native-audio-api`.
   Chiude il debito tecnico AN-02 identificato nel REPORT compatibilità Android v1.0.0.
 
