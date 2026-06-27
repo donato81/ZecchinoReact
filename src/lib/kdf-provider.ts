@@ -23,6 +23,9 @@ export function derivePbkdf2Sha256(
   iterations: number,
   keyLength: number,
 ): Uint8Array {
+  if (keyLength === 0) {
+    return new Uint8Array(0);
+  }
   return new Uint8Array(
     getPbkdf2Sync()(pin, salt, iterations, keyLength, 'sha256'),
   );
