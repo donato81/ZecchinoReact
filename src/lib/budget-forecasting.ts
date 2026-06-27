@@ -1,7 +1,6 @@
 import { Budget, Transaction } from './types';
 import {
   getBudgetHistoricalData,
-  calculateBudgetTrend,
 } from './budget-history';
 
 export interface BudgetForecast {
@@ -114,8 +113,6 @@ export function calculateBudgetForecast(
       : 0;
 
   const historicalDailyAverage = averageHistoricalSpending / totalDays;
-
-  calculateBudgetTrend(budget, transactions, historicalPeriods);
 
   let projectedSpending: number;
   let forecastMethod: 'current-trend' | 'historical-average' | 'weighted';
