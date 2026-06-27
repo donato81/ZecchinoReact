@@ -41,7 +41,7 @@ Questi file usano soundSystem.play() con nomi legacy. Grazie al mapping introdot
 
 ### 5A — TODO Trasversali (Tutti i sistemi)
 * [ ] **TS-01**: Eseguire il type-checking generale con `npx tsc --noEmit` ad ogni completamento di task.
-* [ ] **TS-02**: Riscrivere la logica di mapping legacy-to-canonical `normalizeSoundType()` coprendo tutti i 91 valori totali.
+* [ ] **TS-02**: Riscrivere la logica di mapping legacy-to-canonical `normalizeSoundType()` coprendo tutti i 91 valori totali (inclusi lock e private-lock -> navigation, unlock -> success — delibera PA-01).
 * [ ] **TS-03**: Strutturare i 20 casi di test unitari T01-T20 in Jest per validare in memoria ogni aspetto runtime.
 
 ### 5B — TODO Specifici Android
