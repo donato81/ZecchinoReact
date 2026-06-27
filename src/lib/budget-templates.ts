@@ -131,6 +131,10 @@ export function findTemplateCategories(
   availableCategories: Array<{ id: string; nome: string }>,
 ): string[] {
   return availableCategories
-    .filter(cat => template.categorieTarget.includes(cat.nome))
+    .filter(cat =>
+      template.categorieTarget
+        .map(t => t.toLowerCase())
+        .includes(cat.nome.toLowerCase())
+    )
     .map(cat => cat.id);
 }
