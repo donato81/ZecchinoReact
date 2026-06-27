@@ -88,6 +88,7 @@ Prossima azione: Attendere definizione prossimo blocco da donny-81.
 - [TODO 020 — Centralizzazione design tokens: colori e chiavi icone](docs/4-todo-lists/020-TODO_icone-colori-design-system_v0.2.0.md) — v0.2.0 — PENDING
 - [PLAN 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics](docs/3-coding-plans/021-PLAN_haptic-system_v0.1.0.md) — v0.1.0 — REVIEWED
 - [TODO 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics](docs/4-todo-lists/021-TODO_haptic-system_v0.1.0.md) — v0.1.0 — PENDING
+- [PLAN 022 — Sound System — Refactoring motore audio nativo](docs/3-coding-plans/022-PLAN_sound-system_v0.1.0.md) — v0.1.0 — DRAFT
 
 
 Correzioni applicate il 2026-06-26.

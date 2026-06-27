@@ -2,6 +2,11 @@
 
 ## [0.1.1] — 2026-06-27
 
+### PLAN 022 — Sound System
+- Aggiunto coding plan 022-PLAN_sound-system_v0.1.0.md
+- Riferimento: DESIGN 022 versione 0.1.1
+- Blocco AN-02
+
 ### DESIGN 022 — Sound System
 - Corretto conteggio union SoundType: 91 totali (non 87)
 - Rimossa affermazione errata "nessun consumer reale"
