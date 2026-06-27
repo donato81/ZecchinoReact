@@ -1,63 +1,81 @@
-/**
- * Placeholder spec for DESIGN 016 and PLAN 016.
- * Implementation is intentionally deferred; only TODO scenarios are tracked here.
- */
-jest.mock('@/lib/supabase/client', () => ({
-  supabase: {
-    storage: {
-      from: jest.fn(),
-    },
-  },
-}));
+import RNFS from 'react-native-fs';
 
 jest.mock('react-native-fs', () => ({
   read: jest.fn(),
   readFile: jest.fn(),
 }));
 
-import {
-  deleteAttachment,
-  getAttachmentSignedUrl,
-  uploadAttachment,
-  validateAttachmentFile,
-} from '@/lib/supabase/storage';
-import { supabase } from '@/lib/supabase/client';
-import RNFS from 'react-native-fs';
-import * as magicBytesReader from '@/lib/file-system/magic-bytes-reader';
-
-const mockFrom = supabase.storage.from as jest.Mock;
-const mockRead = RNFS.read as jest.Mock;
-const mockReadFile = RNFS.readFile as jest.Mock;
-
-function buildStorageBucket() {
-  return {
-    upload: jest.fn(),
-    remove: jest.fn(),
-    createSignedUrl: jest.fn(),
-  };
-}
-
-beforeEach(() => {
-  jest.clearAllMocks();
-  Object.defineProperty(globalThis, 'crypto', {
-    value: {
-      randomUUID: jest.fn(() => 'uuid-016'),
-      getRandomValues: jest.fn(),
-    },
-    configurable: true,
-  });
-  Object.defineProperty(globalThis, 'Buffer', {
-    value: require('buffer').Buffer,
-    configurable: true,
-  });
-  mockRead.mockResolvedValue('cGRm');
-  mockReadFile.mockResolvedValue('cGRm');
-  jest
-    .spyOn(magicBytesReader, 'readFileHeader')
-    .mockResolvedValue(Uint8Array.from([0x25, 0x50, 0x44, 0x46]));
-});
-
 describe('allegati.storage', () => {
+  let deleteAttachment: any;
+  let getAttachmentSignedUrl: any;
+  let uploadAttachment: any;
+  let validateAttachmentFile: any;
+  let mockFrom: jest.Mock;
+  let mockReadFileHeader: jest.Mock;
+  let mockRead: jest.Mock;
+  let mockReadFile: jest.Mock;
+
+  function buildStorageBucket() {
+    return {
+      upload: jest.fn(),
+      remove: jest.fn(),
+      createSignedUrl: jest.fn(),
+    };
+  }
+
+  beforeEach(() => {
+    jest.resetModules();
+    jest.clearAllMocks();
+
+    mockFrom = jest.fn();
+    mockReadFileHeader = jest.fn();
+
+    // Get the fresh mock references after Jest module reset
+    const freshRNFS = require('react-native-fs');
+    mockRead = freshRNFS.read;
+    mockReadFile = freshRNFS.readFile;
+
+    // Isolate client mock to prevent leaks from other tests
+    jest.doMock('@/lib/supabase/client', () => ({
+      supabase: {
+        storage: {
+          from: mockFrom,
+        },
+      },
+    }));
+
+    // Isolate magic bytes reader mock so it is correctly loaded by the dynamic require of storage.ts
+    jest.doMock('@/lib/file-system/magic-bytes-reader', () => {
+      const actual = jest.requireActual('@/lib/file-system/magic-bytes-reader');
+      return {
+        ...actual,
+        readFileHeader: () => mockReadFileHeader(),
+      };
+    });
+
+    // Import functions dynamically from the isolated storage module instance
+    const storageModule = require('@/lib/supabase/storage');
+    deleteAttachment = storageModule.deleteAttachment;
+    getAttachmentSignedUrl = storageModule.getAttachmentSignedUrl;
+    uploadAttachment = storageModule.uploadAttachment;
+    validateAttachmentFile = storageModule.validateAttachmentFile;
+
+    Object.defineProperty(globalThis, 'crypto', {
+      value: {
+        randomUUID: jest.fn(() => 'uuid-016'),
+        getRandomValues: jest.fn(),
+      },
+      configurable: true,
+    });
+    Object.defineProperty(globalThis, 'Buffer', {
+      value: require('buffer').Buffer,
+      configurable: true,
+    });
+    mockRead.mockResolvedValue('cGRm');
+    mockReadFile.mockResolvedValue('cGRm');
+    mockReadFileHeader.mockResolvedValue(Uint8Array.from([0x25, 0x50, 0x44, 0x46])); // default PDF signature
+  });
+
   it('sanitizeFilename produce un path sicuro per nomi file pericolosi', async () => {
     const bucket = buildStorageBucket();
     bucket.upload.mockResolvedValue({ error: null });
@@ -148,9 +166,7 @@ describe('allegati.storage', () => {
     });
     bucket.remove.mockResolvedValue({ error: null });
     mockFrom.mockReturnValue(bucket);
-    jest
-      .spyOn(magicBytesReader, 'readFileHeader')
-      .mockResolvedValue(Uint8Array.from([0xff, 0xd8, 0xff]));
+    mockReadFileHeader.mockResolvedValue(Uint8Array.from([0xff, 0xd8, 0xff])); // JPEG signature
 
     const uploadResult = await uploadAttachment('user-016', 'tx-016', {
       uri: 'file:///foto.jpg',

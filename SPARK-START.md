@@ -15,15 +15,15 @@ necessari per il tuo progetto.
 *Puoi eliminare questo file dopo il primo avvio.*
 *Per domande sull'architettura SPARK, usa l'agente `spark-guide`.*
 
-Versione corrente progetto: `0.17.0`.
+Versione corrente progetto: `0.18.0`.
 Analisi Android completata (DUSU-ANALYZER 2025-07-25).
 Stato aggiornato: 2026-06-27.
 Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
 012 Export Nativo Guard Concorrente, 017 Prestiti e Mutui, 018 Confronto Mese su Mese per Categoria,
 019 Notifiche Budget e Orchestrazione, 020 Centralizzazione design tokens, 021 Haptic System nativo,
-022 Sound System nativo.
+022 Sound System nativo, Copertura Test Moduli Core (39 test unitari).
 Suite di test: PASS.
-Decisione release: versione avanzata a `0.17.0` con l'integrazione di tutti i blocchi completati, inclusi i sistemi nativi per feedback aptico e acustico.
+Decisione release: versione avanzata a `0.18.0` consolidando la suite di test unitari completa sui 7 moduli core.
 Prossima azione: Attendere definizione prossimo blocco da donny-81.
 
 ---
@@ -98,4 +98,4 @@ Stato: COMPLETATO.
 
 Blocco residuo: `009-native` resta aperto solo per le validazioni runtime
 T3-N5 su Windows e Android. Non sblocca da solo una nuova release: il progetto
-resta alla `0.17.0` finche' i blocchi compatibilita' aperti non vengono chiusi.
+resta alla `0.18.0` finche' i blocchi compatibilita' aperti non vengono chiusi.

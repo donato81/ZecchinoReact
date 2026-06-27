@@ -1,6 +1,16 @@
 # PIANO DI TEST DEI MODULI CORE (FASE A)
 **Data di produzione:** 2026-06-27  
-**Stato del report:** IN ATTESA DI REVISIONE ARCHITETTO
+**Stato del report:** IMPLEMENTATO (SESSIONE B)  
+**Data di completamento:** 2026-06-27  
+
+### Riferimenti Commit Implementazione (SESSIONE B):
+- **Modulo 1: budget-forecasting.ts** -> Test: [budget-forecasting.test.ts](file:///c:/Sviluppo/ZecchinoReact/src/lib/__tests__/budget-forecasting.test.ts) (Commit: `52b456e`)
+- **Modulo 2: budget-history.ts** -> Test: [budget-history.test.ts](file:///c:/Sviluppo/ZecchinoReact/src/lib/__tests__/budget-history.test.ts) (Commit: `a5e43e9`)
+- **Modulo 3: budget-templates.ts** -> Test: [budget-templates.test.ts](file:///c:/Sviluppo/ZecchinoReact/src/lib/__tests__/budget-templates.test.ts) (Commit: `a848453`)
+- **Modulo 4: kdf-provider.ts** -> Test: [kdf-provider.test.ts](file:///c:/Sviluppo/ZecchinoReact/src/lib/__tests__/kdf-provider.test.ts) (Commit: `04d4c78`)
+- **Modulo 5: helpers.ts** -> Test: [helpers.test.ts](file:///c:/Sviluppo/ZecchinoReact/src/lib/__tests__/helpers.test.ts) (Commit: `17c9d9b`)
+- **Modulo 6: engine.ts** -> Test: [engine.test.ts](file:///c:/Sviluppo/ZecchinoReact/src/accessibility/__tests__/engine.test.ts) (Commit: `7349715`)
+- **Modulo 7: detection.ts** -> Test: [detection.test.ts](file:///c:/Sviluppo/ZecchinoReact/src/accessibility/__tests__/detection.test.ts) (Commit: `b7b4eb2`)
 
 ## Introduzione
 Questo documento contiene il piano di test dettagliato per i sette moduli core del progetto **ZecchinoReact**. L'analisi è stata condotta leggendo integralmente ciascun modulo, mappandone lo scopo, le dipendenze esterne da simulare, i casi d'uso normali, i casi limite e i possibili scenari di errore.

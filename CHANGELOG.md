@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## [0.18.0] — 2026-06-27 — Copertura Test Unitari Moduli Core (Fase B)
+
+### Added
+- test(budget-forecasting): suite completa di 18 test unitari per previsioni budget.
+- test(budget-history): suite di 12 test unitari per periodi, trend e confronti.
+- test(budget-templates): suite di 7 test unitari per template standard e mappatura.
+- test(kdf-provider): suite di 8 test unitari per derivazione chiave nativa/Node.
+- test(helpers): suite di 13 test unitari per calcoli saldi, proiezioni e CSV.
+- test(accessibility-engine): suite di 5 test unitari per sintesi annunci fire-and-forget.
+- test(accessibility-detection): suite di 14 test unitari per hook rilevamento TalkBack e adattamenti UI.
+
+### Fixed
+- fix(kdf-provider): aggiunto early return per `keyLength === 0` per evitare crash crittografici nativi Node.
+- fix(helpers): allineamento tipi con campo obbligatorio `cifrato` per conformità TypeScript compiler.
+
 ## [2026-06-27] — Correzione bug moduli core
 - fix(helpers): corregge escaping virgolette in exportToCSV — src/lib/helpers.ts
 - fix(budget-history): corregge roll-over date setMonth su giorni > 28 — src/lib/budget-history.ts
