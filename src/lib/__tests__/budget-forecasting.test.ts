@@ -38,6 +38,7 @@ describe('Budget Forecasting', () => {
         descrizione: 'Spesa 1',
         categoriaId: 'cat-1',
         ricorrente: false,
+        cifrato: false,
       },
       {
         id: 't-2',
@@ -48,6 +49,7 @@ describe('Budget Forecasting', () => {
         descrizione: 'Spesa 2',
         categoriaId: 'cat-1',
         ricorrente: false,
+        cifrato: false,
       },
     ];
 
@@ -180,7 +182,7 @@ describe('Budget Forecasting', () => {
     expect(result.projectedSpending).toBe(581.25);
 
     // adding transaction of a different category
-    const extendedTransactions = [
+    const extendedTransactions: Transaction[] = [
       ...mockTransactions,
       {
         id: 't-3',
@@ -191,6 +193,7 @@ describe('Budget Forecasting', () => {
         descrizione: 'Spesa differente cat',
         categoriaId: 'cat-different',
         ricorrente: false,
+        cifrato: false,
       },
     ];
 
@@ -203,7 +206,7 @@ describe('Budget Forecasting', () => {
     mockBudget.contoId = 'conto-1';
     jest.setSystemTime(new Date('2026-06-16T12:00:00Z'));
 
-    const extendedTransactions = [
+    const extendedTransactions: Transaction[] = [
       ...mockTransactions,
       {
         id: 't-3',
@@ -214,6 +217,7 @@ describe('Budget Forecasting', () => {
         descrizione: 'Conto differente',
         categoriaId: 'cat-1',
         ricorrente: false,
+        cifrato: false,
       },
     ];
 

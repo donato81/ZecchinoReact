@@ -30,6 +30,7 @@ describe('Budget History', () => {
         descrizione: 'Spesa 1',
         categoriaId: 'cat-1',
         ricorrente: false,
+        cifrato: false,
       },
       {
         id: 't-2',
@@ -40,6 +41,7 @@ describe('Budget History', () => {
         descrizione: 'Spesa 2',
         categoriaId: 'cat-1',
         ricorrente: false,
+        cifrato: false,
       },
       {
         id: 't-3',
@@ -50,6 +52,7 @@ describe('Budget History', () => {
         descrizione: 'Spesa 3',
         categoriaId: 'cat-1',
         ricorrente: false,
+        cifrato: false,
       },
     ];
   });
@@ -148,13 +151,13 @@ describe('Budget History', () => {
   test('Caso 4: Analisi Trend Crescente (trend = increasing)', () => {
     const customTransactions: Transaction[] = [
       // Older periods: Oct, Nov, Dec 2025
-      { id: '1', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-10-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '2', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-11-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '3', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-12-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
+      { id: '1', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-10-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '2', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-11-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '3', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-12-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
       // Recent periods: Jan, Feb, Mar 2026
-      { id: '4', contoId: 'c1', tipo: 'uscita', importo: 120, data: '2026-01-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '5', contoId: 'c1', tipo: 'uscita', importo: 120, data: '2026-02-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '6', contoId: 'c1', tipo: 'uscita', importo: 120, data: '2026-03-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
+      { id: '4', contoId: 'c1', tipo: 'uscita', importo: 120, data: '2026-01-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '5', contoId: 'c1', tipo: 'uscita', importo: 120, data: '2026-02-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '6', contoId: 'c1', tipo: 'uscita', importo: 120, data: '2026-03-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
     ];
 
     mockBudget.dataInizio = '2026-03-15T00:00:00.000Z';
@@ -166,12 +169,12 @@ describe('Budget History', () => {
 
   test('Caso 5: Analisi Trend Decrescente (trend = decreasing)', () => {
     const customTransactions: Transaction[] = [
-      { id: '1', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-10-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '2', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-11-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '3', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-12-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '4', contoId: 'c1', tipo: 'uscita', importo: 80, data: '2026-01-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '5', contoId: 'c1', tipo: 'uscita', importo: 80, data: '2026-02-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '6', contoId: 'c1', tipo: 'uscita', importo: 80, data: '2026-03-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
+      { id: '1', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-10-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '2', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-11-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '3', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-12-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '4', contoId: 'c1', tipo: 'uscita', importo: 80, data: '2026-01-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '5', contoId: 'c1', tipo: 'uscita', importo: 80, data: '2026-02-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '6', contoId: 'c1', tipo: 'uscita', importo: 80, data: '2026-03-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
     ];
 
     mockBudget.dataInizio = '2026-03-15T00:00:00.000Z';
@@ -183,12 +186,12 @@ describe('Budget History', () => {
 
   test('Caso 6: Analisi Trend Stabile (trend = stable)', () => {
     const customTransactions: Transaction[] = [
-      { id: '1', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-10-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '2', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-11-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '3', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-12-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '4', contoId: 'c1', tipo: 'uscita', importo: 105, data: '2026-01-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '5', contoId: 'c1', tipo: 'uscita', importo: 105, data: '2026-02-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
-      { id: '6', contoId: 'c1', tipo: 'uscita', importo: 105, data: '2026-03-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
+      { id: '1', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-10-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '2', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-11-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '3', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2025-12-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '4', contoId: 'c1', tipo: 'uscita', importo: 105, data: '2026-01-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '5', contoId: 'c1', tipo: 'uscita', importo: 105, data: '2026-02-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
+      { id: '6', contoId: 'c1', tipo: 'uscita', importo: 105, data: '2026-03-15T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
     ];
 
     mockBudget.dataInizio = '2026-03-15T00:00:00.000Z';
@@ -219,6 +222,7 @@ describe('Budget History', () => {
         descrizione: 'Categoria diversa',
         categoriaId: 'cat-differente',
         ricorrente: false,
+        cifrato: false,
       },
       {
         id: 't-conto-diff',
@@ -229,6 +233,7 @@ describe('Budget History', () => {
         descrizione: 'Conto diverso',
         categoriaId: 'cat-1',
         ricorrente: false,
+        cifrato: false,
       },
     ];
 
@@ -258,7 +263,7 @@ describe('Budget History', () => {
 
   test('Caso Limite 2: Spesa passata nulla (olderAvg = 0)', () => {
     const customTransactions: Transaction[] = [
-      { id: '1', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2026-06-20T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false },
+      { id: '1', contoId: 'c1', tipo: 'uscita', importo: 100, data: '2026-06-20T00:00:00Z', descrizione: '', categoriaId: 'cat-1', ricorrente: false, cifrato: false },
     ];
 
     const result = calculateBudgetTrend(mockBudget, customTransactions, 2);
