@@ -39,11 +39,13 @@ function getPeriodLabel(budget: Budget, periodIndex: number): string {
   switch (budget.periodo) {
     case 'mensile': {
       const date = new Date(startDate);
+      date.setDate(1);
       date.setMonth(date.getMonth() - periodIndex);
       return `${getMonthName(date.getMonth())} ${date.getFullYear()}`;
     }
     case 'trimestrale': {
       const date = new Date(startDate);
+      date.setDate(1);
       date.setMonth(date.getMonth() - periodIndex * 3);
       const quarter = Math.floor(date.getMonth() / 3) + 1;
       return getQuarterName(quarter, date.getFullYear());
@@ -64,6 +66,7 @@ function getPeriodDates(
   switch (budget.periodo) {
     case 'mensile': {
       const start = new Date(currentStart);
+      start.setDate(1);
       start.setMonth(start.getMonth() - periodIndex);
       const end = new Date(start);
       end.setMonth(end.getMonth() + 1);
@@ -73,6 +76,7 @@ function getPeriodDates(
     }
     case 'trimestrale': {
       const start = new Date(currentStart);
+      start.setDate(1);
       start.setMonth(start.getMonth() - periodIndex * 3);
       const end = new Date(start);
       end.setMonth(end.getMonth() + 3);
@@ -82,6 +86,7 @@ function getPeriodDates(
     }
     case 'annuale': {
       const start = new Date(currentStart);
+      start.setDate(1);
       start.setFullYear(start.getFullYear() - periodIndex);
       const end = new Date(start);
       end.setFullYear(end.getFullYear() + 1);
