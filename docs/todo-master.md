@@ -56,6 +56,7 @@
   - Pulizia documentale 7.1: 2 debiti tecnici chiusi in data 2026-06-27 dopo verifica codice.
   - REPORT-debiti-tecnici-android_v1.0.0.md prodotto il 2026-06-27. 10 debiti analizzati, 3 codificabili senza UI con focus Android. Next Action: review report da donny-81.
   - Permesso VIBRATE Android: aggiunto in AndroidManifest.xml il 2026-06-27. Problema critico Android chiuso.
+  - DT-016-ter-01 CHIUSO il 2026-06-27: supporto HEIC e WEBP aggiunto alla validazione magic bytes.
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
   - **Next Action:** Attendere definizione prossimo blocco da donny-81.
 
@@ -800,7 +801,7 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 - **Impatto:** utenti con foto iPhone o WEBP non possono allegare questi formati. Limitazione funzionale per la base utenti mobile.
 - **Riferimento:** docs/2-projects/016-ter-DESIGN_magic-bytes-validation_v0.1.0.md
 - **Priorità:** media
-- **Stato:** APERTO — espansione futura, alta utilità
+- **Stato:** CHIUSO — implementazione verificata nel codice il 2026-06-27. File: src/lib/file-system/magic-bytes-reader.ts.
 
 ### DT-016-ter-02 — Supporto iOS magic bytes validation
 

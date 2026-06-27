@@ -50,10 +50,13 @@ Il presente report fornisce un'analisi dettagliata dello stato dei debiti tecnic
 - **Priorità:** BASSA
 
 ### DT-016-ter-01 — Supporto HEIC e WEBP magic bytes
-- **Stato assegnato:** APERTO-MULTIPIATTAFORMA
+- **Stato assegnato:** CHIUSO
 - **Motivazione:** Le firme fisiche verificate si limitano a jpeg, png e pdf. I formati HEIC (nativo iOS) e WEBP (diffuso sul web) non sono supportati.
 - **File verificati:** [storage.ts](file:///c:/Sviluppo/ZecchinoReact/src/lib/supabase/storage.ts)
 - **Priorità:** MEDIA
+
+  Risolto il 2026-06-27.
+  Aggiunte firme fisiche HEIC e WEBP in magic-bytes-reader.ts, .android.ts, .windows.ts e aggiornato storage.ts con i nuovi MIME type. 5 nuovi test aggiunti e verificati.
 
 ### DT-016-ter-02 — Supporto iOS magic bytes validation
 - **Stato assegnato:** APERTO-IOS

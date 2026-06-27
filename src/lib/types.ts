@@ -124,7 +124,7 @@ export type NotificationHydrationState =
   | 'READY'
   | 'ERROR';
 
-export type AttachmentMimeType = 'image/jpeg' | 'image/png' | 'application/pdf';
+export type AttachmentMimeType = 'image/jpeg' | 'image/png' | 'application/pdf' | 'image/webp' | 'image/heic';
 
 // --- Dominio prestiti, mutui e simulazione finanziaria (DESIGN 017) ---
 

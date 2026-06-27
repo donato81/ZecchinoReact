@@ -1,4 +1,4 @@
-const MAGIC_BYTES_READ_LENGTH = 8;
+const MAGIC_BYTES_READ_LENGTH = 12;
 
 type FsModule = {
   read?: (
@@ -62,3 +62,5 @@ export async function readFileHeader(uri: string): Promise<Uint8Array> {
     return new Uint8Array(0);
   }
 }
+
+export { matchesSignature } from './magic-bytes-reader';

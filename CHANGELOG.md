@@ -105,6 +105,7 @@
 ## [0.17.0] — 2026-06-27 — Sound System nativo (AN-02)
 
 ### Added
+- feat(allegati): aggiunge supporto magic bytes per formati HEIC e WEBP
 - feat(sound): implementa sound-system nativo con `react-native-audio-api` — riscrittura di `src/lib/sound-system.ts`, temporizzazione nativa via `audioContext.currentTime`, normalizzazione 86 suoni legacy in 5 canonici, lazy initialization del contesto nativo, early return Windows no-op, integrazione `AppState` per suspend/resume del contesto, sincronizzazione preferenze con Supabase. Chiude AN-02.
 - docs(design/plan/todo): creati documenti di design, piano e todo specifici per il refactoring del Sound System (AN-02).
 - docs(api/architettura): aggiornate le API reference e l'architettura per riflettere la compatibilità del Sound System nativo.
