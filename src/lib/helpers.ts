@@ -162,7 +162,7 @@ export function exportToCSV(
 
   const csvContent = [
     headers.join(','),
-    ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+    ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
   ].join('\n');
 
   return csvContent;
