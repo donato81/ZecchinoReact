@@ -272,31 +272,41 @@ Il modulo espone 33 metodi legacy marcati come `@deprecated` per retrocompatibil
 
 ---
 
-## `src/lib/sound-system.ts` ❌
+## `src/lib/sound-system.ts` ✅
 
-Sistema audio. Nessuna dipendenza esterna, usa Web Audio API (`AudioContext`).
+Feedback acustico sintetico basato su `react-native-audio-api` per Android e iOS, con no-op stub per Windows, temporizzazione nativa via `audioContext.currentTime`, ciclo di vita `AppState` e sincronizzazione preferenze.
 
-### Tipo esportato
+### Tipi esportati
 
-| Nome        | Tipo                                                                                                                                                 |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SoundType` | `type` — 48 valori (click, success, error, warning, notification, unlock/lock, income/expense/transfer, pin-error/success, private-unlock/lock, ...) |
+| Nome | Tipo | Descrizione |
+| --- | --- | --- |
+| `CanonicalSoundType` | `type` | I 5 suoni fisicamente generati: `'success' \| 'error' \| 'warning' \| 'click' \| 'navigation'` |
+| `LegacySoundType` | `type` | I 86 suoni legacy mappati sui canonici per retrocompatibilità |
+| `SoundType` | `type` | Unione dei due tipi (91 valori totali) |
+| `AudioPersistCallbacks` | `interface` | Callback per persistenza preferenze: `{ onEnabledChange?, onVolumeChange? }` |
 
-### Classe `SoundSystem` — metodi pubblici
+### Metodi pubblici della classe `SoundSystem`
 
-| Metodo                              | Parametri               | Ritorna   | RN                                            |
-| ----------------------------------- | ----------------------- | --------- | --------------------------------------------- |
-| `initFromSettings(enabled, volume)` | `boolean`, `number`     | `void`    | ⚠️ (logica pura ma presuppone `AudioContext`) |
-| `configure(callbacks)`              | `AudioPersistCallbacks` | `void`    | ✅                                            |
-| `play(soundType)`                   | `SoundType`             | `void`    | ❌ (`AudioContext`)                           |
-| `setEnabled(enabled)`               | `boolean`               | `void`    | ✅                                            |
-| `setVolume(volume)`                 | `number`                | `void`    | ⚠️                                            |
-| `isEnabled()`                       | —                       | `boolean` | ✅                                            |
-| `getVolume()`                       | —                       | `number`  | ✅                                            |
+| Metodo | Parametri | Ritorna | Descrizione |
+| --- | --- | --- | --- |
+| `initFromSettings(enabled, volume)` | `enabled: boolean`, `volume: number` | `void` | Allinea lo stato a runtime con le preferenze caricate da Supabase all'avvio. Non attiva i callback per evitare cicli infiniti. Il volume è clampato in range `0-1`. |
+| `configure(callbacks)` | `callbacks: AudioPersistCallbacks` | `void` | Registra i callback di persistenza. |
+| `play(soundType)` | `soundType: SoundType` | `void` | Riproduce il feedback acustico specificato. Il tipo viene prima normalizzato in uno dei 5 canonici tramite `normalizeSoundType` ed il contesto nativo viene istanziato lazy al primo play. |
+| `setEnabled(enabled)` | `enabled: boolean` | `Promise<void>` | Abilita o disabilita l'audio a runtime e persiste la scelta su Supabase. |
+| `setVolume(volume)` | `volume: number` | `Promise<void>` | Modifica il volume generale (range `0-1`) a runtime e persiste il valore su Supabase. |
+| `getEnabled()` | — | `boolean` | Ritorna `true` se l'audio è abilitato a runtime. |
+| `getVolume()` | — | `number` | Ritorna il volume corrente a runtime. |
+
+### Normalizzazione Legacy (Delibera PA-01)
+Il metodo privato `normalizeSoundType` mappa i suoni legacy. I mapping principali includono:
+- `pin-error`, `delete`, `budget-exceeded`, `budget-deleted` → `error`
+- `budget-critical`, `budget-warning`, `notification` → `warning`
+- `private-unlock`, `save`, `account-created`, `income`, `export`, `unlock` → `success`
+- `expense` → `click`
+- `transfer`, `dialog-open`, `dialog-close`, `tab-change`, `lock`, `private-lock` → `navigation`
+- Altri suoni non elencati mappano per default a `click`.
 
 **Singleton esportato**: `soundSystem: SoundSystem`
-
-> Interfaccia pubblica portabile. Implementazione da riscrivere con `expo-av` o `react-native-sound`.
 
 ---
 

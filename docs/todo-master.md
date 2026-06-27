@@ -1,26 +1,24 @@
 ## 1. Metadata e Context Header
-
-- **Project Name:** ZecchinoReact
-- **Version:** 0.16.1
-- **Owner:** donny-81
-- **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
-- **Environment Sync:** Local
- - **Ultimo Agente Attivo:** donny-81, 2026-06-26
- - **Blocco in Carico:** Nessuno
-- **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
-
-### Stato Globale Corrente
-
-- **Active Phase:** P0/P1/P2 completate. DESIGN 004 implementato:
-  layer `src/announcements/` creato e collegato; legacy
-  `use-screen-reader.ts` e `screen-reader.ts` eliminati;
-  TSC baseline ridotta da 89 a 47 errori.
-- **Active Block:** Nessuno — implementazione 017-020 completata.
- - **Last Updated:** 2026-06-26
-- **Pending Plans:**
-  - **PLAN 020 COMPLETATO** (release 0.16.x) —
-    `docs/3-coding-plans/020-PLAN_icone-colori-design-system_v0.2.0.md`
-    e `docs/4-todo-lists/020-TODO_icone-colori-design-system_v0.2.0.md` in stato DONE. Centralizzazione design tokens implementata e testata.
+ 
+ - **Project Name:** ZecchinoReact
+- **Version:** 0.17.0
+ - **Owner:** donny-81
+ - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
+ - **Environment Sync:** Local
+-  - **Ultimo Agente Attivo:** Antigravity, 2026-06-27
+ -  - **Blocco in Carico:** Nessuno
+ - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
+ 
+ ### Stato Globale Corrente
+ 
+- - **Active Phase:** P0/P1/P2 completate. DESIGN 022 e 021 implementati (Fase 1 completata).
+- - **Active Block:** Nessuno — implementazione 017-022 completata.
+-  - **Last Updated:** 2026-06-27
+ - **Pending Plans:**
+   - **PLAN 022 COMPLETATO** (release 0.17.0) — Refactoring del Sound System in ambiente nativo completato e validato.
+   - **PLAN 020 COMPLETATO** —
+     `docs/3-coding-plans/020-PLAN_icone-colori-design-system_v0.2.0.md`
+     e `docs/4-todo-lists/020-TODO_icone-colori-design-system_v0.2.0.md` in stato DONE. Centralizzazione design tokens implementata e testata.
   - **PLAN 007 COMPLETATO** (release 0.2.0) —
     `docs/3-coding-plans/007-PLAN_async-cache-hydration_v0.1.0.md`
     e `docs/4-todo-lists/007-TODO_async-cache-hydration_v0.1.0.md` in stato
@@ -47,16 +45,16 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** Stesura 022-DESIGN_sound-system_v0.1.0.md (bozza) (completato 2026-06-27).
-- **Last Validated Block:** DESIGN 022 — Sound System Refactor (2026-06-27, DUSU-DOCS).
+- **Last Completed Task:** Codifica ed allineamento documentale del PLAN 022 — Sound System Refactor (completato 2026-06-27).
+- **Last Validated Block:** PLAN 022 — Sound System Refactor (2026-06-27, Antigravity).
 - **Files Modified But Not Validated:** 
  - **Open Threads:**
-  - AN-02: `src/lib/sound-system.ts` — stesura DESIGN 022 completata (bozza) — in attesa di PLAN 022
+  - AN-02: `src/lib/sound-system.ts` — IMPLEMENTATO e CLOSED (2026-06-27)
   - AN-03: `oklch colori` — da verificare per compatibilità Android (da DESIGN 020)
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
   - DD-02: `docs/architettura.md` — use-online-status.ts — CLOSED
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
-  - **Next Action:** AN-02 sound-system.ts — pianificazione con PLAN 022 (da definire con donny-81).
+  - **Next Action:** Attendere definizione prossimo blocco da donny-81.
 
 > Nota sessione orchestrazione 2026-05-29:
 > Creati i sei documenti di pianificazione richiesti:
@@ -573,11 +571,16 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.AN-01-TODO | Redazione Todo Specifico 021 — Haptic System Refactor | [x] DONE — 2026-06-26 DUSU-FIX | [x] PASSED |
 | P3.B8-AN-01 | Codifica 021 — Haptic System (expo-haptics) | [x] DONE — 2026-06-26 DUSU-CODER | [x] PASSED |
 | P3.B1-IMPL-021 | Haptic System nativo — expo-haptics | [x] DONE — 2026-06-26 donny-81 | [x] PASSED |
+| P3.AN-02-PLAN | Redazione Coding Plan 022 — Sound System Refactor | [x] DONE — 2026-06-27 Antigravity | [x] PASSED |
+| P3.AN-02-TODO | Redazione Todo Specifico 022 — Sound System Refactor | [x] DONE — 2026-06-27 Antigravity | [x] PASSED |
+| P3.B8-AN-02 | Codifica 022 — Sound System (react-native-audio-api) | [x] DONE — 2026-06-27 Antigravity | [x] PASSED |
+| P3.B1-IMPL-022 | Sound System nativo — react-native-audio-api | [x] DONE — 2026-06-27 Antigravity | [x] PASSED |
 
 ### Log di Validazione
 
 | Data | Block ID | Validato Da | Risultato | Note |
 |------|----------|-------------|-----------|------|
+| 2026-06-27 | P3.B8-AN-02 | Antigravity | DONE | PLAN 022 — Sound System nativo con react-native-audio-api |
 | 2026-05-22 | P0.B1 | Agent-Orchestrator | DONE | DESIGN 001 — babel.config.js |
 | 2026-05-22 | P0.B2 | Agent-Orchestrator | DONE | DESIGN 001 — package.json |
 | 2026-05-22 | P0.B3 | Agent-Orchestrator | DONE | DESIGN 001+002 — AuthContext |

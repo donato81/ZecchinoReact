@@ -3,20 +3,20 @@
 App di finanza personale per **Android**, **iOS** e **Windows** (react-native-windows).  
 Il dominio â€” nomi variabili, tipi, label UI â€” Ã¨ interamente in italiano.
 
-Versione progetto: **0.16.1**.
+Versione progetto: **0.17.0**.
 
 > **Stato attuale**: migrazione da web (React + shadcn) a React Native in corso.  
 > L'app **non Ã¨ avviabile** fino alla risoluzione dei 6 blocchi di build documentati in  
 > [`docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md`](docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md).
 
-Stato rilascio: la release `0.16.1` integra i blocchi 017 (Prestiti), 018 (Confronto Mese su Mese per Categoria), 019 (Notifiche Budget e Orchestrazione), 020 (Centralizzazione design tokens) e 021 (Haptic System nativo).
+Stato rilascio: la release `0.17.0` integra i blocchi 017 (Prestiti), 018 (Confronto Mese su Mese per Categoria), 019 (Notifiche Budget e Orchestrazione), 020 (Centralizzazione design tokens), 021 (Haptic System nativo) e 022 (Sound System nativo).
 
-Aggiornamento 2026-06-26: i blocchi 017, 018, 019, 020 e 021 sono stati completati e validati. I blocchi critici di build Android BC-01, BC-02 e BC-03 sono stati risolti e chiusi. La versione è stata avanzata a `0.16.1` in conformità con la chiusura delle funzionalità, la centralizzazione del design system e il refactor del feedback aptico nativo.
+Aggiornamento 2026-06-27: completato il refactoring del Sound System in ambiente nativo con `react-native-audio-api` (Blocco 022). La versione è stata avanzata a `0.17.0`.
 
 ## Funzionalità implementate
 
 - Blocco 013 completato: repository `ricorrenze` con tipi dedicati, query `getDue`, integrazione in `AppDataContext` e cache offline del nuovo slice.
-- Blocco 014 completato: repository `tag` e `transazioni-tag`, bootstrap bulk delle associazioni, fallback cache offline per `transactionTagMap` e trigger SQL per mantenere coerente `usato_n_volte`.
+- Blocco 014 completato: repository `tag` e `transazioni-tag`, bootstrap bulk delle associazioni, fallback cache offline for `transactionTagMap` e trigger SQL per mantenere coerente `usato_n_volte`.
 - Blocco 015 completato: repository `notifiche`, `notification-service`, hydration secondaria delle notifiche dopo `READY` e deduplicazione/escalation per periodo reale del budget.
 - Blocco 016 completato: repository `allegati`, storage Supabase privato con validazione file lato client, path sicuro per upload e rollback best-effort su fallimento DB.
 - Blocco 016-bis completato: cleanup automatico e silenzioso dei file orfani Storage con trigger su login, logout, delete transazione e rollback allegati.
@@ -26,6 +26,7 @@ Aggiornamento 2026-06-26: i blocchi 017, 018, 019, 020 e 021 sono stati completa
 - Blocco 019 completato: orchestrazione notifiche budget con budget-notification-config.ts, riallineamento repository notifiche con campi titolo_key e messaggio_key per localizzazione a runtime, introduzione tipo NotificationLevel e BudgetNotificationMetadata, chiavi di localizzazione warning, critical ed exceeded in it.ts, mappatura nel notification-service e nel context orchestrator.
 - Blocco 020 completato: centralizzazione design tokens per colori e chiavi icone in colors.ts, refactoring constants.ts e budget-templates.ts per rimuovere la dipendenza da @phosphor-icons/react.
 - Blocco 021 completato: riscrittura di `src/lib/haptic-system.ts` con `expo-haptics` per Android/iOS e no-op stub per Windows, aggiunta persistenza preferenza in `AsyncStorage`, sincronizzazione con Supabase e shim deprecati.
+- Blocco 022 completato: riscrittura di `src/lib/sound-system.ts` con `react-native-audio-api` per Android/iOS e no-op stub per Windows, temporizzazione nativa via `audioContext.currentTime` (senza `setTimeout`), normalizzazione legacy-to-canonical (91 suoni totali), sincronizzazione Supabase ed AppState.
 
 ---
 
@@ -40,6 +41,7 @@ Aggiornamento 2026-06-26: i blocchi 017, 018, 019, 020 e 021 sono stati completa
 | AsyncStorage              | ^2.x     | Cache locale (24h TTL)                     |
 | bcryptjs                  | ^3.0.3   | Hashing PIN privato                        |
 | react-native-quick-crypto | 1.1.5    | PBKDF2-SHA256 nativa (OpenSSL) per KDF PIN |
+| react-native-audio-api    | ^0.12.2  | Web Audio API nativo per Android/iOS       |
 | TypeScript                | â€”      | Tipizzazione completa                      |
 
 ---
@@ -103,7 +105,7 @@ src/
     crypto.ts                 # Hash PIN, AES-GCM legacy e payload PIN versionato
     kdf-provider.ts           # Boundary PBKDF2-SHA256 verso react-native-quick-crypto
     haptic-system.ts          # Feedback aptico (✅ expo-haptics (Android/iOS) + no-op stub (Windows))
-    sound-system.ts           # Audio (❌ Web Audio API)
+    sound-system.ts           # Audio (✅ react-native-audio-api (Android/iOS) + no-op stub (Windows))
     supabase/
       client.ts               # Singleton Supabase
       types.ts                # Tipi DB row (interni) + UserSettings + RepositoryError

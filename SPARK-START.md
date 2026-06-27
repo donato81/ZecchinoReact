@@ -15,14 +15,15 @@ necessari per il tuo progetto.
 *Puoi eliminare questo file dopo il primo avvio.*
 *Per domande sull'architettura SPARK, usa l'agente `spark-guide`.*
 
-Versione corrente progetto: `0.16.0`.
+Versione corrente progetto: `0.17.0`.
 Analisi Android completata (DUSU-ANALYZER 2025-07-25).
-Stato aggiornato: 2026-06-26.
+Stato aggiornato: 2026-06-27.
 Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
 012 Export Nativo Guard Concorrente, 017 Prestiti e Mutui, 018 Confronto Mese su Mese per Categoria,
-019 Notifiche Budget e Orchestrazione, 020 Centralizzazione design tokens.
+019 Notifiche Budget e Orchestrazione, 020 Centralizzazione design tokens, 021 Haptic System nativo,
+022 Sound System nativo.
 Suite di test: PASS.
-Decisione release: versione avanzata a `0.16.0` con integrazione dei blocchi 017-020 e risoluzione dei blocchi critici Android.
+Decisione release: versione avanzata a `0.17.0` con l'integrazione di tutti i blocchi completati, inclusi i sistemi nativi per feedback aptico e acustico.
 Prossima azione: Attendere definizione prossimo blocco da donny-81.
 
 ---
@@ -35,8 +36,8 @@ Prossima azione: Attendere definizione prossimo blocco da donny-81.
 |------|-------|---------------|
 | Gate 1 — Build Android | ✅ PRONTO | — (BC-01, BC-02, BC-03 CLOSED) |
 | Gate 2 — Runtime Core | ✅ PRONTO | — (crypto, export, NetInfo, Supabase ✅) |
-| Gate 3 — Runtime UI | ⏳ IN ATTESA | AN-02 (sound), AN-03 (oklch) (AN-01 CLOSED 2026-06-26) |
-| Gate 4 — Documentazione | ⏳ IN ATTESA | DD-01 (patch orfana), DD-02 (architettura.md stale) |
+| Gate 3 — Runtime UI | ⏳ IN ATTESA | AN-03 (oklch) (AN-01, AN-02 CLOSED) |
+| Gate 4 — Documentazione | ⏳ IN ATTESA | DD-01 (patch orfana) (DD-02 CLOSED) |
 
 **Target platform:** iOS ✅ (non testato) · Android ✅ (pronto per build) · Windows ❄️ (DT-009-N-01 aperto)
 
@@ -58,7 +59,7 @@ Prossima azione: Attendere definizione prossimo blocco da donny-81.
 - [DESIGN 019 — Notifiche Budget e Orchestrazione](docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 020 — Centralizzazione design tokens: colori e chiavi icone](docs/2-projects/020-DESIGN_icone-colori-design-system_v0.2.0.md) — v0.2.0 — REVIEWED
 - [DESIGN 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics](docs/2-projects/021-DESIGN_haptic-system_v0.1.0.md) — v0.1.0 — REVIEWED
-- [DESIGN 022 — Sound System — Refactoring motore audio nativo](docs/2-projects/022-DESIGN_sound-system_v0.1.0.md) — v0.1.1 — bozza
+- [DESIGN 022 — Sound System — Refactoring motore audio nativo](docs/2-projects/022-DESIGN_sound-system_v0.1.0.md) — v0.1.1 — REVIEWED
 
 ## Stato PLAN / TODO
 
@@ -86,15 +87,15 @@ Prossima azione: Attendere definizione prossimo blocco da donny-81.
 - [TODO 019 — Notifiche Budget e Orchestrazione](docs/4-todo-lists/019-TODO_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — PENDING
 - [PLAN 020 — Centralizzazione design tokens: colori e chiavi icone](docs/3-coding-plans/020-PLAN_icone-colori-design-system_v0.2.0.md) — v0.2.0 — DRAFT
 - [TODO 020 — Centralizzazione design tokens: colori e chiavi icone](docs/4-todo-lists/020-TODO_icone-colori-design-system_v0.2.0.md) — v0.2.0 — PENDING
-- [PLAN 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics](docs/3-coding-plans/021-PLAN_haptic-system_v0.1.0.md) — v0.1.0 — REVIEWED
-- [TODO 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics](docs/4-todo-lists/021-TODO_haptic-system_v0.1.0.md) — v0.1.0 — PENDING
-- [PLAN 022 — Sound System — Refactoring motore audio nativo](docs/3-coding-plans/022-PLAN_sound-system_v0.1.0.md) — v0.1.0 — APPROVED (passato da bozza ad approvato il 27/06/2026)
-- [TODO 022 — Sound System — Refactoring motore audio nativo](docs/4-todo-lists/022-TODO_sound-system_v0.1.0.md) — v0.1.0 — PENDING
+- [PLAN 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics](docs/3-coding-plans/021-PLAN_haptic-system_v0.1.0.md) — v0.1.0 — COMPLETATO
+- [TODO 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics](docs/4-todo-lists/021-TODO_haptic-system_v0.1.0.md) — v0.1.0 — DONE
+- [PLAN 022 — Sound System — Refactoring motore audio nativo](docs/3-coding-plans/022-PLAN_sound-system_v0.1.0.md) — v0.1.0 — COMPLETATO
+- [TODO 022 — Sound System — Refactoring motore audio nativo](docs/4-todo-lists/022-TODO_sound-system_v0.1.0.md) — v0.1.0 — DONE
 
 
-Correzioni applicate il 2026-06-26.
-Stato: REVIEWED PENDING.
+Correzioni applicate il 2026-06-27.
+Stato: COMPLETATO.
 
 Blocco residuo: `009-native` resta aperto solo per le validazioni runtime
 T3-N5 su Windows e Android. Non sblocca da solo una nuova release: il progetto
-resta alla `0.4.0` finche' i blocchi compatibilita' aperti non vengono chiusi.
+resta alla `0.17.0` finche' i blocchi compatibilita' aperti non vengono chiusi.

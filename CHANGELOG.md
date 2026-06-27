@@ -102,10 +102,21 @@
 - AN-02: src/lib/sound-system.ts, riscrittura con API RN (TODO P1.B2) — APERTO
 - AN-03: oklch colori, compatibilità Android — APERTO
 
-## [Unreleased]
+## [0.17.0] — 2026-06-27 — Sound System nativo (AN-02)
 
 ### Added
-- docs: aggiunto 022-DESIGN_sound-system_v0.1.0.md — refactoring motore audio nativo (AN-02)
+- feat(sound): implementa sound-system nativo con `react-native-audio-api` — riscrittura di `src/lib/sound-system.ts`, temporizzazione nativa via `audioContext.currentTime`, normalizzazione 86 suoni legacy in 5 canonici, lazy initialization del contesto nativo, early return Windows no-op, integrazione `AppState` per suspend/resume del contesto, sincronizzazione preferenze con Supabase. Chiude AN-02.
+- docs(design/plan/todo): creati documenti di design, piano e todo specifici per il refactoring del Sound System (AN-02).
+- docs(api/architettura): aggiornate le API reference e l'architettura per riflettere la compatibilità del Sound System nativo.
+
+### Fixed
+- AN-02: rimosso l'utilizzo delle Web Audio API del browser, sostituito con `react-native-audio-api`.
+  Chiude il debito tecnico AN-02 identificato nel REPORT compatibilità Android v1.0.0.
+
+### Open Threads aggiornati
+- AN-01: CLOSED
+- AN-02: CLOSED
+- AN-03: oklch colori, compatibilità Android — APERTO
 
 
 ## [0.4.0-docs.2] — 2026-05-28 — Pianificazione

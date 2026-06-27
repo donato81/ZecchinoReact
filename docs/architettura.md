@@ -110,6 +110,24 @@ modo esaustivo sul discriminated union JS.
 con `@react-native-windows/fs`. Su altre piattaforme usa share sheet
 mobile o fallback `UNSUPPORTED_PLATFORM` senza import nativi.
 
+### Feedback nativi: Aptico e Sonoro
+
+ZecchinoReact centralizza il feedback sensoriale (aptico ed acustico) nel layer `src/lib/` per garantire uniformità di comportamento e supporto cross-platform:
+
+1. **Haptic System (`src/lib/haptic-system.ts`)**:
+   - Gestito tramite `expo-haptics` su Android e iOS.
+   - Fornisce un fallback no-op sicuro su Windows (Platform.OS === 'windows') per prevenire crash.
+   - Sincronizza lo stato delle preferenze tramite `AsyncStorage` locale ed il database Supabase.
+   - Espone un'interfaccia shim deprecata per garantire la retrocompatibilità con le 33 vecchie chiamate legacy.
+
+2. **Sound System (`src/lib/sound-system.ts`)**:
+   - Gestito tramite `react-native-audio-api` su Android e iOS, fornendo un'implementazione del Web Audio API standard in ambiente nativo.
+   - Esegue un early return no-op su Windows per preservare la compatibilità di build e runtime.
+   - Inizializza l'audio context ed i nodi in modo lazy (`ensureContext()`) per evitare consumi di risorse o crash in fase di import.
+   - Esegue una temporizzazione acustica nativa (tramite `audioContext.currentTime`) per garantire una precisione millimetrica degli attacchi e rilasci delle onde sintetizzate (oscillatori), senza delegare a `setTimeout` del runtime JS.
+   - Normalizza i vecchi 86 suoni legacy in 5 suoni canonici fisici (`click`, `success`, `warning`, `error`, `navigation`).
+   - Sincronizza lo stato globale tramite il ciclo di vita `AppState` (sospensione e ripresa automatica del contesto audio).
+
 ---
 
 ## 3. Flusso dati principale
@@ -186,7 +204,7 @@ Tutti i file SQL sono in `docs/6-sql/`.
 | `lib/crypto.ts`                                    | lib        | ✅ OK                        | Sì             | `hashPin`/`verifyPin` invariati; `derivePinKey`, `encryptDataPin` e `decryptDataPin` aggiungono PBKDF2-SHA256 (600.000 iterazioni) e payload `KDF_VERSION[1] SALT[16] IV[12] Ciphertext[N] AuthTag[16]`. PLAN 010 aggiunge `generateMasterKey`, `wrapMasterKeyWithPin`, `unwrapMasterKeyWithPin` e `rewrapMasterKeyWithPin` per la wrapped master key versionata del PIN. |
 | `lib/kdf-provider.ts`                              | lib        | ✅ Compatibile               | No             | Boundary KDF verso `react-native-quick-crypto`; fallback Node/OpenSSL usato solo nei test Jest                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `lib/haptic-system.ts`                             | lib        | ✅ Compatibile               | No             | Feedback aptico centralizzato via `expo-haptics` con AsyncStorage e fallback no-op Windows (AN-01)                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `lib/sound-system.ts`                              | lib        | ❌ Incompatibile             | No             | Web Audio API — da riscrivere                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `lib/sound-system.ts`                              | lib        | ✅ Compatibile               | No             | Riscrittura nativa con react-native-audio-api (PLAN 022)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `lib/screen-reader.ts`                             | lib        | **ELIMINATO (DESIGN 004)**   | —              | Sostituito da `src/announcements/`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `lib/supabase/client.ts`                           | supabase   | ⚠️ Richiede config           | **Sì (B2/B6)** | OK struttura; bloccato senza `react-native-dotenv` in Babel                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `lib/supabase/cache.ts`                            | supabase   | ✅ Compatibile               | No             | AsyncStorage 24h TTL con slice `ricorrenze`, `tag` e `transazioni_tag` inclusi dai blocchi 013-014                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
@@ -273,8 +291,8 @@ Fase 0 — Config (pre-requisito globale)
 
 Fase 1 — Rimpiazza dipendenze DOM in lib/
   ├── haptic-system.ts → expo-haptics (✅ COMPLETATO)
-  ├── sound-system.ts → expo-av
-  └── screen-reader.ts → ✅ COMPLETATO (DESIGN 004)
+  ├── sound-system.ts → react-native-audio-api (✅ COMPLETATO)
+  ├── screen-reader.ts → ✅ COMPLETATO (DESIGN 004)
       Sostituito da src/announcements/ → accessibility/engine →
       AccessibilityInfo.announceForAccessibility
 
