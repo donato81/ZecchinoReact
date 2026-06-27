@@ -58,7 +58,7 @@ Prossima azione: Attendere definizione prossimo blocco da donny-81.
 - [DESIGN 019 — Notifiche Budget e Orchestrazione](docs/2-projects/019-DESIGN_notifiche-budget-orchestrazione_v0.1.0.md) — v0.1.0 — REVIEWED
 - [DESIGN 020 — Centralizzazione design tokens: colori e chiavi icone](docs/2-projects/020-DESIGN_icone-colori-design-system_v0.2.0.md) — v0.2.0 — REVIEWED
 - [DESIGN 021 — Refactor Haptic System — sostituzione navigator.vibrate() con expo-haptics](docs/2-projects/021-DESIGN_haptic-system_v0.1.0.md) — v0.1.0 — REVIEWED
-- [DESIGN 022 — Sound System — Refactoring motore audio nativo](docs/2-projects/022-DESIGN_sound-system_v0.1.0.md) — v0.1.0 — bozza
+- [DESIGN 022 — Sound System — Refactoring motore audio nativo](docs/2-projects/022-DESIGN_sound-system_v0.1.0.md) — v0.1.1 — bozza
 
 ## Stato PLAN / TODO
 

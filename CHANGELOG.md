@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## [0.1.1] — 2026-06-27
+
+### DESIGN 022 — Sound System
+- Corretto conteggio union SoundType: 91 totali (non 87)
+- Rimossa affermazione errata "nessun consumer reale"
+- Introdotti CanonicalSoundType e LegacySoundType
+- Aggiunta normalizeSoundType() con tabella mapping legacy
+- Rimossi tutti i link file:/// non portabili
+- Aggiunta nota esplicita: initialize() va rimosso
+- Aggiunta nota: playSequence() deve usare currentTime
+- warning: forma d'onda resa deterministica (square)
+- navigation: ADSR completato con valori reali dal sorgente
+- Chiarito: enabled=false dopo errore e' solo runtime
+- Aggiunta nota compatibilita' RN 0.82 / New Architecture
+- Platform.OS === 'windows' dichiarato come fallback temporaneo
+- LaTeX sostituito con testo piano per accessibilita' NVDA
+- Test T11 rafforzato, aggiunti T18, T19, T20
+- Aggiunto DT-022-05: rimozione progressiva legacy e nota architetturale su suoni nei context come temporanei
+
 ## [0.13.9] — 2026-05-28 — Reallineamento versione
 
 ### Versioning
