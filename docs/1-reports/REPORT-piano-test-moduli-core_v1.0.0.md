@@ -59,7 +59,7 @@ I sette moduli analizzati in questa sessione sono:
 - **Data fine antecedente a data inizio (`dataFine < dataInizio`):** Provoca giorni totali negativi, alterando il calcolo delle percentuali e falsificando le soglie temporali condizionali dell'algoritmo.
 
 **NOTE PER L'ARCHITETTO:**
-- **Chiamata morta a `calculateBudgetTrend`:** Alla riga 118, viene invocata la funzione `calculateBudgetTrend(budget, transactions, historicalPeriods)`, ma il valore restituito non viene assegnato ad alcuna variabile né utilizzato. Questa chiamata esegue calcoli storici ridondanti e consuma CPU inutilmente. Si consiglia di rimuoverla o di integrarla se necessario.
+- **Chiamata morta a `calculateBudgetTrend`:** Alla riga 118, viene invocata la funzione `calculateBudgetTrend(budget, transactions, historicalPeriods)`, ma il valore restituito non viene assegnato ad alcuna variabile né utilizzato. Questa chiamata esegue calcoli storici ridondanti e consuma CPU inutilmente. Si consiglia di rimuoverla o di integrarla se necessario. *(Risolto nel commit `08de53d`)*
 - **Precedenza esclusiva Categoria/Conto in `getCurrentPeriodSpending`:** Se un budget possiede sia `categoriaId` che `contoId`, l'istruzione condizionale `if (budget.categoriaId)` esegue il return del filtro basato solo su categoria, ignorando completamente il filtro sul conto. Si raccomanda di verificare se questo sia il comportamento desiderato.
 - **Divisione per zero con `totalDays = 0`:** Se `dataInizio === dataFine`, `totalDays` è 0. Questo porta `historicalDailyAverage` ad essere `Infinity`. È opportuno introdurre una guardia per impostare a 0 la media se `totalDays <= 0`.
 
@@ -103,7 +103,7 @@ I sette moduli analizzati in questa sessione sono:
 - **Periodo del budget non supportato:** Se il campo `periodo` del budget contiene un valore non valido o non contemplato dallo switch, le funzioni `getPeriodLabel` e `getPeriodDates` restituiranno `undefined`, provocando crash per mancata corrispondenza di proprietà a runtime.
 
 **NOTE PER L'ARCHITETTO:**
-- **Bug critico JS Date SetMonth (Roll-over su fine mese):** Nelle funzioni `getPeriodLabel` e `getPeriodDates`, la data di riferimento viene manipolata sottraendo mesi con `start.setMonth(start.getMonth() - periodIndex)`. In JavaScript, se la data di partenza cade sul 31 del mese (ad es. 31 Maggio) e sottraiamo 1 mese, il motore JS proverà a impostare 31 Aprile. Poiché Aprile ha solo 30 giorni, la data avanzerà automaticamente al 1° Maggio. Questo comporta il calcolo di date storiche duplicate e intervalli sovrapposti. Si raccomanda caldamente di normalizzare la data di inizio impostando temporaneamente il giorno a 1 prima di effettuare calcoli sui mesi, impostando poi l'ultimo giorno corretto.
+- **Bug critico JS Date SetMonth (Roll-over su fine mese):** Nelle funzioni `getPeriodLabel` e `getPeriodDates`, la data di riferimento viene manipolata sottraendo mesi con `start.setMonth(start.getMonth() - periodIndex)`. In JavaScript, se la data di partenza cade sul 31 del mese (ad es. 31 Maggio) e sottraiamo 1 mese, il motore JS proverà a impostare 31 Aprile. Poiché Aprile ha solo 30 giorni, la data avanzerà automaticamente al 1° Maggio. Questo comporta il calcolo di date storiche duplicate e intervalli sovrapposti. Si raccomanda caldamente di normalizzare la data di inizio impostando temporaneamente il giorno a 1 prima di effettuare calcoli sui mesi, impostando poi l'ultimo giorno corretto. *(Risolto nel commit `efff58a`)*
 
 ---
 
@@ -132,7 +132,7 @@ I sette moduli analizzati in questa sessione sono:
 - **Elenco categorie non definito (`undefined` / `null`):** Se viene passato un valore nullo per `availableCategories`, la chiamata a `.filter` fallirà con un `TypeError` irreversibile.
 
 **NOTE PER L'ARCHITETTO:**
-- **Sensibilità alle maiuscole/minuscole (Case-Sensitivity):** Il metodo di ricerca `.includes(cat.nome)` è strettamente case-sensitive. Ad esempio, il template `spesa-mensile` ha come target `'Spesa alimentare'` (con la "a" minuscola), ma se la categoria disponibile sul database è stata salvata come `'Spesa Alimentare'` (con la "A" maiuscola), la mappatura fallirà silenziosamente restituendo `[]`. Si consiglia di normalizzare il confronto a lettere minuscole (es. `.toLowerCase()`) per prevenire errori dovuti a discrepanze di inserimento da parte dell'utente.
+- **Sensibilità alle maiuscole/minuscole (Case-Sensitivity):** Il metodo di ricerca `.includes(cat.nome)` è strettamente case-sensitive. Ad esempio, il template `spesa-mensile` ha come target `'Spesa alimentare'` (con la "a" minuscola), ma se la categoria disponibile sul database è stata salvata come `'Spesa Alimentare'` (con la "A" maiuscola), la mappatura fallirà silenziosamente restituendo `[]`. Si consiglia di normalizzare il confronto a lettere minuscole (es. `.toLowerCase()`) per prevenire errori dovuti a discrepanze di inserimento da parte dell'utente. *(Risolto nel commit `82e0600`)*
 
 ---
 
@@ -203,7 +203,7 @@ I sette moduli analizzati in questa sessione sono:
 - **Date non parseabili:** Input di date invalide negli helper di formattazione o di progresso temporale produrrà valori `NaN` o stringhe `"Invalid Date"`.
 
 **NOTE PER L'ARCHITETTO:**
-- **Bug di Escaping in `exportToCSV`:** Alla riga 165, la funzione avvolge i valori semplicemente tra doppi apici: `row.map(cell => `"${cell}"`)`. Se la descrizione della transazione contiene delle virgolette doppie (es. `Cena "di lavoro"`), il CSV finale risulterà malformato ed i parser falliranno la lettura. Si raccomanda di effettuare l'escaping raddoppiando i doppi apici (`cell.replace(/"/g, '""')`).
+- **Bug di Escaping in `exportToCSV`:** Alla riga 165, la funzione avvolge i valori semplicemente tra doppi apici: `row.map(cell => `"${cell}"`)`. Se la descrizione della transazione contiene delle virgolette doppie (es. `Cena "di lavoro"`), il CSV finale risulterà malformato ed i parser falliranno la lettura. Si raccomanda di effettuare l'escaping raddoppiando i doppi apici (`cell.replace(/"/g, '""')`). *(Risolto nel commit `0107c7a`)*
 - **Problema di timezone in `formatDateShort`:** La funzione ricava giorno e mese tramite `date.getDate()` e `date.getMonth()`, che si basano sul fuso orario locale del dispositivo. Se i test vengono eseguiti su un server con fuso orario UTC, una data registrata alle `2026-06-27T00:00:00Z` potrebbe essere interpretata come il giorno precedente (es. `26/06/26` se localizzato a ovest rispetto a UTC). Si raccomanda di utilizzare metodi UTC (`getUTCDate()`, `getUTCMonth()`) per garantire consistenza assoluta nei test e in produzione.
 
 ---

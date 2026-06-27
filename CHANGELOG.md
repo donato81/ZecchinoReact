@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [2026-06-27] — Correzione bug moduli core
+- fix(helpers): corregge escaping virgolette in exportToCSV — src/lib/helpers.ts
+- fix(budget-history): corregge roll-over date setMonth su giorni > 28 — src/lib/budget-history.ts
+- fix(budget-forecasting): rimuove chiamata morta a calculateBudgetTrend — src/lib/budget-forecasting.ts
+- fix(budget-templates): rende confronto categorie case-insensitive — src/lib/budget-templates.ts
+
 ## [2026-06-27] — Piano di test moduli core (Fase A)
 ### docs/1-reports/REPORT-piano-test-moduli-core_v1.0.0.md
 - Creato il report con il piano di test dettagliato per i sette moduli core del progetto.
