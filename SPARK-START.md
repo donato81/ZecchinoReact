@@ -15,16 +15,16 @@ necessari per il tuo progetto.
 *Puoi eliminare questo file dopo il primo avvio.*
 *Per domande sull'architettura SPARK, usa l'agente `spark-guide`.*
 
-Versione corrente progetto: `0.18.0`.
+Versione corrente progetto: `0.18.1`.
 Analisi Android completata (DUSU-ANALYZER 2025-07-25).
-Stato aggiornato: 2026-06-27.
+Stato aggiornato: 2026-06-28.
 Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
 012 Export Nativo Guard Concorrente, 017 Prestiti e Mutui, 018 Confronto Mese su Mese per Categoria,
 019 Notifiche Budget e Orchestrazione, 020 Centralizzazione design tokens, 021 Haptic System nativo,
-022 Sound System nativo, Copertura Test Moduli Core (39 test unitari).
+022 Sound System nativo, Copertura Test Moduli Core (39 test unitari), Analisi Copertura Test Completa (SESSIONE D).
 Suite di test: PASS.
-Decisione release: versione avanzata a `0.18.0` consolidando la suite di test unitari completa sui 7 moduli core.
-Prossima azione: Attendere definizione prossimo blocco da donny-81.
+Decisione release: versione avanzata a `0.18.1` registrando il report di analisi copertura test completa su 39 moduli del progetto.
+Prossima azione: Attendere l'approvazione del piano di implementazione della copertura test (E1-E4) o la correzione dei 7 potenziali bug.
 
 ---
 

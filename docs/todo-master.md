@@ -1,7 +1,7 @@
 ## 1. Metadata e Context Header
  
  - **Project Name:** ZecchinoReact
- - **Version:** 0.18.0
+ - **Version:** 0.18.1
  - **Owner:** donny-81
  - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
  - **Environment Sync:** Local
@@ -15,6 +15,7 @@
  - **Active Block:** Nessuno — implementazione test moduli core completata.
  - **Last Updated:** 2026-06-28
  - **Pending Plans:**
+   - **Analisi Copertura Test Completa (SESSIONE D) — COMPLETATA** (report `docs/1-reports/REPORT-analisi-copertura-test-completa_v1.0.0.md` creato il 2026-06-28).
    - **Piano di test moduli core (Fase A e B) — COMPLETATO E IMPLEMENTATO** (report `docs/1-reports/REPORT-piano-test-moduli-core_v1.0.0.md` aggiornato il 2026-06-27).
    - **PLAN 022 COMPLETATO** (release 0.17.0, test coverage v0.18.0) — Refactoring del Sound System in ambiente nativo completato e validato.
    - **PLAN 020 COMPLETATO** —
@@ -46,20 +47,26 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** Copertura di test completa per la macchina a stati di AppDataContext (12 todo test reali implementati, 321 test passanti).
-- **Last Validated Block:** Suite di test AppDataContext (2026-06-28, Antigravity).
-- **Files Modified But Not Validated:** 
+- **Last Completed Task:** Analisi completa della copertura dei test mancanti su 39 moduli (SESSIONE D) e stesura del report di gap analysis v1.0.0.
+- **Last Validated Block:** Report analisi copertura test completa (2026-06-28, Antigravity).
+- **Files Modified But Not Validated:** Nessuno
  - **Open Threads:**
-  - AN-02: `src/lib/sound-system.ts` — IMPLEMENTATO e CLOSED (2026-06-27)
   - AN-03: `oklch colori` — da verificare per compatibilità Android (da DESIGN 020)
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
-  - DD-02: `docs/architettura.md` — use-online-status.ts — CLOSED
-  - Pulizia documentale 7.1: 2 debiti tecnici chiusi in data 2026-06-27 dopo verifica codice.
-  - REPORT-debiti-tecnici-android_v1.0.0.md prodotto il 2026-06-27. 10 debiti analizzati, 3 codificabili senza UI con focus Android. Next Action: review report da donny-81.
-  - Permesso VIBRATE Android: aggiunto in AndroidManifest.xml il 2026-06-27. Problema critico Android chiuso.
-  - DT-016-ter-01 CHIUSO il 2026-06-27: supporto HEIC e WEBP aggiunto alla validazione magic bytes.
+  - BUG-1 (CRITICO): perdita delle simulazioni locali in `AppDataContext.tsx` al bootstrap online.
+  - BUG-2 (ALTO): crash di runtime in `t.ts` su chiavi di traduzione mancanti.
+  - BUG-3 (MEDIO): crash per `subscription.remove` nullo in `detection.ts`.
+  - BUG-4 (MEDIO): crash per `subscription.remove` nullo in `AuthContext.tsx`.
+  - BUG-5 (MEDIO): parametro `hadTransactions` cablato a `true` in `AppDataContext.tsx`.
+  - BUG-6 (BASSO): perdita di capitalizzazione in `plurals.ts` per parole irregolari.
+  - BUG-7 (BASSO): mancato annuncio vocale di sforamento per budget con target pari a 0.
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
   - **Next Action:** Esecuzione del push finale su main.
+
+> Nota sessione analisi 2026-06-28 (Antigravity):
+> Completata la SESSIONE D: eseguito il censimento e l'analisi completa della copertura dei test mancanti per 39 moduli del progetto.
+> Redatto il report dettagliato in `docs/1-reports/REPORT-analisi-copertura-test-completa_v1.0.0.md` censendo 324 test necessari e individuando 7 potenziali bug (tra cui BUG-1 critico e BUG-2 alto).
+> Proposto piano di rilascio diviso in 4 sessioni (E1, E2, E3, E4) per implementare la copertura completa.
 
 > Nota sessione coding 2026-06-28 (Antigravity):
 > Completata la SESSIONE C: implementati i 12 test unitari todo in `__tests__/AppDataContext.spec.ts` coprendo robustezza dello stato, concorrenza e resilienza della cache.

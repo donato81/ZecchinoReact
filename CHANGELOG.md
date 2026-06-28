@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.18.1] — 2026-06-28 — Analisi Copertura Test Completa (SESSIONE D)
+
+### Added
+- docs(reports): aggiunto REPORT-analisi-copertura-test-completa_v1.0.0.md contenente l'analisi dettagliata di copertura dei 39 moduli principali del progetto.
+- docs(reports): censiti 7 potenziali bug (tra cui BUG-1 critico di perdita delle simulazioni e BUG-2 di crash traduzioni).
+- docs(reports): pianificato il rilascio sequenziale in 4 sessioni (E1, E2, E3, E4) per un totale stimato di 324 nuovi test unitari.
+
 ## [0.18.0] — 2026-06-28 — Copertura Test Unitari Moduli Core (Fase B & C)
 
 ### Added
