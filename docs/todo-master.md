@@ -1,19 +1,19 @@
 ## 1. Metadata e Context Header
  
  - **Project Name:** ZecchinoReact
-- **Version:** 0.18.0
+ - **Version:** 0.18.0
  - **Owner:** donny-81
  - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
  - **Environment Sync:** Local
- - **Ultimo Agente Attivo:** Antigravity, 2026-06-27
+ - **Ultimo Agente Attivo:** Antigravity, 2026-06-28
  - **Blocco in Carico:** Nessuno
  - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
  
  ### Stato Globale Corrente
  
-- **Active Phase:** P0/P1/P2 completate. DESIGN 022 e 021 implementati (Fase 1 completata).
-- **Active Block:** Nessuno — implementazione test moduli core completata.
-- **Last Updated:** 2026-06-27
+ - **Active Phase:** P0/P1/P2 completate. DESIGN 022 e 021 implementati (Fase 1 completata).
+ - **Active Block:** Nessuno — implementazione test moduli core completata.
+ - **Last Updated:** 2026-06-28
  - **Pending Plans:**
    - **Piano di test moduli core (Fase A e B) — COMPLETATO E IMPLEMENTATO** (report `docs/1-reports/REPORT-piano-test-moduli-core_v1.0.0.md` aggiornato il 2026-06-27).
    - **PLAN 022 COMPLETATO** (release 0.17.0, test coverage v0.18.0) — Refactoring del Sound System in ambiente nativo completato e validato.
@@ -46,8 +46,8 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** Copertura di test unitari completa per i sette moduli core (Fase B, 7 commit atomici).
-- **Last Validated Block:** Suite di test moduli core (2026-06-27, Antigravity).
+- **Last Completed Task:** Copertura di test completa per la macchina a stati di AppDataContext (12 todo test reali implementati, 321 test passanti).
+- **Last Validated Block:** Suite di test AppDataContext (2026-06-28, Antigravity).
 - **Files Modified But Not Validated:** 
  - **Open Threads:**
   - AN-02: `src/lib/sound-system.ts` — IMPLEMENTATO e CLOSED (2026-06-27)
@@ -59,7 +59,13 @@
   - Permesso VIBRATE Android: aggiunto in AndroidManifest.xml il 2026-06-27. Problema critico Android chiuso.
   - DT-016-ter-01 CHIUSO il 2026-06-27: supporto HEIC e WEBP aggiunto alla validazione magic bytes.
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
-  - **Next Action:** Attendere definizione prossimo blocco da donny-81.
+  - **Next Action:** Esecuzione del push finale su main.
+
+> Nota sessione coding 2026-06-28 (Antigravity):
+> Completata la SESSIONE C: implementati i 12 test unitari todo in `__tests__/AppDataContext.spec.ts` coprendo robustezza dello stato, concorrenza e resilienza della cache.
+> Esposta la transizione `transitionTo` in `AppDataContextValue` per abilitare la testabilità controllata dello stato.
+> Risolti errori tipi e allineato `process` con `globalThis.process` per la compilazione TypeScript.
+> Tutti i 321 test del progetto sono passanti.
 
 > Nota sessione orchestrazione 2026-05-29:
 > Creati i sei documenti di pianificazione richiesti:

@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [0.18.0] — 2026-06-27 — Copertura Test Unitari Moduli Core (Fase B)
+## [0.18.0] — 2026-06-28 — Copertura Test Unitari Moduli Core (Fase B & C)
 
 ### Added
 - test(budget-forecasting): suite completa di 18 test unitari per previsioni budget.
@@ -10,10 +10,14 @@
 - test(helpers): suite di 13 test unitari per calcoli saldi, proiezioni e CSV.
 - test(accessibility-engine): suite di 5 test unitari per sintesi annunci fire-and-forget.
 - test(accessibility-detection): suite di 14 test unitari per hook rilevamento TalkBack e adattamenti UI.
+- test(AppDataContext): implementati i 12 test todo per la macchina a stati, gestione concorrenza (generation counter) e cache fail-soft in `__tests__/AppDataContext.spec.ts`.
 
 ### Fixed
 - fix(kdf-provider): aggiunto early return per `keyLength === 0` per evitare crash crittografici nativi Node.
 - fix(helpers): allineamento tipi con campo obbligatorio `cifrato` per conformità TypeScript compiler.
+- fix(kdf-provider-test): corretto il mock di `react-native-quick-crypto` tramite getters dinamici evitando conflitti di cache tra i test.
+- fix(accessibility-engine-test): risolti errori preesistenti TypeScript relativi a global e `__DEV__`.
+- fix(AppDataContext-test): allineato riferimento `process` a `globalThis.process` per la corretta compilazione del modulo di test.
 
 ## [2026-06-27] — Correzione bug moduli core
 - fix(helpers): corregge escaping virgolette in exportToCSV — src/lib/helpers.ts
