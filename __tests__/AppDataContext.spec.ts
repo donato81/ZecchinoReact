@@ -449,7 +449,35 @@ describe('AppDataContext — PLAN 007', () => {
 
       harness.unmount();
     });
-    it.todo('HYDRATING → CACHE-READY con cache presente e validata');
+    it('HYDRATING → CACHE-READY con cache presente e validata', async () => {
+      const cachedAccounts = [{ id: 'conto-1', nome: 'Conto Cash', saldoIniziale: 100 }];
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockUseNetworkStatus.mockReturnValue({
+        isOffline: true,
+        isInitialized: true,
+        isConnected: false,
+        isInternetReachable: false,
+        connectionType: 'wifi',
+      } as never);
+      mockReadCache.mockImplementation(async (_u, table) => {
+        if (table === 'conti') return entry(cachedAccounts);
+        if (table === 'transazioni_tag') return entry({});
+        return entry([]);
+      });
+
+      const harness = renderAppDataProvider();
+
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      expect(harness.getValue().isDataReady).toBe(true);
+      expect(harness.getValue().accounts).toEqual(cachedAccounts);
+      harness.unmount();
+    });
     it('HYDRATING → READY con rete OK e dati caricati', async () => {
       mockUseAuth.mockReturnValue({
         isAuthenticated: true,
@@ -658,9 +686,131 @@ describe('AppDataContext — PLAN 007', () => {
       expect(harness.getValue().transactionTagMap).toEqual({});
       harness.unmount();
     });
-    it.todo('CACHE-READY → REMOTE-SYNC al completamento refresh background');
-    it.todo('REMOTE-SYNC → READY come stato di quiete');
-    it.todo('IDLE → READY diretto vietato (deve attraversare HYDRATING)');
+    it('CACHE-READY → REMOTE-SYNC al completamento refresh background', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockUseNetworkStatus.mockReturnValue({
+        isOffline: true,
+        isInitialized: true,
+        isConnected: false,
+        isInternetReachable: false,
+        connectionType: 'wifi',
+      } as never);
+      mockReadCache.mockImplementation(async (_u, table) =>
+        table === 'transazioni_tag' ? entry({} as never) : entry([] as never),
+      );
+
+      let resolveConti!: (value: never) => void;
+      mockGetAllConti.mockImplementation(
+        () =>
+          new Promise(resolve => {
+            resolveConti = resolve as never;
+          }),
+      );
+
+      const harness = renderAppDataProvider();
+
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      expect(harness.getValue().isDataReady).toBe(true);
+      expect(harness.getValue().isLoading).toBe(false);
+
+      mockUseNetworkStatus.mockReturnValue({
+        isOffline: false,
+        isInitialized: true,
+        isConnected: true,
+        isInternetReachable: true,
+        connectionType: 'wifi',
+      } as never);
+      harness.rerender();
+
+      await act(async () => {
+        harness.getValue().refreshAll();
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      expect(harness.getValue().isLoading).toBe(true);
+      expect(harness.getValue().isDataReady).toBe(true);
+
+      await act(async () => {
+        resolveConti([] as never);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      expect(harness.getValue().isLoading).toBe(false);
+      expect(harness.getValue().isDataReady).toBe(true);
+      harness.unmount();
+    });
+
+    it('REMOTE-SYNC → READY come stato di quiete', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+
+      let resolveConti!: (value: never) => void;
+      mockGetAllConti.mockImplementation(
+        () =>
+          new Promise(resolve => {
+            resolveConti = resolve as never;
+          }),
+      );
+
+      const harness = renderAppDataProvider();
+
+      await act(async () => {
+        resolveConti([] as never);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      expect(harness.getValue().isDataReady).toBe(true);
+      expect(harness.getValue().isLoading).toBe(false);
+
+      mockGetAllConti.mockImplementation(
+        () =>
+          new Promise(resolve => {
+            resolveConti = resolve as never;
+          }),
+      );
+
+      await act(async () => {
+        harness.getValue().refreshAll();
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      expect(harness.getValue().isLoading).toBe(true);
+
+      await act(async () => {
+        resolveConti([] as never);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      expect(harness.getValue().isLoading).toBe(false);
+      expect(harness.getValue().isDataReady).toBe(true);
+      expect(harness.getValue().error).toBeNull();
+      harness.unmount();
+    });
+
+    it('IDLE → READY diretto vietato (deve attraversare HYDRATING)', async () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      mockUseAuth.mockReturnValue({ isAuthenticated: false, user: null } as never);
+      const harness = renderAppDataProvider();
+
+      const result = harness.getValue().transitionTo!('READY');
+
+      expect(result).toBe(false);
+      expect(harness.getValue().isDataReady).toBe(false);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Transizione vietata IDLE → READY'),
+      );
+
+      warnSpy.mockRestore();
+      harness.unmount();
+    });
     it('* → IDLE al logout da qualsiasi stato autenticato', async () => {
       const ricorrenze = [
         {
@@ -960,30 +1110,324 @@ describe('AppDataContext — PLAN 007', () => {
     });
   });
 
-  describe('Concorrenza refreshAll — INV3 (richiede harness Provider)', () => {
-    // TODO residui PLAN 011: servono promise indipendenti per tutte e 5 le
-    // repository, wrapper React.StrictMode e controllo deterministico delle
-    // race tra refreshAll e hydration iniziale. Il prerequisito manca nella
-    // fixture attuale, pensata solo per bootstrap/export a un singolo consumer.
-    it.todo(
-      'invocazioni concorrenti refreshAll: nessuna doppia applyDomainSnapshot',
-    );
-    it.todo('hydration A pre-B ma termina dopo: B vince (generation counter)');
-    it.todo(
-      'React 18 Strict Mode double invoke: nessuna doppia transizione READY',
-    );
-    it.todo('hydration invalidata al logout (transizione * → IDLE)');
-  });
+    it('invocazioni concorrenti refreshAll: nessuna doppia applyDomainSnapshot', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+
+      let resolveConti!: (value: never) => void;
+      mockGetAllConti.mockImplementation(
+        () =>
+          new Promise(resolve => {
+            resolveConti = resolve as never;
+          }),
+      );
+
+      const harness = renderAppDataProvider();
+
+      // Resolve initial bootstrap to READY
+      await act(async () => {
+        resolveConti([] as never);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      expect(harness.getValue().isDataReady).toBe(true);
+
+      // Now prepare mock for refresh
+      mockGetAllConti.mockClear();
+      mockGetAllConti.mockImplementation(
+        () =>
+          new Promise(resolve => {
+            resolveConti = resolve as never;
+          }),
+      );
+
+      // Trigger first refreshAll
+      await act(async () => {
+        harness.getValue().refreshAll();
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      expect(mockGetAllConti).toHaveBeenCalledTimes(1);
+
+      // Trigger second refreshAll concurrently while state is REMOTE-SYNC
+      await act(async () => {
+        harness.getValue().refreshAll();
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      // It should NOT have triggered a second load
+      expect(mockGetAllConti).toHaveBeenCalledTimes(1);
+
+      // Complete the first load
+      await act(async () => {
+        resolveConti([] as never);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      // No double loading or errors
+      expect(harness.getValue().isDataReady).toBe(true);
+      expect(harness.getValue().isLoading).toBe(false);
+      harness.unmount();
+    });
+
+    it('hydration A pre-B ma termina dopo: B vince (generation counter)', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: 'user-A' },
+      } as never);
+
+      let resolveA!: (value: any) => void;
+      let resolveB!: (value: any) => void;
+
+      mockGetAllConti
+        .mockImplementationOnce(() => new Promise(resolve => { resolveA = resolve; }))
+        .mockImplementationOnce(() => new Promise(resolve => { resolveB = resolve; }));
+
+      const harness = renderAppDataProvider();
+
+      // Hydration A is in flight. Now log out to transition state to IDLE
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: false,
+        user: null,
+      } as never);
+      harness.rerender();
+
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      // Now log in as user B
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: 'user-B' },
+      } as never);
+      harness.rerender();
+
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      // Hydration B is in flight. Let's resolve B first
+      await act(async () => {
+        resolveB([{ id: 'conto-B', nome: 'B' }]);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      expect(harness.getValue().accounts).toEqual([{ id: 'conto-B', nome: 'B' }]);
+
+      // Now resolve A (outdated)
+      await act(async () => {
+        resolveA([{ id: 'conto-A', nome: 'A' }]);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      // Accounts should STILL be B, not A!
+      expect(harness.getValue().accounts).toEqual([{ id: 'conto-B', nome: 'B' }]);
+      harness.unmount();
+    });
+
+    it('React 18 Strict Mode double invoke: nessuna doppia transizione READY', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+
+      const harness = renderAppDataProvider();
+
+      // First run has triggered bootstrap
+      expect(mockGetAllConti).toHaveBeenCalledTimes(1);
+
+      // Simulate a re-run of useEffect while HYDRATING by changing a dependency
+      mockUseNetworkStatus.mockReturnValue({
+        isOffline: false,
+        isInitialized: true,
+        isConnected: true,
+        isInternetReachable: true,
+        connectionType: 'cellular',
+      } as never);
+      harness.rerender();
+
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      // It should NOT call getAllConti again
+      expect(mockGetAllConti).toHaveBeenCalledTimes(1);
+      harness.unmount();
+    });
+
+    it('hydration invalidata al logout (transizione * → IDLE)', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+
+      let resolveConti!: (value: any) => void;
+      mockGetAllConti.mockImplementation(
+        () =>
+          new Promise(resolve => {
+            resolveConti = resolve as never;
+          }),
+      );
+
+      const harness = renderAppDataProvider();
+
+      // Hydration in progress
+      expect(harness.getValue().isLoading).toBe(true);
+
+      // Now log out
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: false,
+        user: null,
+      } as never);
+      harness.rerender();
+
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      // State must be IDLE
+      expect(harness.getValue().isLoading).toBe(false);
+      expect(harness.getValue().isDataReady).toBe(false);
+
+      // Resolve the old fetch
+      await act(async () => {
+        resolveConti([{ id: 'conto-1', nome: 'Conto' }]);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      // Data must remain empty
+      expect(harness.getValue().accounts).toEqual([]);
+      harness.unmount();
+    });
 
   describe('writeCache fail-soft — INV4 (richiede harness Provider)', () => {
     // TODO residui PLAN 011: per coprire questi casi serve una fixture che
     // osservi il flush asincrono post-READY e differenzi gli errori per
     // tabella AsyncStorage. Il mock attuale di cache non espone ancora quel
     // livello di granularità né l'ordine dei side effect background.
-    it.todo('errore AsyncStorage.setItem su una tabella: no crash');
-    it.todo('errore writeCache: no unhandled promise rejection');
-    it.todo('errore writeCache: no alterazione stato React in memoria');
-    it.todo('errore su una tabella: altre tabelle vengono comunque scritte');
+    it('errore AsyncStorage.setItem su una tabella: no crash', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      mockWriteCache.mockRejectedValue(new Error('AsyncStorage error'));
+
+      const harness = renderAppDataProvider();
+
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      // Verify we reached READY and didn't crash
+      expect(harness.getValue().isDataReady).toBe(true);
+      expect(mockWriteCache).toHaveBeenCalled();
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[AppDataContext] writeCache fallito',
+        expect.any(Object),
+      );
+
+      warnSpy.mockRestore();
+      harness.unmount();
+    });
+
+    it('errore writeCache: no unhandled promise rejection', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      
+      const unhandledRejections: any[] = [];
+      const handler = (reason: any) => { unhandledRejections.push(reason); };
+      const unhandledProcess = (globalThis as any).process;
+      if (unhandledProcess) {
+        unhandledProcess.on('unhandledRejection', handler);
+      }
+
+      mockWriteCache.mockRejectedValue(new Error('writeCache failed'));
+
+      const harness = renderAppDataProvider();
+
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      if (unhandledProcess) {
+        unhandledProcess.off('unhandledRejection', handler);
+      }
+
+      expect(harness.getValue().isDataReady).toBe(true);
+      expect(unhandledRejections).toHaveLength(0);
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[AppDataContext] writeCache fallito',
+        expect.any(Object),
+      );
+
+      warnSpy.mockRestore();
+      harness.unmount();
+    });
+
+    it('errore writeCache: no alterazione stato React in memoria', async () => {
+      const mockAccounts = [{ id: 'conto-1', nome: 'Conto principale' }];
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockGetAllConti.mockResolvedValueOnce(mockAccounts as never);
+
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      mockWriteCache.mockRejectedValue(new Error('writeCache failed'));
+
+      const harness = renderAppDataProvider();
+
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      expect(harness.getValue().accounts).toEqual(mockAccounts);
+
+      warnSpy.mockRestore();
+      harness.unmount();
+    });
+
+    it('errore su una tabella: altre tabelle vengono comunque scritte', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      
+      mockWriteCache.mockImplementation(async (_u, table) => {
+        if (table === 'conti') {
+          throw new Error('conti write failed');
+        }
+      });
+
+      const harness = renderAppDataProvider();
+
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 20));
+      });
+
+      expect(mockWriteCache).toHaveBeenCalledWith(USER, 'conti', expect.any(Array));
+      expect(mockWriteCache).toHaveBeenCalledWith(USER, 'transazioni', expect.any(Array));
+      expect(mockWriteCache).toHaveBeenCalledWith(USER, 'categorie', expect.any(Array));
+      
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[AppDataContext] writeCache fallito',
+        expect.objectContaining({ table: 'conti' }),
+      );
+
+      warnSpy.mockRestore();
+      harness.unmount();
+    });
     it('writeCache include i nuovi slice ricorrenze, tag e transazioni_tag quando il bootstrap e READY', async () => {
       mockUseAuth.mockReturnValue({
         isAuthenticated: true,

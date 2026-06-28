@@ -285,6 +285,7 @@ type AppDataContextValue = {
   // Dialog keyboard shortcuts
   showKeyboardHelp: boolean;
   setShowKeyboardHelp: (v: boolean) => void;
+  transitionTo?: (to: any, payload?: { error?: string | null }) => boolean;
 };
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
@@ -1792,6 +1793,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       handleAddFundsToGoal,
       showKeyboardHelp,
       setShowKeyboardHelp,
+      transitionTo,
     }),
     [
       accounts,
@@ -1868,6 +1870,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       showDeleteDialog,
       showKeyboardHelp,
       showSavingsGoalDialog,
+      transitionTo,
       showTransactionDialog,
       tags,
       transactionTagMap,
