@@ -335,3 +335,88 @@ Si raccomanda di implementare i test seguendo l'ordine dei 4 commit proposti per
 2. La compilazione del codice e dei test deve essere validata prima di ogni commit con:
    `npx tsc --noEmit`
 3. Nel caso in cui una suite di test rimanga bloccata per più di 10 tentativi consecutivi, si dovrà accodare a questo documento un **Diagnostic Report** dettagliato contenente il log dell'errore, lo stack trace e l'analisi del fallimento per il Consiglio AI.
+
+## Note tecniche post-validazione Consiglio AI
+
+Documento: validazione sessione del 2026-06-30.
+Organo: Consiglio AI (Perplexity, Gemini, DeepSeek, ChatGPT).
+Stato: osservazioni non bloccanti — integrate prima del Commit 1.
+
+### NT-1 — client.ts: isolamento modulo nei test Jest
+
+Il modulo `src/lib/supabase/client.ts` importa `SUPABASE_URL` e
+`SUPABASE_ANON_KEY` da `@env` e lancia un errore direttamente al
+momento dell'importazione se una delle due variabili è assente.
+
+Questo comportamento si chiama errore in import-time: il modulo
+fallisce nel momento stesso in cui viene caricato, non quando viene
+chiamata una funzione.
+
+Problema tecnico: se il file di test importa `client.ts` una sola
+volta all'inizio con `import`, Jest mette in cache il modulo.
+I test successivi non ricaricano più il modulo e non possono
+quindi testare correttamente gli scenari di errore all'importazione.
+
+Strategia obbligatoria per i Test 11 e 12:
+- Non importare `client.ts` staticamente all'inizio del file di test.
+- Usare `jest.resetModules()` nel `beforeEach` per svuotare la cache
+  dei moduli prima di ogni test.
+- Usare `jest.isolateModules()` oppure `require()` dinamico all'interno
+  di ogni singolo test, dopo aver configurato il mock di `@env`.
+
+Esempio di struttura corretta:
+
+```ts
+  beforeEach(() => {
+    jest.resetModules();
+  });
+
+  it('lancia errore se SUPABASE_URL manca', () => {
+    jest.doMock('@env', () => ({
+      SUPABASE_URL: '',
+      SUPABASE_ANON_KEY: 'test-key',
+    }));
+    jest.isolateModules(() => {
+      expect(() => {
+        require('../src/lib/supabase/client');
+      }).toThrow();
+    });
+  });
+```
+
+### NT-2 — storage-cleanup-service.ts: strategia di test per funzioni interne
+
+Il modulo `src/lib/storage-cleanup-service.ts` espone pubblicamente
+solo la factory `createStorageCleanupService(customDeps?)`.
+
+Le funzioni `listStoragePrefix`, `listCandidateFilesDefault` e
+`listKnownPathsDefault` sono funzioni interne non esportate.
+Quando non vengono passate dipendenze custom alla factory, il servizio
+usa queste funzioni interne come implementazione predefinita.
+
+Strategia preferita per i Test 85-90:
+Invocare `createStorageCleanupService()` senza passare `customDeps`,
+e mockare invece le API esterne da cui dipendono le funzioni interne:
+`supabase.storage`, `supabase.from` e `deleteAttachment`.
+In questo modo i test coprono il flusso reale, incluse le funzioni
+interne, senza doverle esportare.
+
+Strategia alternativa (ammessa solo come fallback motivato):
+Se la strategia preferita non consente una copertura stabile e
+verificabile, è ammesso esportare le funzioni interne tramite un
+namespace dedicato `_testing`. In tal caso la scelta deve essere
+motivata esplicitamente nel messaggio del commit in cui viene
+applicata.
+
+### NT-3 — helpers.ts: chiarimento conteggio scenari e task
+
+Il PLAN dichiara 10 test per `helpers.ts`.
+Il TODO elenca i task dal Test 15 al Test 25, che sono 11 task numerati.
+
+La discrepanza è intenzionale e non è un errore.
+Il Test 25 copre due funzioni correlate in un unico task operativo:
+`getSavingsGoalProgress` e `calculateSavingsProjection`.
+
+Il conteggio totale di 116 test dichiarato nel PLAN è corretto.
+Non è necessario rinumerare il TODO.
+Il Test 25 doppio è documentato e accettato.
