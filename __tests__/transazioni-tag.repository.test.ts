@@ -125,4 +125,32 @@ describe('transazioni-tag.repository', () => {
       p_tag_id: 'tag-atomic',
     });
   });
+
+  // --- INTEGRATION SESSIONE E4 ---
+
+  it('E4-82: getTagsForTransaction - lancia RepositoryError se Supabase fallisce', async () => {
+    buildSelectChain({
+      data: null,
+      error: { message: 'DB load tags failed' },
+    });
+
+    await expect(getTagsForTransaction('tx-1')).rejects.toThrow();
+  });
+
+  it('E4-83: getTagMapForTransactions - lancia RepositoryError se Supabase fallisce', async () => {
+    buildSelectChain({
+      data: null,
+      error: { message: 'DB load tag map failed' },
+    });
+
+    await expect(getTagMapForTransactions(['tx-1', 'tx-2'])).rejects.toThrow();
+  });
+
+  it('E4-84: setTagsForTransaction - lancia RepositoryError se la RPC fallisce', async () => {
+    mockRpc.mockResolvedValueOnce({
+      error: { message: 'RPC set tags failed' },
+    });
+
+    await expect(setTagsForTransaction('tx-1', ['tag-1'])).rejects.toThrow();
+  });
 });

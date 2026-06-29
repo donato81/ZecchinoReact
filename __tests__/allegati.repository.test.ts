@@ -240,4 +240,78 @@ describe('allegati.repository', () => {
       ascending: false,
     });
   });
+
+  // --- INTEGRATION SESSIONE E4 ---
+
+  it('E4-72: create - inserimento record riuscito con conversione in camelCase', async () => {
+    const chain = buildInsertChain({
+      data: ROW,
+      error: null,
+    });
+
+    const result = await create({
+      transazioneId: 'tx-016',
+      file: {
+        uri: 'file:///documento.pdf',
+        name: 'documento.pdf',
+        type: 'application/pdf',
+        size: 2048,
+      },
+      descrizione: 'Ricevuta',
+    });
+
+    expect(result).toEqual({
+      id: 'all-1',
+      transazioneId: 'tx-016',
+      nomeFile: 'documento.pdf',
+      storagePath: 'user-016/tx-016/uuid-documento.pdf',
+      mimeType: 'application/pdf',
+      dimensioneBytes: 2048,
+      descrizione: 'Ricevuta',
+      miniaturaPath: undefined,
+      createdAt: '2026-05-28T12:00:00.000Z',
+    });
+    expect(chain.insert).toHaveBeenCalled();
+  });
+
+  it('E4-73: getById - recupero per ID riuscito con conversione camelCase', async () => {
+    const chain = buildSelectChain({
+      data: ROW,
+      error: null,
+    });
+
+    const result = await getById('all-1');
+    expect(result).toEqual({
+      id: 'all-1',
+      transazioneId: 'tx-016',
+      nomeFile: 'documento.pdf',
+      storagePath: 'user-016/tx-016/uuid-documento.pdf',
+      mimeType: 'application/pdf',
+      dimensioneBytes: 2048,
+      descrizione: 'Ricevuta',
+      miniaturaPath: undefined,
+      createdAt: '2026-05-28T12:00:00.000Z',
+    });
+    expect(chain.eq).toHaveBeenCalledWith('id', 'all-1');
+  });
+
+  it('E4-74: create - fallimento upload su storage (DB non viene toccato)', async () => {
+    mockUploadAttachment.mockRejectedValueOnce(new Error('Storage crash'));
+    const chain = buildInsertChain({
+      data: ROW,
+      error: null,
+    });
+
+    await expect(create({
+      transazioneId: 'tx-016',
+      file: {
+        uri: 'file:///documento.pdf',
+        name: 'documento.pdf',
+        type: 'application/pdf',
+        size: 2048,
+      },
+    })).rejects.toThrow('Storage crash');
+
+    expect(chain.insert).not.toHaveBeenCalled();
+  });
 });

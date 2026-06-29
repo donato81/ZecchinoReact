@@ -260,4 +260,63 @@ describe('notifiche.repository', () => {
     ).resolves.toBeUndefined();
     expect(chain.eq).toHaveBeenCalledWith('letta', true);
   });
+
+  // --- INTEGRATION SESSIONE E4 ---
+
+  function buildE4Chain(result: unknown) {
+    const promise = Promise.resolve(result);
+    const chain: any = promise;
+    const mockFn = jest.fn(() => chain);
+    chain.select = mockFn;
+    chain.eq = mockFn;
+    chain.contains = mockFn;
+    chain.order = mockFn;
+    chain.single = mockFn;
+    chain.update = mockFn;
+    chain.insert = mockFn;
+    chain.delete = mockFn;
+    chain.lt = mockFn;
+    mockFrom.mockReturnValue(chain);
+    return chain;
+  }
+
+  it('E4-75: getAll - lancia RepositoryError in caso di errore Supabase', async () => {
+    buildSelectChain({ data: null, error: { message: 'Database error' } });
+    await expect(getAll()).rejects.toThrow();
+  });
+
+  it('E4-76: getUnreadCount - lancia RepositoryError in caso di errore Supabase', async () => {
+    buildSelectChain({ count: null, error: { message: 'Database error' } });
+    await expect(getUnreadCount()).rejects.toThrow();
+  });
+
+  it('E4-77: markAsRead - lancia RepositoryError se l\'aggiornamento fallisce', async () => {
+    buildUpdateChain({ data: null, error: { message: 'Update error' } });
+    await expect(markAsRead('notif-1')).rejects.toThrow();
+  });
+
+  it('E4-78: markAllAsRead - lancia RepositoryError se l\'aggiornamento massivo fallisce', async () => {
+    buildE4Chain({ error: { message: 'Bulk update error' } });
+    await expect(markAllAsRead({ entitaTipo: 'budget', entitaId: 'budget-1' })).rejects.toThrow();
+  });
+
+  it('E4-79: create - lancia RepositoryError se l\'inserimento fallisce', async () => {
+    buildInsertChain({ data: null, error: { message: 'Insert error' } });
+    await expect(create({
+      tipo: 'budget_soglia',
+      titolo_key: 'notifiche.budget.titolo.warning',
+      messaggio_key: 'notifiche.budget.messaggio.warning',
+      metadata: {},
+    })).rejects.toThrow();
+  });
+
+  it('E4-80: remove - lancia RepositoryError se l\'eliminazione fallisce', async () => {
+    buildE4Chain({ error: { message: 'Delete error' } });
+    await expect(remove('notif-1')).rejects.toThrow();
+  });
+
+  it('E4-81: cleanupReadExpiredBefore - lancia RepositoryError se la pulizia fallisce', async () => {
+    buildE4Chain({ error: { message: 'Cleanup error' } });
+    await expect(cleanupReadExpiredBefore('2026-05-01T00:00:00.000Z')).rejects.toThrow();
+  });
 });

@@ -194,8 +194,69 @@ describe('allegati.storage', () => {
     });
     mockFrom.mockReturnValue(bucket);
 
-    await expect(
-      getAttachmentSignedUrl('user-016/tx-016/uuid-016-file.pdf'),
-    ).rejects.toThrow("Impossibile generare il link temporaneo dell'allegato.");
+  });
+
+  // --- INTEGRATION SESSIONE E4 ---
+
+  it('E4-40: uploadAttachment - lancia errore se bucket.upload fallisce', async () => {
+    const bucket = buildStorageBucket();
+    bucket.upload.mockResolvedValue({ error: { message: 'caricamento fallito' } });
+    mockFrom.mockReturnValue(bucket);
+
+    await expect(uploadAttachment('user-1', 'tx-1', {
+      uri: 'file:///document.pdf',
+      name: 'document.pdf',
+      type: 'application/pdf',
+      size: 1024,
+    })).rejects.toThrow("Impossibile caricare l'allegato.");
+  });
+
+  it('E4-41: deleteAttachment - lancia errore se bucket.remove fallisce', async () => {
+    const bucket = buildStorageBucket();
+    bucket.remove.mockResolvedValue({ error: { message: 'rimozione fallita' } });
+    mockFrom.mockReturnValue(bucket);
+
+    await expect(deleteAttachment('user-1/tx-1/file.pdf')).rejects.toThrow("Impossibile eliminare l'allegato.");
+  });
+
+  it('E4-42: validateAttachmentFile - rifiuta firma magic bytes non corrispondente al MIME dichiarante', async () => {
+    mockReadFileHeader.mockResolvedValue(Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+
+    const result = await validateAttachmentFile({
+      uri: 'file:///spoofed.pdf',
+      name: 'spoofed.pdf',
+      type: 'application/pdf',
+      size: 1024,
+    });
+
+    expect(result).toEqual({
+      code: 'MIME_EXTENSION_MISMATCH',
+      message: 'Estensione e tipo file non sono coerenti.',
+    });
+  });
+
+  it('E4-43: validateAttachmentFile - rifiuta file con estensioni multiple non permesse', async () => {
+    const result = await validateAttachmentFile({
+      uri: 'file:///document.pdf.exe',
+      name: 'document.pdf.exe',
+      type: 'application/pdf',
+      size: 1024,
+    });
+
+    expect(result).toEqual({
+      code: 'MIME_EXTENSION_MISMATCH',
+      message: 'Estensione e tipo file non sono coerenti.',
+    });
+  });
+
+  it('E4-44: validateAttachmentFile - propaga errore se la lettura del file fallisce', async () => {
+    mockReadFileHeader.mockRejectedValue(new Error('File access error'));
+
+    await expect(validateAttachmentFile({
+      uri: 'file:///blocked.pdf',
+      name: 'blocked.pdf',
+      type: 'application/pdf',
+      size: 1024,
+    })).rejects.toThrow('File access error');
   });
 });

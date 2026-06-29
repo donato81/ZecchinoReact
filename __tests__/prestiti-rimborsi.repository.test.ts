@@ -97,4 +97,120 @@ describe('Repository Prestiti Rimborsi', () => {
       });
     });
   });
+
+  // --- INTEGRATION SESSIONE E4 ---
+
+  describe('E4 Integration Tests', () => {
+    it('E4-55: getByPrestitoId - ritorna array vuoto se non ci sono rimborsi', async () => {
+      mockQuery.order.mockResolvedValueOnce({
+        data: [],
+        error: null,
+      });
+
+      const result = await getByPrestitoId('prestito-1');
+      expect(result).toHaveLength(0);
+    });
+
+    it('E4-56: getByPrestitoId - lancia RepositoryError in caso di errore Supabase', async () => {
+      mockQuery.order.mockResolvedValueOnce({
+        data: null,
+        error: { message: 'Database error' },
+      });
+
+      await expect(getByPrestitoId('prestito-1')).rejects.toThrow();
+    });
+
+    it('E4-57: addRimborso - lancia RepositoryError se RPC fallisce', async () => {
+      (supabase.rpc as jest.Mock).mockResolvedValueOnce({
+        data: null,
+        error: { message: 'RPC error' },
+      });
+
+      await expect(addRimborso({
+        prestitoId: 'prestito-1',
+        importo: 500,
+        dataRimborso: '2023-02-01',
+        quotaCapitale: 400,
+        quotaInteressi: 100,
+      })).rejects.toThrow();
+    });
+
+    it('E4-58: addRimborso - lancia RepositoryError se il recupero del record creato fallisce', async () => {
+      (supabase.rpc as jest.Mock).mockResolvedValueOnce({
+        data: 'rimborso-1',
+        error: null,
+      });
+      mockQuery.single.mockResolvedValueOnce({
+        data: null,
+        error: { message: 'Fetch failed' },
+      });
+
+      await expect(addRimborso({
+        prestitoId: 'prestito-1',
+        importo: 500,
+        dataRimborso: '2023-02-01',
+        quotaCapitale: 400,
+        quotaInteressi: 100,
+      })).rejects.toThrow();
+    });
+
+    it('E4-59: addRimborso - passa correttamente il campo note opzionale', async () => {
+      (supabase.rpc as jest.Mock).mockResolvedValueOnce({
+        data: 'rimborso-1',
+        error: null,
+      });
+      mockQuery.single.mockResolvedValueOnce({
+        data: mockRimborsoDb,
+        error: null,
+      });
+
+      await addRimborso({
+        prestitoId: 'prestito-1',
+        importo: 500,
+        dataRimborso: '2023-02-01',
+        quotaCapitale: 400,
+        quotaInteressi: 100,
+        note: 'Nota rimborso'
+      });
+
+      expect(supabase.rpc).toHaveBeenCalledWith('rpc_aggiungi_rimborso', expect.objectContaining({
+        p_note: 'Nota rimborso'
+      }));
+    });
+
+    it('E4-60: deleteRimborso - lancia RepositoryError se RPC di eliminazione fallisce', async () => {
+      (supabase.rpc as jest.Mock).mockResolvedValueOnce({
+        error: { message: 'Delete RPC failed' },
+      });
+
+      await expect(deleteRimborso('rimborso-1')).rejects.toThrow();
+    });
+
+    it('E4-61: Rimborso mapping - verifica conversione snake_case in camelCase', async () => {
+      mockQuery.order.mockResolvedValueOnce({
+        data: [{
+          id: 'rim-1',
+          prestito_id: 'pres-1',
+          user_id: 'usr-1',
+          importo: 100,
+          data_rimborso: '2026-06-30',
+          quota_capitale: 80,
+          quota_interessi: 20,
+          note: 'Ok'
+        }],
+        error: null,
+      });
+
+      const result = await getByPrestitoId('prestito-1');
+      expect(result[0]).toEqual({
+        id: 'rim-1',
+        prestitoId: 'pres-1',
+        importo: 100,
+        dataRimborso: '2026-06-30',
+        quotaCapitale: 80,
+        quotaInteressi: 20,
+        note: 'Ok'
+      });
+    });
+  });
 });
