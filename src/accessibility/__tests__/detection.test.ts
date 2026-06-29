@@ -235,6 +235,20 @@ describe('useAccessibilityDetection Hook', () => {
     expect(mockRemoveSubscription).toHaveBeenCalled();
   });
 
+  test('Caso Limite 3b: Cleanup del hook (Unmount) con sottoscrizione undefined o null', async () => {
+    spyAddEventListener.mockReturnValueOnce(undefined as any);
+    let renderResult: any;
+    await act(async () => {
+      renderResult = renderHook(() => useAccessibilityDetection());
+    });
+
+    await act(async () => {
+      expect(() => {
+        renderResult.unmount();
+      }).not.toThrow();
+    });
+  });
+
   // --- CASI DI ERRORE ---
 
   test('Caso Errore 1: Esecuzione fuori dal Provider', () => {

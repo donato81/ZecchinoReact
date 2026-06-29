@@ -418,6 +418,28 @@ function applyTagUsageDelta(
   });
 }
 
+export function mergePrestitiWithLocalSimulations(
+  remotePrestiti: PrestitoMutuo[],
+  cachedSimulazioni: PrestitoMutuo[] | null | undefined,
+): PrestitoMutuo[] {
+  const result = [...remotePrestiti];
+  if (!cachedSimulazioni || !Array.isArray(cachedSimulazioni)) {
+    return result;
+  }
+  const remoteIds = new Set(remotePrestiti.map(p => p.id));
+  for (const sim of cachedSimulazioni) {
+    if (
+      sim &&
+      (sim.stato === 'simulazione' || (sim.id && sim.id.startsWith('sim-')))
+    ) {
+      if (!remoteIds.has(sim.id)) {
+        result.push(sim);
+      }
+    }
+  }
+  return result;
+}
+
 async function loadDomainSnapshot(): Promise<DomainSnapshot> {
   const [
     accounts,
@@ -660,7 +682,28 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
           BOOTSTRAP_REMOTE_TIMEOUT_MS,
         );
         if (gen !== hydrationGen.current) return;
-        applyDomainSnapshot(snapshot);
+
+        let mergedPrestiti = [...(snapshot.prestiti || [])];
+        try {
+          const cachedSimulazioni = await readCache<PrestitoMutuo[]>(
+            userId,
+            'prestiti_simulazioni',
+          );
+          if (gen !== hydrationGen.current) return;
+          mergedPrestiti = mergePrestitiWithLocalSimulations(
+            snapshot.prestiti || [],
+            cachedSimulazioni?.data,
+          );
+        } catch (cacheError) {
+          console.warn('[AppDataContext] errore lettura simulazioni da cache', cacheError);
+        }
+
+        const mergedSnapshot: DomainSnapshot = {
+          ...snapshot,
+          prestiti: mergedPrestiti,
+        };
+
+        applyDomainSnapshot(mergedSnapshot);
         transitionTo('READY');
       } catch (error) {
         const message = isBootstrapTimeoutError(error)
@@ -917,7 +960,28 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
           BOOTSTRAP_REMOTE_TIMEOUT_MS,
         );
         if (myGen !== hydrationGen.current) return;
-        applyDomainSnapshot(snapshot);
+
+        let mergedPrestiti = [...(snapshot.prestiti || [])];
+        try {
+          const cachedSimulazioni = await readCache<PrestitoMutuo[]>(
+            userId,
+            'prestiti_simulazioni',
+          );
+          if (myGen !== hydrationGen.current) return;
+          mergedPrestiti = mergePrestitiWithLocalSimulations(
+            snapshot.prestiti || [],
+            cachedSimulazioni?.data,
+          );
+        } catch (cacheError) {
+          console.warn('[AppDataContext] errore lettura simulazioni da cache', cacheError);
+        }
+
+        const mergedSnapshot: DomainSnapshot = {
+          ...snapshot,
+          prestiti: mergedPrestiti,
+        };
+
+        applyDomainSnapshot(mergedSnapshot);
         transitionTo('READY');
       } catch (error) {
         const fromReadyState = bootstrapStateRef.current === 'REMOTE-SYNC';
@@ -1593,12 +1657,15 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     try {
       if (deletingItem.type === 'account') {
         const account = accounts.find(a => a.id === deletingItem.id);
+        const hadTransactions = transactions.some(
+          t => t.contoId === deletingItem.id || t.contoDestinazioneId === deletingItem.id,
+        );
         await removeAccount(deletingItem.id);
         soundSystem.play('account-deleted');
         hapticSystem.accountDeleted();
         toast.success('Conto eliminato');
         if (account) {
-          announce(accountsAnn.announceAccountDeleted(account.nome, true));
+          announce(accountsAnn.announceAccountDeleted(account.nome, hadTransactions));
         } else {
           announce(accountsAnn.announceAccountDeletedGeneric());
         }

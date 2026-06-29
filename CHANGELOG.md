@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## [0.18.3] — 2026-06-29 — Implementazione Bugfix (SESSIONE E0)
+
+### Added
+- test(t): aggiunta suite di 3 regression test per la gestione delle traduzioni (`__tests__/t.test.ts`).
+- test(plurals): aggiunta suite di 4 regression test per il pluralizzatore (`__tests__/plurals.test.ts`).
+- test(budgets): aggiunta suite di 3 regression test per gli annunci dello stato dei budget (`__tests__/budgets.test.ts`).
+- test(AuthContext): aggiunto regression test per la pulizia delle sottoscrizioni a screen reader (`__tests__/AuthContext.test.tsx`).
+- test(detection): aggiunto regression test per l'unmount dell'hook di rilevamento Talkback in caso di sottoscrizione nulla o indefinita (`src/accessibility/__tests__/detection.test.ts`).
+- test(AppDataContext): aggiunti 3 regression test per la rimozione conto e calcolo dinamico `hadTransactions`, e 5 regression test per `mergePrestitiWithLocalSimulations` (`__tests__/AppDataContext.spec.ts`).
+
+### Fixed
+- fix(AppDataContext): risolto il bug critico BUG-1, implementando la fusione centralizzata delle simulazioni locali da cache al bootstrap online ed evitando perdite di dati.
+- fix(t.ts): risolto il bug alto BUG-2, introducendo una guardia difensiva `typeof result !== 'string'` prima delle operazioni sulla chiave.
+- fix(detection.ts): risolto il bug medio BUG-3, aggiungendo il controllo di esistenza della sottoscrizione prima di invocare `.remove()`.
+- fix(AuthContext): risolto il bug medio BUG-4, introducendo la stessa guardia difensiva sulla sottoscrizione.
+- fix(AppDataContext): risolto il bug medio BUG-5, calcolando dinamicamente `hadTransactions` prima di rimuovere un conto.
+- fix(plurals.ts): risolto il bug basso BUG-6, ripristinando correttamente la capitalizzazione originale nei plurali irregolari.
+- fix(budgets.ts): risolto il bug basso BUG-7, implementando la gestione e notifica assertive per i budget con target zero e spesa superiore a zero.
+
 ## [0.18.2] — 2026-06-29 — Pianificazione Bugfix (SESSIONE E0)
 
 ### Added

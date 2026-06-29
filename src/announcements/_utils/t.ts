@@ -9,6 +9,11 @@ export function t(
   params?: Record<string, string | number>,
 ): string {
   let result: string = strings[key];
+
+  if (typeof result !== 'string') {
+    return String(key);
+  }
+
   if (!params) return result;
   for (const [k, v] of Object.entries(params)) {
     result = result.split(`{${k}}`).join(String(v));

@@ -186,7 +186,7 @@ jest.mock(
   { virtual: true },
 );
 
-import { AppDataProvider, useAppData } from '@/context/AppDataContext';
+import { AppDataProvider, useAppData, mergePrestitiWithLocalSimulations } from '@/context/AppDataContext';
 import { useAuth } from '@/context/AuthContext';
 import { useNetworkStatus } from '@/hooks/use-network-status';
 import { readCachedDomainSnapshotPure } from '@/context/app-data-cache';
@@ -1855,6 +1855,185 @@ describe('AppDataContext — PLAN 007', () => {
 
       expect(mockScreenReaderSuccess).not.toHaveBeenCalled();
       expect(mockScreenReaderError).not.toHaveBeenCalled();
+      harness.unmount();
+    });
+  });
+
+  describe('BUG-5 - hadTransactions in deleteAccount', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('eliminazione di un conto avente transazioni collegate (contoId)', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as any);
+      mockGetAllConti.mockResolvedValueOnce([
+        { id: 'conto-1', nome: 'Conto A' },
+      ] as any);
+      mockGetAllTransazioni.mockResolvedValueOnce([
+        { id: 'tx-1', contoId: 'conto-1', contoDestinazioneId: undefined },
+      ] as any);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        harness.getValue().setDeletingItem({ type: 'account', id: 'conto-1' });
+      });
+
+      await act(async () => {
+        await harness.getValue().handleDeleteConfirm();
+      });
+
+      expect(accountsAnn.announceAccountDeleted).toHaveBeenCalledWith('Conto A', true);
+      harness.unmount();
+    });
+
+    it('eliminazione di un conto avente transazioni collegate (contoDestinazioneId)', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as any);
+      mockGetAllConti.mockResolvedValueOnce([
+        { id: 'conto-1', nome: 'Conto A' },
+      ] as any);
+      mockGetAllTransazioni.mockResolvedValueOnce([
+        { id: 'tx-1', contoId: 'conto-2', contoDestinazioneId: 'conto-1' },
+      ] as any);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        harness.getValue().setDeletingItem({ type: 'account', id: 'conto-1' });
+      });
+
+      await act(async () => {
+        await harness.getValue().handleDeleteConfirm();
+      });
+
+      expect(accountsAnn.announceAccountDeleted).toHaveBeenCalledWith('Conto A', true);
+      harness.unmount();
+    });
+
+    it('eliminazione di un conto senza transazioni collegate', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as any);
+      mockGetAllConti.mockResolvedValueOnce([
+        { id: 'conto-1', nome: 'Conto A' },
+      ] as any);
+      mockGetAllTransazioni.mockResolvedValueOnce([
+        { id: 'tx-1', contoId: 'conto-2', contoDestinazioneId: 'conto-3' },
+      ] as any);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        harness.getValue().setDeletingItem({ type: 'account', id: 'conto-1' });
+      });
+
+      await act(async () => {
+        await harness.getValue().handleDeleteConfirm();
+      });
+
+      expect(accountsAnn.announceAccountDeleted).toHaveBeenCalledWith('Conto A', false);
+      harness.unmount();
+    });
+  });
+
+  describe('BUG-1 - mergePrestitiWithLocalSimulations', () => {
+    it('lista remota con prestiti validi + cache con simulazioni distinte: verifica che il risultato li contenga tutti', () => {
+      const remote = [
+        { id: 'p1', controparteNome: 'P1', stato: 'attivo' },
+      ] as any;
+      const cached = [
+        { id: 'sim-1', controparteNome: 'Sim 1', stato: 'simulazione' },
+      ] as any;
+      const result = mergePrestitiWithLocalSimulations(remote, cached);
+      expect(result).toHaveLength(2);
+      expect(result).toContainEqual(remote[0]);
+      expect(result).toContainEqual(cached[0]);
+    });
+
+    it('lista remota con un prestito e cache con un elemento con lo stesso ID: verifica che l\'elemento non compaia due volte', () => {
+      const remote = [
+        { id: 'sim-1', controparteNome: 'Sim 1 Remote', stato: 'simulazione' },
+      ] as any;
+      const cached = [
+        { id: 'sim-1', controparteNome: 'Sim 1 Cache', stato: 'simulazione' },
+      ] as any;
+      const result = mergePrestitiWithLocalSimulations(remote, cached);
+      expect(result).toHaveLength(1);
+      expect(result[0].controparteNome).toBe('Sim 1 Remote');
+    });
+
+    it('cache null o undefined: verifica che la funzione restituisca la sola lista remota senza errori', () => {
+      const remote = [
+        { id: 'p1', controparteNome: 'P1', stato: 'attivo' },
+      ] as any;
+      expect(mergePrestitiWithLocalSimulations(remote, null)).toEqual(remote);
+      expect(mergePrestitiWithLocalSimulations(remote, undefined)).toEqual(remote);
+    });
+
+    it('cache con un elemento non simulazione (privo di prefisso sim- e stato diverso da simulazione): verifica che venga escluso dal risultato', () => {
+      const remote = [] as any;
+      const cached = [
+        { id: 'p2', controparteNome: 'P2', stato: 'attivo' },
+        { id: 'sim-2', controparteNome: 'Sim 2', stato: 'simulazione' },
+      ] as any;
+      const result = mergePrestitiWithLocalSimulations(remote, cached);
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('sim-2');
+    });
+
+    it('eccezione durante la lettura della cache: verifica che il bootstrap continui con lo snapshot remoto puro', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as any);
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([{ id: 'p-remote', controparteNome: 'Prestito Remoto' }] as any);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      mockReadCache.mockImplementation(async (userId, table) => {
+        if (table === 'prestiti_simulazioni') {
+          throw new Error('Cache error');
+        }
+        return null;
+      });
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(harness.getValue().isDataReady).toBe(true);
+      expect(harness.getValue().isLoading).toBe(false);
+      expect(harness.getValue().prestiti).toEqual([{ id: 'p-remote', controparteNome: 'Prestito Remoto' }]);
       harness.unmount();
     });
   });

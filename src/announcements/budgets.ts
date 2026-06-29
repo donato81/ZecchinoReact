@@ -50,6 +50,16 @@ export function announceBudgetStatus(
   spent: number,
   target: number,
 ): Announcement {
+  if (target <= 0 && spent > 0) {
+    return build(
+      t('budget_superato', {
+        name,
+        spent: formatCurrencyVocal(spent),
+        target: formatCurrencyVocal(target),
+      }),
+      'assertive',
+    );
+  }
   const percent = target > 0 ? Math.round((spent / target) * 100) : 0;
   const remaining = Math.max(target - spent, 0);
   if (percent >= 100) {

@@ -96,7 +96,7 @@ export function useAccessibilityDetection() {
       // Verifica difensiva: subscription.remove potrebbe non essere una
       // funzione su versioni di react-native-windows precedenti a RN 0.65.
       // Coerente con il Rischio R2 di DESIGN 003 §10.
-      if (typeof subscription.remove === 'function') {
+      if (subscription && typeof subscription.remove === 'function') {
         subscription.remove();
       }
     };
