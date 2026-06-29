@@ -1,20 +1,21 @@
 ## 1. Metadata e Context Header
  
  - **Project Name:** ZecchinoReact
- - **Version:** 0.18.1
+ - **Version:** 0.18.2
  - **Owner:** donny-81
  - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
  - **Environment Sync:** Local
- - **Ultimo Agente Attivo:** Antigravity, 2026-06-28
- - **Blocco in Carico:** Nessuno
+ - **Ultimo Agente Attivo:** Antigravity, 2026-06-29
+ - **Blocco in Carico:** Sessione E0 bugfix
  - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
  
  ### Stato Globale Corrente
  
  - **Active Phase:** P0/P1/P2 completate. DESIGN 022 e 021 implementati (Fase 1 completata).
- - **Active Block:** Nessuno — implementazione test moduli core completata.
- - **Last Updated:** 2026-06-28
+ - **Active Block:** Sessione E0 bugfix — pianificazione completata.
+ - **Last Updated:** 2026-06-29
  - **Pending Plans:**
+   - **Pianificazione Bugfix (SESSIONE E0) — COMPLETATA** (coding plan `docs/3-coding-plans/023-PLAN_bugfix-sessione-E0_v0.18.2.md` e todo list `docs/4-todo-lists/023-TODO_bugfix-sessione-E0_v0.18.2.md` creati il 2026-06-29).
    - **Analisi Copertura Test Completa (SESSIONE D) — COMPLETATA** (report `docs/1-reports/REPORT-analisi-copertura-test-completa_v1.0.0.md` creato il 2026-06-28).
    - **Piano di test moduli core (Fase A e B) — COMPLETATO E IMPLEMENTATO** (report `docs/1-reports/REPORT-piano-test-moduli-core_v1.0.0.md` aggiornato il 2026-06-27).
    - **PLAN 022 COMPLETATO** (release 0.17.0, test coverage v0.18.0) — Refactoring del Sound System in ambiente nativo completato e validato.
@@ -47,21 +48,19 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** Analisi completa della copertura dei test mancanti su 39 moduli (SESSIONE D) e stesura del report di gap analysis v1.0.0.
-- **Last Validated Block:** Report analisi copertura test completa (2026-06-28, Antigravity).
+- **Last Completed Task:** Redazione Coding Plan 023 e Todo List 023 per la correzione dei 7 bug e relativi regression test (Sessione E0).
+- **Last Validated Block:** Pianificazione Bugfix Sessione E0 (2026-06-29, Antigravity).
 - **Files Modified But Not Validated:** Nessuno
  - **Open Threads:**
   - AN-03: `oklch colori` — da verificare per compatibilità Android (da DESIGN 020)
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
-  - BUG-1 (CRITICO): perdita delle simulazioni locali in `AppDataContext.tsx` al bootstrap online.
-  - BUG-2 (ALTO): crash di runtime in `t.ts` su chiavi di traduzione mancanti.
-  - BUG-3 (MEDIO): crash per `subscription.remove` nullo in `detection.ts`.
-  - BUG-4 (MEDIO): crash per `subscription.remove` nullo in `AuthContext.tsx`.
-  - BUG-5 (MEDIO): parametro `hadTransactions` cablato a `true` in `AppDataContext.tsx`.
-  - BUG-6 (BASSO): perdita di capitalizzazione in `plurals.ts` per parole irregolari.
-  - BUG-7 (BASSO): mancato annuncio vocale di sforamento per budget con target pari a 0.
+  - BUG-1, BUG-2, BUG-3, BUG-4, BUG-5, BUG-6, BUG-7: pianificati per la Sessione E0.
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
-  - **Next Action:** Esecuzione del push finale su main.
+  - **Next Action:** Esecuzione della sessione E0 (implementazione correzione dei 7 bug e relativi regression test).
+
+> Nota sessione pianificazione 2026-06-29 (Antigravity):
+> Completata la pianificazione della SESSIONE E0: redatti `023-PLAN_bugfix-sessione-E0_v0.18.2.md` e `023-TODO_bugfix-sessione-E0_v0.18.2.md` per la correzione chirurgica dei 7 bug e relativi regression test.
+> package.json avanzato alla versione 0.18.2.
 
 > Nota sessione analisi 2026-06-28 (Antigravity):
 > Completata la SESSIONE D: eseguito il censimento e l'analisi completa della copertura dei test mancanti per 39 moduli del progetto.
@@ -595,11 +594,14 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.B1-IMPL-022 | Sound System nativo — react-native-audio-api | [x] DONE — 2026-06-27 Antigravity | [x] PASSED |
 | CORE-TEST-PLAN-A | Piano di test moduli core (Fase A) | [x] DONE | [x] PASSED |
 | CORE-TEST-IMPL-B | Implementazione test moduli core (Fase B) | [x] DONE | [x] PASSED |
+| P3.E0-PLAN-023 | Redazione Coding Plan 023 — SESSIONE E0 bugfix | [x] DONE — 2026-06-29 Antigravity | [x] PASSED |
+| P3.E0-TODO-023 | Redazione Todo Specifico 023 — SESSIONE E0 bugfix | [x] DONE — 2026-06-29 Antigravity | [x] PASSED |
 
 ### Log di Validazione
 
 | Data | Block ID | Validato Da | Risultato | Note |
 |------|----------|-------------|-----------|------|
+| 2026-06-29 | P3.E0-PLAN-023 / TODO-023 | Antigravity | DONE | Redatto coding plan 023 e todo list 023 per correzione dei 7 bug e regression test |
 | 2026-06-27 | CORE-TEST-IMPL-B | Antigravity | DONE | Scritta e convalidata la suite completa di 39 test unitari per i 7 moduli core |
 | 2026-06-27 | CORE-TEST-PLAN-A | Antigravity | DONE | Prodotto report di piano di test dettagliato per i sette moduli core |
 | 2026-06-27 | P3.B8-AN-02 | Antigravity | DONE | PLAN 022 — Sound System nativo con react-native-audio-api |

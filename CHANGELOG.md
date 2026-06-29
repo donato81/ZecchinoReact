@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## [0.18.2] — 2026-06-29 — Pianificazione Bugfix (SESSIONE E0)
+
+### Added
+- docs(plans): aggiunto `023-PLAN_bugfix-sessione-E0_v0.18.2.md` con il piano dettagliato per la correzione dei 7 bug e relativi regression test.
+- docs(todos): aggiunto `023-TODO_bugfix-sessione-E0_v0.18.2.md` con la checklist per la sessione E0.
+
+### Planned
+- fix(AppDataContext): correzione del bug critico BUG-1 per la perdita delle simulazioni locali.
+- fix(t.ts): correzione del bug alto BUG-2 per il crash in caso di chiavi di traduzione mancanti con parametri.
+- fix(detection.ts): correzione del bug medio BUG-3 per il pattern fragile della sottoscrizione.
+- fix(AuthContext): correzione del bug medio BUG-4 per il pattern fragile della sottoscrizione.
+- fix(AppDataContext): correzione del bug medio BUG-5 per il parametro hadTransactions cablato a true.
+- fix(plurals.ts): correzione del bug basso BUG-6 per la perdita di maiuscole nei plurali irregolari.
+- fix(budgets.ts): correzione del bug basso BUG-7 per la gestione dei budget con target zero.
+
 ## [0.18.1] — 2026-06-28 — Analisi Copertura Test Completa (SESSIONE D)
 
 ### Added

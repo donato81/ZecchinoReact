@@ -1,0 +1,67 @@
+---
+tipo: todo
+titolo: "TODO — Bugfix sessione E0"
+riferimento-plan: docs/3-coding-plans/023-PLAN_bugfix-sessione-E0_v0.18.2.md
+versione: 0.18.2
+data-creazione: 2026-06-29
+stato: PENDING
+ramo: main
+agente: Antigravity
+data-completamento: —
+note-stato: Documento operativo derivato dal PLAN 023 v0.18.2. Tutti i task PENDING.
+---
+
+# TODO 023 — Bugfix sessione E0
+
+## 1. Stato / Snapshot
+
+| Campo | Valore |
+|---|---|
+| Ultimo Agente Attivo | Antigravity |
+| Blocco in Carico | Sessione E0 bugfix |
+| Last Completed Task | — |
+| Next Action | Avvio correzione BUG-2 |
+| Open Threads | — |
+
+---
+
+## 2. Checklist Bug per Bug (in ordine di esecuzione consigliato)
+
+### BUG-2 — Crash su chiave traduzione mancante
+- [ ] **Codice:** Implementare la guardia difensiva `typeof result !== 'string'` in `src/announcements/_utils/t.ts`.
+- [ ] **Test:** Scrivere il regression test per i tre casi: chiave esistente con parametri, chiave esistente senza parametri, chiave inesistente (deve restituire la chiave stessa come stringa).
+
+### BUG-6 — Perdita maiuscola nei plurali irregolari
+- [ ] **Codice:** Implementare la verifica di capitalizzazione `wasCapitalized` in `src/announcements/_utils/plurals.ts`.
+- [ ] **Test:** Scrivere il regression test per verificare plurali irregolari minuscoli, irregolari maiuscoli, regolari maiuscoli e parole non nel dizionario.
+
+### BUG-7 — Budget con target zero annunciato come normale
+- [ ] **Codice:** Aggiungere la gestione del ramo `target <= 0 && spent > 0` in `src/announcements/budgets.ts` con priorità `assertive`.
+- [ ] **Test:** Scrivere il regression test per verificare target zero con spesa positiva, target zero con spesa zero e target positivo normale.
+
+### BUG-4 — Pattern fragile su subscription in AuthContext
+- [ ] **Codice:** Applicare la guardia di esistenza per `subscription` in `src/context/AuthContext.tsx` prima di chiamare `.remove()`.
+- [ ] **Test:** Scrivere il regression test per verificare che il cleanup non lanci eccezioni quando la sottoscrizione è `undefined`.
+
+### BUG-3 — Pattern fragile su subscription in detection.ts
+- [ ] **Codice:** Applicare la guardia di esistenza per `subscription` in `src/accessibility/detection.ts` prima di chiamare `.remove()`.
+- [ ] **Test:** Scrivere il regression test per verificare che il cleanup non lanci eccezioni quando la sottoscrizione è `undefined`.
+
+### BUG-5 — hadTransactions fisso a true
+- [ ] **Codice:** Calcolare dinamicamente `hadTransactions` prima di invocare `removeAccount()` in `src/context/AppDataContext.tsx`.
+- [ ] **Test:** Scrivere il regression test per verificare l'annuncio vocale dell'eliminazione conto sia con transazioni collegate che senza.
+
+### BUG-1 — Perdita simulazioni locali al bootstrap online
+- [ ] **Codice:** Implementare la logica di recupero e fusione dei prestiti simulati da cache prima di `applyDomainSnapshot` in `runOnlineBootstrap` e `refreshAll` di `src/context/AppDataContext.tsx`.
+- [ ] **Test:** Scrivere il regression test in `__tests__/AppDataContext.spec.ts` che simula un bootstrap online e verifica la persistenza delle simulazioni locali.
+
+---
+
+## 3. Chiusura Sessione
+
+- [ ] **Versione:** Aggiornare la versione in `package.json` da `0.18.0` a `0.18.2`.
+- [ ] **Changelog:** Aggiornare `CHANGELOG.md` registrando la release `0.18.2` con l'elenco delle correzioni dei 7 bug.
+- [ ] **Spark Start:** Aggiornare `SPARK-START.md` con la versione `0.18.2` e lo stato della Sessione E0.
+- [ ] **Todo Master:** Aggiornare `docs/todo-master.md` aggiungendo i riferimenti a PLAN 023 e TODO 023 e marcando completata la sessione E0.
+- [ ] **Verifica:** Eseguire `npx jest` e `npx tsc --noEmit` per garantire la stabilità del build.
+- [ ] **Push:** Eseguire commit e push su `main` con messaggio: `docs: aggiunge coding plan e todo 023 — SESSIONE E0 bugfix`.
