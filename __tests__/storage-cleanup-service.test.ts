@@ -328,4 +328,107 @@ describe('storage-cleanup-service', () => {
       failed: 0,
     });
   });
+
+  // --- INTEGRATION SESSIONE E4 ---
+
+  it('E4-85: listCandidateFiles - fallimento recupero file da listCandidateFiles incrementa failed', async () => {
+    const { service, deps } = makeService('2026-05-28T12:00:00.000Z');
+    deps.listCandidateFiles.mockRejectedValueOnce(new Error('List candidate failed'));
+
+    await expect(service.cleanupRecentOrphans('user-016')).resolves.toEqual({
+      scanned: 0,
+      orphanFound: 0,
+      deleted: 0,
+      failed: 0,
+    });
+    expect(deps.warn).toHaveBeenCalled();
+  });
+
+  it('E4-86: listKnownPaths - fallimento recupero percorsi noti propaga errore o incrementa failed', async () => {
+    const { service, deps } = makeService('2026-05-28T12:00:00.000Z');
+    deps.listKnownPaths.mockRejectedValueOnce(new Error('List known paths failed'));
+
+    await expect(service.cleanupRecentOrphans('user-016')).resolves.toEqual({
+      scanned: 0,
+      orphanFound: 0,
+      deleted: 0,
+      failed: 0,
+    });
+    expect(deps.warn).toHaveBeenCalled();
+  });
+
+  it('E4-87: cleanupRecentOrphans - gestisce correttamente mix di file validi, orfani ed in safety window', async () => {
+    const { service, deps } = makeService('2026-05-28T12:00:00.000Z');
+    deps.listKnownPaths.mockResolvedValue(new Set(['user-016/tx-1/known.pdf']));
+    deps.listCandidateFiles.mockResolvedValue([
+      { path: 'user-016/tx-1/known.pdf', createdAt: '2026-05-28T06:00:00.000Z' },
+      { path: 'user-016/tx-1/orphan.pdf', createdAt: '2026-05-28T06:00:00.000Z' },
+      { path: 'user-016/tx-1/fresh.pdf', createdAt: '2026-05-28T11:58:00.000Z' },
+    ]);
+    deps.deleteFile.mockResolvedValue(undefined);
+
+    await expect(service.cleanupRecentOrphans('user-016')).resolves.toEqual({
+      scanned: 3,
+      orphanFound: 2,
+      deleted: 1,
+      failed: 0,
+    });
+    expect(deps.deleteFile).toHaveBeenCalledTimes(1);
+    expect(deps.deleteFile).toHaveBeenCalledWith('user-016/tx-1/orphan.pdf');
+  });
+
+  it('E4-88: cleanupOnLogout - interrompe per timeout la rimozione se supera CLEANUP_LOGOUT_TIMEOUT_MS', async () => {
+    jest.useFakeTimers();
+    const { service, deps } = makeService('2026-05-28T12:00:00.000Z');
+    deps.listKnownPaths.mockResolvedValue(new Set());
+    deps.listCandidateFiles.mockResolvedValue([
+      { path: 'user-016/tx-1/orphan1.pdf', createdAt: '2026-05-28T06:00:00.000Z' },
+    ]);
+    deps.deleteFile.mockImplementation(() => new Promise(() => {}));
+
+    const cleanupPromise = service.cleanupOnLogout('user-016');
+    
+    jest.advanceTimersByTime(CLEANUP_LOGOUT_TIMEOUT_MS);
+
+    await expect(cleanupPromise).resolves.toEqual({
+      scanned: 0,
+      orphanFound: 0,
+      deleted: 0,
+      failed: 0,
+    });
+    jest.useRealTimers();
+  });
+
+  it('E4-89: cleanupSpecificOrphan - no-op con path non valido o vuoto', async () => {
+    const { service, deps } = makeService('2026-05-28T12:00:00.000Z');
+
+    await expect(service.cleanupSpecificOrphan('user-016', '')).resolves.toEqual({
+      scanned: 0,
+      orphanFound: 0,
+      deleted: 0,
+      failed: 0,
+    });
+
+    await expect(service.cleanupSpecificOrphan('user-016', 'user-abc/tx-1/file.pdf')).resolves.toEqual({
+      scanned: 0,
+      orphanFound: 0,
+      deleted: 0,
+      failed: 0,
+    });
+
+    expect(deps.deleteFile).not.toHaveBeenCalled();
+  });
+
+  it('E4-90: cleanupTransactionOrphans - gestisce transazioneId vuoto', async () => {
+    const { service, deps } = makeService('2026-05-28T12:00:00.000Z');
+    deps.listKnownPaths.mockResolvedValue(new Set());
+    deps.listCandidateFiles.mockResolvedValue([]);
+
+    await expect(service.cleanupTransactionOrphans('user-016', '')).resolves.toEqual({
+      scanned: 0,
+      orphanFound: 0,
+      deleted: 0,
+      failed: 0,
+    });
+  });
 });

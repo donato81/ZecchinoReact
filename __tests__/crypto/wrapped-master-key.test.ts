@@ -89,4 +89,40 @@ describe('wrapped master key payload', () => {
 
     expect(decodeBase64(encodeBase64(masterKey))).toEqual(masterKey);
   });
+
+  // --- INTEGRATION SESSIONE E4 ---
+
+  test('E4-95: unwrapMasterKeyWithPin - fallimento con PIN errato lancia errore con codice MASTER_KEY_UNWRAP_FAILED', () => {
+    const masterKey = generateMasterKey();
+    const salt = generatePinSalt();
+    const payload = serializeWrappedMasterKeyPayload(
+      wrapMasterKeyWithPin(masterKey, '123456', salt),
+    );
+
+    expect(() => unwrapMasterKeyWithPin(payload, 'wrong_pin', salt)).toThrow(
+      expect.objectContaining({ code: 'MASTER_KEY_UNWRAP_FAILED' })
+    );
+  });
+
+  test('E4-96: rewrapMasterKeyWithPin - fallimento se vecchio PIN errato', () => {
+    const masterKey = generateMasterKey();
+    const oldSalt = generatePinSalt();
+    const newSalt = generatePinSalt();
+    const payload = serializeWrappedMasterKeyPayload(
+      wrapMasterKeyWithPin(masterKey, '123456', oldSalt),
+    );
+
+    expect(() =>
+      rewrapMasterKeyWithPin(payload, 'wrong_old_pin', oldSalt, '222222', newSalt)
+    ).toThrow(expect.objectContaining({ code: 'MASTER_KEY_UNWRAP_FAILED' }));
+  });
+
+  test('E4-97: deserializeWrappedMasterKeyPayload - JSON non valido solleva errore', () => {
+    expect(() => deserializeWrappedMasterKeyPayload('non-json-string')).toThrow(
+      WrappedMasterKeyPayloadError
+    );
+    expect(() => deserializeWrappedMasterKeyPayload('{}')).toThrow(
+      WrappedMasterKeyPayloadError
+    );
+  });
 });

@@ -299,4 +299,175 @@ describe('magic-bytes-validation', () => {
       expect.objectContaining({ code: 'MIME_EXTENSION_MISMATCH' }),
     );
   });
+
+  // --- INTEGRATION SESSIONE E4 ---
+
+  it('E4-98: JPEG - firma a 3 byte FF D8 FF senza estensione definita o nulla', async () => {
+    jest
+      .spyOn(magicBytesReader, 'readFileHeader')
+      .mockResolvedValue(Uint8Array.from([0xff, 0xd8, 0xff]));
+    
+    await expect(
+      validateAttachmentFile({
+        uri: 'file:///foto',
+        name: 'foto',
+        type: 'image/jpeg',
+        size: 100,
+      }),
+    ).resolves.toEqual(
+      expect.objectContaining({ code: 'FILE_NAME_INVALID' }),
+    );
+  });
+
+  it('E4-99: PNG - file con firma parziale (solo primi 4 byte validi)', async () => {
+    jest
+      .spyOn(magicBytesReader, 'readFileHeader')
+      .mockResolvedValue(Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x00, 0x00, 0x00, 0x00]));
+    
+    await expect(
+      validateAttachmentFile({
+        uri: 'file:///partial.png',
+        name: 'partial.png',
+        type: 'image/png',
+        size: 100,
+      }),
+    ).resolves.toEqual(
+      expect.objectContaining({ code: 'MIME_EXTENSION_MISMATCH' }),
+    );
+  });
+
+  it('E4-100: PDF - file con estensione in maiuscolo (.PDF) viene accettato', async () => {
+    jest
+      .spyOn(magicBytesReader, 'readFileHeader')
+      .mockResolvedValue(Uint8Array.from([0x25, 0x50, 0x44, 0x46]));
+    
+    await expect(
+      validateAttachmentFile({
+        uri: 'file:///ok.PDF',
+        name: 'ok.PDF',
+        type: 'application/pdf',
+        size: 100,
+      }),
+    ).resolves.toBeNull();
+  });
+
+  it('E4-101: WEBP - file con firma parziale (solo RIFF, senza WEBP)', async () => {
+    jest
+      .spyOn(magicBytesReader, 'readFileHeader')
+      .mockResolvedValue(Uint8Array.from([0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]));
+    
+    await expect(
+      validateAttachmentFile({
+        uri: 'file:///partial.webp',
+        name: 'partial.webp',
+        type: 'image/webp',
+        size: 100,
+      }),
+    ).resolves.toEqual(
+      expect.objectContaining({ code: 'MIME_EXTENSION_MISMATCH' }),
+    );
+  });
+
+  it('E4-102: HEIC - file con firma parziale (ftyp corretto ma senza brand)', async () => {
+    jest
+      .spyOn(magicBytesReader, 'readFileHeader')
+      .mockResolvedValue(Uint8Array.from([0x00, 0x00, 0x00, 0x1c, 0x66, 0x74, 0x79, 0x70, 0x00, 0x00, 0x00, 0x00]));
+    
+    await expect(
+      validateAttachmentFile({
+        uri: 'file:///partial.heic',
+        name: 'partial.heic',
+        type: 'image/heic',
+        size: 100,
+      }),
+    ).resolves.toEqual(
+      expect.objectContaining({ code: 'MIME_EXTENSION_MISMATCH' }),
+    );
+  });
+
+  it('E4-103: MIME non consentito - file text/html rifiutato prima di accedere ai magic bytes', async () => {
+    const headerSpy = jest
+      .spyOn(magicBytesReader, 'readFileHeader')
+      .mockResolvedValue(Uint8Array.from([0x25, 0x50, 0x44, 0x46]));
+    
+    await expect(
+      validateAttachmentFile({
+        uri: 'file:///bad.html',
+        name: 'bad.html',
+        type: 'text/html',
+        size: 100,
+      }),
+    ).resolves.toEqual(
+      expect.objectContaining({ code: 'MIME_NOT_ALLOWED' }),
+    );
+    expect(headerSpy).not.toHaveBeenCalled();
+  });
+
+  it('E4-104: Dimensione eccessiva - file che supera MAX_ATTACHMENT_SIZE viene rifiutato', async () => {
+    const headerSpy = jest
+      .spyOn(magicBytesReader, 'readFileHeader')
+      .mockResolvedValue(Uint8Array.from([0x25, 0x50, 0x44, 0x46]));
+    
+    await expect(
+      validateAttachmentFile({
+        uri: 'file:///large.pdf',
+        name: 'large.pdf',
+        type: 'application/pdf',
+        size: 11 * 1024 * 1024,
+      }),
+    ).resolves.toEqual(
+      expect.objectContaining({ code: 'SIZE_LIMIT_EXCEEDED' }),
+    );
+    expect(headerSpy).not.toHaveBeenCalled();
+  });
+
+  it('E4-105: File nullo o indefinito - validateAttachmentFile lancia errore', async () => {
+    await expect(validateAttachmentFile(null as any)).rejects.toThrow();
+  });
+
+  it('E4-106: Percorso non valido - uri con caratteri speciali o schema errato non crasha', async () => {
+    jest
+      .spyOn(magicBytesReader, 'readFileHeader')
+      .mockResolvedValue(new Uint8Array(0));
+    
+    await expect(
+      validateAttachmentFile({
+        uri: 'invalid-schema://\\#$?%',
+        name: 'file.pdf',
+        type: 'application/pdf',
+        size: 100,
+      }),
+    ).resolves.toEqual(
+      expect.objectContaining({ code: 'MIME_EXTENSION_MISMATCH' }),
+    );
+  });
+
+  it('E4-107: Android helper - fallimento di read su Android ritorna array vuoto', async () => {
+    mockRead.mockRejectedValueOnce(new Error('Read error'));
+    await expect(readAndroidHeader('file:///broken.pdf')).resolves.toEqual(
+      new Uint8Array(0),
+    );
+  });
+
+  it('E4-108: Windows helper - fallimento di read su Windows ritorna array vuoto', async () => {
+    mockRead.mockRejectedValueOnce(new Error('Read error'));
+    await expect(readWindowsHeader('file:///broken.pdf')).resolves.toEqual(
+      new Uint8Array(0),
+    );
+  });
+
+  it('E4-109: Estensioni multiple - file con estensioni multiple convalidato su ultima', async () => {
+    jest
+      .spyOn(magicBytesReader, 'readFileHeader')
+      .mockResolvedValue(Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+    
+    await expect(
+      validateAttachmentFile({
+        uri: 'file:///documento.pdf.png',
+        name: 'documento.pdf.png',
+        type: 'image/png',
+        size: 100,
+      }),
+    ).resolves.toBeNull();
+  });
 });

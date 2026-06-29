@@ -1,5 +1,5 @@
 jest.mock('@/lib/helpers', () => ({
-  getActiveBudgets: jest.fn((budgets: unknown) => budgets),
+  getActiveBudgets: jest.fn((budgets: any[]) => budgets.filter(b => b.attivo)),
   getBudgetProgress: jest.fn(),
 }));
 
@@ -194,5 +194,170 @@ describe('notification-service', () => {
       0,
       75,
     );
+  });
+
+  // --- INTEGRATION SESSIONE E4 ---
+
+  it('E4-110: processBudgetNotifications - nessun budget attivo', async () => {
+    const service = createNotificationService();
+
+    await service.processBudgetNotifications({
+      budgets: [],
+      transactions: [{ id: 'tx-1', data: '2026-06-01' } as never],
+    });
+
+    expect(mockCreateNotification).not.toHaveBeenCalled();
+  });
+
+  it('E4-111: processBudgetNotifications - nessun budget corrispondente', async () => {
+    const service = createNotificationService();
+
+    await service.processBudgetNotifications({
+      budgets: [
+        {
+          id: 'budget-1',
+          nome: 'Casa',
+          importoTarget: 100,
+          attivo: false,
+          dataInizio: '2026-04-01',
+          dataFine: '2026-06-30',
+          periodo: 'trimestrale',
+        } as never,
+      ],
+      transactions: [{ id: 'tx-1', data: '2026-06-01' } as never],
+    });
+
+    expect(mockCreateNotification).not.toHaveBeenCalled();
+  });
+
+  it('E4-112: processBudgetNotifications - soglia non superata', async () => {
+    const service = createNotificationService();
+    mockShouldShowBudgetNotification.mockReturnValue({
+      shouldShow: false,
+      level: 'warning',
+    });
+
+    await service.processBudgetNotifications({
+      budgets: [
+        {
+          id: 'budget-1',
+          nome: 'Casa',
+          importoTarget: 100,
+          attivo: true,
+          dataInizio: '2026-04-01',
+          dataFine: '2026-06-30',
+          periodo: 'trimestrale',
+        } as never,
+      ],
+      transactions: [{ id: 'tx-1', data: '2026-06-01' } as never],
+    });
+
+    expect(mockCreateNotification).not.toHaveBeenCalled();
+  });
+
+  it('E4-113: processBudgetNotifications - evita duplicati se notifica non letta già esistente dello stesso livello', async () => {
+    const service = createNotificationService();
+    mockExistsUnreadForEntityLevel.mockResolvedValue(true);
+
+    await service.processBudgetNotifications({
+      budgets: [
+        {
+          id: 'budget-1',
+          nome: 'Casa',
+          importoTarget: 100,
+          attivo: true,
+          dataInizio: '2026-04-01',
+          dataFine: '2026-06-30',
+          periodo: 'trimestrale',
+        } as never,
+      ],
+      transactions: [{ id: 'tx-1', data: '2026-06-01' } as never],
+    });
+
+    expect(mockCreateNotification).not.toHaveBeenCalled();
+  });
+
+  it('E4-114: processBudgetNotifications - getBudgetProgress solleva eccezione', async () => {
+    const service = createNotificationService();
+    mockGetBudgetProgress.mockImplementationOnce(() => {
+      throw new Error('Progress error');
+    });
+
+    await expect(
+      service.processBudgetNotifications({
+        budgets: [
+          {
+            id: 'budget-1',
+            nome: 'Casa',
+            importoTarget: 100,
+            attivo: true,
+            dataInizio: '2026-04-01',
+            dataFine: '2026-06-30',
+            periodo: 'trimestrale',
+          } as never,
+        ],
+        transactions: [{ id: 'tx-1', data: '2026-06-01' } as never],
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('E4-115: processBudgetNotifications - repository create fallisce', async () => {
+    const service = createNotificationService();
+    mockCreateNotification.mockRejectedValueOnce(new Error('DB error'));
+
+    await expect(
+      service.processBudgetNotifications({
+        budgets: [
+          {
+            id: 'budget-1',
+            nome: 'Casa',
+            importoTarget: 100,
+            attivo: true,
+            dataInizio: '2026-04-01',
+            dataFine: '2026-06-30',
+            periodo: 'trimestrale',
+          } as never,
+        ],
+        transactions: [{ id: 'tx-1', data: '2026-06-01' } as never],
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('E4-116: processBudgetNotifications - budget con date non valide o indefinite non crasha', async () => {
+    const service = createNotificationService();
+
+    await expect(service.processBudgetNotifications({
+      budgets: [
+        {
+          id: 'budget-1',
+          nome: 'Casa',
+          importoTarget: 100,
+          attivo: true,
+          dataInizio: '',
+          dataFine: '',
+          periodo: 'trimestrale',
+        } as never,
+      ],
+      transactions: [{ id: 'tx-1', data: '2026-06-01' } as never],
+    })).resolves.toBeDefined();
+  });
+
+  it('E4-117: processBudgetNotifications - transazioni con date malformate o vuote non crasha', async () => {
+    const service = createNotificationService();
+
+    await expect(service.processBudgetNotifications({
+      budgets: [
+        {
+          id: 'budget-1',
+          nome: 'Casa',
+          importoTarget: 100,
+          attivo: true,
+          dataInizio: '2026-04-01',
+          dataFine: '2026-06-30',
+          periodo: 'trimestrale',
+        } as never,
+      ],
+      transactions: [{ id: 'tx-1', data: '' } as never],
+    })).resolves.toBeDefined();
   });
 });

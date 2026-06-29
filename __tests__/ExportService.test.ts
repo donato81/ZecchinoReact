@@ -254,4 +254,55 @@ describe('ExportService — PLAN 012', () => {
     ).resolves.toEqual({ success: true });
     expect(mockShareOpen).toHaveBeenCalledTimes(2);
   });
+
+  // --- INTEGRATION SESSIONE E4 ---
+
+  it('E4-91: exportFile - comportamento con stringhe vuote', async () => {
+    const { exportFile, mockShareOpen } = loadExportService('ios');
+    mockShareOpen.mockResolvedValue(undefined);
+
+    await expect(exportFile('', 'export.csv', 'text/csv')).resolves.toEqual({ success: true });
+  });
+
+  it('E4-92: exportFile - gestisce stringhe di grandi dimensioni in memoria', async () => {
+    const { exportFile, mockShareOpen } = loadExportService('ios');
+    mockShareOpen.mockResolvedValue(undefined);
+
+    const bigContent = 'x'.repeat(1024 * 1024);
+
+    await expect(
+      exportFile(bigContent, 'big.csv', 'text/csv'),
+    ).resolves.toEqual({ success: true });
+    expect(mockShareOpen).toHaveBeenCalled();
+  });
+
+  it('E4-93: exportFile - successo su piattaforma Windows', async () => {
+    const { exportFile, mockPickSavePath, mockWriteFile } = loadExportService('windows');
+    mockPickSavePath.mockResolvedValue({
+      status: 'SUCCESS',
+      path: 'C:\\temp\\export.csv',
+    });
+    mockWriteFile.mockResolvedValue(undefined);
+
+    await expect(
+      exportFile('contenuto', 'export.csv', 'text/csv'),
+    ).resolves.toEqual({ success: true });
+
+    expect(mockPickSavePath).toHaveBeenCalledWith(expect.objectContaining({ suggestedFileName: 'export.csv' }));
+    expect(mockWriteFile).toHaveBeenCalledWith('C:\\temp\\export.csv', 'contenuto', 'utf8');
+  });
+
+  it('E4-94: exportFile - cancellazione picker su piattaforma Windows (CANCELED)', async () => {
+    const { exportFile, mockPickSavePath } = loadExportService('windows');
+    mockPickSavePath.mockResolvedValue({
+      status: 'USER_CANCELLED',
+    });
+
+    await expect(
+      exportFile('contenuto', 'export.csv', 'text/csv'),
+    ).resolves.toEqual({
+      success: false,
+      reason: 'CANCELLED',
+    });
+  });
 });
