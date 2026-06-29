@@ -5,16 +5,17 @@
  - **Owner:** donny-81
  - **Core Technology Stack:** React Native 0.82.1, React 19.1.1, react-native-windows ^0.82.5, Supabase JS ^2.105.4, TypeScript
  - **Environment Sync:** Local
- - **Ultimo Agente Attivo:** Antigravity, 2026-06-29
- - **Blocco in Carico:** Sessione E0 bugfix
+ - **Ultimo Agente Attivo:** Antigravity, 2026-06-30
+ - **Blocco in Carico:** Pianificazione Test Sessione E4
  - **Context Refresh Threshold:** Se la sessione supera i 40 scambi di prompt o i 50.000 token, l'agente deve eseguire un riassunto dello Snapshot di Ripresa e riavviare la sessione per svuotare la memoria cache. Questo è un reset tecnico della memoria: l'agente riprende il lavoro dal punto esatto in cui si trovava senza eseguire il protocollo di apertura sessione (sezione 2b). Il protocollo 2b si applica esclusivamente all'avvio di una nuova sessione di lavoro umana, ovvero quando l'architetto riprende il progetto dopo un'interruzione.
  
  ### Stato Globale Corrente
  
  - **Active Phase:** P0/P1/P2 completate. DESIGN 022 e 021 implementati (Fase 1 completata).
- - **Active Block:** Sessione E0 bugfix — completata.
- - **Last Updated:** 2026-06-29
+ - **Active Block:** Pianificazione Test Sessione E4 — completata.
+ - **Last Updated:** 2026-06-30
  - **Pending Plans:**
+   - **Pianificazione Test Sessione E4 (Blocco 3) — COMPLETATA** (coding plan `docs/3-coding-plans/024-PLAN_test-sessione-E4-blocco3_v1.0.0.md` e todo list `docs/4-todo-lists/024-TODO_test-sessione-E4-blocco3_v1.0.0.md` creati il 2026-06-30).
    - **Sessione E0 Bugfix — COMPLETATA** (implementati i 7 bugfix con regression test in data 2026-06-29, versione bump 0.18.3).
    - **Pianificazione Bugfix (SESSIONE E0) — COMPLETATA** (coding plan `docs/3-coding-plans/023-PLAN_bugfix-sessione-E0_v0.18.2.md` e todo list `docs/4-todo-lists/023-TODO_bugfix-sessione-E0_v0.18.2.md` creati il 2026-06-29).
    - **Analisi Copertura Test Completa (SESSIONE D) — COMPLETATA** (report `docs/1-reports/REPORT-analisi-copertura-test-completa_v1.0.0.md` creato il 2026-06-28).
@@ -596,11 +597,14 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | CORE-TEST-IMPL-B | Implementazione test moduli core (Fase B) | [x] DONE | [x] PASSED |
 | P3.E0-PLAN-023 | Redazione Coding Plan 023 — SESSIONE E0 bugfix | [x] DONE — 2026-06-29 Antigravity | [x] PASSED |
 | P3.E0-TODO-023 | Redazione Todo Specifico 023 — SESSIONE E0 bugfix | [x] DONE — 2026-06-29 Antigravity | [x] PASSED |
+| P3.E4-PLAN-024 | Redazione Coding Plan 024 — Test Sessione E4 | [x] DONE — 2026-06-30 Antigravity | [x] PASSED |
+| P3.E4-TODO-024 | Redazione Todo Specifico 024 — Test Sessione E4 | [x] DONE — 2026-06-30 Antigravity | [x] PASSED |
 
 ### Log di Validazione
 
 | Data | Block ID | Validato Da | Risultato | Note |
 |------|----------|-------------|-----------|------|
+| 2026-06-30 | P3.E4-PLAN-024 / TODO-024 | Antigravity | DONE | Redatto coding plan 024 e todo list 024 per test Sessione E4 (Persistenza e Librerie) |
 | 2026-06-29 | P3.E0-PLAN-023 / TODO-023 | Antigravity | DONE | Redatto coding plan 023 e todo list 023 per correzione dei 7 bug e regression test |
 | 2026-06-27 | CORE-TEST-IMPL-B | Antigravity | DONE | Scritta e convalidata la suite completa di 39 test unitari per i 7 moduli core |
 | 2026-06-27 | CORE-TEST-PLAN-A | Antigravity | DONE | Prodotto report di piano di test dettagliato per i sette moduli core |
