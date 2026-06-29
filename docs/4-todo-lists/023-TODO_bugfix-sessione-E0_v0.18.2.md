@@ -50,6 +50,7 @@ note-stato: Documento operativo derivato dal PLAN 023 v0.18.2. Tutti i task PEND
 ### BUG-5 — hadTransactions fisso a true
 - [ ] **Codice:** Calcolare dinamicamente `hadTransactions` prima di invocare `removeAccount()` in `src/context/AppDataContext.tsx`.
 - [ ] **Test:** Scrivere il regression test per verificare l'annuncio vocale dell'eliminazione conto sia con transazioni collegate che senza.
+- [ ] **Test:** Aggiungere il caso trasferimento: verificare che `hadTransactions` risulti true quando il conto eliminato compare nel campo `contoDestinazioneId` e non solo in `contoId` (scenario di trasferimento in uscita verso il conto eliminato).
 
 ### BUG-1 — Perdita simulazioni locali al bootstrap online
 - [ ] **Codice:** Implementare la logica di recupero e fusione dei prestiti simulati da cache prima di `applyDomainSnapshot` in `runOnlineBootstrap` e `refreshAll` di `src/context/AppDataContext.tsx`.
@@ -59,7 +60,7 @@ note-stato: Documento operativo derivato dal PLAN 023 v0.18.2. Tutti i task PEND
 
 ## 3. Chiusura Sessione
 
-- [ ] **Versione:** Aggiornare la versione in `package.json` da `0.18.0` a `0.18.2`.
+- [ ] **Versione:** Verificare che `package.json`, `SPARK-START.md` e `CHANGELOG.md` siano coerenti tra loro e riflettano lo stato reale della sessione E0. Nota: `package.json` è già a `0.18.2`. Se la versione finale dell'implementazione richiede un incremento a `0.18.3`, applicarlo in tutti e tre i file in modo coerente. La scelta va dichiarata esplicitamente prima del commit finale.
 - [ ] **Changelog:** Aggiornare `CHANGELOG.md` registrando la release `0.18.2` con l'elenco delle correzioni dei 7 bug.
 - [ ] **Spark Start:** Aggiornare `SPARK-START.md` con la versione `0.18.2` e lo stato della Sessione E0.
 - [ ] **Todo Master:** Aggiornare `docs/todo-master.md` aggiungendo i riferimenti a PLAN 023 e TODO 023 e marcando completata la sessione E0.

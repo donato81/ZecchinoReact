@@ -45,7 +45,16 @@ Questo Coding Plan definisce la strategia chirurgica per correggere i 7 bug iden
   La successiva chiamata ad `applyDomainSnapshot()` sovrascrive lo stato React azzerando le simulazioni locali (che iniziano con `sim-`).
   Infine, l'effetto di persistenza rileva lo stato modificato e cancella permanentemente la cache locale `prestiti_simulazioni`.
 - **Codice corretto da implementare:**
-  In `runOnlineBootstrap` e nella funzione interna `reloadData` di `refreshAll`, prima di chiamare `applyDomainSnapshot`, dobbiamo recuperare le simulazioni locali presenti nella cache e fonderle nello snapshot remoto:
+  Estrarre la logica di fusione delle simulazioni in una funzione pura esportata separata, con questa firma:
+  ```ts
+  export function mergePrestitiWithLocalSimulations(
+    remotePrestiti: PrestitoMutuo[],
+    cachedSimulazioni: PrestitoMutuo[] | null | undefined,
+  ): PrestitoMutuo[]
+  ```
+  Questa funzione deve essere l'unico punto dove avviene il filtro per `stato === 'simulazione'` o `id.startsWith('sim-')` e la deduplicazione per ID. Sia `runOnlineBootstrap` che `refreshAll` devono chiamare questa funzione, non duplicare la logica inline. Vietato duplicare questa sequenza in due punti separati del codice.
+
+  In `runOnlineBootstrap` e nella funzione interna `reloadData` di `refreshAll`, prima di chiamare `applyDomainSnapshot`, dobbiamo recuperare le simulazioni locali presenti nella cache e fonderle nello snapshot remoto tramite la funzione centralizzata:
   ```ts
   let mergedPrestiti = [...(snapshot.prestiti || [])];
   try {
@@ -54,14 +63,10 @@ Questo Coding Plan definisce la strategia chirurgica per correggere i 7 bug iden
       'prestiti_simulazioni',
     );
     if (gen !== hydrationGen.current) return; // verifica hydrationGen prima di procedere
-    if (cachedSimulazioni && Array.isArray(cachedSimulazioni.data)) {
-      const simulazioni = cachedSimulazioni.data.filter(
-        p => p.stato === 'simulazione' || p.id.startsWith('sim-'),
-      );
-      const remoteIds = new Set(mergedPrestiti.map(p => p.id));
-      const uniqueSimulazioni = simulazioni.filter(p => !remoteIds.has(p.id));
-      mergedPrestiti = [...mergedPrestiti, ...uniqueSimulazioni];
-    }
+    mergedPrestiti = mergePrestitiWithLocalSimulations(
+      snapshot.prestiti || [],
+      cachedSimulazioni?.data,
+    );
   } catch (cacheError) {
     console.warn('[AppDataContext] errore lettura simulazioni da cache', cacheError);
   }
@@ -80,11 +85,19 @@ Questo Coding Plan definisce la strategia chirurgica per correggere i 7 bug iden
   - Verificare `hydrationGen` prima dell'applicazione finale.
   - Non fare due chiamate consecutive ad `applyDomainSnapshot`.
   - Non sostituire mai l'intero snapshot remoto con la cache.
+  - Se la lettura della cache `prestiti_simulazioni` fallisce (eccezione nel blocco try/catch), il bootstrap deve proseguire applicando lo snapshot remoto puro senza simulazioni locali. L'errore va registrato con `console.warn` ma non deve bloccare il bootstrap né portare lo stato dell'applicazione in ERROR.
 - **Regression test atteso:**
-  In `__tests__/AppDataContext.spec.ts`, creare un test che:
-  - Mocki `loadDomainSnapshot` per restituire prestiti dal DB remoto (senza simulazioni).
-  - Mocki `readCache` per la tabella `prestiti_simulazioni` per restituire almeno una simulazione con id `sim-1`.
-  - Esegua `runOnlineBootstrap` e verifichi che `applyDomainSnapshot` riceva lo snapshot con entrambi i prestiti remoti e le simulazioni locali fusi.
+  Il regression test di BUG-1 deve essere un test unitario su una funzione pura.
+  Testare direttamente `mergePrestitiWithLocalSimulations` esportata.
+
+  Casi da coprire:
+  - lista remota con prestiti validi + cache con simulazioni distinte: verifica che il risultato li contenga tutti;
+  - lista remota con un prestito e cache con un elemento con lo stesso ID: verifica che l'elemento non compaia due volte;
+  - cache null o undefined: verifica che la funzione restituisca la sola lista remota senza errori;
+  - cache con un elemento non simulazione (privo di prefisso sim- e stato diverso da simulazione): verifica che venga escluso dal risultato;
+  - cache che genera un'eccezione al momento della lettura: verifica che il bootstrap continui con snapshot remoto puro.
+
+  Non testare funzioni private non esportate. Non testare `runOnlineBootstrap` direttamente.
 
 ---
 
@@ -137,6 +150,13 @@ Questo Coding Plan definisce la strategia chirurgica per correggere i 7 bug iden
 - **Regression test atteso:**
   In `src/accessibility/__tests__/detection.test.ts`, verificare che:
   - L'unmount del hook non provochi eccezioni qualora la sottoscrizione restituita da `AccessibilityInfo.addEventListener` sia `undefined` o `null`.
+
+Analisi manual=false:
+La funzione enableTalkBack(false) e disableTalkBack(false) modificano esclusivamente lo stato locale React senza scrivere l'override persistente. Questo comportamento è progettato intenzionalmente: il parametro manual=false serve a modifiche temporanee che possono essere sovrascritte in qualsiasi momento dal listener nativo screenReaderChanged o da una nuova lettura di AccessibilityInfo.isScreenReaderEnabled().
+
+Non si tratta di un bug né di una doppia sottoscrizione. Il codice non crea nuove sottoscrizioni quando manual=false, perché l'effetto useEffect dipende da manualOverride e manual=false non modifica manualOverride.
+
+Questa sessione E0 NON deve correggere il comportamento manual=false. Documenta solo il cleanup fragile della subscription (già pianificato sopra).
 
 ---
 
@@ -269,8 +289,30 @@ L'ordine di implementazione consigliato è impostato per iniziare dai moduli a l
 6. **BUG-5** (Conto eliminato in `AppDataContext.tsx` — calcolo stato)
 7. **BUG-1** (Persistenza simulazioni in `AppDataContext.tsx` — ciclo di vita asincrono del bootstrap)
 
+## 4. Validazione e Cicli di Convergenza
+
+Per ogni bug, nell'ordine di esecuzione indicato nella sezione precedente, la sessione di implementazione deve seguire questo ciclo obbligatorio:
+
+1. Implementare la correzione del codice.
+2. Implementare o aggiornare il regression test specifico del bug.
+3. Eseguire il regression test specifico con npx jest --testPathPattern=<file>.
+4. Se il test fallisce, correggere e ripetere dal punto 1.
+5. Massimo 10 tentativi per bug.
+6. Se dopo 10 tentativi il test non passa, fermarsi immediatamente su quel bug e produrre un Diagnostic Report prima di procedere al bug successivo.
+
+Il Diagnostic Report deve contenere:
+- ID del bug bloccato;
+- comando eseguito e output completo dell'errore;
+- stack trace se disponibile;
+- lista dei file modificati;
+- elenco delle ipotesi già tentate;
+- diff sintetico delle modifiche effettuate;
+- richiesta esplicita di intervento del Consiglio AI.
+
+La verifica finale globale con npx jest e npx tsc --noEmit rimane obbligatoria, ma avviene solo dopo che tutti i cicli locali sono stati completati.
+
 ---
 
-## 3. Aggiornamento Versione Target
+## 5. Aggiornamento Versione Target
 
 Al termine della sessione di implementazione (Sessione E0), la versione del progetto in `package.json` deve essere aumentata da `0.18.0` a `0.18.2`. La versione `0.18.1` è già stata utilizzata nella documentazione della SESSIONE D.
