@@ -342,4 +342,69 @@ describe("Sound System - Unit Tests (PLAN 022)", () => {
       expect(res).toBe(mapping[legacySound]);
     });
   });
+
+  // --- INTEGRATION SESSIONE E4 ---
+
+  it("T21 (E4-1) - normalizeSoundType fa il fallback su click per suoni non validi", () => {
+    const res = soundSystem['normalizeSoundType']('invalid-sound' as any);
+    expect(res).toBe('click');
+  });
+
+  it("T22 (E4-2) - play non fa nulla se soundType non è valido e viene normalizzato ad un valore gestito", () => {
+    soundSystem.initFromSettings(true, 0.3);
+    soundSystem['audioContext'] = mockAudioContext as any;
+    expect(() => soundSystem.play(undefined as any)).not.toThrow();
+  });
+
+  it("T23 (E4-3) - play gestisce la sicurezza se il context è in stato closed", () => {
+    soundSystem.initFromSettings(true, 0.3);
+    soundSystem['audioContext'] = mockAudioContext as any;
+    mockAudioContext.state = 'closed';
+    const prev = mockAudioContext.createOscillator;
+    mockAudioContext.createOscillator = jest.fn().mockImplementationOnce(() => {
+      throw new Error('Closed context');
+    });
+    expect(() => soundSystem.play('click')).not.toThrow();
+    mockAudioContext.createOscillator = prev;
+  });
+
+  it("T24 (E4-4) - play ricrea il context se resettato a null", () => {
+    soundSystem.initFromSettings(true, 0.3);
+    soundSystem['audioContext'] = null;
+    soundSystem.play('success');
+    expect(mockAudioContext.createOscillator).toHaveBeenCalled();
+  });
+
+  it("T25 (E4-5) - play funziona su iOS", () => {
+    Object.defineProperty(Platform, 'OS', {
+      value: 'ios',
+      configurable: true,
+    });
+    soundSystem.initFromSettings(true, 0.3);
+    soundSystem['audioContext'] = null;
+    expect(() => soundSystem.play('click')).not.toThrow();
+    expect(mockAudioContext.createOscillator).toHaveBeenCalled();
+  });
+
+  it("T26 (E4-6) - useUserSettings riflette i valori modificati", async () => {
+    let hookResult: any;
+    function Probe() {
+      hookResult = useUserSettings();
+      return null;
+    }
+    act(() => {
+      TestRenderer.create(React.createElement(Probe));
+    });
+    expect(hookResult.audioEnabled).toBe(true);
+    expect(hookResult.audioVolume).toBe(0.8);
+  });
+
+  it("T27 (E4-7) - registerAppStateListener si registra correttamente", () => {
+    const addListenerSpy = jest.spyOn(AppState, 'addEventListener');
+    soundSystem.initFromSettings(true, 0.3);
+    soundSystem['audioContext'] = null;
+    soundSystem.play('click');
+    expect(addListenerSpy).toHaveBeenCalledWith('change', expect.any(Function));
+    addListenerSpy.mockRestore();
+  });
 });

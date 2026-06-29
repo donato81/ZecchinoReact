@@ -266,4 +266,107 @@ describe('Haptic System - Unit Tests (BLOCCO 021)', () => {
     expect(hookResult.impactMedium).toBeDefined();
     expect(hookResult.impactHeavy).toBeDefined();
   });
+
+  // --- INTEGRATION SESSIONE E4 ---
+
+  // T26 (E4-1): loadSettings - errore AsyncStorage gestito senza crash
+  it('T26 - errore AsyncStorage gestito senza crash', async () => {
+    mockGetItem.mockRejectedValueOnce(new Error('AsyncStorage read error'));
+    const system = new HapticSystem();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(system.isSupported()).toBe(true);
+  });
+
+  // T27 (E4-2): loadSettings - parsing JSON corrotto gestito senza crash
+  it('T27 - parsing JSON corrotto gestito senza crash e mantiene default', async () => {
+    mockGetItem.mockResolvedValueOnce('{corrupted json');
+    const system = new HapticSystem();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(system.isEnabled()).toBe(true);
+  });
+
+  // T28 (E4-3): setEnabled - AsyncStorage save error non crasha
+  it('T28 - AsyncStorage save error non crasha', async () => {
+    mockSetItem.mockRejectedValueOnce(new Error('AsyncStorage write error'));
+    const system = new HapticSystem();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await expect(system.setEnabled(false)).resolves.not.toThrow();
+  });
+
+  // T29 (E4-4): useHaptic - i metodi dello hook propagano correttamente al singleton
+  it('T29 - useHaptic propaga i metodi al singleton', () => {
+    const successSpy = jest.spyOn(hapticSystem, 'success').mockResolvedValue();
+    const errorSpy = jest.spyOn(hapticSystem, 'error').mockResolvedValue();
+
+    let hookResult: any;
+    function Probe() {
+      hookResult = useHaptic();
+      return null;
+    }
+    act(() => {
+      TestRenderer.create(<Probe />);
+    });
+
+    hookResult.success();
+    expect(successSpy).toHaveBeenCalled();
+
+    hookResult.error();
+    expect(errorSpy).toHaveBeenCalled();
+
+    successSpy.mockRestore();
+    errorSpy.mockRestore();
+  });
+
+  // T30 (E4-5): success/error - eccezione expo-haptics gestita
+  it('T30 - eccezione expo-haptics gestita senza lanciare errore al chiamante', async () => {
+    mockGetItem.mockResolvedValueOnce(JSON.stringify({ enabled: true }));
+    const system = new HapticSystem();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    (Haptics.notificationAsync as jest.Mock).mockRejectedValueOnce(new Error('Native error'));
+    await expect(system.success()).resolves.not.toThrow();
+  });
+
+  // T31 (E4-6): hapticSystem - supportato su iOS
+  it('T31 - supportato su iOS', async () => {
+    Object.defineProperty(Platform, 'OS', {
+      value: 'ios',
+      configurable: true,
+    });
+    mockGetItem.mockResolvedValueOnce(JSON.stringify({ enabled: true }));
+    const system = new HapticSystem();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(system.isSupported()).toBe(true);
+    expect(system.isEnabled()).toBe(true);
+  });
+
+  // T32 (E4-7): useUserSettings - setHapticEnabled aggiorna Cloud e Local
+  it('T32 - useUserSettings setHapticEnabled aggiorna Cloud e Local', async () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      userSettings: {
+        preferences: {
+          haptic_enabled: true,
+        },
+      },
+    });
+    mockUpdatePreference.mockResolvedValueOnce(undefined);
+
+    let hookResult: any;
+    function Probe() {
+      hookResult = useUserSettings();
+      return null;
+    }
+    act(() => {
+      TestRenderer.create(<Probe />);
+    });
+
+    await act(async () => {
+      await hookResult.setHapticEnabled(false);
+    });
+
+    expect(mockUpdatePreference).toHaveBeenCalledWith('haptic_enabled', false);
+    expect(hapticSystem.isEnabled()).toBe(false);
+  });
 });

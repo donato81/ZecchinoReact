@@ -291,4 +291,144 @@ describe('Helpers', () => {
     const result = formatDateShort('invalid-date');
     expect(result).toBe('NaN/NaN/aN');
   });
+
+  // --- INTEGRATION SESSIONE E4 ---
+
+  test('Caso E4-1: Format date short con data valida (formatDateShort)', () => {
+    expect(formatDateShort('2026-06-30')).toBe('30/06/26');
+  });
+
+  test('Caso E4-2: Calcolo saldo totale dei conti (getTotalBalance)', () => {
+    const mockAccounts: Account[] = [
+      { id: 'conto-1', nome: 'Conto 1', tipo: 'bancario', saldoIniziale: 100, valuta: 'EUR', isPrivato: false, dataCreazione: '2026-01-01', archiviato: false },
+      { id: 'conto-2', nome: 'Conto 2', tipo: 'bancario', saldoIniziale: 200, valuta: 'EUR', isPrivato: false, dataCreazione: '2026-01-01', archiviato: false }
+    ];
+    const mockTransactions: Transaction[] = [
+      { id: 't-1', contoId: 'conto-1', tipo: 'entrata', importo: 50, data: '2026-06-05', descrizione: '', categoriaId: 'c-1', ricorrente: false, cifrato: false },
+      { id: 't-2', contoId: 'conto-2', tipo: 'uscita', importo: 100, data: '2026-06-06', descrizione: '', categoriaId: 'c-2', ricorrente: false, cifrato: false }
+    ];
+    expect(getTotalBalance(mockAccounts, mockTransactions)).toBe(250);
+  });
+
+  test('Caso E4-3: Filtro transazioni in un intervallo di tempo (getTransactionsInPeriod)', () => {
+    const mockTransactions: Transaction[] = [
+      { id: 't-1', contoId: 'conto-1', tipo: 'entrata', importo: 50, data: '2026-06-05T12:00:00Z', descrizione: '', categoriaId: 'c-1', ricorrente: false, cifrato: false },
+      { id: 't-2', contoId: 'conto-1', tipo: 'uscita', importo: 100, data: '2026-06-15T12:00:00Z', descrizione: '', categoriaId: 'c-2', ricorrente: false, cifrato: false },
+      { id: 't-3', contoId: 'conto-1', tipo: 'uscita', importo: 200, data: '2026-06-25T12:00:00Z', descrizione: '', categoriaId: 'c-2', ricorrente: false, cifrato: false }
+    ];
+    const result = getTransactionsInPeriod(mockTransactions, '2026-06-10T00:00:00Z', '2026-06-20T23:59:59Z');
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('t-2');
+  });
+
+  test('Caso E4-4: Somma delle sole entrate o uscite (getTotalByType)', () => {
+    const mockTransactions: Transaction[] = [
+      { id: 't-1', contoId: 'conto-1', tipo: 'entrata', importo: 50, data: '2026-06-05', descrizione: '', categoriaId: 'c-1', ricorrente: false, cifrato: false },
+      { id: 't-2', contoId: 'conto-1', tipo: 'uscita', importo: 100, data: '2026-06-06', descrizione: '', categoriaId: 'c-2', ricorrente: false, cifrato: false },
+      { id: 't-3', contoId: 'conto-1', tipo: 'entrata', importo: 150, data: '2026-06-07', descrizione: '', categoriaId: 'c-2', ricorrente: false, cifrato: false }
+    ];
+    expect(getTotalByType(mockTransactions, 'entrata')).toBe(200);
+    expect(getTotalByType(mockTransactions, 'uscita')).toBe(100);
+  });
+
+  test('Caso E4-5: Raggruppamento per Categoria con categoria non trovata (groupTransactionsByCategory)', () => {
+    const mockTransactions: Transaction[] = [
+      { id: 't-1', contoId: 'conto-1', tipo: 'uscita', importo: 100, data: '2026-06-05', descrizione: '', categoriaId: 'non-esistente', ricorrente: false, cifrato: false }
+    ];
+    const result = groupTransactionsByCategory(mockTransactions, []);
+    expect(result).toEqual([
+      { categoria: 'Sconosciuta', totale: 100 }
+    ]);
+  });
+
+  test('Caso E4-6: Esportazione CSV con conti o categorie nulle (exportToCSV)', () => {
+    const mockTransactions: Transaction[] = [
+      { id: 't-1', contoId: 'non-esistente', tipo: 'uscita', importo: 10, data: '2026-06-20', descrizione: 'Test', categoriaId: 'non-esistente', ricorrente: false, cifrato: false }
+    ];
+    const csv = exportToCSV(mockTransactions, [], []);
+    expect(csv).toContain('"MOCKED_DATE","uscita","10","","","Test","No"');
+  });
+
+  test('Caso E4-7: getBudgetProgress con budget specifico di conto o globale', () => {
+    const mockTransactions: Transaction[] = [
+      { id: 't-1', contoId: 'conto-1', tipo: 'uscita', importo: 40, data: '2026-06-05', descrizione: '', categoriaId: 'c-1', ricorrente: false, cifrato: false },
+      { id: 't-2', contoId: 'conto-2', tipo: 'uscita', importo: 60, data: '2026-06-06', descrizione: '', categoriaId: 'c-2', ricorrente: false, cifrato: false }
+    ];
+
+    const budgetConto: Budget = {
+      id: 'b-1',
+      nome: 'Budget Conto 1',
+      importoTarget: 100,
+      contoId: 'conto-1',
+      categoriaId: undefined,
+      dataInizio: '2026-06-01',
+      dataFine: '2026-06-30',
+      periodo: 'mensile',
+      attivo: true
+    };
+    const progressConto = getBudgetProgress(budgetConto, mockTransactions);
+    expect(progressConto.spent).toBe(40);
+    expect(progressConto.percentage).toBe(40);
+
+    const budgetGlobale: Budget = {
+      id: 'b-2',
+      nome: 'Budget Globale',
+      importoTarget: 200,
+      contoId: undefined,
+      categoriaId: undefined,
+      dataInizio: '2026-06-01',
+      dataFine: '2026-06-30',
+      periodo: 'mensile',
+      attivo: true
+    };
+    const progressGlobale = getBudgetProgress(budgetGlobale, mockTransactions);
+    expect(progressGlobale.spent).toBe(100);
+    expect(progressGlobale.percentage).toBe(50);
+  });
+
+  test('Caso E4-8: Esclusione budget scaduti (getActiveBudgets)', () => {
+    const mockBudgets: Budget[] = [
+      { id: 'b-1', nome: 'Attivo', importoTarget: 100, dataInizio: '2026-06-01', dataFine: '2026-06-20', periodo: 'mensile', attivo: true },
+      { id: 'b-2', nome: 'Scaduto', importoTarget: 100, dataInizio: '2026-06-01', dataFine: '2026-06-10', periodo: 'mensile', attivo: true },
+      { id: 'b-3', nome: 'Inattivo', importoTarget: 100, dataInizio: '2026-06-01', dataFine: '2026-06-25', periodo: 'mensile', attivo: false }
+    ];
+    const active = getActiveBudgets(mockBudgets);
+    expect(active).toHaveLength(1);
+    expect(active[0].id).toBe('b-1');
+  });
+
+  test('Caso E4-9: Calcolo date per periodo trimestrale e annuale (getBudgetPeriodDates)', () => {
+    const start = new Date('2026-01-15T00:00:00Z');
+    
+    const datesTrim = getBudgetPeriodDates('trimestrale', start);
+    expect(new Date(datesTrim.dataInizio).getDate()).toBe(15);
+    expect(new Date(datesTrim.dataFine).getMonth()).toBe(start.getMonth() + 3);
+    expect(new Date(datesTrim.dataFine).getDate()).toBe(14);
+
+    const datesAnn = getBudgetPeriodDates('annuale', start);
+    expect(new Date(datesAnn.dataFine).getFullYear()).toBe(start.getFullYear() + 1);
+    expect(new Date(datesAnn.dataFine).getMonth()).toBe(start.getMonth());
+    expect(new Date(datesAnn.dataFine).getDate()).toBe(14);
+  });
+
+  test('Caso E4-10: Gestione scadenze e proiezioni su obiettivi incompleti o senza scadenze (getSavingsGoalProgress, calculateSavingsProjection)', () => {
+    const goalNoDeadline = {
+      importoTarget: 1000,
+      importoCorrente: 200,
+      dataInizio: '2026-06-01'
+    };
+    const progress = getSavingsGoalProgress(goalNoDeadline);
+    expect(progress.daysRemaining).toBeUndefined();
+    expect(calculateSavingsProjection(goalNoDeadline)).toBeNull();
+
+    const goalZeroCurrent = {
+      importoTarget: 1000,
+      importoCorrente: 0,
+      dataInizio: '2026-06-15',
+      dataScadenza: '2026-06-30'
+    };
+    const projection = calculateSavingsProjection(goalZeroCurrent);
+    expect(projection).not.toBeNull();
+    expect(projection!.projectedCompletion).toBeUndefined();
+  });
 });
