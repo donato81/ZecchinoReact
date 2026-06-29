@@ -54,7 +54,14 @@ note-stato: Documento operativo derivato dal PLAN 023 v0.18.2. Tutti i task PEND
 
 ### BUG-1 — Perdita simulazioni locali al bootstrap online
 - [ ] **Codice:** Implementare la logica di recupero e fusione dei prestiti simulati da cache prima di `applyDomainSnapshot` in `runOnlineBootstrap` e `refreshAll` di `src/context/AppDataContext.tsx`.
-- [ ] **Test:** Scrivere il regression test in `__tests__/AppDataContext.spec.ts` che simula un bootstrap online e verifica la persistenza delle simulazioni locali.
+- [ ] **Test:** Scrivere il regression test unitario su `mergePrestitiWithLocalSimulations`
+  esportata, coprendo i seguenti 5 casi:
+  - lista remota con simulazioni distinte in cache: verifica che il risultato le contenga tutte;
+  - lista remota con un ID identico a un elemento in cache: verifica che non compaia due volte;
+  - cache null o undefined: verifica che la funzione restituisca solo la lista remota senza errori;
+  - cache con un elemento che non è una simulazione (no prefisso sim- e stato diverso): verifica che venga escluso;
+  - eccezione durante la lettura della cache: verifica che il bootstrap continui con snapshot remoto puro.
+  Non testare funzioni private non esportate. Non testare `runOnlineBootstrap` direttamente.
 
 ---
 

@@ -315,4 +315,12 @@ La verifica finale globale con npx jest e npx tsc --noEmit rimane obbligatoria, 
 
 ## 5. Aggiornamento Versione Target
 
-Al termine della sessione di implementazione (Sessione E0), la versione del progetto in `package.json` deve essere aumentata da `0.18.0` a `0.18.2`. La versione `0.18.1` è già stata utilizzata nella documentazione della SESSIONE D.
+Al termine della sessione di implementazione (Sessione E0), verificare che
+`package.json`, `SPARK-START.md` e `CHANGELOG.md` siano coerenti tra loro
+e riflettano lo stato reale della sessione E0.
+
+Nota: `package.json` è già a `0.18.2` dalla pianificazione della sessione.
+Se la versione finale dell'implementazione effettiva dei 7 bugfix richiede
+un incremento a `0.18.3`, applicarlo in modo coerente in tutti e tre i file.
+La scelta tra mantenere `0.18.2` o incrementare a `0.18.3` va dichiarata
+esplicitamente nel commit finale, prima del push su main.
