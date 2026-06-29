@@ -27,3 +27,9 @@ try {
   console.error(err.message);
   process.exit(1);
 }
+
+if (typeof test === 'function') {
+  test('dummy test for Jest scan compatibility', () => {
+    expect(true).toBe(true);
+  });
+}

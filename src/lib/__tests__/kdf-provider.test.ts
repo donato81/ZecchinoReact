@@ -21,10 +21,32 @@ jest.mock('react-native-quick-crypto', () => {
   };
 }, { virtual: true });
 
-import { derivePbkdf2Sha256 } from '../kdf-provider';
 const crypto: any = require('crypto');
+let derivePbkdf2Sha256: any;
 
 describe('KDF Provider', () => {
+  beforeAll(() => {
+    jest.doMock('react-native-quick-crypto', () => {
+      return {
+        get pbkdf2Sync() {
+          if (mockShouldThrowQuickCrypto) {
+            throw new Error('react-native-quick-crypto not available');
+          }
+          return mockPbkdf2Sync;
+        },
+        get default() {
+          if (mockShouldThrowQuickCrypto) {
+            throw new Error('react-native-quick-crypto not available');
+          }
+          return {
+            pbkdf2Sync: mockPbkdf2Sync,
+          };
+        }
+      };
+    }, { virtual: true });
+    derivePbkdf2Sha256 = require('../kdf-provider').derivePbkdf2Sha256;
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockShouldThrowQuickCrypto = false;
