@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [0.18.3] — 2026-06-30 — Pianificazione Test Sessione E4 (Blocco 3)
+## [0.18.4] — 2026-06-30 — Pianificazione Test Sessione E4 (Blocco 3)
 
 ### Added
 - docs(plans): aggiunto `024-PLAN_test-sessione-E4-blocco3_v1.0.0.md` con la pianificazione dettagliata di 116 test unitari/integrazione per i 20 moduli del Blocco 3 (Repository e Librerie).
