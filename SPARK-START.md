@@ -15,7 +15,7 @@ necessari per il tuo progetto.
 *Puoi eliminare questo file dopo il primo avvio.*
 *Per domande sull'architettura SPARK, usa l'agente `spark-guide`.*
 
-Versione corrente progetto: `0.18.5`.
+Versione corrente progetto: `0.18.6`.
 Analisi Android completata (DUSU-ANALYZER 2025-07-25).
 Stato aggiornato: 2026-06-30.
 Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
@@ -23,10 +23,12 @@ Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
 019 Notifiche Budget e Orchestrazione, 020 Centralizzazione design tokens, 021 Haptic System nativo,
 022 Sound System nativo, Copertura Test Moduli Core (39 test unitari), Analisi Copertura Test Completa (SESSIONE D),
 Pianificazione Bugfix (Sessione E0), Esecuzione 7 Bugfix e Regression Test (Sessione E0),
-Pianificazione Test Sessione E4 (Blocco 3 — Repository e Librerie), Pianificazione Test Sessione E2 (Blocco 2 — Contesti Base e Hook).
+Pianificazione Test Sessione E4 (Blocco 3 — Repository e Librerie), Pianificazione Test Sessione E2 (Blocco 2 — Contesti Base e Hook),
+Pianificazione Test Sessione E3 (AuthContext e AppDataContext).
 Suite di test: PASS.
-Decisione release: versione corrente `0.18.5` (completata implementazione dei 38 test unitari della sessione E2 per il Blocco 2 - Parte 1).
-Prossima azione: Avvio della Sessione E3 (AuthContext e AppDataContext).
+Decisione release: versione corrente `0.18.6` (completata implementazione dei test Sessione E2 e E4, pianificazione Sessione E3 completata).
+Prossima azione: Avvio dell'implementazione dei test della Sessione E3 (AuthContext e AppDataContext).
+
 
 ---
 
@@ -99,6 +101,9 @@ Prossima azione: Avvio della Sessione E3 (AuthContext e AppDataContext).
 - [TODO 024 — Test Sessione E4 — Blocco 3: Repository e Librerie](docs/4-todo-lists/024-TODO_test-sessione-E4-blocco3_v1.0.0.md) — v1.0.0 — DONE
 - [PLAN 025 — Test Sessione E2 — Blocco 2: Contesti Base, Hook e Componenti (Parte 1)](docs/3-coding-plans/025-PLAN_test-sessione-E2-blocco2_v1.0.0.md) — v1.0.0 — COMPLETATO
 - [TODO 025 — Test Sessione E2 — Blocco 2: Contesti Base, Hook e Componenti (Parte 1)](docs/4-todo-lists/025-TODO_test-sessione-E2-blocco2_v1.0.0.md) — v1.0.0 — DONE
+- [PLAN 026 — Test Sessione E3 — Contesto Principale e Autenticazione (AuthContext & AppDataContext)](docs/3-coding-plans/026-PLAN_test-sessione-E3-authctx-appdatactx_v1.0.0.md) — v1.0.0 — COMPLETATO
+- [TODO 026 — Test Sessione E3 — Contesto Principale e Autenticazione (AuthContext & AppDataContext)](docs/4-todo-lists/026-TODO_test-sessione-E3-authctx-appdatactx_v1.0.0.md) — v1.0.0 — PENDING
+
 
 
 Correzioni applicate il 2026-06-27.

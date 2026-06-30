@@ -3,6 +3,7 @@
 ## [0.18.6] — 2026-06-30 — Implementazione Test Sessione E2 (Blocco 2 - Parte 1)
 
 ### Added
+- docs: aggiunge PLAN 026 e TODO 026 per Sessione E3 (AuthContext + AppDataContext).
 - test(ActivityDetectorView): suite di 3 test unitari per touch response e interazioni tastiera Windows (`__tests__/ActivityDetectorView.test.tsx`).
 - test(Button): suite di 4 test unitari per rendering, click handler fallback legacy e pass-through properties (`__tests__/button.test.tsx`).
 - test(use-inactivity-timer): suite di 8 test unitari per timeout di avviso, scadenza sessione e cleanup fake timers (`__tests__/use-inactivity-timer.test.tsx`).

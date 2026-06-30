@@ -15,6 +15,7 @@
  - **Active Block:** Sessione E3 (AuthContext e AppDataContext).
  - **Last Updated:** 2026-06-30
  - **Pending Plans:**
+   - **Pianificazione Test Sessione E3 (AuthContext e AppDataContext) — COMPLETATA** (coding plan `docs/3-coding-plans/026-PLAN_test-sessione-E3-authctx-appdatactx_v1.0.0.md` e todo list `docs/4-todo-lists/026-TODO_test-sessione-E3-authctx-appdatactx_v1.0.0.md` creati il 2026-06-30).
    - **Sessione E2 Test Codifica (Blocco 2 - Parte 1) — IMPLEMENTATA** (implementati ed eseguiti tutti i 38 test unitari in data 2026-06-30).
    - **Pianificazione Test Sessione E2 (Blocco 2 - Parte 1) — COMPLETATA** (coding plan `docs/3-coding-plans/025-PLAN_test-sessione-E2-blocco2_v1.0.0.md` e todo list `docs/4-todo-lists/025-TODO_test-sessione-E2-blocco2_v1.0.0.md` creati il 2026-06-30).
    - **Sessione E4 Test Codifica (Blocco 3) — IMPLEMENTATA** (implementati ed eseguiti con successo tutti i 116 test per i 20 moduli in data 2026-06-30).
@@ -53,14 +54,18 @@
 > Questa sezione viene aggiornata al termine di ogni sessione di lavoro.
 > Permette la ripresa immediata senza esplorazione manuale dello stato.
 
-- **Last Completed Task:** Implementazione Test Sessione E2 (Blocco 2 - Parte 1).
-- **Last Validated Block:** Implementazione Test Sessione E2 (2026-06-30, Antigravity).
+- **Last Completed Task:** Pianificazione Test Sessione E3 (AuthContext e AppDataContext).
+- **Last Validated Block:** Pianificazione Test Sessione E3 (2026-06-30, Antigravity).
 - **Files Modified But Not Validated:** Nessuno
 - **Open Threads:**
   - AN-03: `oklch colori` — da verificare per compatibilità Android (da DESIGN 020)
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
-  - **Next Action:** Avvio della Sessione E3 (AuthContext e AppDataContext).
+  - **Next Action:** Esecuzione dei test della Sessione E3 (AuthContext e AppDataContext).
+
+
+> Nota sessione pianificazione test 2026-06-30 (Antigravity):
+> Completata la pianificazione della SESSIONE E3: redatti il coding plan `docs/3-coding-plans/026-PLAN_test-sessione-E3-authctx-appdatactx_v1.0.0.md` e la todo list `docs/4-todo-lists/026-TODO_test-sessione-E3-authctx-appdatactx_v1.0.0.md` per i contesti AuthContext e AppDataContext, per un totale di 75 nuovi test unitari pianificati in stato PENDING.
 
 > Nota sessione coding test 2026-06-30 (Antigravity):
 > Completata l'implementazione della SESSIONE E2: aggiunti ed eseguiti tutti i 38 test unitari per i 7 moduli del Blocco 2 - Parte 1.
@@ -618,11 +623,14 @@ Panoramica dello stato globale di tutti i blocchi e task. Aggiornare dopo ogni t
 | P3.E2-PLAN-025 | Redazione Coding Plan 025 — Test Sessione E2 | [x] DONE — 2026-06-30 Antigravity | [x] PASSED |
 | P3.E2-TODO-025 | Redazione Todo Specifico 025 — Test Sessione E2 | [x] DONE — 2026-06-30 Antigravity | [x] PASSED |
 | P3.E2-TEST-IMPL | Implementazione Test Sessione E2 (Blocco 2 - Parte 1) | [x] DONE — 2026-06-30 Antigravity | [x] PASSED |
+| P3.E3-PLAN-026 | Redazione Coding Plan 026 — Test Sessione E3 | [x] DONE — 2026-06-30 Antigravity | [x] PASSED |
+| P3.E3-TODO-026 | Todo list 026 — Test Sessione E3 | [ ] PENDING | [ ] OPEN |
 
 ### Log di Validazione
 
 | Data | Block ID | Validato Da | Risultato | Note |
 |------|----------|-------------|-----------|------|
+| 2026-06-30 | P3.E3-PLAN-026 / TODO-026 | Antigravity | DONE | Redatto coding plan 026 e todo list 026 per test Sessione E3 (AuthContext e AppDataContext) |
 | 2026-06-30 | P3.E2-TEST-IMPL | Antigravity | DONE | Implementati ed eseguiti tutti i 38 test unitari della Sessione E2 per il Blocco 2 - Parte 1 |
 | 2026-06-30 | P3.E2-PLAN-025 / TODO-025 | Antigravity | DONE | Redatto coding plan 025 e todo list 025 per test Sessione E2 (Contesti Base e Hook) |
 | 2026-06-30 | P3.E4-TEST-IMPL | Antigravity | DONE | Implementati ed eseguiti con successo i 116 test per i 20 moduli del Blocco 3 |
