@@ -25,8 +25,8 @@ Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
 Pianificazione Bugfix (Sessione E0), Esecuzione 7 Bugfix e Regression Test (Sessione E0),
 Pianificazione Test Sessione E4 (Blocco 3 — Repository e Librerie), Pianificazione Test Sessione E2 (Blocco 2 — Contesti Base e Hook).
 Suite di test: PASS.
-Decisione release: versione corrente `0.18.5` (registrata la pianificazione della sessione E2 per contesti base e hook).
-Prossima azione: Avvio della Sessione E2 di implementazione dei 38 test unitari per il Blocco 2 (Parte 1).
+Decisione release: versione corrente `0.18.5` (completata implementazione dei 38 test unitari della sessione E2 per il Blocco 2 - Parte 1).
+Prossima azione: Avvio della Sessione E3 (AuthContext e AppDataContext).
 
 ---
 
@@ -97,8 +97,8 @@ Prossima azione: Avvio della Sessione E2 di implementazione dei 38 test unitari 
 - [TODO 023 — Bugfix sessione E0](docs/4-todo-lists/023-TODO_bugfix-sessione-E0_v0.18.2.md) — v0.18.3 — DONE
 - [PLAN 024 — Test Sessione E4 — Blocco 3: Repository e Librerie](docs/3-coding-plans/024-PLAN_test-sessione-E4-blocco3_v1.0.0.md) — v1.0.0 — COMPLETATO
 - [TODO 024 — Test Sessione E4 — Blocco 3: Repository e Librerie](docs/4-todo-lists/024-TODO_test-sessione-E4-blocco3_v1.0.0.md) — v1.0.0 — DONE
-- [PLAN 025 — Test Sessione E2 — Blocco 2: Contesti Base, Hook e Componenti (Parte 1)](docs/3-coding-plans/025-PLAN_test-sessione-E2-blocco2_v1.0.0.md) — v1.0.0 — APPROVED
-- [TODO 025 — Test Sessione E2 — Blocco 2: Contesti Base, Hook e Componenti (Parte 1)](docs/4-todo-lists/025-TODO_test-sessione-E2-blocco2_v1.0.0.md) — v1.0.0 — PENDING
+- [PLAN 025 — Test Sessione E2 — Blocco 2: Contesti Base, Hook e Componenti (Parte 1)](docs/3-coding-plans/025-PLAN_test-sessione-E2-blocco2_v1.0.0.md) — v1.0.0 — COMPLETATO
+- [TODO 025 — Test Sessione E2 — Blocco 2: Contesti Base, Hook e Componenti (Parte 1)](docs/4-todo-lists/025-TODO_test-sessione-E2-blocco2_v1.0.0.md) — v1.0.0 — DONE
 
 
 Correzioni applicate il 2026-06-27.

@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## [0.18.6] — 2026-06-30 — Implementazione Test Sessione E2 (Blocco 2 - Parte 1)
+
+### Added
+- test(ActivityDetectorView): suite di 3 test unitari per touch response e interazioni tastiera Windows (`__tests__/ActivityDetectorView.test.tsx`).
+- test(Button): suite di 4 test unitari per rendering, click handler fallback legacy e pass-through properties (`__tests__/button.test.tsx`).
+- test(use-inactivity-timer): suite di 8 test unitari per timeout di avviso, scadenza sessione e cleanup fake timers (`__tests__/use-inactivity-timer.test.tsx`).
+- test(useHaptic): integrati 2 test unitari per caricamento stato da `hapticSystem` e aggiornamento (`__tests__/haptic-system.test.tsx`).
+- test(UserSettingsContext): suite di 3 test unitari per provider mount, consumo ed errore fuori provider (`__tests__/UserSettingsContext.test.tsx`).
+- test(useUserSettings): suite di 14 test per caricamento preferenze cloud/default, persistenza con vincolo P29 e reset screen reader (`__tests__/use-user-settings.test.tsx`).
+- test(NetworkStatusContext): integrati 2 test unitari per fail-safe online e tolleranza errori unmount (`__tests__/use-network-status.spec.ts`).
+
+### Fixed
+- fix(use-inactivity-timer): corretto tipo ref dei timer in `src/hooks/use-inactivity-timer.ts` a `any` per risolvere conflitti fra tipi Node e browser in Jest.
+- fix(kdf-provider-test): rinominata variabile `crypto` a `nodeCrypto` in `src/lib/__tests__/kdf-provider.test.ts` per evitare conflitti con oggetto global.
+
 ## [0.18.5] — 2026-06-30 — Pianificazione Test Sessione E2 (Blocco 2 - Parte 1)
 
 ### Added
