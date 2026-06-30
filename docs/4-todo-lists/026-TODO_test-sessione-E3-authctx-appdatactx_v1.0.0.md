@@ -72,7 +72,7 @@ Suite target: `__tests__/AuthContext.test.tsx`
 
 ---
 
-### COMMIT 3 — AppDataContext state machine e bootstrap
+### COMMIT 3A — AppDataContext state machine e bootstrap
 Suite target: `__tests__/AppDataContext.spec.ts`
 
 - [ ] **ADC-29**: State machine - transizione da IDLE a HYDRATING al mount [Normale]
@@ -85,6 +85,13 @@ Suite target: `__tests__/AppDataContext.spec.ts`
 - [ ] **ADC-36**: State machine - transizione IDLE -> READY non ammessa lancia warning [Errore]
 - [ ] **ADC-37**: State machine - transizione ERROR -> READY non ammessa bloccata [Errore]
 - [ ] **ADC-38**: State machine - cambi rapidi e concorrenti di login/logout preservano lo stato [Limite]
+- [ ] **Commit 3A eseguito su main**
+
+---
+
+### COMMIT 3B — AppDataContext concorrenza e hydration cache
+Suite target: `__tests__/AppDataContext.spec.ts`
+
 - [ ] **ADC-39**: Concorrenza - hydrationGen invalida hydration asincrone lente/scadute [Limite]
 - [ ] **ADC-40**: Concorrenza - Strict Mode doppia inizializzazione gestita senza duplicare hydration [Limite]
 - [ ] **ADC-41**: Concorrenza - login/logout rapido cancella hydration asincrona pendente precedente [Limite]
@@ -95,12 +102,22 @@ Suite target: `__tests__/AppDataContext.spec.ts`
 - [ ] **ADC-46**: Cache - dati di cache malformati o corrotti intercettati senza crash [Errore]
 - [ ] **ADC-47**: Cache - cache valida ma vuota (Caso A) avvia stato pulito senza crash [Limite]
 - [ ] **ADC-48**: Cache - cache stale caricata subito per fail-soft, innescando refresh in background [Normale]
+- [ ] **Commit 3B eseguito su main**
+
+---
+
+### COMMIT 3C — AppDataContext CRUD base e test negativi P29
+Suite target: `__tests__/AppDataContext.spec.ts`
+
 - [ ] **ADC-49**: CRUD Conti - addAccount persiste a DB ed aggiorna lo stato React [Normale]
 - [ ] **ADC-50**: CRUD Conti - updateAccount persiste modifiche a DB ed aggiorna lo stato [Normale]
 - [ ] **ADC-51**: CRUD Conti - removeAccount cancella record a DB ed aggiorna lo stato [Normale]
 - [ ] **ADC-52**: CRUD Movimenti - addTransaction ricalcola saldo conto, persiste e aggiorna stato [Normale]
 - [ ] **ADC-53**: CRUD Movimenti - updateTransaction ricalcola saldo conto modificato e persiste [Normale]
-- [ ] **Commit 3 eseguito su main**
+- [ ] **ADC-49b**: CRUD Conti - addAccount fallito - stato invariato per vincolo P29 [Errore / P29]
+- [ ] **ADC-53b**: CRUD Movimenti - updateTransaction fallito - stato e saldi invariati per vincolo P29 [Errore / P29]
+- [ ] **ADC-56b**: CRUD Budget - CRUD budget fallito - stato invariato per vincolo P29 [Errore / P29]
+- [ ] **Commit 3C eseguito su main**
 
 ---
 
