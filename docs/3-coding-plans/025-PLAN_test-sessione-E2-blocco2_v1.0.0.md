@@ -16,7 +16,16 @@ Questo Coding Plan definisce la pianificazione strategica per la Sessione E2 dei
 
 - **Obiettivo della sessione:** Implementare tutti i test mancanti identificati per garantire robustezza su preferenze di accessibilità, timer di inattività, risposte di tastiera su Windows e componenti riutilizzabili.
 - **Numero test stimati:** 38 test unitari ed integrati nuovi.
-  *(Nota: il REPORT di analisi copertura stima originariamente 58 test totali in sintesi per E2, ma la somma analitica dei singoli moduli dettagliati nel report per questo blocco è pari a 38 test nuovi, che sono quelli pianificati e tracciati in questa sessione per garantire perfetta coerenza).*
+
+> **Riconciliazione conteggio E2 — 58 vs 38:**
+> Il report Sessione D (`REPORT-analisi-copertura-test-completa_v1.0.0.md`)
+> indica in sintesi 58 test per la Sessione E2. La somma analitica dei
+> 7 moduli coperti da questo PLAN è pari a 38 test obbligatori.
+> La differenza di 20 test corrisponde ad `AuthContext.tsx`, che nel
+> report sorgente è esplicitamente assegnato alla Sessione E3 insieme
+> ad `AppDataContext.tsx`.
+> **PLAN 025 copre E2 Parte 1 con 38 test. AuthContext resta fuori
+> perimetro e sarà trattato nella Sessione E3.**
 - **Moduli coinvolti:** 7 moduli totali (suddivisi in 2 contesti, 3 hook e 2 componenti).
 - **Nuove suite di test da creare (5):**
   - `__tests__/UserSettingsContext.test.tsx` (3 test per `src/context/UserSettingsContext.tsx`)
@@ -37,7 +46,15 @@ Questo Coding Plan definisce la pianificazione strategica per la Sessione E2 dei
 - **Test target:** `__tests__/UserSettingsContext.test.tsx` [NEW]
 - **Obiettivo:** Testare il corretto montaggio del provider e l'accesso difensivo al hook per i consumer.
 - **Stima test:** 3 test.
-- **Dipendenze da mockare:** `@/hooks/use-user-settings`.
+- **Dipendenze da mockare:** `@/hooks/use-user-settings` (hook privato).
+- **Nota architetturale:** Il file `UserSettingsContext.tsx` importa il
+  hook privato `useUserSettings` da `@/hooks/use-user-settings` e ne
+  distribuisce il valore tramite React Context. Il test deve mockare
+  questo hook privato per controllare il valore iniettato nel provider.
+  **Non montare il hook reale in questa suite**: la logica interna del
+  hook è coperta autonomamente da `__tests__/use-user-settings.test.ts`.
+  Non mockare il hook pubblico `useUserSettings` esportato da
+  `UserSettingsContext.tsx` stesso.
 - **Test pianificati:**
   1. `UserSettingsProvider` monta correttamente i figli avvolgendoli con lo stato restituito da `useUserSettings`.
   2. `useUserSettings` consumato correttamente all'interno del provider restituisce il valore del contesto.
@@ -49,6 +66,14 @@ Questo Coding Plan definisce la pianificazione strategica per la Sessione E2 dei
 - **Obiettivo:** Coprire interamente l'inizializzazione delle preferenze utente, il caricamento dal cloud, i setter asincroni e i ripristini dei valori predefiniti nel rispetto del vincolo P29.
 - **Stima test:** 16 test.
 - **Dipendenze da mockare:** `@/context/AuthContext`, `@/lib/supabase/repositories/impostazioni-utente`, `@/lib/sound-system`, `@/lib/haptic-system`.
+- **Nota dipendenza AuthContext:** Mockare esclusivamente `useAuth()`
+  da `@/context/AuthContext` all'interno del file di test. Non montare
+  `AuthProvider` reale e non dipendere dalla Sessione E3. I mock di
+  `useAuth` devono coprire almeno questi scenari: utente non
+  autenticato, utente autenticato senza preferenze cloud, utente
+  autenticato con preferenze valide, preferenze incomplete o corrotte,
+  `updatePreference` risolto con successo, `updatePreference` rigettato
+  con errore.
 - **Test pianificati:**
   1. Inizializzazione preferenze - carica i valori di default corretti in mancanza di preferenze salvate per l'utente loggato.
   2. Caricamento preferenze da cloud - inizializza correttamente lo stato dell'audio, feedback tattile, preferenze grafiche e di accessibilità scaricati da Supabase.
@@ -109,6 +134,12 @@ Questo Coding Plan definisce la pianificazione strategica per la Sessione E2 dei
 - **Test target:** `__tests__/button.test.tsx` [NEW]
 - **Obiettivo:** Verificare la propagazione dei click, fallback su proprietà legacy e pass-through degli attributi.
 - **Stima test:** 4 test.
+- **Nota promozione:** Il test sul pass-through delle proprietà extra
+  (`disabled`, `accessibilityLabel`) era classificato come opzionale
+  nel report sorgente. Viene qui promosso a test operativo obbligatorio
+  perché il componente `Button` usa `...props` per distribuire le
+  proprietà a `TouchableOpacity`, rendendo questo comportamento
+  critico per accessibilità e compatibilità con i consumer.
 - **Dipendenze da mockare:** Nessuna.
 - **Test pianificati:**
   1. Renderizzazione corretta del testo interno (children) all'interno del pulsante.
@@ -168,7 +199,10 @@ Tutti i test relativi ai setter asincroni (`setVisibleCategories`, `dismissBudge
 I test sul timer di inattività richiedono l'uso intensivo dei timer fittizi di Jest:
 - Abilitare i timer tramite `jest.useFakeTimers()` nel `beforeEach`.
 - Controllare l'avanzamento temporale tramite `jest.advanceTimersByTime(ms)`.
-- Ripristinare i timer reali tramite `jest.useRealTimers()` nel `afterEach` per evitare effetti collaterali sulle altre suite.
+- Nel `afterEach`, eseguire prima `jest.runOnlyPendingTimers()` per
+  svuotare eventuali timer rimasti in sospeso al termine del test,
+  poi ripristinare i timer reali tramite `jest.useRealTimers()`.
+  Questo previene interferenze tra suite consecutive.
 
 ### NT-3 — ActivityDetectorView.tsx: Simulazione di Piattaforma Windows
 Il file `ActivityDetectorView.tsx` usa `Platform.OS === 'windows'` per registrare la prop `onKeyDown`. Per testare questo ramo specifico:
