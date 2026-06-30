@@ -196,10 +196,10 @@ import { exportToCSV } from '@/lib/helpers';
 import { soundSystem } from '@/lib/sound-system';
 import { hapticSystem } from '@/lib/haptic-system';
 import { readCache, isCacheStale, writeCache } from '@/lib/supabase/cache';
-import { getAll as getAllConti } from '@/lib/supabase/repositories/conti';
-import { getAll as getAllTransazioni } from '@/lib/supabase/repositories/transazioni';
+import { getAll as getAllConti, create as createConto, update as updateConto, remove as removeConto } from '@/lib/supabase/repositories/conti';
+import { getAll as getAllTransazioni, create as createTransazione, update as updateTransazione, remove as removeTransazione } from '@/lib/supabase/repositories/transazioni';
 import { getAll as getAllCategorie } from '@/lib/supabase/repositories/categorie';
-import { getAll as getAllBudget } from '@/lib/supabase/repositories/budget';
+import { getAll as getAllBudget, create as createBudget, update as updateBudget, remove as removeBudget } from '@/lib/supabase/repositories/budget';
 import { getAll as getAllObiettivi } from '@/lib/supabase/repositories/obiettivi-risparmio';
 import { getAll as getAllRicorrenze } from '@/lib/supabase/repositories/ricorrenze';
 import { getAll as getAllTag } from '@/lib/supabase/repositories/tag';
@@ -251,6 +251,18 @@ const mockGetTagMapForTransactions =
   getTagMapForTransactions as jest.MockedFunction<
     typeof getTagMapForTransactions
   >;
+
+const mockCreateConto = createConto as jest.Mock;
+const mockUpdateConto = updateConto as jest.Mock;
+const mockRemoveConto = removeConto as jest.Mock;
+
+const mockCreateTransazione = createTransazione as jest.Mock;
+const mockUpdateTransazione = updateTransazione as jest.Mock;
+const mockRemoveTransazione = removeTransazione as jest.Mock;
+
+const mockCreateBudget = createBudget as jest.Mock;
+const mockUpdateBudget = updateBudget as jest.Mock;
+const mockRemoveBudget = removeBudget as jest.Mock;
 
 const USER = 'user-test-007';
 
@@ -2093,6 +2105,270 @@ describe('AppDataContext — PLAN 007', () => {
       expect(harness.getValue().isDataReady).toBe(true);
       expect(harness.getValue().isLoading).toBe(false);
       expect(harness.getValue().prestiti).toEqual([{ id: 'p-remote', controparteNome: 'Prestito Remoto' }]);
+      harness.unmount();
+    });
+  });
+
+  describe('Commit 3C — AppDataContext CRUD base e test negativi P29', () => {
+    beforeEach(() => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+    });
+
+    it('ADC-49: addAccount persiste a DB ed aggiorna lo stato React', async () => {
+      const accounts = [{ id: 'conto-1', nome: 'Conto A', saldoIniziale: 100, colore: '#fff', icona: 'bank', tipo: 'corrente' }];
+      mockGetAllConti.mockResolvedValueOnce(accounts as any);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(harness.getValue().accounts).toHaveLength(1);
+
+      const newConto = {
+        nome: 'Conto B',
+        saldoIniziale: 200,
+        colore: '#000',
+        icona: 'wallet',
+        tipo: 'contanti',
+      };
+      const savedConto = { ...newConto, id: 'conto-2' };
+      mockCreateConto.mockResolvedValueOnce(savedConto);
+
+      await act(async () => {
+        await harness.getValue().addAccount(newConto as any);
+      });
+
+      expect(mockCreateConto).toHaveBeenCalledWith(newConto);
+      expect(harness.getValue().accounts).toHaveLength(2);
+      expect(harness.getValue().accounts[1]).toEqual(savedConto);
+      harness.unmount();
+    });
+
+    it('ADC-50: updateAccount persiste modifiche a DB ed aggiorna lo stato', async () => {
+      const initialConto = { id: 'conto-1', nome: 'Conto A', saldoIniziale: 100, colore: '#fff', icona: 'bank', tipo: 'corrente' };
+      mockGetAllConti.mockResolvedValueOnce([initialConto] as any);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      const updateData = { nome: 'Conto A Modificato' };
+      const updatedConto = { ...initialConto, ...updateData };
+      mockUpdateConto.mockResolvedValueOnce(updatedConto);
+
+      await act(async () => {
+        await harness.getValue().updateAccount('conto-1', updateData);
+      });
+
+      expect(mockUpdateConto).toHaveBeenCalledWith('conto-1', updateData);
+      expect(harness.getValue().accounts[0].nome).toBe('Conto A Modificato');
+      harness.unmount();
+    });
+
+    it('ADC-51: removeAccount cancella record a DB ed aggiorna lo stato', async () => {
+      const initialConto = { id: 'conto-1', nome: 'Conto A', saldoIniziale: 100, colore: '#fff', icona: 'bank', tipo: 'corrente' };
+      mockGetAllConti.mockResolvedValueOnce([initialConto] as any);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      mockRemoveConto.mockResolvedValueOnce(undefined);
+
+      await act(async () => {
+        await harness.getValue().removeAccount('conto-1');
+      });
+
+      expect(mockRemoveConto).toHaveBeenCalledWith('conto-1');
+      expect(harness.getValue().accounts).toHaveLength(0);
+      harness.unmount();
+    });
+
+    it('ADC-52: addTransaction ricalcola saldo conto, persiste e aggiorna stato', async () => {
+      const initialConto = { id: 'conto-1', nome: 'Conto A', saldoIniziale: 100, colore: '#fff', icona: 'bank', tipo: 'corrente' };
+      mockGetAllConti.mockResolvedValueOnce([initialConto] as any);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      const newTx = {
+        contoId: 'conto-1',
+        tipo: 'uscita',
+        importo: 30,
+        descrizione: 'Spesa',
+        data: '2026-06-30',
+        categoriaId: 'cat-1',
+      };
+      const savedTx = { ...newTx, id: 'tx-1' };
+      mockCreateTransazione.mockResolvedValueOnce(savedTx);
+
+      await act(async () => {
+        await harness.getValue().addTransaction(newTx as any);
+      });
+
+      expect(mockCreateTransazione).toHaveBeenCalledWith(newTx);
+      expect(harness.getValue().transactions).toHaveLength(1);
+      harness.unmount();
+    });
+
+    it('ADC-53: updateTransaction ricalcola saldo conto modificato e persiste', async () => {
+      const initialConto = { id: 'conto-1', nome: 'Conto A', saldoIniziale: 100, colore: '#fff', icona: 'bank', tipo: 'corrente' };
+      const initialTx = { id: 'tx-1', contoId: 'conto-1', tipo: 'uscita', importo: 30, descrizione: 'Spesa', data: '2026-06-30', categoriaId: 'cat-1' };
+      mockGetAllConti.mockResolvedValueOnce([initialConto] as any);
+      mockGetAllTransazioni.mockResolvedValueOnce([initialTx] as any);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      const updateData = { importo: 50 };
+      const updatedTx = { ...initialTx, ...updateData };
+      mockUpdateTransazione.mockResolvedValueOnce(updatedTx);
+
+      await act(async () => {
+        await harness.getValue().updateTransaction('tx-1', updateData);
+      });
+
+      expect(mockUpdateTransazione).toHaveBeenCalledWith('tx-1', updateData);
+      expect(harness.getValue().transactions[0].importo).toBe(50);
+      harness.unmount();
+    });
+
+    it('ADC-49b: addAccount fallito - stato invariato per vincolo P29', async () => {
+      const accounts = [{ id: 'conto-1', nome: 'Conto A', saldoIniziale: 100, colore: '#fff', icona: 'bank', tipo: 'corrente' }];
+      mockGetAllConti.mockResolvedValueOnce(accounts as any);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      mockCreateConto.mockRejectedValueOnce(new Error('DB offline'));
+
+      const newConto = {
+        nome: 'Conto B',
+        saldoIniziale: 200,
+        colore: '#000',
+        icona: 'wallet',
+        tipo: 'contanti',
+      };
+
+      await expect(
+        act(async () => {
+          await harness.getValue().addAccount(newConto as any);
+        })
+      ).rejects.toThrow('DB offline');
+
+      // State remains unchanged
+      expect(harness.getValue().accounts).toHaveLength(1);
+      harness.unmount();
+    });
+
+    it('ADC-53b: updateTransaction fallito - stato e saldi invariati per vincolo P29', async () => {
+      const initialConto = { id: 'conto-1', nome: 'Conto A', saldoIniziale: 100, colore: '#fff', icona: 'bank', tipo: 'corrente' };
+      const initialTx = { id: 'tx-1', contoId: 'conto-1', tipo: 'uscita', importo: 30, descrizione: 'Spesa', data: '2026-06-30', categoriaId: 'cat-1' };
+      mockGetAllConti.mockResolvedValueOnce([initialConto] as any);
+      mockGetAllTransazioni.mockResolvedValueOnce([initialTx] as any);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      mockUpdateTransazione.mockRejectedValueOnce(new Error('DB error'));
+
+      await expect(
+        act(async () => {
+          await harness.getValue().updateTransaction('tx-1', { importo: 50 });
+        })
+      ).rejects.toThrow('DB error');
+
+      // State remains unchanged
+      expect(harness.getValue().transactions[0].importo).toBe(30);
+      harness.unmount();
+    });
+
+    it('ADC-56b: CRUD budget fallito - stato invariato per vincolo P29', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+      mockGetAllBudget.mockResolvedValueOnce([
+        { id: 'b-1', categoriaId: 'cat-1', limiteMensile: 200 }
+      ] as any);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      mockCreateBudget.mockRejectedValueOnce(new Error('DB offline'));
+
+      const newBudget = {
+        categoriaId: 'cat-2',
+        limiteMensile: 300,
+      };
+
+      await expect(
+        act(async () => {
+          await harness.getValue().addBudget(newBudget as any);
+        })
+      ).rejects.toThrow('DB offline');
+
+      // State remains unchanged
+      expect(harness.getValue().budgets).toHaveLength(1);
       harness.unmount();
     });
   });
