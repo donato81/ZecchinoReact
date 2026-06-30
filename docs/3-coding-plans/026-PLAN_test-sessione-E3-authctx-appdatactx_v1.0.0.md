@@ -23,13 +23,14 @@ Questo Coding Plan definisce la pianificazione strategica per la **Sessione E3**
 - **Conteggio dei test:**
   - **AuthContext.tsx:** 4 test esistenti + 20 test nuovi = 24 test totali.
     `[DISCREPANZA RILEVATA: il report di copertura indica 3 test esistenti e 20 da scrivere, per un totale di 23. Tuttavia, nella sessione di bugfix E0 è stato aggiunto 1 regression test per BUG-4 in __tests__/AuthContext.test.tsx, portando la suite esistente a 4 test (3 PIN + 1 accessibility unmount) e la stima post-sessione a 24 totali.]`
-  - **AppDataContext.tsx:** 28 test esistenti + 55 test nuovi = 83 test totali.
-  - **Sessione E3 Totale:** 75 test nuovi da scrivere.
+  - **AppDataContext.tsx:** 28 test esistenti + 58 test nuovi = 86 test totali.
+  - **Sessione E3 Totale:** 78 test nuovi da scrivere.
 - **Suite di destinazione:**
   - `__tests__/AuthContext.test.tsx` [MODIFY]: suite da integrare con i nuovi 20 test di AuthContext (conservando il test esistente per BUG-4).
   - `__tests__/AuthContext.pin.test.tsx` [PREEXISTING]: contiene 3 test PIN esistenti, che **NON** devono essere toccati o modificati.
-  - `__tests__/AppDataContext.spec.ts` [MODIFY]: suite da integrare con i nuovi 55 test di AppDataContext.
+  - `__tests__/AppDataContext.spec.ts` [MODIFY]: suite da integrare con i nuovi 58 test di AppDataContext.
 - **Vincoli tecnici:** Gestione avanzata dei timer fittizi di Jest per testare inattività e avvisi di sessione, mock profondi delle API di Supabase (Auth e tabelle di repository) e conformità al vincolo P29 (persistenza a DB prima dell'aggiornamento locale delle impostazioni).
+
 
 ---
 
@@ -122,14 +123,34 @@ I 3 test PIN preesistenti rimangono separati in `__tests__/AuthContext.pin.test.
 - **`AUTH-15` [Errore]**: `removePin` fallisce se il PIN inserito per convalida è errato.
   - *Expected*: PIN non rimosso.
 - **`AUTH-16` [Normale]**: `removePin` con PIN corretto azzera i tre campi PIN ed esegue `signOut` globale.
-  - *Expected*: Chiamata a `updatePinSecurityMaterial` con null, seguita da disconnessione.
+  - *Expected*: Chiamata a `updatePinSecurityMaterial` con null, seguita da disconnessione. Verificare che `supabase.auth.signOut` venga chiamato con il parametro `{ scope: 'global' }` e non senza argomenti né con `{ scope: 'local' }`. Il codice reale chiama `performSignOut('global')` che a sua volta passa `{ scope: 'global' }` a `supabase.auth.signOut`. Il test deve asserire:
+    ```typescript
+    expect(mockSignOut).toHaveBeenCalledWith({ scope: 'global' });
+    ```
 
 #### Casi Limite ed Eventi
 - **`AUTH-17` [Errore]**: Fallimento caricamento iniziale di `getOrCreate` (impostazioni utente) sul mount valorizza lo stato di errore.
   - *Mock*: `getOrCreate` rigetta.
 - **`AUTH-18` [Normale]**: Mount del provider registra il listener nativo dello screen reader di accessibilità.
   - *Mock*: `AccessibilityInfo.addEventListener` mockato.
-- **`AUTH-19` [Normale]**: Unmount del provider pulisce correttamente i listener nativi registrati per evitare leak.
+- **`AUTH-19` [Normale]**: Screen reader unmount — cleanup positivo del listener nativo
+  - *Descrizione*: L'unmount di AuthProvider deve chiamare `subscription.remove()` esattamente una volta, prevenendo leak di memoria.
+  - *Input*: montaggio e successivo smontaggio di AuthProvider.
+  - *Expected*: `AccessibilityInfo.addEventListener` viene chiamato durante il mount; la funzione `remove()` dell'oggetto subscription restituito viene invocata esattamente una volta durante l'unmount.
+  - *Mock*: `AccessibilityInfo.addEventListener` mockato per restituire `{ remove: jest.fn() }`.
+  - *Pattern di verifica*:
+    ```typescript
+    const mockSubscription = { remove: jest.fn() };
+    jest.spyOn(AccessibilityInfo, 'addEventListener').mockReturnValue(mockSubscription);
+    const { unmount } = renderAuthProvider();
+    unmount();
+    expect(mockSubscription.remove).toHaveBeenCalledTimes(1);
+    ```
+  - *Nota*: il codice reale usa la guardia:
+    ```typescript
+    if (subscription && typeof subscription.remove === 'function') { subscription.remove(); }
+    ```
+    Il test verifica il percorso positivo. Non usare `test.failing()`.
 - **`AUTH-20` [Normale/Limite]**: I cambiamenti di stato dello screen reader aggiornano correttamente lo stato locale e innescano le haptic/audio adaptions.
 
 ---
@@ -146,16 +167,53 @@ I nuovi test saranno integrati nella suite esistente `__tests__/AppDataContext.s
 - **`ADC-33` [Normale]**: Transizione da `CACHE-READY` a `REMOTE-SYNC` alla riconnessione della rete o invocazione manuale di `refreshAll`.
 - **`ADC-34` [Normale]**: Transizione da `REMOTE-SYNC` a `READY` al completamento del recupero dati asincrono da Supabase.
 - **`ADC-35` [Normale]**: Transizione da `READY` a `REMOTE-SYNC` quando viene avviato un `refreshAll` manuale.
-- **`ADC-36` [Errore]**: Una transizione vietata (es. da `IDLE` a `READY` diretto) viene intercettata, stampando un `console.warn`.
-- **`ADC-37` [Errore]**: Una transizione vietata da `ERROR` a `READY` viene bloccata e loggata.
-- **`ADC-38` [Limite]**: Cambiamenti rapidi ed out-of-order nello stato di autenticazione mantengono la stabilità dello stato.
+- **`ADC-36` [Errore]**: Transizione vietata `IDLE` → `READY` — bloccata, warning emesso, stato invariato
+  - *Descrizione*: Il tentativo di transitare direttamente da `IDLE` a `READY` deve essere bloccato dalla matrice `ALLOWED_TRANSITIONS`.
+  - *Input*: context in stato `IDLE`; chiamata a `transitionTo('READY')`.
+  - *Expected*:
+    1. `console.warn` chiamato con stringa contenente "Transizione vietata" e "IDLE → READY".
+    2. Il valore restituito da `transitionTo` è `false`.
+    3. `bootstrapState` rimane 'IDLE'.
+    4. `isDataReady` rimane `false`.
+  - *Mock*: `console.warn` spiato con `jest.spyOn`.
+  - *Nota*: `transitionTo` è esposto nel context value. Invocare direttamente `result.current.transitionTo('READY')` dopo il mount in stato `IDLE`.
+- **`ADC-37` [Errore]**: Transizione vietata `ERROR` → `READY` — bloccata, warning emesso, stato invariato
+  - *Descrizione*: Il tentativo di transitare direttamente da `ERROR` a `READY` deve essere bloccato dalla matrice `ALLOWED_TRANSITIONS`.
+  - *Input*: context portato in stato `ERROR` (simulando un bootstrap fallito); chiamata a `transitionTo('READY')`.
+  - *Expected*:
+    1. `console.warn` chiamato con stringa contenente "Transizione vietata" e "ERROR → READY".
+    2. Il valore restituito da `transitionTo` è `false`.
+    3. `bootstrapState` rimane 'ERROR'.
+    4. La proprietà `error` del context rimane valorizzata (non viene azzerata).
+  - *Mock*: `console.warn` spiato con `jest.spyOn`.
+- **`ADC-38` [Limite]**: Login/logout rapido — hydration obsoleta scartata, stato coerente post-logout
+  - *Descrizione*: Una sequenza rapida login → logout deve incrementare `hydrationGen`, cancellare l'hydration in corso e portare lo stato a `IDLE` con dati vuoti.
+  - *Input*: simulare login (`isAuthenticated = true`, `user.id` valorizzato) seguito immediatamente da logout (`isAuthenticated = false`) prima che il bootstrap online completi.
+  - *Expected*:
+    - I dati dell'utente precedente non vengono applicati dopo il logout.
+    - Una hydration asincrona in volo viene scartata (gen !== hydrationGen.current).
+    - `bootstrapState` torna a 'IDLE' dopo il logout.
+    - `accounts`, `transactions`, `budgets` sono array vuoti dopo il logout.
+  - *Mock*: `loadDomainSnapshot` mockato con una Promise che risolve lentamente (controllata manualmente o tramite `jest.useFakeTimers`).
 
 #### Gestione della Concorrenza (5 test)
 - **`ADC-39` [Limite]**: Il generation counter `hydrationGen` scarta i caricamenti lenti e obsoleti rispetto a hydration più recenti.
 - **`ADC-40` [Limite]**: Gestione del doppio mount indotto da React 18 Strict Mode senza duplicazione di sottoscrizioni o hydration concorrenti.
 - **`ADC-41` [Limite]**: Sequenza rapida di login/logout cancella immediatamente l'hydration in corso per l'utente precedente.
 - **`ADC-42` [Limite]**: Risposte asincrone del DB remoto ricevute dopo un logout vengono scartate (controllo su `hydrationGen`).
-- **`ADC-43` [Normale]**: Chiamate multiple a `refreshAll` a distanza ravvicinata vengono limitate per evitare query ridondanti.
+- **`ADC-43` [Normale]**: Chiamate consecutive a `refreshAll` — nessuna query duplicata concorrente
+  - *Descrizione*: Se `refreshAll` viene chiamato due volte in sequenza mentre il primo refresh è ancora in corso, la seconda chiamata non deve generare una seconda ondata di query a Supabase.
+  - *Input*: context in stato `READY`; due chiamate consecutive a `refreshAll` mentre la prima Promise remota non è ancora risolta.
+  - *Expected*:
+    - `loadDomainSnapshot` viene chiamato esattamente una volta, non due.
+    - Lo stato finale dopo la risoluzione della prima Promise è coerente (`READY`).
+  - *Meccanismo osservabile*: il codice reale usa le guardie:
+    ```typescript
+    if (bootstrapStateRef.current === 'HYDRATING') return;
+    if (bootstrapStateRef.current === 'REMOTE-SYNC') return;
+    ```
+    Non vincolare il test a un debounce specifico: verificare il comportamento esterno.
+  - *Mock*: `loadDomainSnapshot` mockato con una Promise controllata (usa un resolve manuale per controllare il timing).
 
 #### Hydration della Cache (5 test)
 - **`ADC-44` [Normale]**: Hydration offline da cache asincrona carica correttamente tutte le 8 tabelle.
@@ -175,6 +233,30 @@ I nuovi test saranno integrati nella suite esistente `__tests__/AppDataContext.s
 - **`ADC-56` [Normale]**: Logica CRUD Budget: aggiunta, modifica ed eliminazione persistono a DB e aggiornano lo stato.
 - **`ADC-57` [Normale]**: Logica CRUD Obiettivi di Risparmio e aggiornamento progressi persistono a DB.
 - **`ADC-58` [Normale]**: Logica CRUD Tag: creazione, aggiornamento ed eliminazione fisica del tag persistono a DB.
+- **`ADC-49b` [Errore / P29]**: `addAccount` fallito — stato invariato per vincolo P29
+  - *Descrizione*: Se `createConto` rigetta, l'array accounts non deve essere aggiornato.
+  - *Input*: oggetto conto valido.
+  - *Expected*: l'eccezione propagata dall'errore Supabase è rilanciata al chiamante; `result.current.accounts` è uguale allo snapshot precedente alla chiamata.
+  - *Mock*: `createConto` mockato con `mockRejectedValueOnce(new Error('DB offline'))`.
+  - *Nota tecnica*: collegato a NT-1 (vincolo P29). Verificare con:
+    ```typescript
+    const before = result.current.accounts;
+    await expect(result.current.addAccount(input)).rejects.toThrow();
+    expect(result.current.accounts).toEqual(before);
+    ```
+- **`ADC-53b` [Errore / P29]**: `updateTransaction` fallito — stato e saldi invariati per vincolo P29
+  - *Descrizione*: Se `updateTransazione` rigetta, l'array transactions non cambia e nessun ricalcolo del saldo viene eseguito.
+  - *Input*: id transazione esistente, dati di aggiornamento validi.
+  - *Expected*: eccezione propagata; `result.current.transactions` uguale allo snapshot precedente; nessuna variazione nei saldi degli account correlati.
+  - *Mock*: `updateTransazione` mockato con `mockRejectedValueOnce(new Error('DB offline'))`.
+  - *Nota tecnica*: collegato a NT-1 (vincolo P29) e NT-2 (ricalcolo saldi).
+- **`ADC-56b` [Errore / P29]**: CRUD Budget fallito — stato invariato per vincolo P29
+  - *Descrizione*: Se `createBudgetItem` o `updateBudgetItem` rigetta, l'array budgets non deve essere aggiornato.
+  - *Input*: oggetto budget valido (nuovo o esistente).
+  - *Expected*: eccezione propagata; `result.current.budgets` uguale allo snapshot precedente.
+  - *Mock*: `createBudgetItem` o `updateBudgetItem` mockato con `mockRejectedValueOnce(new Error('DB offline'))`.
+  - *Nota tecnica*: collegato a NT-1 (vincolo P29).
+
 
 #### Propagazione dei Tag (5 test)
 - **`ADC-59` [Normale]**: `addTagToTransaction` aggiorna la tabella di associazione ed incrementa il contatore `usatoNVolte` del tag.
@@ -260,6 +342,59 @@ Per garantire che i test di inattività di `AuthContext` e la state machine non 
 
 ---
 
+## 3-bis. Setup Condiviso AppDataContext (Harness)
+
+Tutti i test di AppDataContext utilizzano un harness condiviso per evitare la duplicazione del setup dei mock tra i commit 3A, 3B, 3C, 4 e 5. L'harness non usa beforeAll globale rigido: ogni test parte da stato pulito tramite reset completo in beforeEach.
+
+### Struttura dell'harness
+
+```typescript
+// Funzioni helper da definire in un file condiviso oppure
+// in un beforeEach del describe padre di AppDataContext.spec.ts
+
+function mockUseAuth(overrides?: Partial<{
+  user: { id: string } | null;
+  isAuthenticated: boolean;
+  userSettings: UserSettings | null;
+}>) {
+  // Mock di useAuth con valori di default sicuri
+  // Default: user = { id: 'test-user-id' }, isAuthenticated = true
+}
+
+function mockNetworkStatus(overrides?: Partial<{
+  isOffline: boolean;
+  isInitialized: boolean;
+}>) {
+  // Mock di useNetworkStatus
+  // Default: isOffline = false, isInitialized = true
+}
+
+function mockDomainSnapshot(overrides?: Partial<DomainSnapshot>) {
+  // Mock di loadDomainSnapshot per restituire un snapshot vuoto di default
+  // con override per scenari specifici
+}
+
+function resetRepositoryMocks() {
+  // Resetta tutti i mock dei repository Supabase (conti, transazioni, etc.)
+  jest.clearAllMocks();
+}
+
+function resetCacheMocks() {
+  // Resetta readCache, writeCache, isCacheStale
+}
+
+function renderAppDataHook() {
+  // renderHook con wrapper che include AuthContext mockato e AppDataProvider
+  return renderHook(() => useAppData(), { wrapper: AppDataProviderWrapper });
+}
+```
+
+### Regola critica
+
+Ogni test deve partire da stato pulito. Nessun mock mutabile deve essere condiviso tra test senza reset in beforeEach. La struttura del wrapper per renderHook deve essere identica in tutti i describe dei commit 3A, 3B, 3C, 4 e 5 per garantire isolamento e riproducibilità.
+
+---
+
 ## 4. Ordine dei Commit e Flusso di Esecuzione Consigliato
 
 Si richiede di strutturare lo sviluppo dei test nei seguenti 5 commit atomici eseguiti direttamente su `main`:
@@ -276,14 +411,27 @@ Si richiede di strutturare lo sviluppo dei test nei seguenti 5 commit atomici es
 - **Numero test:** 9 test nuovi.
 - **Verifica locale:** `npx jest __tests__/AuthContext.test.tsx`
 
-### Commit 3: `test: aggiunge test per la state machine di AppDataContext`
-- **Moduli coinvolti:** `src/context/AppDataContext.tsx` (Bootstrap, Concorrenza, Cache, CRUD Conti/Movimenti parziali)
+### Commit 3A: `test: aggiunge test per la state machine di AppDataContext`
+- **Moduli coinvolti:** `src/context/AppDataContext.tsx` (State Machine: ADC-29..ADC-38)
 - **File modificati:** `__tests__/AppDataContext.spec.ts` [MODIFY]
-- **Numero test:** 25 test nuovi (ADC-29..ADC-53).
+- **Numero test:** 10 test nuovi (ADC-29..ADC-38).
+- **Verifica locale:** `npx jest __tests__/AppDataContext.spec.ts`
+
+### Commit 3B: `test: aggiunge test per concorrenza e hydration cache in AppDataContext`
+- **Moduli coinvolti:** `src/context/AppDataContext.tsx` (Concorrenza: ADC-39..ADC-43, Cache: ADC-44..ADC-48)
+- **File modificati:** `__tests__/AppDataContext.spec.ts` [MODIFY]
+- **Numero test:** 10 test nuovi (ADC-39..ADC-48).
+- **Verifica locale:** `npx jest __tests__/AppDataContext.spec.ts`
+
+### Commit 3C: `test: aggiunge test CRUD base e test negativi P29 in AppDataContext`
+- **Moduli coinvolti:** `src/context/AppDataContext.tsx` (CRUD Conti/Movimenti: ADC-49..ADC-53 + test P29: ADC-49b, ADC-53b, ADC-56b)
+- **File modificati:** `__tests__/AppDataContext.spec.ts` [MODIFY]
+- **Numero test:** 5 + 3 = 8 test nuovi.
+- **Nota:** `ADC-56b` è anticipato qui dal Commit 4 originale perché tematicamente collegato agli altri test P29. Nel TODO il Commit 4 partirà da ADC-54.
 - **Verifica locale:** `npx jest __tests__/AppDataContext.spec.ts`
 
 ### Commit 4: `test: implementa test per le azioni CRUD e prestiti in AppDataContext`
-- **Moduli coinvolti:** `src/context/AppDataContext.tsx` (CRUD Transazioni/Tag/Categorie/Budget/Obiettivi, Mapping Tag, Prestiti e Rimborsi)
+- **Moduli coinvolti:** `src/context/AppDataContext.tsx` (CRUD Transazioni/Tag/Categorie/Budget/Obiettivi a partire da ADC-54, Mapping Tag, Prestiti e Rimborsi)
 - **File modificati:** `__tests__/AppDataContext.spec.ts` [MODIFY]
 - **Numero test:** 20 test nuovi (ADC-54..ADC-73).
 - **Verifica locale:** `npx jest __tests__/AppDataContext.spec.ts`
@@ -329,7 +477,7 @@ La validazione deve seguire i criteri di correttezza formale e stabilità:
 | Metrica | Pre-E3 | Post-E3 (Target) |
 |---|---|---|
 | **Test totali in suite AuthContext** | 4 | 24 |
-| **Test totali in suite AppDataContext** | 28 | 83 |
+| **Test totali in suite AppDataContext** | 28 | 86 |
 | **Copertura percentuale AuthContext.tsx** | 60.59% | > 90.00% |
 | **Copertura percentuale AppDataContext.tsx** | 50.46% | > 90.00% |
 | **Copertura globale file core coinvolti** | ~55% | > 92% |
@@ -346,3 +494,7 @@ I test CRUD per le transazioni (`ADC-52`, `ADC-53`, `ADC-54`) devono asserire il
 
 ### NT-3 — Mappatura ID Simulazione (`sim-`)
 I test sui prestiti (`ADC-64`..`ADC-68`) devono verificare che i record locali con ID simulato non inneschino chiamate remote al database Supabase durante le operazioni di salvataggio finché non vengono promossi a contratti attivi tramite la transizione formale di UUID.
+
+### NT-4 — Eccezione Esplicita al Vincolo P29 in AuthContext
+La funzione `setInactivityTimeout` in `AuthContext.tsx` è l'unica eccezione documentata al vincolo P29: aggiorna lo stato React (`setInactivityTimeoutState`) prima di attendere la conferma di Supabase (`updatePreference`). Questo comportamento è intenzionale perché riguarda una preferenza UI non finanziaria e non un dato critico. I test `AUTH-xx` non devono segnalare questo pattern come violazione di P29.
+
