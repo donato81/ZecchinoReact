@@ -15,7 +15,7 @@ necessari per il tuo progetto.
 *Puoi eliminare questo file dopo il primo avvio.*
 *Per domande sull'architettura SPARK, usa l'agente `spark-guide`.*
 
-Versione corrente progetto: `0.18.3`.
+Versione corrente progetto: `0.18.5`.
 Analisi Android completata (DUSU-ANALYZER 2025-07-25).
 Stato aggiornato: 2026-06-30.
 Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
@@ -23,10 +23,10 @@ Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
 019 Notifiche Budget e Orchestrazione, 020 Centralizzazione design tokens, 021 Haptic System nativo,
 022 Sound System nativo, Copertura Test Moduli Core (39 test unitari), Analisi Copertura Test Completa (SESSIONE D),
 Pianificazione Bugfix (Sessione E0), Esecuzione 7 Bugfix e Regression Test (Sessione E0),
-Pianificazione Test Sessione E4 (Blocco 3 — Repository e Librerie).
+Pianificazione Test Sessione E4 (Blocco 3 — Repository e Librerie), Pianificazione Test Sessione E2 (Blocco 2 — Contesti Base e Hook).
 Suite di test: PASS.
-Decisione release: versione corrente `0.18.3` (registrato il completamento della sessione E0 di bugfix e i relativi regression test; aggiunti i documenti di pianificazione per la sessione E4).
-Prossima azione: Avvio della Sessione E4 di implementazione dei 116 test unitari per il Blocco 3.
+Decisione release: versione corrente `0.18.5` (registrata la pianificazione della sessione E2 per contesti base e hook).
+Prossima azione: Avvio della Sessione E2 di implementazione dei 38 test unitari per il Blocco 2 (Parte 1).
 
 ---
 
@@ -96,7 +96,9 @@ Prossima azione: Avvio della Sessione E4 di implementazione dei 116 test unitari
 - [PLAN 023 — Bugfix sessione E0](docs/3-coding-plans/023-PLAN_bugfix-sessione-E0_v0.18.2.md) — v0.18.2 — COMPLETATO
 - [TODO 023 — Bugfix sessione E0](docs/4-todo-lists/023-TODO_bugfix-sessione-E0_v0.18.2.md) — v0.18.3 — DONE
 - [PLAN 024 — Test Sessione E4 — Blocco 3: Repository e Librerie](docs/3-coding-plans/024-PLAN_test-sessione-E4-blocco3_v1.0.0.md) — v1.0.0 — COMPLETATO
-- [TODO 024 — Test Sessione E4 — Blocco 3: Repository e Librerie](docs/4-todo-lists/024-TODO_test-sessione-E4-blocco3_v1.0.0.md) — v1.0.0 — PENDING
+- [TODO 024 — Test Sessione E4 — Blocco 3: Repository e Librerie](docs/4-todo-lists/024-TODO_test-sessione-E4-blocco3_v1.0.0.md) — v1.0.0 — DONE
+- [PLAN 025 — Test Sessione E2 — Blocco 2: Contesti Base, Hook e Componenti (Parte 1)](docs/3-coding-plans/025-PLAN_test-sessione-E2-blocco2_v1.0.0.md) — v1.0.0 — APPROVED
+- [TODO 025 — Test Sessione E2 — Blocco 2: Contesti Base, Hook e Componenti (Parte 1)](docs/4-todo-lists/025-TODO_test-sessione-E2-blocco2_v1.0.0.md) — v1.0.0 — PENDING
 
 
 Correzioni applicate il 2026-06-27.

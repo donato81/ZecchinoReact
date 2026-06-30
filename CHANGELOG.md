@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.18.5] — 2026-06-30 — Pianificazione Test Sessione E2 (Blocco 2 - Parte 1)
+
+### Added
+- docs(plans): aggiunto `025-PLAN_test-sessione-E2-blocco2_v1.0.0.md` con la pianificazione dettagliata di 38 test unitari/integrazione per i 7 moduli del Blocco 2 (Contesti Base, Hook e Componenti).
+- docs(todos): aggiunto `025-TODO_test-sessione-E2-blocco2_v1.0.0.md` con la checklist operativa dei test pianificati.
+
 ## [0.18.4] — 2026-06-30 — Pianificazione Test Sessione E4 (Blocco 3)
 
 ### Added
