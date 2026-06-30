@@ -2742,8 +2742,8 @@ describe('AppDataContext — PLAN 007', () => {
       });
 
       expect(harness.getValue().transactionTagMap['tx-1']).toEqual(['tag-2']);
-      expect(harness.getValue().tags.find(t => t.id === 'tag-1')?.usatoNVolte).toBe(0);
-      expect(harness.getValue().tags.find(t => t.id === 'tag-2')?.usatoNVolte).toBe(2);
+      expect(harness.getValue().tags.find((t: any) => t.id === 'tag-1')?.usatoNVolte).toBe(0);
+      expect(harness.getValue().tags.find((t: any) => t.id === 'tag-2')?.usatoNVolte).toBe(2);
       harness.unmount();
     });
 
@@ -2869,7 +2869,7 @@ describe('AppDataContext — PLAN 007', () => {
       });
 
       expect(mockUpdatePrestitoDb).not.toHaveBeenCalled();
-      expect(harness.getValue().prestiti.find(p => p.id === sim.id)?.controparteNome).toBe('Modificato');
+      expect(harness.getValue().prestiti.find((p: any) => p.id === sim.id)?.controparteNome).toBe('Modificato');
       harness.unmount();
     });
 
@@ -2910,8 +2910,8 @@ describe('AppDataContext — PLAN 007', () => {
       });
 
       expect(mockCreatePrestitoDb).toHaveBeenCalled();
-      expect(harness.getValue().prestiti.some(p => p.id === sim.id)).toBe(false);
-      expect(harness.getValue().prestiti.find(p => p.id === uuidReal)).toEqual(promoted);
+      expect(harness.getValue().prestiti.some((p: any) => p.id === sim.id)).toBe(false);
+      expect(harness.getValue().prestiti.find((p: any) => p.id === uuidReal)).toEqual(promoted);
       harness.unmount();
     });
 
@@ -2971,7 +2971,7 @@ describe('AppDataContext — PLAN 007', () => {
         await harness.getValue().deletePrestitoSimulazione(sim.id);
       });
 
-      expect(harness.getValue().prestiti.some(p => p.id === sim.id)).toBe(false);
+      expect(harness.getValue().prestiti.some((p: any) => p.id === sim.id)).toBe(false);
       harness.unmount();
     });
 
@@ -3349,8 +3349,8 @@ describe('AppDataContext — PLAN 007', () => {
       mockCreateTransazione.mockResolvedValueOnce({ id: 'tx-new', importo: 50, tipo: 'uscita', contoId: 'c-1' });
 
       const spyInfo = jest.spyOn(console, 'info').mockImplementation(() => {});
-      soundSystem.play.mockClear();
-      hapticSystem.budgetWarning.mockClear();
+      (soundSystem.play as jest.Mock).mockClear();
+      (hapticSystem.budgetWarning as jest.Mock).mockClear();
 
       await act(async () => {
         await harness.getValue().handleSaveTransaction({ importo: 50, tipo: 'uscita', contoId: 'c-1' } as any);
@@ -3389,8 +3389,8 @@ describe('AppDataContext — PLAN 007', () => {
       mockCreateTransazione.mockResolvedValueOnce({ id: 'tx-new', importo: 50, tipo: 'uscita', contoId: 'c-1' });
 
       const spyWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      soundSystem.play.mockClear();
-      hapticSystem.budgetCritical.mockClear();
+      (soundSystem.play as jest.Mock).mockClear();
+      (hapticSystem.budgetCritical as jest.Mock).mockClear();
 
       await act(async () => {
         await harness.getValue().handleSaveTransaction({ importo: 50, tipo: 'uscita', contoId: 'c-1' } as any);
@@ -3429,8 +3429,8 @@ describe('AppDataContext — PLAN 007', () => {
       mockCreateTransazione.mockResolvedValueOnce({ id: 'tx-new', importo: 50, tipo: 'uscita', contoId: 'c-1' });
 
       const spyError = jest.spyOn(console, 'error').mockImplementation(() => {});
-      soundSystem.play.mockClear();
-      hapticSystem.budgetExceeded.mockClear();
+      (soundSystem.play as jest.Mock).mockClear();
+      (hapticSystem.budgetExceeded as jest.Mock).mockClear();
 
       await act(async () => {
         await harness.getValue().handleSaveTransaction({ importo: 50, tipo: 'uscita', contoId: 'c-1' } as any);
