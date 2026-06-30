@@ -811,6 +811,39 @@ describe('AppDataContext — PLAN 007', () => {
       warnSpy.mockRestore();
       harness.unmount();
     });
+    it('ADC-37: transizione ERROR → READY non ammessa bloccata', async () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockUseNetworkStatus.mockReturnValue({
+        isOffline: true,
+        isInitialized: true,
+        isConnected: false,
+        isInternetReachable: false,
+        connectionType: 'wifi',
+      } as never);
+      mockReadCache.mockResolvedValue(null);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(harness.getValue().error).toBe(strings.bootstrap_offline_error);
+
+      const result = harness.getValue().transitionTo!('READY');
+
+      expect(result).toBe(false);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Transizione vietata ERROR → READY'),
+      );
+      expect(harness.getValue().error).toBe(strings.bootstrap_offline_error);
+
+      warnSpy.mockRestore();
+      harness.unmount();
+    });
     it('* → IDLE al logout da qualsiasi stato autenticato', async () => {
       const ricorrenze = [
         {
