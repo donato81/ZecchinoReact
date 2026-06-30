@@ -87,6 +87,15 @@ jest.mock('@/lib/storage-cleanup-service', () => ({
     cleanupTransactionOrphans: jest.fn().mockResolvedValue(undefined),
   },
 }));
+jest.mock('@/lib/crypto', () => {
+  const actual = jest.requireActual('@/lib/crypto');
+  return {
+    ...actual,
+    verifyPin: jest.fn(),
+    hashPin: jest.fn(),
+    rewrapMasterKeyWithPin: jest.fn().mockReturnValue('mock-new-wrapped-key'),
+  };
+});
 
 describe('AuthContext Cleanup Test', () => {
   let spyIsScreenReaderEnabled: jest.SpiedFunction<typeof AccessibilityInfo.isScreenReaderEnabled>;
@@ -425,6 +434,333 @@ describe('AuthContext Main Flows — Commit 1', () => {
       expect(() => harness.getRenderer().root.findByProps({ accessibilityRole: 'alert' })).toThrow();
       harness.unmount();
     });
+  });
+});
+
+describe('AuthContext PIN and Accessibility — Commit 2', () => {
+  type AuthValue = ReturnType<typeof useAuth>;
+
+  function renderAuthProvider(): {
+    getValue: () => AuthValue;
+    unmount: () => void;
+    getRenderer: () => TestRenderer.ReactTestRenderer;
+  } {
+    let captured: AuthValue | null = null;
+    let renderer: TestRenderer.ReactTestRenderer;
+
+    function Capture(): null {
+      captured = useAuth();
+      return null;
+    }
+
+    act(() => {
+      renderer = TestRenderer.create(
+        <AuthProvider>
+          <Capture />
+        </AuthProvider>
+      );
+    });
+
+    return {
+      getValue: () => {
+        if (!captured) throw new Error('AuthContext non disponibile');
+        return captured;
+      },
+      unmount: () => {
+        act(() => {
+          renderer.unmount();
+        });
+      },
+      getRenderer: () => renderer,
+    };
+  }
+
+  let spyIsScreenReaderEnabled: jest.SpiedFunction<typeof AccessibilityInfo.isScreenReaderEnabled>;
+  let spyAddEventListener: jest.SpiedFunction<typeof AccessibilityInfo.addEventListener>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseInactivityTimer.mockImplementation(() => ({
+      resetTimer: jest.fn(),
+      showWarning: false,
+    }));
+    spyIsScreenReaderEnabled = jest.spyOn(AccessibilityInfo, 'isScreenReaderEnabled').mockResolvedValue(false);
+    spyAddEventListener = jest.spyOn(AccessibilityInfo, 'addEventListener').mockReturnValue({ remove: jest.fn() } as any);
+    mockGetSession.mockResolvedValue({ data: { session: null } });
+    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: jest.fn() } } });
+    mockSignOut.mockResolvedValue({ error: null });
+    mockGetOrCreate.mockResolvedValue({
+      nomeVisualizzato: 'Test User',
+      valutaDefault: 'EUR',
+      pinPrivatoHash: null,
+      pinKdfSalt: null,
+      pinMasterKeyEncrypted: null,
+      preferences: {
+        session_timeout_minutes: 5,
+      },
+    } as any);
+  });
+
+  afterEach(() => {
+    spyIsScreenReaderEnabled.mockRestore();
+    spyAddEventListener.mockRestore();
+  });
+
+  it('AUTH-12: unlockPrivate con PIN errato fallisce: sblocco bloccato, haptic error, suono e annuncio assertive', async () => {
+    mockGetSession.mockResolvedValue({ data: { session: { user: { id: 'user-id' } } } });
+    const harness = renderAuthProvider();
+    for (let i = 0; i < 10 && !harness.getValue().isAuthReady; i++) {
+      await act(async () => {
+        await Promise.resolve();
+      });
+    }
+
+    await act(async () => {
+      await expect(harness.getValue().unlockPrivate('123456')).rejects.toThrow();
+    });
+
+    const mockVerifyPin = require('@/lib/crypto').verifyPin as jest.Mock;
+    mockVerifyPin.mockResolvedValueOnce(false);
+    
+    mockGetOrCreate.mockResolvedValue({
+      nomeVisualizzato: 'Test User',
+      valutaDefault: 'EUR',
+      pinPrivatoHash: 'somehash',
+      pinKdfSalt: 'salt',
+      pinMasterKeyEncrypted: 'enckey',
+      preferences: {
+        session_timeout_minutes: 5,
+      },
+    } as any);
+
+    harness.unmount();
+    const harness2 = renderAuthProvider();
+    for (let i = 0; i < 10 && !harness2.getValue().isAuthReady; i++) {
+      await act(async () => {
+        await Promise.resolve();
+      });
+    }
+
+    await act(async () => {
+      await expect(harness2.getValue().unlockPrivate('wrongpin')).rejects.toThrow();
+    });
+
+    expect(harness2.getValue().isPrivateUnlocked).toBe(false);
+    harness2.unmount();
+  });
+
+  it('AUTH-13: changePin fallisce se il vecchio PIN inserito non corrisponde all\'hash memorizzato', async () => {
+    mockGetSession.mockResolvedValue({ data: { session: { user: { id: 'user-id' } } } });
+    mockGetOrCreate.mockResolvedValue({
+      nomeVisualizzato: 'Test User',
+      valutaDefault: 'EUR',
+      pinPrivatoHash: 'oldhash',
+      pinKdfSalt: 'oldsalt',
+      pinMasterKeyEncrypted: 'oldenckey',
+      preferences: {
+        session_timeout_minutes: 5,
+      },
+    } as any);
+
+    const mockVerifyPin = require('@/lib/crypto').verifyPin as jest.Mock;
+    mockVerifyPin.mockResolvedValueOnce(false);
+
+    const harness = renderAuthProvider();
+    for (let i = 0; i < 10 && !harness.getValue().isAuthReady; i++) {
+      await act(async () => {
+        await Promise.resolve();
+      });
+    }
+
+    await act(async () => {
+      await expect(harness.getValue().changePin('wrongold', 'newpin')).rejects.toThrow();
+    });
+    harness.unmount();
+  });
+
+  it('AUTH-14: changePin fallisce in caso di errore di rete durante il salvataggio dei nuovi parametri Supabase', async () => {
+    mockGetSession.mockResolvedValue({ data: { session: { user: { id: 'user-id' } } } });
+    mockGetOrCreate.mockResolvedValue({
+      nomeVisualizzato: 'Test User',
+      valutaDefault: 'EUR',
+      pinPrivatoHash: 'oldhash',
+      pinKdfSalt: 'oldsalt',
+      pinMasterKeyEncrypted: 'oldenckey',
+      preferences: {
+        session_timeout_minutes: 5,
+      },
+    } as any);
+
+    const mockVerifyPin = require('@/lib/crypto').verifyPin as jest.Mock;
+    mockVerifyPin.mockResolvedValueOnce(true);
+
+    mockUpdatePinSecurityMaterial.mockRejectedValueOnce(new Error('Network error'));
+
+    const harness = renderAuthProvider();
+    for (let i = 0; i < 10 && !harness.getValue().isAuthReady; i++) {
+      await act(async () => {
+        await Promise.resolve();
+      });
+    }
+
+    await act(async () => {
+      await expect(harness.getValue().changePin('correctold', 'newpin')).rejects.toThrow('Network error');
+    });
+
+    expect(harness.getValue().userSettings?.pinPrivatoHash).toBe('oldhash');
+    harness.unmount();
+  });
+
+  it('AUTH-15: removePin fallisce se il PIN inserito per convalida e errato', async () => {
+    mockGetSession.mockResolvedValue({ data: { session: { user: { id: 'user-id' } } } });
+    mockGetOrCreate.mockResolvedValue({
+      nomeVisualizzato: 'Test User',
+      valutaDefault: 'EUR',
+      pinPrivatoHash: 'somehash',
+      pinKdfSalt: 'salt',
+      pinMasterKeyEncrypted: 'enckey',
+      preferences: {
+        session_timeout_minutes: 5,
+      },
+    } as any);
+
+    const mockVerifyPin = require('@/lib/crypto').verifyPin as jest.Mock;
+    mockVerifyPin.mockResolvedValueOnce(false);
+
+    const harness = renderAuthProvider();
+    for (let i = 0; i < 10 && !harness.getValue().isAuthReady; i++) {
+      await act(async () => {
+        await Promise.resolve();
+      });
+    }
+
+    await act(async () => {
+      await expect(harness.getValue().removePin('wrongpin')).rejects.toThrow();
+    });
+    harness.unmount();
+  });
+
+  it('AUTH-16: removePin con PIN corretto azzera i tre campi PIN ed esegue signOut globale', async () => {
+    mockGetSession.mockResolvedValue({ data: { session: { user: { id: 'user-id' } } } });
+    mockGetOrCreate.mockResolvedValue({
+      nomeVisualizzato: 'Test User',
+      valutaDefault: 'EUR',
+      pinPrivatoHash: 'somehash',
+      pinKdfSalt: 'salt',
+      pinMasterKeyEncrypted: 'enckey',
+      preferences: {
+        session_timeout_minutes: 5,
+      },
+    } as any);
+
+    const mockVerifyPin = require('@/lib/crypto').verifyPin as jest.Mock;
+    mockVerifyPin.mockResolvedValueOnce(true);
+
+    const harness = renderAuthProvider();
+    for (let i = 0; i < 10 && !harness.getValue().isAuthReady; i++) {
+      await act(async () => {
+        await Promise.resolve();
+      });
+    }
+
+    await act(async () => {
+      await harness.getValue().removePin('correctpin');
+    });
+
+    expect(mockUpdatePinSecurityMaterial).toHaveBeenCalledWith({
+      hash: null,
+      salt: null,
+      encryptedMasterKey: null,
+    });
+    expect(mockSignOut).toHaveBeenCalledWith({ scope: 'global' });
+    harness.unmount();
+  });
+
+  it('AUTH-17: Fallimento caricamento iniziale di getOrCreate (impostazioni utente) sul mount valorizza lo stato di errore', async () => {
+    mockGetSession.mockResolvedValue({ data: { session: { user: { id: 'user-id' } } } });
+    mockGetOrCreate.mockRejectedValueOnce(new Error('DB failure'));
+
+    const harness = renderAuthProvider();
+    for (let i = 0; i < 10 && !harness.getValue().isAuthReady; i++) {
+      await act(async () => {
+        await Promise.resolve();
+      });
+    }
+
+    expect(harness.getValue().userSettings).toBeNull();
+    expect(harness.getValue().inactivityTimeout).toBe(5);
+    harness.unmount();
+  });
+
+  it('AUTH-18: Mount del provider registra il listener nativo dello screen reader di accessibilita', async () => {
+    const harness = renderAuthProvider();
+    expect(spyAddEventListener).toHaveBeenCalledWith('screenReaderChanged', expect.any(Function));
+    harness.unmount();
+  });
+
+  it('AUTH-19: Screen reader unmount — cleanup positivo del listener nativo', async () => {
+    const mockSubscription = { remove: jest.fn() };
+    spyAddEventListener.mockReturnValueOnce(mockSubscription as any);
+    const harness = renderAuthProvider();
+    harness.unmount();
+    expect(mockSubscription.remove).toHaveBeenCalledTimes(1);
+  });
+
+  it('AUTH-20: I cambiamenti di stato dello screen reader aggiornano correttamente lo stato locale e innescano le haptic/audio adaptions', async () => {
+    let capturedCallback: ((enabled: boolean) => void) | undefined;
+    spyAddEventListener.mockImplementationOnce((event, callback) => {
+      capturedCallback = callback as any;
+      return { remove: jest.fn() } as any;
+    });
+
+    mockGetSession.mockResolvedValue({ data: { session: { user: { id: 'user-id' } } } });
+    mockGetOrCreate.mockResolvedValue({
+      nomeVisualizzato: 'Test User',
+      valutaDefault: 'EUR',
+      pinPrivatoHash: 'somehash',
+      pinKdfSalt: 'salt',
+      pinMasterKeyEncrypted: 'enckey',
+      preferences: {
+        session_timeout_minutes: 5,
+      },
+    } as any);
+
+    const harness = renderAuthProvider();
+    for (let i = 0; i < 10 && !harness.getValue().isAuthReady; i++) {
+      await act(async () => {
+        await Promise.resolve();
+      });
+    }
+
+    expect(capturedCallback).toBeDefined();
+
+    await act(async () => {
+      capturedCallback!(true);
+    });
+
+    const mockVerifyPin = require('@/lib/crypto').verifyPin as jest.Mock;
+    mockVerifyPin.mockResolvedValueOnce(false);
+
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    await act(async () => {
+      await expect(harness.getValue().unlockPrivate('wrongpin')).rejects.toThrow();
+    });
+
+    expect(errorSpy).not.toHaveBeenCalledWith('[toast:error]', expect.any(String));
+
+    await act(async () => {
+      capturedCallback!(false);
+    });
+
+    mockVerifyPin.mockResolvedValueOnce(false);
+    await act(async () => {
+      await expect(harness.getValue().unlockPrivate('wrongpin')).rejects.toThrow();
+    });
+
+    expect(errorSpy).toHaveBeenCalledWith('[toast:error]', expect.any(String));
+
+    errorSpy.mockRestore();
+    harness.unmount();
   });
 });
 
