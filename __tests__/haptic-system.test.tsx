@@ -369,4 +369,50 @@ describe('Haptic System - Unit Tests (BLOCCO 021)', () => {
     expect(mockUpdatePreference).toHaveBeenCalledWith('haptic_enabled', false);
     expect(hapticSystem.isEnabled()).toBe(false);
   });
+
+  // Test 16: Inizializzazione hook useHaptic legge correttamente lo stato iniziale
+  it('Test 16 - Inizializzazione useHaptic legge correttamente lo stato iniziale da hapticSystem', () => {
+    const isEnabledSpy = jest.spyOn(hapticSystem, 'isEnabled').mockReturnValue(true);
+    const isSupportedSpy = jest.spyOn(hapticSystem, 'isSupported').mockReturnValue(true);
+
+    let hookResult: any;
+    function Probe() {
+      hookResult = useHaptic();
+      return null;
+    }
+
+    act(() => {
+      TestRenderer.create(<Probe />);
+    });
+
+    expect(hookResult.isEnabled).toBe(true);
+    expect(hookResult.isSupported).toBe(true);
+
+    isEnabledSpy.mockRestore();
+    isSupportedSpy.mockRestore();
+  });
+
+  // Test 17: setEnabled del hook useHaptic chiama hapticSystem.setEnabled e aggiorna lo stato React
+  it('Test 17 - setEnabled di useHaptic chiama hapticSystem.setEnabled e aggiorna lo stato', async () => {
+    const setEnabledSpy = jest.spyOn(hapticSystem, 'setEnabled').mockResolvedValue(undefined);
+
+    let hookResult: any;
+    function Probe() {
+      hookResult = useHaptic();
+      return null;
+    }
+
+    act(() => {
+      TestRenderer.create(<Probe />);
+    });
+
+    await act(async () => {
+      await hookResult.setEnabled(false);
+    });
+
+    expect(setEnabledSpy).toHaveBeenCalledWith(false);
+    expect(hookResult.isEnabled).toBe(false);
+
+    setEnabledSpy.mockRestore();
+  });
 });

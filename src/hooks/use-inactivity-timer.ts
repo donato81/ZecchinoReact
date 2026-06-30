@@ -14,8 +14,8 @@ export function useInactivityTimer({
   timeoutMinutes,
   onTimeout,
 }: UseInactivityTimerOptions): UseInactivityTimerResult {
-  const warningTimerRef = useRef<number | null>(null);
-  const timeoutTimerRef = useRef<number | null>(null);
+  const warningTimerRef = useRef<any>(null);
+  const timeoutTimerRef = useRef<any>(null);
   const [showWarning, setShowWarning] = useState(false);
 
   const clearTimers = useCallback(() => {
