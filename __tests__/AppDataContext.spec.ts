@@ -3115,6 +3115,336 @@ describe('AppDataContext — PLAN 007', () => {
     });
   });
 
+  describe('Commit 5 — AppDataContext dialoghi, export e alert', () => {
+    it('ADC-74: Dialogs - openNewTransactionDialog and openEditTransactionDialog update showTransactionDialog and editingTransaction', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        harness.getValue().openNewTransactionDialog();
+      });
+      expect(harness.getValue().showTransactionDialog).toBe(true);
+      expect(harness.getValue().editingTransaction).toBeUndefined();
+
+      const tx = { id: 'tx-1', importo: 100, tipo: 'uscita' } as any;
+      await act(async () => {
+        harness.getValue().openEditTransactionDialog(tx);
+      });
+      expect(harness.getValue().showTransactionDialog).toBe(true);
+      expect(harness.getValue().editingTransaction).toEqual(tx);
+      harness.unmount();
+    });
+
+    it('ADC-75: Dialogs - showBudgetDialog and editingBudget state setters work', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        harness.getValue().setShowBudgetDialog(true);
+      });
+      expect(harness.getValue().showBudgetDialog).toBe(true);
+
+      const budget = { id: 'b-1', limiteMensile: 500 } as any;
+      await act(async () => {
+        harness.getValue().setEditingBudget(budget);
+      });
+      expect(harness.getValue().editingBudget).toEqual(budget);
+      harness.unmount();
+    });
+
+    it('ADC-76: Dialogs - showAccountDialog and editingAccount state setters work', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        harness.getValue().setShowAccountDialog(true);
+      });
+      expect(harness.getValue().showAccountDialog).toBe(true);
+
+      const account = { id: 'a-1', nome: 'Conto' } as any;
+      await act(async () => {
+        harness.getValue().setEditingAccount(account);
+      });
+      expect(harness.getValue().editingAccount).toEqual(account);
+      harness.unmount();
+    });
+
+    it('ADC-77: Dialogs - showSavingsGoalDialog and editingSavingsGoal state setters work and handleAddFundsToGoal sets goal', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        harness.getValue().setShowSavingsGoalDialog(true);
+      });
+      expect(harness.getValue().showSavingsGoalDialog).toBe(true);
+
+      const goal = { id: 'g-1', nome: 'Obiettivo' } as any;
+      await act(async () => {
+        harness.getValue().setEditingSavingsGoal(goal);
+      });
+      expect(harness.getValue().editingSavingsGoal).toEqual(goal);
+
+      await act(async () => {
+        harness.getValue().handleAddFundsToGoal(goal);
+      });
+      expect(harness.getValue().showSavingsGoalDialog).toBe(true);
+      expect(harness.getValue().editingSavingsGoal).toEqual(goal);
+      harness.unmount();
+    });
+
+    it('ADC-78: Dialogs - showKeyboardHelp state setter works and showDeleteDialog controls delete confirm flow', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        harness.getValue().setShowKeyboardHelp(true);
+      });
+      expect(harness.getValue().showKeyboardHelp).toBe(true);
+
+      await act(async () => {
+        harness.getValue().setDeletingItem({ type: 'budget', id: 'b-1' });
+        harness.getValue().setShowDeleteDialog(true);
+      });
+      expect(harness.getValue().deletingItem).toEqual({ type: 'budget', id: 'b-1' });
+      expect(harness.getValue().showDeleteDialog).toBe(true);
+
+      mockRemoveBudget.mockResolvedValueOnce(undefined);
+      await act(async () => {
+        await harness.getValue().handleDeleteConfirm();
+      });
+      expect(mockRemoveBudget).toHaveBeenCalledWith('b-1');
+      harness.unmount();
+    });
+
+    it('ADC-79: CSV Export - success plays sound, haptic, toast, and triggers exportFile', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      mockExportFile.mockResolvedValueOnce({ success: true });
+      const spyInfo = jest.spyOn(console, 'info').mockImplementation(() => {});
+
+      await act(async () => {
+        await harness.getValue().handleExportCSV([], [], []);
+      });
+
+      expect(mockExportFile).toHaveBeenCalled();
+      expect(soundSystem.play).toHaveBeenCalledWith('export');
+      expect(hapticSystem.export).toHaveBeenCalled();
+      expect(spyInfo).toHaveBeenCalledWith('[toast:success]', expect.any(String), expect.any(String));
+
+      spyInfo.mockRestore();
+      harness.unmount();
+    });
+
+    it('ADC-80: CSV Export - failure reasons (like PERMISSION_DENIED) trigger error toast and announce', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      mockExportFile.mockResolvedValueOnce({ success: false, reason: 'PERMISSION_DENIED' });
+      const spyError = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      await act(async () => {
+        await harness.getValue().handleExportCSV([], [], []);
+      });
+
+      expect(spyError).toHaveBeenCalledWith('[toast:error]', expect.any(String), expect.any(String));
+      expect(announce).toHaveBeenCalled();
+
+      spyError.mockRestore();
+      harness.unmount();
+    });
+
+    it('ADC-81: Budget Alerts - warning level plays warning sound, warning haptic, and info toast', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      const mockNotification = {
+        id: 'notif-warning',
+        letta: false,
+        titolo_key: 'notification_budget_warning_title',
+        messaggio_key: 'notification_budget_warning_desc',
+        livello: 'warning',
+      };
+      mockProcessBudgetNotifications.mockResolvedValueOnce([mockNotification]);
+      mockCreateTransazione.mockResolvedValueOnce({ id: 'tx-new', importo: 50, tipo: 'uscita', contoId: 'c-1' });
+
+      const spyInfo = jest.spyOn(console, 'info').mockImplementation(() => {});
+      soundSystem.play.mockClear();
+      hapticSystem.budgetWarning.mockClear();
+
+      await act(async () => {
+        await harness.getValue().handleSaveTransaction({ importo: 50, tipo: 'uscita', contoId: 'c-1' } as any);
+      });
+
+      expect(soundSystem.play).toHaveBeenCalledWith('budget-warning');
+      expect(hapticSystem.budgetWarning).toHaveBeenCalled();
+      expect(spyInfo).toHaveBeenCalledWith('[toast]', expect.any(String), expect.any(String));
+
+      spyInfo.mockRestore();
+      harness.unmount();
+    });
+
+    it('ADC-82: Budget Alerts - critical level plays critical sound, critical haptic, and warning toast', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      const mockNotification = {
+        id: 'notif-critical',
+        letta: false,
+        titolo_key: 'notification_budget_critical_title',
+        messaggio_key: 'notification_budget_critical_desc',
+        livello: 'critical',
+      };
+      mockProcessBudgetNotifications.mockResolvedValueOnce([mockNotification]);
+      mockCreateTransazione.mockResolvedValueOnce({ id: 'tx-new', importo: 50, tipo: 'uscita', contoId: 'c-1' });
+
+      const spyWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      soundSystem.play.mockClear();
+      hapticSystem.budgetCritical.mockClear();
+
+      await act(async () => {
+        await harness.getValue().handleSaveTransaction({ importo: 50, tipo: 'uscita', contoId: 'c-1' } as any);
+      });
+
+      expect(soundSystem.play).toHaveBeenCalledWith('budget-critical');
+      expect(hapticSystem.budgetCritical).toHaveBeenCalled();
+      expect(spyWarn).toHaveBeenCalledWith('[toast:warning]', expect.any(String), expect.any(String));
+
+      spyWarn.mockRestore();
+      harness.unmount();
+    });
+
+    it('ADC-83: Budget Alerts - exceeded level plays exceeded sound, exceeded haptic, and error toast', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      const mockNotification = {
+        id: 'notif-exceeded',
+        letta: false,
+        titolo_key: 'notification_budget_exceeded_title',
+        messaggio_key: 'notification_budget_exceeded_desc',
+        livello: 'exceeded',
+      };
+      mockProcessBudgetNotifications.mockResolvedValueOnce([mockNotification]);
+      mockCreateTransazione.mockResolvedValueOnce({ id: 'tx-new', importo: 50, tipo: 'uscita', contoId: 'c-1' });
+
+      const spyError = jest.spyOn(console, 'error').mockImplementation(() => {});
+      soundSystem.play.mockClear();
+      hapticSystem.budgetExceeded.mockClear();
+
+      await act(async () => {
+        await harness.getValue().handleSaveTransaction({ importo: 50, tipo: 'uscita', contoId: 'c-1' } as any);
+      });
+
+      expect(soundSystem.play).toHaveBeenCalledWith('budget-exceeded');
+      expect(hapticSystem.budgetExceeded).toHaveBeenCalled();
+      expect(spyError).toHaveBeenCalledWith('[toast:error]', expect.any(String), expect.any(String));
+
+      spyError.mockRestore();
+      harness.unmount();
+    });
+  });
+
   afterAll(() => {
     try {
       const shadowPath = path.resolve(__dirname, '../src/context/AppDataContext.test-shadow.tsx');
