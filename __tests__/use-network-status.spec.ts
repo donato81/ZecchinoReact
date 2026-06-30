@@ -234,4 +234,47 @@ describe('useNetworkStatus / NetworkStatusProvider — PLAN 008 T6', () => {
       jest.advanceTimersByTime(2000);
     }).not.toThrow();
   });
+
+  it('Scenario 7: Test 37 - eccezione in NetInfo.addEventListener attiva immediatamente il fail-safe FAIL_SAFE_ONLINE', () => {
+    const NetInfo = require('@react-native-community/netinfo').default;
+    NetInfo.addEventListener.mockImplementationOnce(() => {
+      throw new Error('NetInfo mock registration failed');
+    });
+
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const { read } = mountProbe();
+
+    const s = read();
+    expect(s.isInitialized).toBe(true);
+    expect(s.isOffline).toBe(false);
+    expect(s.isConnected).toBe(true);
+    expect(s.isInternetReachable).toBe(true);
+    expect(s.connectionType).toBe('unknown');
+
+    expect(warnSpy).toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+  });
+
+  it('Scenario 8: Test 38 - eccezione in unsubscribe durante unmount viene catturata stampando un warning senza crash', () => {
+    mockSubscribeImpl = () => {
+      return () => {
+        throw new Error('Unsubscribe failed');
+      };
+    };
+
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const { renderer } = mountProbe();
+
+    expect(() => {
+      act(() => {
+        renderer.unmount();
+      });
+    }).not.toThrow();
+
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
 });
