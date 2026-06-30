@@ -686,6 +686,32 @@ describe('AppDataContext — PLAN 007', () => {
       expect(harness.getValue().transactionTagMap).toEqual({});
       harness.unmount();
     });
+    it('ADC-46: payload di cache corrotto (non-array) durante bootstrap offline porta a stato ERROR (fail-soft)', async () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+      mockUseNetworkStatus.mockReturnValue({
+        isOffline: true,
+        isInitialized: true,
+        isConnected: false,
+        isInternetReachable: false,
+        connectionType: 'wifi',
+      } as never);
+      mockReadCache.mockImplementation(async (_u, table) => {
+        return entry({} as any);
+      });
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(harness.getValue().isDataReady).toBe(false);
+      expect(harness.getValue().error).toBe(strings.bootstrap_offline_error);
+      harness.unmount();
+    });
     it('CACHE-READY → REMOTE-SYNC al completamento refresh background', async () => {
       mockUseAuth.mockReturnValue({
         isAuthenticated: true,
