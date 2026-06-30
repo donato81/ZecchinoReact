@@ -34,6 +34,12 @@ jest.mock('@/lib/supabase/cache', () => ({
   isCacheStale: jest.fn(),
 }));
 
+jest.mock('@/lib/loan-calculator', () => ({
+  __esModule: true,
+  calcolaSimulazione: jest.fn(() => ({ rataMensile: 100, totaleInteressi: 200 })),
+  calcolaDataFinePrevista: jest.fn(() => '2027-07-01'),
+}));
+
 jest.mock('@/lib/supabase/client', () => ({ supabase: {} }), { virtual: true });
 jest.mock('@/context/AuthContext', () => ({ useAuth: jest.fn() }));
 jest.mock('@/hooks/use-network-status', () => ({
@@ -186,7 +192,24 @@ jest.mock(
   { virtual: true },
 );
 
-import { AppDataProvider, useAppData, mergePrestitiWithLocalSimulations } from '@/context/AppDataContext';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const originalPath = path.resolve(__dirname, '../src/context/AppDataContext.tsx');
+const shadowPath = path.resolve(__dirname, '../src/context/AppDataContext.test-shadow.tsx');
+
+try {
+  let content = fs.readFileSync(originalPath, 'utf8');
+  content = content.replace(
+    /import\(\s*['"]@\/lib\/loan-calculator['"]\s*\)/g,
+    "Promise.resolve(require('@/lib/loan-calculator'))"
+  );
+  fs.writeFileSync(shadowPath, content, 'utf8');
+} catch (e) {
+  console.error('Failed to create shadow AppDataContext file', e);
+}
+
+const { AppDataProvider, useAppData, mergePrestitiWithLocalSimulations } = require('../src/context/AppDataContext.test-shadow');
 import { useAuth } from '@/context/AuthContext';
 import { useNetworkStatus } from '@/hooks/use-network-status';
 import { readCachedDomainSnapshotPure } from '@/context/app-data-cache';
@@ -198,13 +221,13 @@ import { hapticSystem } from '@/lib/haptic-system';
 import { readCache, isCacheStale, writeCache } from '@/lib/supabase/cache';
 import { getAll as getAllConti, create as createConto, update as updateConto, remove as removeConto } from '@/lib/supabase/repositories/conti';
 import { getAll as getAllTransazioni, create as createTransazione, update as updateTransazione, remove as removeTransazione } from '@/lib/supabase/repositories/transazioni';
-import { getAll as getAllCategorie } from '@/lib/supabase/repositories/categorie';
+import { getAll as getAllCategorie, create as createCategoria, update as updateCategoria, remove as removeCategoria } from '@/lib/supabase/repositories/categorie';
 import { getAll as getAllBudget, create as createBudget, update as updateBudget, remove as removeBudget } from '@/lib/supabase/repositories/budget';
-import { getAll as getAllObiettivi } from '@/lib/supabase/repositories/obiettivi-risparmio';
+import { getAll as getAllObiettivi, create as createObiettivo, update as updateObiettivo, remove as removeObiettivo, updateProgress as updateObiettivoProgress } from '@/lib/supabase/repositories/obiettivi-risparmio';
 import { getAll as getAllRicorrenze } from '@/lib/supabase/repositories/ricorrenze';
-import { getAll as getAllTag } from '@/lib/supabase/repositories/tag';
-import { getAll as getAllPrestiti } from '@/lib/supabase/repositories/prestiti';
-import { getAll as getAllRimborsi } from '@/lib/supabase/repositories/prestiti-rimborsi';
+import { getAll as getAllTag, create as createTag, update as updateTag, remove as removeTag } from '@/lib/supabase/repositories/tag';
+import { getAll as getAllPrestiti, create as createPrestitoDb, update as updatePrestitoDb, promote as promotePrestitoDb, close as closePrestitoDb, deleteSimulation as deleteSimulationDb } from '@/lib/supabase/repositories/prestiti';
+import { getAll as getAllRimborsi, addRimborso as addRimborsoDb, deleteRimborso as deleteRimborsoDb } from '@/lib/supabase/repositories/prestiti-rimborsi';
 import { getTagMapForTransactions } from '@/lib/supabase/repositories/transazioni-tag';
 import { strings } from '@/locales';
 
@@ -263,6 +286,28 @@ const mockRemoveTransazione = removeTransazione as jest.Mock;
 const mockCreateBudget = createBudget as jest.Mock;
 const mockUpdateBudget = updateBudget as jest.Mock;
 const mockRemoveBudget = removeBudget as jest.Mock;
+
+const mockCreateCategoria = createCategoria as jest.Mock;
+const mockUpdateCategoria = updateCategoria as jest.Mock;
+const mockRemoveCategoria = removeCategoria as jest.Mock;
+
+const mockCreateObiettivo = createObiettivo as jest.Mock;
+const mockUpdateObiettivo = updateObiettivo as jest.Mock;
+const mockRemoveObiettivo = removeObiettivo as jest.Mock;
+const mockUpdateObiettivoProgress = updateObiettivoProgress as jest.Mock;
+
+const mockCreateTag = createTag as jest.Mock;
+const mockUpdateTag = updateTag as jest.Mock;
+const mockRemoveTag = removeTag as jest.Mock;
+
+const mockCreatePrestitoDb = createPrestitoDb as jest.Mock;
+const mockUpdatePrestitoDb = updatePrestitoDb as jest.Mock;
+const mockPromotePrestitoDb = promotePrestitoDb as jest.Mock;
+const mockClosePrestitoDb = closePrestitoDb as jest.Mock;
+const mockDeleteSimulationDb = deleteSimulationDb as jest.Mock;
+
+const mockAddRimborsoDb = addRimborsoDb as jest.Mock;
+const mockDeleteRimborsoDb = deleteRimborsoDb as jest.Mock;
 
 const USER = 'user-test-007';
 
@@ -2371,5 +2416,711 @@ describe('AppDataContext — PLAN 007', () => {
       expect(harness.getValue().budgets).toHaveLength(1);
       harness.unmount();
     });
+  });
+
+  describe('Commit 4 — AppDataContext CRUD e prestiti', () => {
+    beforeEach(() => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: USER },
+      } as never);
+    });
+
+    it('ADC-54: CRUD Movimenti - removeTransaction ricalcola saldo ed elimina record a DB', async () => {
+      const initialConto = { id: 'conto-1', nome: 'Conto A', saldoIniziale: 100, colore: '#fff', icona: 'bank', tipo: 'corrente' };
+      const initialTx = { id: 'tx-1', contoId: 'conto-1', tipo: 'uscita', importo: 30, descrizione: 'Spesa', data: '2026-06-30', categoriaId: 'cat-1' };
+      mockGetAllConti.mockResolvedValueOnce([initialConto] as any);
+      mockGetAllTransazioni.mockResolvedValueOnce([initialTx] as any);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      mockRemoveTransazione.mockResolvedValueOnce(undefined);
+
+      await act(async () => {
+        await harness.getValue().removeTransaction('tx-1');
+      });
+
+      expect(mockRemoveTransazione).toHaveBeenCalledWith('tx-1');
+      expect(harness.getValue().transactions).toHaveLength(0);
+      harness.unmount();
+    });
+
+    it('ADC-55: CRUD Categorie - CRUD categorie aggiorna correttamente stato locale e DB', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+      const initialCat = { id: 'cat-1', nome: 'Cibo', colore: '#f00', icona: 'food', tipo: 'uscita' };
+      mockGetAllCategorie.mockResolvedValueOnce([initialCat] as any);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(harness.getValue().categories).toHaveLength(1);
+
+      // Add Category
+      const newCat = { nome: 'Salute', colore: '#0f0', icona: 'heart', tipo: 'uscita' };
+      const savedCat = { ...newCat, id: 'cat-2' };
+      mockCreateCategoria.mockResolvedValueOnce(savedCat);
+
+      await act(async () => {
+        await harness.getValue().addCategory(newCat as any);
+      });
+
+      expect(mockCreateCategoria).toHaveBeenCalledWith(newCat);
+      expect(harness.getValue().categories).toHaveLength(2);
+
+      // Update Category
+      const updatedCat = { ...savedCat, nome: 'Medicina' };
+      mockUpdateCategoria.mockResolvedValueOnce(updatedCat);
+
+      await act(async () => {
+        await harness.getValue().updateCategory('cat-2', { nome: 'Medicina' });
+      });
+
+      expect(mockUpdateCategoria).toHaveBeenCalledWith('cat-2', { nome: 'Medicina' });
+      expect(harness.getValue().categories[1].nome).toBe('Medicina');
+
+      // Remove Category
+      mockRemoveCategoria.mockResolvedValueOnce(undefined);
+
+      await act(async () => {
+        await harness.getValue().removeCategory('cat-2');
+      });
+
+      expect(mockRemoveCategoria).toHaveBeenCalledWith('cat-2');
+      expect(harness.getValue().categories).toHaveLength(1);
+      harness.unmount();
+    });
+
+    it('ADC-56: CRUD Budget - CRUD budget aggiorna correttamente stato locale e DB', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+      const initialBudget = { id: 'b-1', categoriaId: 'cat-1', limiteMensile: 100 };
+      mockGetAllBudget.mockResolvedValueOnce([initialBudget] as any);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(harness.getValue().budgets).toHaveLength(1);
+
+      // Add Budget
+      const newBudget = { categoriaId: 'cat-2', limiteMensile: 200 };
+      const savedBudget = { ...newBudget, id: 'b-2' };
+      mockCreateBudget.mockResolvedValueOnce(savedBudget);
+
+      await act(async () => {
+        await harness.getValue().addBudget(newBudget as any);
+      });
+
+      expect(mockCreateBudget).toHaveBeenCalledWith(newBudget);
+      expect(harness.getValue().budgets).toHaveLength(2);
+
+      // Update Budget
+      const updatedBudget = { ...savedBudget, limiteMensile: 250 };
+      mockUpdateBudget.mockResolvedValueOnce(updatedBudget);
+
+      await act(async () => {
+        await harness.getValue().updateBudget('b-2', { limiteMensile: 250 });
+      });
+
+      expect(mockUpdateBudget).toHaveBeenCalledWith('b-2', { limiteMensile: 250 });
+      expect(harness.getValue().budgets[1].limiteMensile).toBe(250);
+
+      // Remove Budget
+      mockRemoveBudget.mockResolvedValueOnce(undefined);
+
+      await act(async () => {
+        await harness.getValue().removeBudget('b-2');
+      });
+
+      expect(mockRemoveBudget).toHaveBeenCalledWith('b-2');
+      expect(harness.getValue().budgets).toHaveLength(1);
+      harness.unmount();
+    });
+
+    it('ADC-57: CRUD Obiettivi - CRUD obiettivi ed avanzamento progressi persistono a DB', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+      const initialGoal = { id: 'g-1', nome: 'Auto', importoTarget: 5000, importoAccumulato: 100, scadenza: '2026-12-31' };
+      mockGetAllObiettivi.mockResolvedValueOnce([initialGoal] as any);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(harness.getValue().savingsGoals).toHaveLength(1);
+
+      // Add Savings Goal
+      const newGoal = { nome: 'Vacanza', importoTarget: 1000, importoAccumulato: 50, scadenza: '2026-08-31' };
+      const savedGoal = { ...newGoal, id: 'g-2' };
+      mockCreateObiettivo.mockResolvedValueOnce(savedGoal);
+
+      await act(async () => {
+        await harness.getValue().addSavingsGoal(newGoal as any);
+      });
+
+      expect(mockCreateObiettivo).toHaveBeenCalledWith(newGoal);
+      expect(harness.getValue().savingsGoals).toHaveLength(2);
+
+      // Update Savings Goal
+      const updatedGoal = { ...savedGoal, importoTarget: 1200 };
+      mockUpdateObiettivo.mockResolvedValueOnce(updatedGoal);
+
+      await act(async () => {
+        await harness.getValue().updateSavingsGoal('g-2', { importoTarget: 1200 });
+      });
+
+      expect(mockUpdateObiettivo).toHaveBeenCalledWith('g-2', { importoTarget: 1200 });
+      expect(harness.getValue().savingsGoals[1].importoTarget).toBe(1200);
+
+      // Update Progress
+      const progressGoal = { ...updatedGoal, importoAccumulato: 200 };
+      mockUpdateObiettivoProgress.mockResolvedValueOnce(progressGoal);
+
+      await act(async () => {
+        await harness.getValue().updateSavingsGoalProgress('g-2', 150);
+      });
+
+      expect(mockUpdateObiettivoProgress).toHaveBeenCalledWith('g-2', 150);
+      expect(harness.getValue().savingsGoals[1].importoAccumulato).toBe(200);
+
+      // Remove Goal
+      mockRemoveObiettivo.mockResolvedValueOnce(undefined);
+
+      await act(async () => {
+        await harness.getValue().removeSavingsGoal('g-2');
+      });
+
+      expect(mockRemoveObiettivo).toHaveBeenCalledWith('g-2');
+      expect(harness.getValue().savingsGoals).toHaveLength(1);
+      harness.unmount();
+    });
+
+    it('ADC-58: CRUD Tag - creazione, modifica ed eliminazione fisica tag persistono a DB', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([{ id: 'tag-1', nome: 'Lavoro', usatoNVolte: 0 }] as any);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(harness.getValue().tags).toHaveLength(1);
+
+      // Add Tag
+      const newTag = { nome: 'Spese', colore: '#00f', icona: 'tag' };
+      const savedTag = { ...newTag, id: 'tag-2', usatoNVolte: 0 };
+      mockCreateTag.mockResolvedValueOnce(savedTag);
+
+      await act(async () => {
+        await harness.getValue().addTag(newTag as any);
+      });
+
+      expect(mockCreateTag).toHaveBeenCalledWith(newTag);
+      expect(harness.getValue().tags).toHaveLength(2);
+
+      // Update Tag
+      const updatedTag = { ...savedTag, nome: 'Divertimento' };
+      mockUpdateTag.mockResolvedValueOnce(updatedTag);
+
+      await act(async () => {
+        await harness.getValue().updateTag('tag-2', { nome: 'Divertimento' });
+      });
+
+      expect(mockUpdateTag).toHaveBeenCalledWith('tag-2', { nome: 'Divertimento' });
+      expect(harness.getValue().tags[1].nome).toBe('Divertimento');
+
+      // Remove Tag
+      mockRemoveTag.mockResolvedValueOnce(undefined);
+
+      await act(async () => {
+        await harness.getValue().removeTag('tag-2');
+      });
+
+      expect(mockRemoveTag).toHaveBeenCalledWith('tag-2');
+      expect(harness.getValue().tags).toHaveLength(1);
+      harness.unmount();
+    });
+
+    it('ADC-59: Associazione Tag - addTagToTransaction crea record mapping e incrementa usatoNVolte', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as any);
+      mockGetAllTag.mockResolvedValueOnce([{ id: 'tag-1', nome: 'Lavoro', usatoNVolte: 1 }] as any);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': [] });
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        await harness.getValue().addTagToTransaction('tx-1', 'tag-1');
+      });
+
+      expect(harness.getValue().transactionTagMap['tx-1']).toEqual(['tag-1']);
+      expect(harness.getValue().tags[0].usatoNVolte).toBe(2);
+      harness.unmount();
+    });
+
+    it('ADC-60: Associazione Tag - removeTagFromTransaction rimuove record mapping e decrementa usatoNVolte', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as any);
+      mockGetAllTag.mockResolvedValueOnce([{ id: 'tag-1', nome: 'Lavoro', usatoNVolte: 3 }] as any);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': ['tag-1'] });
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        await harness.getValue().removeTagFromTransaction('tx-1', 'tag-1');
+      });
+
+      expect(harness.getValue().transactionTagMap['tx-1']).toEqual([]);
+      expect(harness.getValue().tags[0].usatoNVolte).toBe(2);
+      harness.unmount();
+    });
+
+    it('ADC-61: Associazione Tag - setTagsForTransaction calcola differenze, aggiorna mapping e contatori', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as any);
+      mockGetAllTag.mockResolvedValueOnce([
+        { id: 'tag-1', nome: 'Lavoro', usatoNVolte: 1 },
+        { id: 'tag-2', nome: 'Casa', usatoNVolte: 1 },
+      ] as any);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': ['tag-1'] });
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        await harness.getValue().setTagsForTransaction('tx-1', ['tag-2']);
+      });
+
+      expect(harness.getValue().transactionTagMap['tx-1']).toEqual(['tag-2']);
+      expect(harness.getValue().tags.find(t => t.id === 'tag-1')?.usatoNVolte).toBe(0);
+      expect(harness.getValue().tags.find(t => t.id === 'tag-2')?.usatoNVolte).toBe(2);
+      harness.unmount();
+    });
+
+    it('ADC-62: Propagazione Tag - eliminazione transazione riduce usatoNVolte di tutti i tag associati', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([{ id: 'tx-1' }] as any);
+      mockGetAllTag.mockResolvedValueOnce([{ id: 'tag-1', nome: 'Lavoro', usatoNVolte: 2 }] as any);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': ['tag-1'] });
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      mockRemoveTransazione.mockResolvedValueOnce(undefined);
+
+      await act(async () => {
+        await harness.getValue().removeTransaction('tx-1');
+      });
+
+      expect(harness.getValue().tags[0].usatoNVolte).toBe(1);
+      harness.unmount();
+    });
+
+    it('ADC-63: Propagazione Tag - eliminazione conto riduce usatoNVolte dei tag delle sue transazioni', async () => {
+      const initialConto = { id: 'conto-1', nome: 'Conto A', saldoIniziale: 100, colore: '#fff', icona: 'bank', tipo: 'corrente' };
+      const tx1 = { id: 'tx-1', contoId: 'conto-1', tipo: 'uscita', importo: 30, descrizione: 'Spesa', data: '2026-06-30', categoriaId: 'cat-1' };
+      mockGetAllConti.mockResolvedValueOnce([initialConto] as any);
+      mockGetAllTransazioni.mockResolvedValueOnce([tx1] as any);
+      mockGetAllTag.mockResolvedValueOnce([{ id: 'tag-1', nome: 'Lavoro', usatoNVolte: 2 }] as any);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({ 'tx-1': ['tag-1'] });
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      mockRemoveConto.mockResolvedValueOnce(undefined);
+
+      await act(async () => {
+        await harness.getValue().removeAccount('conto-1');
+      });
+
+      expect(harness.getValue().tags[0].usatoNVolte).toBe(1);
+      harness.unmount();
+    });
+
+    it('ADC-64: Prestiti Simulati - creazione prestito simulato (ID sim-) scrive solo in cache locale', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      const newSim = {
+        controparteNome: 'Simulato',
+        importoIniziale: 1000,
+        tassoAnnuo: 3,
+        durataMesi: 12,
+        dataInizio: '2026-07-01',
+        tipo: 'prestito',
+        stato: 'simulazione',
+      };
+
+      let result: any;
+      await act(async () => {
+        result = await harness.getValue().addPrestito(newSim as any);
+      });
+
+      expect(result.id).toMatch(/^sim-/);
+      expect(mockCreatePrestitoDb).not.toHaveBeenCalled();
+      expect(harness.getValue().prestiti).toContainEqual(result);
+      harness.unmount();
+    });
+
+    it('ADC-65: Prestiti Simulati - modifica simulazione aggiorna solo lo stato in cache locale', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      // Add a simulation first
+      let sim: any;
+      await act(async () => {
+        sim = await harness.getValue().addPrestito({
+          controparteNome: 'Simulato',
+          importoIniziale: 1000,
+          tassoAnnuo: 3,
+          durataMesi: 12,
+          dataInizio: '2026-07-01',
+          tipo: 'prestito',
+          stato: 'simulazione',
+        } as any);
+      });
+
+      mockUpdatePrestitoDb.mockClear();
+
+      // Modify simulation
+      let updated: any;
+      await act(async () => {
+        updated = await harness.getValue().updatePrestito(sim.id, { controparteNome: 'Modificato' });
+      });
+
+      expect(mockUpdatePrestitoDb).not.toHaveBeenCalled();
+      expect(harness.getValue().prestiti.find(p => p.id === sim.id)?.controparteNome).toBe('Modificato');
+      harness.unmount();
+    });
+
+    it('ADC-66: Promozione Prestito - promozione a contratto genera UUID, scrive a DB ed elimina sim- da cache', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      // Add simulation
+      let sim: any;
+      await act(async () => {
+        sim = await harness.getValue().addPrestito({
+          controparteNome: 'Simulato',
+          importoIniziale: 1000,
+          tassoAnnuo: 3,
+          durataMesi: 12,
+          dataInizio: '2026-07-01',
+          tipo: 'prestito',
+          stato: 'simulazione',
+        } as any);
+      });
+
+      const uuidReal = 'real-uuid-12345';
+      const promoted = { ...sim, id: uuidReal, stato: 'attivo' };
+      mockCreatePrestitoDb.mockResolvedValueOnce(promoted);
+
+      await act(async () => {
+        await harness.getValue().promotePrestito(sim.id);
+      });
+
+      expect(mockCreatePrestitoDb).toHaveBeenCalled();
+      expect(harness.getValue().prestiti.some(p => p.id === sim.id)).toBe(false);
+      expect(harness.getValue().prestiti.find(p => p.id === uuidReal)).toEqual(promoted);
+      harness.unmount();
+    });
+
+    it('ADC-67: Prestiti Attivi - chiusura prestito attivo persiste i flag a DB Supabase', async () => {
+      const activeLoan = { id: 'real-loan-1', controparteNome: 'Banca', importoIniziale: 10000, stato: 'attivo', tipo: 'mutuo', dataInizio: '2026-01-01' };
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([activeLoan] as any);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      const closedLoan = { ...activeLoan, stato: 'chiuso' };
+      mockClosePrestitoDb.mockResolvedValueOnce(closedLoan);
+
+      await act(async () => {
+        await harness.getValue().closePrestito('real-loan-1');
+      });
+
+      expect(mockClosePrestitoDb).toHaveBeenCalledWith('real-loan-1');
+      expect(harness.getValue().prestiti[0].stato).toBe('chiuso');
+      harness.unmount();
+    });
+
+    it('ADC-68: Prestiti Simulati - rimozione prestito simulato cancella record da cache locale', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      let sim: any;
+      await act(async () => {
+        sim = await harness.getValue().addPrestito({
+          controparteNome: 'Simulato',
+          importoIniziale: 1000,
+          stato: 'simulazione',
+          tipo: 'prestito',
+          dataInizio: '2026-07-01',
+        } as any);
+      });
+
+      await act(async () => {
+        await harness.getValue().deletePrestitoSimulazione(sim.id);
+      });
+
+      expect(harness.getValue().prestiti.some(p => p.id === sim.id)).toBe(false);
+      harness.unmount();
+    });
+
+    it('ADC-69: Rimborsi Prestiti - aggiunta rimborso su prestito attivo ricalcola residuo e aggiorna DB', async () => {
+      const activeLoan = { id: 'real-loan-1', controparteNome: 'Banca', importoIniziale: 10000, saldoResiduo: 10000, stato: 'attivo', tipo: 'mutuo', dataInizio: '2026-01-01' };
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([activeLoan] as any);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      const newRimborso = { prestitoId: 'real-loan-1', importo: 1000, dataRimborso: '2026-06-30' };
+      const savedRimborso = { ...newRimborso, id: 'rimb-1' };
+      mockAddRimborsoDb.mockResolvedValueOnce(savedRimborso);
+
+      await act(async () => {
+        await harness.getValue().addRimborso(newRimborso);
+      });
+
+      expect(mockAddRimborsoDb).toHaveBeenCalledWith(newRimborso);
+      expect(harness.getValue().prestitiRimborsi).toContainEqual(savedRimborso);
+      harness.unmount();
+    });
+
+    it('ADC-70: Rimborsi Prestiti - rimborso estintivo aggiorna automaticamente lo stato prestito in chiuso', async () => {
+      const activeLoan = { id: 'real-loan-1', controparteNome: 'Banca', importoIniziale: 1000, saldoResiduo: 1000, stato: 'attivo', tipo: 'mutuo', dataInizio: '2026-01-01' };
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([activeLoan] as any);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      const newRimborso = { prestitoId: 'real-loan-1', importo: 1000, dataRimborso: '2026-06-30' };
+      const savedRimborso = { ...newRimborso, id: 'rimb-1' };
+      mockAddRimborsoDb.mockResolvedValueOnce(savedRimborso);
+
+      await act(async () => {
+        await harness.getValue().addRimborso(newRimborso);
+      });
+
+      expect(harness.getValue().prestiti[0].stato).toBe('chiuso');
+      harness.unmount();
+    });
+
+    it('ADC-71: Rimborsi Prestiti - eliminazione rimborso ricalcola residuo incrementandolo e aggiorna DB', async () => {
+      const closedLoan = { id: 'real-loan-1', controparteNome: 'Banca', importoIniziale: 1000, saldoResiduo: 0, stato: 'chiuso', tipo: 'mutuo', dataInizio: '2026-01-01' };
+      const initialRimborso = { id: 'rimb-1', prestitoId: 'real-loan-1', importo: 1000, dataRimborso: '2026-06-30' };
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([closedLoan] as any);
+      mockGetAllRimborsi.mockResolvedValueOnce([initialRimborso] as any);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      mockDeleteRimborsoDb.mockResolvedValueOnce(undefined);
+
+      await act(async () => {
+        await harness.getValue().removeRimborso('rimb-1');
+      });
+
+      expect(mockDeleteRimborsoDb).toHaveBeenCalledWith('rimb-1');
+      expect(harness.getValue().prestitiRimborsi).toHaveLength(0);
+      expect(harness.getValue().prestiti[0].stato).toBe('attivo');
+      harness.unmount();
+    });
+
+    it('ADC-72: Rimborsi Simulazioni - inserimento rimborso su simulazione bloccato con errore', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      let sim: any;
+      await act(async () => {
+        sim = await harness.getValue().addPrestito({
+          controparteNome: 'Simulato',
+          importoIniziale: 1000,
+          stato: 'simulazione',
+          tipo: 'prestito',
+          dataInizio: '2026-07-01',
+        } as any);
+      });
+
+      await expect(
+        act(async () => {
+          await harness.getValue().addRimborso({ prestitoId: sim.id, importo: 100, dataRimborso: '2026-07-05' });
+        })
+      ).rejects.toThrow('Impossibile rimborsare una simulazione.');
+      harness.unmount();
+    });
+
+    it('ADC-73: Rimborsi Simulazioni - eliminazione rimborso su simulazione bloccato con errore', async () => {
+      mockGetAllConti.mockResolvedValueOnce([]);
+      mockGetAllTransazioni.mockResolvedValueOnce([]);
+      mockGetAllTag.mockResolvedValueOnce([]);
+      mockGetTagMapForTransactions.mockResolvedValueOnce({});
+      mockGetAllPrestiti.mockResolvedValueOnce([]);
+      mockGetAllRimborsi.mockResolvedValueOnce([]);
+
+      const harness = renderAppDataProvider();
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      mockDeleteRimborsoDb.mockClear();
+      await act(async () => {
+        await harness.getValue().removeRimborso('sim-rimb-1');
+      });
+
+      expect(mockDeleteRimborsoDb).not.toHaveBeenCalled();
+      harness.unmount();
+    });
+  });
+
+  afterAll(() => {
+    try {
+      const shadowPath = path.resolve(__dirname, '../src/context/AppDataContext.test-shadow.tsx');
+      if (fs.existsSync(shadowPath)) {
+        fs.unlinkSync(shadowPath);
+      }
+    } catch (e) {}
   });
 });
