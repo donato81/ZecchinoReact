@@ -11,6 +11,8 @@
 - test(UserSettingsContext): suite di 3 test unitari per provider mount, consumo ed errore fuori provider (`__tests__/UserSettingsContext.test.tsx`).
 - test(useUserSettings): suite di 14 test per caricamento preferenze cloud/default, persistenza con vincolo P29 e reset screen reader (`__tests__/use-user-settings.test.tsx`).
 - test(NetworkStatusContext): integrati 2 test unitari per fail-safe online e tolleranza errori unmount (`__tests__/use-network-status.spec.ts`).
+- docs: Revisione PLAN 026 e TODO 026: integrazione delibere Consiglio AI (test P29 negativi, harness AppDataContext, commit 3A/3B/3C, AUTH-19 e ADC-36/37 rafforzati, NT-4 eccezione P29 documentata).
+
 
 ### Fixed
 - fix(use-inactivity-timer): corretto tipo ref dei timer in `src/hooks/use-inactivity-timer.ts` a `any` per risolvere conflitti fra tipi Node e browser in Jest.
