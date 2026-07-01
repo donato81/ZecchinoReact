@@ -12,9 +12,10 @@
  ### Stato Globale Corrente
  
  - **Active Phase:** P0/P1/P2 completate. DESIGN 022 e 021 implementati (Fase 1 completata).
- - **Active Block:** Sessione E3 (AuthContext e AppDataContext).
- - **Last Updated:** 2026-06-30
+ - **Active Block:** Sessione E1 (Annunci e Accessibilità — Blocco 1).
+ - **Last Updated:** 2026-07-01
  - **Pending Plans:**
+   - **Pianificazione Test Sessione E1 (Annunci e Accessibilità — Blocco 1) — COMPLETATA** (coding plan `docs/3-coding-plans/027-PLAN_test-sessione-E1-annunci-accessibilita_v1.0.0.md` e todo list `docs/4-todo-lists/027-TODO_test-sessione-E1-annunci-accessibilita_v1.0.0.md` creati il 2026-07-01). 95 test pianificati in 10 commit. Assegnato a Gemini 3.5 Flash (Medium).
    - **Pianificazione Test Sessione E3 (AuthContext e AppDataContext) — COMPLETATA** (coding plan `docs/3-coding-plans/026-PLAN_test-sessione-E3-authctx-appdatactx_v1.0.0.md` e todo list `docs/4-todo-lists/026-TODO_test-sessione-E3-authctx-appdatactx_v1.0.0.md` creati il 2026-06-30).
    - **Sessione E2 Test Codifica (Blocco 2 - Parte 1) — IMPLEMENTATA** (implementati ed eseguiti tutti i 38 test unitari in data 2026-06-30).
    - **Pianificazione Test Sessione E2 (Blocco 2 - Parte 1) — COMPLETATA** (coding plan `docs/3-coding-plans/025-PLAN_test-sessione-E2-blocco2_v1.0.0.md` e todo list `docs/4-todo-lists/025-TODO_test-sessione-E2-blocco2_v1.0.0.md` creati il 2026-06-30).
@@ -61,7 +62,7 @@
   - AN-03: `oklch colori` — da verificare per compatibilità Android (da DESIGN 020)
   - DD-01: `patches/netinfo+12.0.1.patch` — patch orfana per versione v12 (v11.x in uso)
  - Security: aggiornare TODO e checklist per i criteri di sicurezza introdotti in DESIGN 010 (CA-2: atomicità update PIN) e DESIGN 012 (CA-4: rilascio `inProgress` tramite `finally`). Aggiungere task unit test e validazione automazione per CA-2/CA-4 in `docs/4-todo-lists/`.
-  - **Next Action:** Esecuzione dei test della Sessione E3 (AuthContext e AppDataContext).
+  - **Next Action:** Esecuzione dei test della Sessione E1 (Annunci e Accessibilità — Blocco 1). PLAN 027 e TODO 027 pronti.
 
 
 > Nota sessione pianificazione test 2026-06-30 (Antigravity):

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.18.7] — 2026-07-01 — Pianificazione Test Sessione E1 (Blocco 1 — Annunci e Accessibilità)
+
+### Added
+- docs(plans): aggiunto `027-PLAN_test-sessione-E1-annunci-accessibilita_v1.0.0.md` con la pianificazione dettagliata di 95 test unitari per i 10 moduli del Blocco 1 (Annunci e Accessibilità). 10 commit pianificati, 6 suite nuove e 4 estese.
+- docs(todos): aggiunto `027-TODO_test-sessione-E1-annunci-accessibilita_v1.0.0.md` con la checklist operativa in stato PENDING. Assegnato a Gemini 3.5 Flash (Medium).
+
 ## [0.18.6] — 2026-06-30 — Implementazione Test Sessione E2 (Blocco 2 - Parte 1)
 
 ### Added

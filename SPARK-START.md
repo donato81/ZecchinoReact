@@ -25,9 +25,10 @@ Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
 Pianificazione Bugfix (Sessione E0), Esecuzione 7 Bugfix e Regression Test (Sessione E0),
 Pianificazione Test Sessione E4 (Blocco 3 — Repository e Librerie), Pianificazione Test Sessione E2 (Blocco 2 — Contesti Base e Hook),
 Pianificazione Test Sessione E3 (AuthContext e AppDataContext) (revisione post-Consiglio AI applicata).
+Pianificazione Test Sessione E1 (Annunci e Accessibilità — Blocco 1) completata 2026-07-01.
 Suite di test: PASS.
-Decisione release: versione corrente `0.18.6` (completata implementazione dei test Sessione E2 e E4, pianificazione Sessione E3 completata).
-Prossima azione: Nessuna azione pendente — Sessione E3 completata.
+Decisione release: versione corrente `0.18.6` (completata implementazione dei test Sessione E2, E3 e E4, pianificazione Sessione E1 completata).
+Prossima azione: Esecuzione Sessione E1 — PLAN 027 e TODO 027 pronti. Assegnato a Gemini 3.5 Flash (Medium).
 
 
 ---
@@ -103,6 +104,8 @@ Prossima azione: Nessuna azione pendente — Sessione E3 completata.
 - [TODO 025 — Test Sessione E2 — Blocco 2: Contesti Base, Hook e Componenti (Parte 1)](docs/4-todo-lists/025-TODO_test-sessione-E2-blocco2_v1.0.0.md) — v1.0.0 — DONE
 - [PLAN 026 — Test Sessione E3 — Contesto Principale e Autenticazione (AuthContext & AppDataContext)](docs/3-coding-plans/026-PLAN_test-sessione-E3-authctx-appdatactx_v1.0.0.md) — v1.0.0 — COMPLETATO
 - [TODO 026 — Test Sessione E3 — Contesto Principale e Autenticazione (AuthContext & AppDataContext)](docs/4-todo-lists/026-TODO_test-sessione-E3-authctx-appdatactx_v1.0.0.md) — v1.0.0 — PENDING
+- [PLAN 027 — Test Sessione E1 — Annunci e Accessibilità (Blocco 1)](docs/3-coding-plans/027-PLAN_test-sessione-E1-annunci-accessibilita_v1.0.0.md) — v1.0.0 — DRAFT
+- [TODO 027 — Test Sessione E1 — Annunci e Accessibilità (Blocco 1)](docs/4-todo-lists/027-TODO_test-sessione-E1-annunci-accessibilita_v1.0.0.md) — v1.0.0 — PENDING
 
 
 
