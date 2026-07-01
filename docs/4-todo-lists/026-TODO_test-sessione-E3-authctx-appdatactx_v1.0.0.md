@@ -4,7 +4,7 @@ titolo: "TODO — Test Sessione E3 — Contesto Principale e Autenticazione (Aut
 riferimento-plan: docs/3-coding-plans/026-PLAN_test-sessione-E3-authctx-appdatactx_v1.0.0.md
 versione: 1.0.0
 data-creazione: 2026-06-30
-stato: PENDING
+stato: DONE
 ramo: main
 agente: Antigravity
 ---

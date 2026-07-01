@@ -3,15 +3,17 @@
 App di finanza personale per **Android**, **iOS** e **Windows** (react-native-windows).  
 Il dominio â€” nomi variabili, tipi, label UI â€” Ã¨ interamente in italiano.
 
-Versione progetto: **0.18.0**.
+Versione progetto: **0.18.6**.
 
 > **Stato attuale**: migrazione da web (React + shadcn) a React Native in corso.  
 > L'app **non Ã¨ avviabile** fino alla risoluzione dei 6 blocchi di build documentati in  
 > [`docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md`](docs/1-reports/REPORT_diagnosi-compatibilita-RN_v0.1.0.md).
 
-Stato rilascio: la release `0.18.0` consolida la copertura completa di 39 test unitari su 7 moduli core, e integra tutti i precedenti blocchi nativi della 0.17.0.
+Stato rilascio: la release `0.18.6` consolida la copertura completa di 39 test unitari su 7 moduli core, e integra tutti i precedenti blocchi nativi della 0.17.0.
 
-Aggiornamento 2026-06-27: implementata la copertura completa di test per i moduli core (Fase B). La versione del progetto è stata avanzata a `0.18.0`.
+Aggiornamento 2026-06-27: implementata la copertura completa di test per i moduli core (Fase B). La versione del progetto è stata avanzata a `0.18.6`.
+
+- Sessione E3 test suite completata: 78 test unitari PASS.
 
 ## Funzionalità implementate
 
