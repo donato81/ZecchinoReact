@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## [0.18.9] — 2026-07-02 — Sessione E1 — Codifica 96 test per layer annunci accessibilità
+
+### Added
+- test(e1): Suite nuove: `auth.announcements.test.ts` (10 test), `ui.announcements.test.ts` (30 test), `accounts.announcements.test.ts` (27 test), `budgets.announcements.test.ts` (17 test), `index.announcements.test.ts` (2 test), `currency.test.ts` (2 test).
+- test(e1): Suite estese: `plurals.test.ts` (+7 test), `t.test.ts` (+4 test), `detection.test.ts` (+2 test), `App.test.tsx` (+1 test).
+- test(e1): Harness condiviso annunci creato in `__tests__/helpers/announcements-test-utils.ts`.
+- test(e1): Vincolo ACC-1 verificato su tutti i test di errore (priority assertive). Vincolo ACC-2 verificato (text/priority).
+- test(e1): PLAN 027 e TODO 027 completati con successo (totale test progetto: 659).
+
 ## [0.18.8] — 2026-07-02 — Sessione E1-FIX — Correzioni PLAN/TODO 027 e fix accounts.ts ACC-1
 
 ### Fixed

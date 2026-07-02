@@ -15,7 +15,7 @@ necessari per il tuo progetto.
 *Puoi eliminare questo file dopo il primo avvio.*
 *Per domande sull'architettura SPARK, usa l'agente `spark-guide`.*
 
-Versione corrente progetto: `0.18.6`.
+Versione corrente progetto: `0.18.9`.
 Analisi Android completata (DUSU-ANALYZER 2025-07-25).
 Stato aggiornato: 2026-06-30.
 Blocchi completati: 010 Wrapped Master Key PIN, 011 Resilienza Bootstrap,
@@ -26,10 +26,10 @@ Pianificazione Bugfix (Sessione E0), Esecuzione 7 Bugfix e Regression Test (Sess
 Pianificazione Test Sessione E4 (Blocco 3 — Repository e Librerie), Pianificazione Test Sessione E2 (Blocco 2 — Contesti Base e Hook),
 Pianificazione Test Sessione E3 (AuthContext e AppDataContext) (revisione post-Consiglio AI applicata).
 Pianificazione Test Sessione E1 (Annunci e Accessibilità — Blocco 1) completata 2026-07-01.
-Correzioni E1-FIX applicate 2026-07-02: accounts.ts ACC-1 corretto (exportError assertive), PLAN 027 stato READY, ANNB-17 aggiunto, harness senza mock globali, totali aggiornati a 96 test / 650 totali.
+Correzioni E1-FIX applicate 2026-07-02: accounts.ts ACC-1 corretto (exportError assertive), PLAN 027 stato READY, ANNB-17 aggiunto, harness senza mock globali. Sessione E1 completata: 96 test scritti (102 Jest-compiled), totale 659 tests passanti.
 Suite di test: PASS.
-Decisione release: versione corrente `0.18.6` (completata implementazione dei test Sessione E2, E3 e E4, pianificazione Sessione E1 completata).
-Prossima azione: Esecuzione Sessione E1 — PLAN 027 e TODO 027 in stato READY. Assegnato a Gemini 3.5 Flash (Medium).
+Decisione release: versione corrente `0.18.9` (completata implementazione dei test Sessione E2, E3 e E4, pianificazione Sessione E1 completata).
+Prossima azione: Avvio Sessione successiva — Sessione E1 completata (96 test aggiunti, totale 659 passanti). Assegnato a Gemini 3.5 Flash (Medium).
 
 
 ---
