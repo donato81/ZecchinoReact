@@ -329,4 +329,46 @@ describe('useAccessibilityDetection Hook', () => {
     expect(renderResult.result.current.shouldAutoManageFocus()).toBe(true);
     expect(renderResult.result.current.getAriaDescription('brief', 'verbose')).toBe('verbose');
   });
+
+  test('INTD-01 | disableTalkBack(true) -> chiama setTalkBackManualOverride(false) e aggiorna lo stato', async () => {
+    let renderResult: any;
+    await act(async () => {
+      renderResult = renderHook(() => useAccessibilityDetection());
+    });
+
+    await act(async () => {
+      renderResult.result.current.enableTalkBack(false);
+    });
+    expect(renderResult.result.current.talkBackState.isEnabled).toBe(true);
+
+    await act(async () => {
+      renderResult.result.current.disableTalkBack(true);
+    });
+
+    expect(mockUserSettings.setTalkBackManualOverride).toHaveBeenCalledWith(false);
+    expect(renderResult.result.current.talkBackState.isEnabled).toBe(false);
+    expect(renderResult.result.current.talkBackState.adaptationsActive).toBe(false);
+  });
+
+  test('INTD-02 | disableTalkBack(false) -> disabilita adattazioni locali senza chiamare setTalkBackManualOverride', async () => {
+    let renderResult: any;
+    await act(async () => {
+      renderResult = renderHook(() => useAccessibilityDetection());
+    });
+
+    await act(async () => {
+      renderResult.result.current.enableTalkBack(false);
+    });
+    expect(renderResult.result.current.talkBackState.isEnabled).toBe(true);
+
+    mockUserSettings.setTalkBackManualOverride.mockClear();
+
+    await act(async () => {
+      renderResult.result.current.disableTalkBack(false);
+    });
+
+    expect(mockUserSettings.setTalkBackManualOverride).not.toHaveBeenCalled();
+    expect(renderResult.result.current.talkBackState.isEnabled).toBe(false);
+    expect(renderResult.result.current.talkBackState.adaptationsActive).toBe(false);
+  });
 });
