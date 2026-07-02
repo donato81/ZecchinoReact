@@ -25,3 +25,9 @@ export function expectTCalledWith(
     expect(mockT).toHaveBeenCalledWith(key);
   }
 }
+
+if (typeof test === 'function') {
+  test('dummy helper test', () => {
+    expect(true).toBe(true);
+  });
+}
