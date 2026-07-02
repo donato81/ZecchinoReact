@@ -9,6 +9,10 @@
 - test(e1): Vincolo ACC-1 verificato su tutti i test di errore (priority assertive). Vincolo ACC-2 verificato (text/priority).
 - test(e1): PLAN 027 e TODO 027 completati con successo (totale test progetto: 659).
 
+### Docs
+- docs(reports): aggiunto `REPORT-analisi-mirata-4-problemi-test_v1.0.0.md` con l'analisi diagnostica approfondita dei 4 problemi critici del motore e dei test (storage-cleanup-service, magic-bytes-validation, AppDataContext.spec.ts in runInBand e test JPEG intermittente in allegati.storage).
+
+
 ## [0.18.8] — 2026-07-02 — Sessione E1-FIX — Correzioni PLAN/TODO 027 e fix accounts.ts ACC-1
 
 ### Fixed
