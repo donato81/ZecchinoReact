@@ -140,19 +140,19 @@ export function exportError(
 ): Announcement {
   switch (reason) {
     case 'ALREADY_IN_PROGRESS':
-      return build(t('export_already_in_progress_sr'));
+      return build(t('export_already_in_progress_sr'), 'assertive');
     case 'PERMISSION_DENIED':
-      return build(t('export_permission_denied_sr'));
+      return build(t('export_permission_denied_sr'), 'assertive');
     case 'FILESYSTEM_ERROR':
-      return build(t('export_filesystem_error_sr'));
+      return build(t('export_filesystem_error_sr'), 'assertive');
     case 'UNSUPPORTED_PLATFORM':
-      return build(t('export_unsupported_platform_sr'));
+      return build(t('export_unsupported_platform_sr'), 'assertive');
     case 'INVALID_PATH':
-      return build(t('export_invalid_path_sr'));
+      return build(t('export_invalid_path_sr'), 'assertive');
     case 'INSUFFICIENT_SPACE':
-      return build(t('export_insufficient_space_sr'));
+      return build(t('export_insufficient_space_sr'), 'assertive');
     case 'UNKNOWN':
     default:
-      return build(t('export_unknown_error_sr'));
+      return build(t('export_unknown_error_sr'), 'assertive');
   }
 }

@@ -1,10 +1,10 @@
-﻿---
+---
 tipo: plan
 titolo: Test Sessione E1 — Annunci e Accessibilità (Blocco 1)
 versione: 1.0.0
 data: 2026-07-01
-stato: DRAFT
-autore: Claude Sonnet 4.6 Thinking — Sessione E1-PLAN
+stato: READY
+autore: Claude Sonnet 4.6 Thinking — Sessione E1-PLAN | Antigravity — Sessione E1-FIX (2026-07-02)
 sessione-riferimento: E1
 perimetro: src/announcements/*, src/announcements/_utils/*, src/accessibility/detection.ts, App.tsx
 ramo: main
@@ -32,12 +32,12 @@ Questo Coding Plan definisce la pianificazione strategica per la **Sessione E1**
   - `App.tsx` (Copertura attuale: 60% → Attesa: 100%)
 - **Conteggio dei test:**
   - Test già presenti prima della Sessione E1: **554**
-  - Test da scrivere nella Sessione E1: **95**
-  - Test totali attesi al completamento: **649**
+  - Test da scrivere nella Sessione E1: **96**
+  - Test totali attesi al completamento: **650**
 - **Suite di destinazione:**
   - `__tests__/accounts.announcements.test.ts` [NEW]: 21 test
   - `__tests__/auth.announcements.test.ts` [NEW]: 10 test
-  - `__tests__/budgets.announcements.test.ts` [NEW]: 16 test
+  - `__tests__/budgets.announcements.test.ts` [NEW]: 17 test
   - `__tests__/index.announcements.test.ts` [NEW]: 2 test
   - `__tests__/ui.announcements.test.ts` [NEW]: 30 test
   - `__tests__/currency.test.ts` [NEW]: 2 test
@@ -99,10 +99,15 @@ Le funzioni con priorità `assertive` attesa (come da codice sorgente):
 - `auth.ts`: `pinNotConfigured`, `pinInvalid`
 - `budgets.ts`: `announceBudgetStatus` (rami >= 100% e >= 90%)
 - `ui.ts`: `erroreGenerico`, `erroreRete`, `erroreValidazione`, `modificaNonSalvata`, `campoObbligatorio`, `formatoNonValido`, `importoNonValido`, `dataNonValida`, `selezioneRichiesta`
+- `accounts.ts`: `exportError` (tutti i 7 rami — corretto nella sessione E1-FIX del 2026-07-02)
 
 ### Vincolo ACC-2 — Delega dei plurali a plurals.ts
 
 > **I plurali italiani irregolari devono essere gestiti dal modulo `plurals.ts`** e non hardcoded nei file di annunci. I test devono verificare che i file di annunci deleghino sempre a `plurals.ts` per le forme plurali.
+
+**Nota tipo Announcement:** il tipo Announcement usa le proprietà `text` e `priority`. Non usare `message`. Fonte: `src/accessibility/types.ts`.
+
+**Nota BUG-3:** il BUG-3 (crash per subscription nulla all'unmount in `detection.ts`) è già coperto dalla suite esistente con il test "Caso Limite 3b" che verifica l'unmount con subscription undefined. Non è necessario aggiungere un nuovo test per BUG-3 in E1.
 
 ---
 
@@ -262,10 +267,11 @@ I seguenti bug erano stati identificati nel report di analisi originale. **Tutti
 | ANNA-18 | `announceImportComplete(1)` → chiama `pluralize('elemento', 1)` e `t('import_completato', ...)` | Normale |
 | ANNA-19 | `announceExportInProgress()` → chiama `t('export_in_corso')` — priorità `'polite'` | Normale |
 | ANNA-20 | `announceExportFile(5)` → chiama `t('export_success_sr')` — `_count` ignorato (underscore prefix) | Normale |
-| ANNA-21 | `exportError` — branching su tutte le 7 ragioni: `ALREADY_IN_PROGRESS`, `PERMISSION_DENIED`, `FILESYSTEM_ERROR`, `UNSUPPORTED_PLATFORM`, `INVALID_PATH`, `INSUFFICIENT_SPACE`, `UNKNOWN` | Errore |
+| ANNA-21 | `exportError` — `test.each` sui 7 `ExportFailureReason`: `ALREADY_IN_PROGRESS`, `PERMISSION_DENIED`, `FILESYSTEM_ERROR`, `UNSUPPORTED_PLATFORM`, `INVALID_PATH`, `INSUFFICIENT_SPACE`, `UNKNOWN`. Per ogni reason verificare: (a) la chiave `t(...)` attesa nello switch; (b) `priority: 'assertive'` — verifica ACC-1. Usare `test.each` per compattezza e chiarezza. | Errore |
 
 - **Verifica ACC-2:** I test ANNA-12, ANNA-15 e ANNA-17 verificano la delega a `plurals.ts`.
-- **Note tecniche:** Il tipo `ExportFailureReason` è da `@/lib/export-service`. Il test ANNA-21 copre i 7 rami dello switch con 7 asserzioni distinte (parametrizzate o separate). Il mock di `t` deve essere `jest.fn((key) => key)`.
+- **Nota ACC-1 per ANNA-21:** `exportError` è una funzione di errore soggetta al vincolo ACC-1. Tutti i 7 rami restituiscono `priority: 'assertive'` dopo la correzione applicata nella sessione E1-FIX del 2026-07-02.
+- **Note tecniche:** Il tipo `ExportFailureReason` è da `@/lib/export-service`. Il parametro `reason` ha tipo `Exclude<ExportFailureReason, 'CANCELLED'>`. Il mock di `t` deve essere `jest.fn((key) => key)`.
 - **Stima test nuovi:** 21
 
 ---
@@ -295,10 +301,11 @@ I seguenti bug erano stati identificati nel report di analisi originale. **Tutti
 | ANNB-14 | `announceSavingsGoalProgress('Vacanze', 3200, 3000)` >= 100% → chiama `t('obiettivo_completato', ...)` | Normale/Limite |
 | ANNB-15 | `announceSavingsGoalProgress('Vacanze', 2500, 3000)` 83% (>= 75%) → chiama `t('obiettivo_quasi_completato', ...)` | Normale |
 | ANNB-16 | `announceSavingsGoalProgress('Vacanze', 1500, 3000)` 50% (< 75%) → chiama `t('obiettivo_progresso', ...)` | Normale |
+| ANNB-17 | `announceCategoryCreated('Casa')` → chiama `t('categoria_creata', { name: 'Casa' })`; restituisce Announcement con `priority: 'polite'`; non usa `formatCurrencyVocal` | Normale |
 
 - **Verifica ACC-1:** I test ANNB-05, ANNB-06 e ANNB-11 verificano il vincolo ACC-1.
-- **Note tecniche:** ANNB-11 verifica la regressione BUG-7 corretta nella Sessione E0. `announceCategoryCreated` è inclusa come ANNB-17 opzionale ma il 16° slot è già occupato da ANNB-16 in questo piano (si preferisce tenerla separata nel TODO). Il mock di `t` deve essere `jest.fn((key) => key)`.
-- **Stima test nuovi:** 16
+- **Note tecniche:** ANNB-11 verifica la regressione BUG-7 corretta nella Sessione E0. Il mock di `t` deve essere `jest.fn((key) => key)`.
+- **Stima test nuovi:** 17
 
 ---
 
@@ -360,7 +367,8 @@ I seguenti bug erano stati identificati nel report di analisi originale. **Tutti
 | INTD-01 | `disableTalkBack(true)` → chiama `setTalkBackManualOverride(false)` e aggiorna lo stato (righe 129-132 scoperte) | Normale |
 | INTD-02 | `disableTalkBack(false)` → disabilita adattazioni locali senza chiamare `setTalkBackManualOverride` | Normale |
 
-- **Note tecniche:** La suite esistente ha già 11 test. INTD-01 verifica che `setTalkBackManualOverride` sia chiamato con `false` (non `null` o `true`). INTD-02 verifica che `setTalkBackManualOverride` NON venga chiamato. Entrambi verificano che `talkBackState.isEnabled` e `adaptationsActive` siano `false`. L'harness esistente usa `renderHook` con wrapper di `useUserSettings`.
+- **Note tecniche:** La suite esistente ha già 11 test (inclusi i 2 Extra). INTD-01 verifica che `setTalkBackManualOverride` sia chiamato con `false` (non `null` o `true`). INTD-02 verifica che `setTalkBackManualOverride` NON venga chiamato. Entrambi verificano che `talkBackState.isEnabled` e `adaptationsActive` siano `false`.
+- **Nota harness:** INTD-01 e INTD-02 devono riutilizzare il `renderHook` locale, `mockUserSettings` e la struttura `beforeEach` già presenti in `src/accessibility/__tests__/detection.test.ts`. Non introdurre un secondo wrapper o un nuovo harness. Il file di test esistente ha infrastruttura completa (vedi righe 23-60 del file).
 - **Stima test nuovi:** 2
 
 ---
@@ -399,32 +407,48 @@ I seguenti bug erano stati identificati nel report di analisi originale. **Tutti
 
 ## 6. Harness Condiviso
 
-I file di annunci seguono tutti lo stesso pattern. Si consiglia di estrarre il setup comune in `__tests__/helpers/announcements-test-utils.ts`:
+I file di annunci seguono tutti lo stesso pattern strutturale. È disponibile un file helper in `__tests__/helpers/announcements-test-utils.ts` con funzioni pure di supporto alle asserzioni.
+
+**REGOLA OBBLIGATORIA:** Il file helper **NON deve contenere** chiamate `jest.mock()` a livello di modulo. Ogni suite dichiara localmente i propri `jest.mock()` in cima al file di test, prima di qualsiasi import.
+
+Motivo: i file di annunci hanno dipendenze diverse tra loro. `auth.ts` usa solo `t`. `accounts.ts` usa `t + currency + plurals`. `budgets.ts` usa `t + currency`. `ui.ts` usa solo `t`. `index.ts` usa `engine`. Mock globali condivisi tra suite con dipendenze diverse possono produrre falsi positivi o contaminazione tra test.
+
+Funzioni helper ammesse nel file:
+- `expectAnnouncement(result, priority)`: verifica che `result.text` sia stringa e `result.priority` sia uguale a `priority`
+- `expectAssertive(result)`: shorthand per `expectAnnouncement(result, 'assertive')`
+- `expectPolite(result)`: shorthand per `expectAnnouncement(result, 'polite')`
+- `expectTCalledWith(mockT, key, params)`: verifica che la funzione `t` mockata sia stata chiamata con la chiave e i parametri attesi
+
+**Nota tecnica:** il tipo Announcement usa le proprietà `text` e `priority`. Non usare `message`. Fonte: `src/accessibility/types.ts`.
 
 ```typescript
 // __tests__/helpers/announcements-test-utils.ts
 import type { Announcement } from '@/announcements/types';
 
-jest.mock('@/announcements/_utils/t', () => ({
-  t: jest.fn((key: string) => key),
-}));
-
-jest.mock('@/announcements/_utils/currency', () => ({
-  formatCurrencyVocal: jest.fn((amount: number) => `${amount} euro`),
-}));
-
-jest.mock('@/announcements/_utils/plurals', () => ({
-  pluralize: jest.fn((word: string, count: number) =>
-    count === 1 ? word : `${word}_plurale`,
-  ),
-}));
-
 export function expectAnnouncement(
   result: Announcement,
-  expectedPriority: 'polite' | 'assertive',
+  priority: 'polite' | 'assertive',
 ): void {
   expect(typeof result.text).toBe('string');
-  expect(result.priority).toBe(expectedPriority);
+  expect(result.priority).toBe(priority);
+}
+
+export const expectAssertive = (result: Announcement) =>
+  expectAnnouncement(result, 'assertive');
+
+export const expectPolite = (result: Announcement) =>
+  expectAnnouncement(result, 'polite');
+
+export function expectTCalledWith(
+  mockT: jest.Mock,
+  key: string,
+  params?: Record<string, unknown>,
+): void {
+  if (params) {
+    expect(mockT).toHaveBeenCalledWith(key, params);
+  } else {
+    expect(mockT).toHaveBeenCalledWith(key);
+  }
 }
 ```
 
@@ -435,8 +459,8 @@ export function expectAnnouncement(
 | Metrica | Valore |
 |---|---|
 | **Test già presenti prima della Sessione E1** | 554 |
-| **Test da scrivere nella Sessione E1** | 95 |
-| **Test totali attesi al completamento** | 649 |
+| **Test da scrivere nella Sessione E1** | 96 |
+| **Test totali attesi al completamento** | 650 |
 | **Suite nuove create** | 6 |
 | **Suite esistenti estese** | 4 |
 | **Suite totali attese al completamento** | ~56 (46 precedenti + 10) |
@@ -448,7 +472,7 @@ export function expectAnnouncement(
 - `index.announcements.test.ts` [NEW]: 2 test
 - `auth.announcements.test.ts` [NEW]: 10 test
 - `accounts.announcements.test.ts` [NEW]: 21 test
-- `budgets.announcements.test.ts` [NEW]: 16 test
+- `budgets.announcements.test.ts` [NEW]: 17 test
 - `ui.announcements.test.ts` [NEW]: 30 test
 - `detection.test.ts` [MODIFY]: +2 (da 11 a 13)
 - `App.test.tsx` [MODIFY]: +1 (da 1 a 2)
@@ -501,7 +525,7 @@ npx jest __tests__/accounts.announcements.test.ts
 ### Criteri di Accettazione
 
 - **Ciclo A (Revisione Tecnica):**
-  - Tutti i 95 nuovi test devono risultare PASS.
+  - Tutti i 96 nuovi test devono risultare PASS.
   - Nessun test preesistente (554) deve essere rotto.
   - Compilazione TypeScript senza errori.
   - Limite tentativi: max 10. In caso di fallimento, presentare un Diagnostic Report.
@@ -518,7 +542,7 @@ npx jest __tests__/accounts.announcements.test.ts
 
 | Metrica | Pre-E1 | Post-E1 (Target) |
 |---|---|---|
-| **Test totali** | 554 | 649 |
+| **Test totali** | 554 | 650 |
 | **Suite di test** | 46 | ~56 |
 | **Copertura accounts.ts** | 0% | >95% |
 | **Copertura auth.ts** | 0% | 100% |
@@ -559,6 +583,7 @@ npx jest __tests__/accounts.announcements.test.ts
   2. `plurals.test.ts` e `t.test.ts` esistono già con regression test dalla Sessione E0 e vanno estesi.
   3. Il totale di 554 test pre-E1 è confermato dal CHANGELOG (Sessione E3 completata con PASS).
   4. `ui.ts` ha 26 funzioni (contate dal codice). Il report indica 30 test includendo test consolidati e limite aggiuntivi.
-  5. La stima di 95 test: 21+10+16+2+30+2+7+4+2+1 = 95.
+  5. La stima di 96 test: 21+10+17+2+30+2+7+4+2+1 = 96 (ANNB-17 aggiunto nella sessione E1-FIX del 2026-07-02).
+- **Sessione E1-FIX (2026-07-02):** Correzioni applicate da Antigravity: (1) harness sezione 6 senza jest.mock() globali; (2) ANNA-21 rafforzato con test.each e priority assertive; (3) ANNB-17 aggiunto per announceCategoryCreated; (4) note operative INTD-01/02; (5) tipo Announcement text/priority documentato; (6) nota BUG-3 già coperto; (7) stato DRAFT → READY; (8) totali aggiornati a 96/650.
 - **Potenziali bias:** Nessuno identificato.
 - **Limite raggiunto nel ciclo di qualità:** No.

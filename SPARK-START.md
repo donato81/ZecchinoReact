@@ -26,9 +26,10 @@ Pianificazione Bugfix (Sessione E0), Esecuzione 7 Bugfix e Regression Test (Sess
 Pianificazione Test Sessione E4 (Blocco 3 — Repository e Librerie), Pianificazione Test Sessione E2 (Blocco 2 — Contesti Base e Hook),
 Pianificazione Test Sessione E3 (AuthContext e AppDataContext) (revisione post-Consiglio AI applicata).
 Pianificazione Test Sessione E1 (Annunci e Accessibilità — Blocco 1) completata 2026-07-01.
+Correzioni E1-FIX applicate 2026-07-02: accounts.ts ACC-1 corretto (exportError assertive), PLAN 027 stato READY, ANNB-17 aggiunto, harness senza mock globali, totali aggiornati a 96 test / 650 totali.
 Suite di test: PASS.
 Decisione release: versione corrente `0.18.6` (completata implementazione dei test Sessione E2, E3 e E4, pianificazione Sessione E1 completata).
-Prossima azione: Esecuzione Sessione E1 — PLAN 027 e TODO 027 pronti. Assegnato a Gemini 3.5 Flash (Medium).
+Prossima azione: Esecuzione Sessione E1 — PLAN 027 e TODO 027 in stato READY. Assegnato a Gemini 3.5 Flash (Medium).
 
 
 ---

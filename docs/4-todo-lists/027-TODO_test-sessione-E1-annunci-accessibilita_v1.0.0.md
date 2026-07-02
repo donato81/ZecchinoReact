@@ -1,4 +1,4 @@
-﻿---
+---
 tipo: todo
 titolo: "TODO — Test Sessione E1 — Annunci e Accessibilità (Blocco 1)"
 riferimento-plan: docs/3-coding-plans/027-PLAN_test-sessione-E1-annunci-accessibilita_v1.0.0.md
@@ -47,6 +47,8 @@ agente: Gemini 3.5 Flash (Medium) — Sessione E1
   - [ ] `__tests__/t.test.ts` (3 regression test Sessione E0 esistenti)
   - [ ] `src/accessibility/__tests__/detection.test.ts` (11 test esistenti)
   - [ ] `__tests__/App.test.tsx` (1 test esistente)
+
+> **DIVIETO OPERATIVO (obbligatorio):** Nelle suite contrassegnate come [MODIFY] — `plurals.test.ts`, `t.test.ts`, `detection.test.ts`, `App.test.tsx` — aggiungere **solo nuovi test alla fine** della suite esistente. Non cancellare, rinominare, disabilitare, commentare o indebolire test già esistenti. Se una modifica a un test preesistente è necessaria, fermarsi e produrre un Diagnostic Report dettagliato prima di procedere.
 
 ---
 
@@ -135,7 +137,7 @@ Suite target: `__tests__/accounts.announcements.test.ts` [NEW]
 - [ ] **ANNA-18**: `announceImportComplete(1)` → chiama `pluralize('elemento', 1)` e `t('import_completato', ...)` [Normale]
 - [ ] **ANNA-19**: `announceExportInProgress()` → chiama `t('export_in_corso')` — priorità `'polite'` [Normale]
 - [ ] **ANNA-20**: `announceExportFile(5)` → chiama `t('export_success_sr')` — `_count` ignorato [Normale]
-- [ ] **ANNA-21**: `exportError` — branching su tutte le 7 ragioni di errore (ALREADY_IN_PROGRESS, PERMISSION_DENIED, FILESYSTEM_ERROR, UNSUPPORTED_PLATFORM, INVALID_PATH, INSUFFICIENT_SPACE, UNKNOWN) [Errore]
+- [ ] **ANNA-21**: `exportError` — `test.each` sui 7 `ExportFailureReason` (ALREADY_IN_PROGRESS, PERMISSION_DENIED, FILESYSTEM_ERROR, UNSUPPORTED_PLATFORM, INVALID_PATH, INSUFFICIENT_SPACE, UNKNOWN). Per ogni reason: verificare chiave `t(...)` attesa e `priority: 'assertive'` (verifica ACC-1). Il codice sorgente è stato corretto nella sessione E1-FIX. [Errore]
 - [ ] **Commit 6 eseguito su main**
 
 ---
@@ -159,6 +161,7 @@ Suite target: `__tests__/budgets.announcements.test.ts` [NEW]
 - [ ] **ANNB-14**: `announceSavingsGoalProgress('Vacanze', 3200, 3000)` >= 100% → chiama `t('obiettivo_completato', ...)` [Normale/Limite]
 - [ ] **ANNB-15**: `announceSavingsGoalProgress('Vacanze', 2500, 3000)` 83% (>= 75%) → chiama `t('obiettivo_quasi_completato', ...)` [Normale]
 - [ ] **ANNB-16**: `announceSavingsGoalProgress('Vacanze', 1500, 3000)` 50% (< 75%) → chiama `t('obiettivo_progresso', ...)` [Normale]
+- [ ] **ANNB-17**: `announceCategoryCreated('Casa')` → chiama `t('categoria_creata', { name: 'Casa' })` e restituisce Announcement con `priority: 'polite'` [Normale]
 - [ ] **Commit 7 eseguito su main**
 
 ---
@@ -202,6 +205,8 @@ Suite target: `__tests__/ui.announcements.test.ts` [NEW]
 
 ### COMMIT 9 — `test: integra test aggiuntivi per detection.ts`
 Suite target: `src/accessibility/__tests__/detection.test.ts` [MODIFY] (+2 agli 11 esistenti)
+
+> **Nota:** riutilizzare l'harness esistente in `detection.test.ts` (funzione `renderHook` locale righe 23-35, `mockUserSettings` nel `beforeEach`, spy su `AccessibilityInfo`). Non creare un nuovo `renderHook` o un nuovo wrapper.
 
 - [ ] **INTD-01**: `disableTalkBack(true)` → chiama `setTalkBackManualOverride(false)` e aggiorna stato — righe 129-132 scoperte (verifica ACC-1 indiretta) [Normale]
 - [ ] **INTD-02**: `disableTalkBack(false)` → disabilita adattazioni locali senza chiamare `setTalkBackManualOverride` [Normale]
@@ -256,11 +261,11 @@ Suite target: `__tests__/App.test.tsx` [MODIFY] (+1 all'1 esistente)
 | 4 — index.ts | `__tests__/index.announcements.test.ts` [NEW] | 2 | [ ] |
 | 5 — auth.ts | `__tests__/auth.announcements.test.ts` [NEW] | 10 | [ ] |
 | 6 — accounts.ts | `__tests__/accounts.announcements.test.ts` [NEW] | 21 | [ ] |
-| 7 — budgets.ts | `__tests__/budgets.announcements.test.ts` [NEW] | 16 | [ ] |
+| 7 — budgets.ts | `__tests__/budgets.announcements.test.ts` [NEW] | 17 | [ ] |
 | 8 — ui.ts | `__tests__/ui.announcements.test.ts` [NEW] | 30 | [ ] |
 | 9 — detection.ts | `src/accessibility/__tests__/detection.test.ts` [MODIFY] | 2 | [ ] |
 | 10 — App.tsx | `__tests__/App.test.tsx` [MODIFY] | 1 | [ ] |
-| **TOTALE** | | **95** | |
+| **TOTALE** | | **96** | |
 
 **Test pre-Sessione E1:** 554
-**Test post-Sessione E1 (attesi):** 649
+**Test post-Sessione E1 (attesi):** 650

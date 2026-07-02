@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## [0.18.8] — 2026-07-02 — Sessione E1-FIX — Correzioni PLAN/TODO 027 e fix accounts.ts ACC-1
+
+### Fixed
+- fix(acc1): `src/announcements/accounts.ts` — `exportError`: tutti i 7 rami dello switch ora passano `'assertive'` come secondo parametro di `build()`. In precedenza usavano il default `'polite'`, violando il vincolo ACC-1 (errori di esportazione devono interrompere lo screen reader immediatamente).
+
+### Docs
+- docs(plans): `027-PLAN` aggiornato — stato DRAFT → READY. Sezione 6 harness condiviso riscritta senza `jest.mock()` a livello di modulo (ogni suite moca autonomamente). ANNA-21 rafforzato con `test.each` e verifica `priority: 'assertive'` su tutti i 7 rami. ANNB-17 aggiunto per `announceCategoryCreated`. Note operative per INTD-01/02 (riuso harness detection). Nota tipo Announcement (`text`/`priority`). Nota BUG-3 già coperto. Lista funzioni `assertive` aggiornata con `exportError`. Totali: 95 → 96 test, 649 → 650 attesi.
+- docs(todos): `027-TODO` aggiornato — ANNA-21 allineato con `test.each` e `priority: 'assertive'`. ANNB-17 aggiunto. Divieto operativo per suite [MODIFY] aggiunto in FASE 0. Nota harness per commit 9. Totali aggiornati a 96/650.
+
 ## [0.18.7] — 2026-07-01 — Pianificazione Test Sessione E1 (Blocco 1 — Annunci e Accessibilità)
 
 ### Added
